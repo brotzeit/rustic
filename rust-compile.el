@@ -46,7 +46,7 @@
 ;;;;;;;;;;;;;
 ;; Process
 
-(defcustom rust-compile--display-method 'display-buffer
+(defcustom rust-compile--display-method 'pop-to-buffer
   "Default function used for displaying compilation buffer."
   :type 'function
   :group 'rust-compile)
