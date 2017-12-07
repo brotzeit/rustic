@@ -19,6 +19,7 @@
                    (require 'url-vars))
 
 (require 'json)
+(require 'rust-compile)
 
 (defvar electric-pair-inhibit-predicate)
 (defvar electric-indent-chars)
