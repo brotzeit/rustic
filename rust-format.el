@@ -116,9 +116,9 @@
     (if (string-match-p "^finished" output)
         (kill-buffer buf)
       (and
-       (display-buffer buf)
        (goto-char (point-min))
-       (next-error)))
+       (next-error)
+       (display-buffer buf)))
     (insert-file-contents tmpfile nil nil nil t)
     (delete-file tmpfile)))
 
