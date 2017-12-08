@@ -66,6 +66,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
   "Format string to use when submitting code to the playpen"
   :type 'string
   :group 'rust-mode)
+
 (defcustom rust-shortener-url-format "https://is.gd/create.php?format=simple&url=%s"
   "Format string to use for creating the shortened link of a playpen submission"
   :type 'string
@@ -86,11 +87,6 @@ function or trait.  When nil, where will be aligned with fn or trait."
 
 (defcustom rust-rustfmt-bin "rustfmt"
   "Path to rustfmt executable."
-  :type 'string
-  :group 'rust-mode)
-
-(defcustom rust-cargo-bin "cargo"
-  "Path to cargo executable."
   :type 'string
   :group 'rust-mode)
 
