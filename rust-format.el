@@ -101,43 +101,48 @@
 (defvar rust-format--buffer-name "*rust-fmt-buffer*"
   "Buffer name for rust compilation process buffers.")
 
+(defvar rustfmt-files nil
+  "Holds file and tmpfile for `rust-format---filter' and `rust-format--sentinel'")
+
 (defun rust-format---filter (proc output)
   (let ((buf (process-buffer proc)))
     (with-current-buffer buf
       (goto-char (point-max))
-       (insert (xterm-color-filter output)))))
+      (insert (xterm-color-filter (replace-regexp-in-string (cdr rustfmt-files) (car rustfmt-files) output))))))
 
 (defun rust-format--sentinel (proc output)
-  (let ((buf (process-buffer proc)))
+  (let ((buf (process-buffer proc))
+        (tmpfile (cdr rustfmt-files)))
     (if (string-match-p "^finished" output)
         (kill-buffer buf)
       (and
        (display-buffer buf)
        (goto-char (point-min))
-       (next-error)))))
+       (next-error)))
+    (insert-file-contents tmpfile nil nil nil t)
+    (delete-file tmpfile)))
 
 (defun rust-format--start-process (buf)
-  (let* ((tmpf (make-temp-file "rustfmt"))
+  (let* ((file (buffer-file-name buf))
+         (tmpf (make-temp-file "rustmodefmt"))
          (err-buf (get-buffer-create rust-format--buffer-name))
          (coding-system-for-read 'binary)
          (process-environment (nconc
 	                           (list (format "TERM=%s" "ansi"))
                                process-environment)))
+    (setq rustfmt-files (cons file tmpf))
     (with-current-buffer err-buf
       (erase-buffer)
       (rust-compilation-mode))
     (with-current-buffer buf
-      (write-region (point-min) (point-max) tmpf nil t)
+      (write-region (point-min) (point-max) tmpf nil nil)
       (make-process :name rust-format--process-name
                     :buffer err-buf
                     :command `(,rust-rustfmt-bin ,tmpf)
                     :filter #'rust-format---filter
                     :sentinel #'rust-format--sentinel)
       (let ((proc (get-buffer-process err-buf)))
-        (accept-process-output proc 0.1))
-      (erase-buffer)
-      (insert-file-contents tmpf nil)
-      (delete-file tmpf))))
+        (accept-process-output proc 0.1)))))
 
 
 ;;;;;;;;;;;;;;;;
