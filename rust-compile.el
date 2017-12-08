@@ -1,9 +1,15 @@
-;;; rust-compile.el --- Compile facilities for rust-mode
+;;; rust-compile.el --- Compile facilities for rust-mode -*-lexical-binding: t-*-
+
+;; This file is distributed under the terms of both the MIT license and the
+;; Apache License (version 2.0).
 
 ;;; Code:
 
 (require 'xterm-color)
 (require 'compile)
+
+;;;;;;;;;;;;;;;;;;
+;; Customization
 
 (defgroup rust-compilation nil
   "Rust Compilation."
@@ -15,7 +21,11 @@
   :type 'string
   :group 'rust-compilation)
 
-;;;;;;;;;;;
+(defcustom rust-compile--display-method 'display-buffer
+  "Default function used for displaying compilation buffer."
+  :type 'function
+  :group 'rust-compile)
+
 ;; Faces
 
 (defcustom rust-compilation--message-face
@@ -36,6 +46,10 @@
   :type '(vector string string string string string string string string)
   :group 'rust-compilation)
 
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Compilation-mode
+
 (define-compilation-mode rust-compilation-mode "rust-compilation"
   "Rust compilation mode."
   (setq buffer-read-only nil)
@@ -43,13 +57,9 @@
   (setq-local xterm-color-names-bright rust-compilation--ansi-faces)
   (setq-local xterm-color-names rust-compilation--ansi-faces))
 
+
 ;;;;;;;;;;;;;
 ;; Process
-
-(defcustom rust-compile--display-method 'pop-to-buffer
-  "Default function used for displaying compilation buffer."
-  :type 'function
-  :group 'rust-compile)
 
 (defvar rust-compile--process-name "rust-process"
   "Process name for rust compilation processes.")
@@ -66,7 +76,7 @@
     (make-process :name rust-compile--process-name
                   :buffer buf
                   :command command
-                  :filter #'shell-process-filter
+                  :filter #'rust-compile--filter
                   :sentinel #'(lambda (_proc _output)))
     (let ((proc (get-buffer-process buf)))
       (accept-process-output proc 0.1))
@@ -75,13 +85,18 @@
       (rust-compilation-mode)
       (funcall rust-compile--display-method buf))))
 
-(defun shell-process-filter (proc output)
+(defun rust-compile--filter (proc output)
   "Filter for rust compilation process."
   (let ((buf (process-buffer proc)))
     (with-current-buffer buf
       (goto-char (point-max))
        (insert (xterm-color-filter output)))))
 
+
+;;;;;;;;;;;;;;;;
+;; interactive
+
+;;;###autoload
 (defun rust-mode--compile (&optional arg)
   "Compile rust project."
   (interactive "P")
