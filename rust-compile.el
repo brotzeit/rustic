@@ -50,6 +50,9 @@
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Compilation-mode
 
+(defvar rust-compile--compilation-arguments nil
+  "Arguments that were given to `rust-mode--compile'")
+
 (define-compilation-mode rust-compilation-mode "rust-compilation"
   "Rust compilation mode."
   (setq buffer-read-only nil)
@@ -94,14 +97,17 @@
 
 
 ;;;;;;;;;;;;;;;;
-;; interactive
+;; Interactive
 
 ;;;###autoload
 (defun rust-mode--compile (&optional arg)
-  "Compile rust project."
+  "Compile rust project. If called without arguments use `rust-compile--command'.
+
+Otherwise use provided arguments and store them in `rust-compile--compilation-arguments'."
   (interactive "P")
   (let ((command (if arg
-                     (read-from-minibuffer "Compile command: ")
+                     (setq rust-compile--compilation-arguments
+                           (read-from-minibuffer "Compile command: "))
                    rust-compile--command))
         (proc (get-process rust-compile--process-name)))
     (if (process-live-p proc)
@@ -115,7 +121,20 @@
               (error nil))
           (error "Cannot have two processes in `%s' at once"
                  (buffer-name))))
-      (rust-compile--start-process (split-string command))))
+    (save-some-buffers (not compilation-ask-about-save)
+                       compilation-save-buffers-predicate)
+    (rust-compile--start-process (split-string command))))
+
+;;;###autoload
+(defun rust-recompile ()
+  "Re-compile the program using the last `rust-mode--compile' arguments."
+  (interactive)
+  (save-some-buffers (not compilation-ask-about-save)
+                     compilation-save-buffers-predicate)
+  (let ((command (if (not rust-compilation-arguments)
+                     rust-compile-command
+                   rust-compilation-arguments)))
+    (rust-compile-start-process (split-string command))))
 
 (provide 'rust-compile)
 ;;; rust-compile.el ends here
