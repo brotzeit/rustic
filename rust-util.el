@@ -262,11 +262,8 @@
   (interactive)
   (when (null rust-buffer-project)
     (rust-update-buffer-project))
-  (let* ((args (list rust-cargo-bin "clippy" (concat "--manifest-path=" rust-buffer-project)))
-         ;; set `compile-command' temporarily so `compile' doesn't
-         ;; clobber the existing value
-         (compile-command (mapconcat #'shell-quote-argument args " ")))
-    (compile compile-command)))
+  (let* ((command (list rust-cargo-bin "clippy" (concat "--manifest-path=" rust-buffer-project))))
+    (rust-compile-start-process command)))
 
 (provide 'rust-util)
 ;;; rust-util.el ends here
