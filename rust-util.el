@@ -1,9 +1,28 @@
-;;; rust-format.el --- Format facilities for rust-mode -*-lexical-binding: t-*-
+;;; rust-util.el --- Rust utility functions -*-lexical-binding: t-*-
 
 ;; This file is distributed under the terms of both the MIT license and the
 ;; Apache License (version 2.0).
 
 ;;; Code:
+
+;;;;;;;;;;;;;;;;;;
+;; Customization
+
+(defcustom rust-format-on-save nil
+  "Format future rust buffers before saving using rustfmt."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'rust-mode)
+
+(defcustom rust-rustfmt-bin "rustfmt"
+  "Path to rustfmt executable."
+  :type 'string
+  :group 'rust-mode)
+
+(defcustom rust-format--display-method 'display-buffer
+  "Default function used for displaying compilation buffer."
+  :type 'function)
+
 
 (defconst rust--format-word "\\b\\(else\\|enum\\|fn\\|for\\|if\\|let\\|loop\\|match\\|struct\\|union\\|unsafe\\|while\\)\\b")
 (defconst rust--format-line "\\([\n]\\)")
@@ -91,10 +110,6 @@
 ;;;;;;;;;;;;
 ;; Process
 
-(defcustom rust-format--display-method 'display-buffer
-  "Default function used for displaying compilation buffer."
-  :type 'function)
-
 (defvar rust-format--process-name "rust-process"
   "Process name for rust compilation processes.")
 
@@ -148,6 +163,40 @@
 ;;;;;;;;;;;;;;;;
 ;; Interactive
 
+;;; Functions to submit (parts of) buffers to the rust playpen, for
+;;; sharing.
+(defun rust-playpen-region (begin end)
+  "Create a sharable URL for the contents of the current region
+   on the Rust playpen."
+  (interactive "r")
+  (let* ((data (buffer-substring begin end))
+         (escaped-data (url-hexify-string data))
+         (escaped-playpen-url (url-hexify-string (format rust-playpen-url-format escaped-data))))
+    (if (> (length escaped-playpen-url) 5000)
+        (error "encoded playpen data exceeds 5000 character limit (length %s)"
+               (length escaped-playpen-url))
+      (let ((shortener-url (format rust-shortener-url-format escaped-playpen-url))
+            (url-request-method "POST"))
+        (url-retrieve shortener-url
+                      (lambda (state)
+                        ; filter out the headers etc. included at the
+                        ; start of the buffer: the relevant text
+                        ; (shortened url or error message) is exactly
+                        ; the last line.
+                        (goto-char (point-max))
+                        (let ((last-line (thing-at-point 'line t))
+                              (err (plist-get state :error)))
+                          (kill-buffer)
+                          (if err
+                              (error "failed to shorten playpen url: %s" last-line)
+                            (message "%s" last-line)))))))))
+
+(defun rust-playpen-buffer ()
+  "Create a sharable URL for the contents of the current buffer
+   on the Rust playpen."
+  (interactive)
+  (rust-playpen-region (point-min) (point-max)))
+
 (defun rust-format-call ()
   "Format the current buffer using rustfmt."
   (interactive)
@@ -192,15 +241,29 @@
 
   (message "Formatted buffer with rustfmt."))
 
+;;;###autoload
 (defun rust-format--enable-format-on-save ()
   "Enable formatting using rustfmt when saving buffer."
   (interactive)
   (setq-local rust-format-on-save t))
 
+;;;###autoload
 (defun rust-format--disable-format-on-save ()
   "Disable formatting using rustfmt when saving buffer."
   (interactive)
   (setq-local rust-format-on-save nil))
 
-(provide 'rust-format)
-;;; rust-format.el ends here
+;;;###autoload
+(defun rust-run-clippy ()
+  "Run `cargo clippy'."
+  (interactive)
+  (when (null rust-buffer-project)
+    (rust-update-buffer-project))
+  (let* ((args (list rust-cargo-bin "clippy" (concat "--manifest-path=" rust-buffer-project)))
+         ;; set `compile-command' temporarily so `compile' doesn't
+         ;; clobber the existing value
+         (compile-command (mapconcat #'shell-quote-argument args " ")))
+    (compile compile-command)))
+
+(provide 'rust-util)
+;;; rust-util.el ends here
