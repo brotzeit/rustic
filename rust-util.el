@@ -119,11 +119,14 @@
 (defvar rustfmt-files nil
   "Holds file and tmpfile for `rust-format-filter' and `rust-format-sentinel'")
 
+(defconst rust-tmp-file "rustmodefmt")
+
 (defun rust-format-filter (proc output)
   (let ((buf (process-buffer proc)))
     (with-current-buffer buf
       (goto-char (point-max))
-      (insert (xterm-color-filter (replace-regexp-in-string (cdr rustfmt-files) (car rustfmt-files) output))))))
+      (insert (xterm-color-filter
+               (replace-regexp-in-string (cdr rustfmt-files) (car rustfmt-files) output))))))
 
 (defun rust-format-sentinel (proc output)
   (let ((buf (process-buffer proc))
@@ -139,7 +142,7 @@
 
 (defun rust-format-start-process (buf)
   (let* ((file (buffer-file-name buf))
-         (tmpf (make-temp-file "rustmodefmt"))
+         (tmpf (make-temp-file rust-tmp-file))
          (err-buf (get-buffer-create rust-format--buffer-name))
          (coding-system-for-read 'binary)
          (process-environment (nconc
