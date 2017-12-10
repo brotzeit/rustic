@@ -134,7 +134,7 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
   (let ((command (if (not rust-compilation-arguments)
                      rust-compile-command
                    rust-compilation-arguments)))
-    (rust-compile-start-process (split-string command))))
+    (rust-compile-start-process command)))
 
 (provide 'rust-compile)
 ;;; rust-compile.el ends here
