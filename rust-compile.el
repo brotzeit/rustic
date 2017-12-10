@@ -16,32 +16,32 @@
   :group 'tools
   :group 'processes)
 
-(defcustom rust-compile--command (purecopy "cargo build")
+(defcustom rust-compile-command (purecopy "cargo build")
   "Default command for rust compilation."
   :type 'string
   :group 'rust-compilation)
 
-(defcustom rust-compile--display-method 'display-buffer
+(defcustom rust-compile-display-method 'display-buffer
   "Default function used for displaying compilation buffer."
   :type 'function
   :group 'rust-compile)
 
 ;; Faces
 
-(defcustom rust-compilation--message-face
+(defcustom rust-message-face
   '((t :inherit default))
   "Don't use `compilation-message-face', as ansi colors get messed up."
   :type 'face
   :group 'rust-compilation)
 
-(defcustom rust-compilation--ansi-faces ["black"
-                                         "red3"
-                                         "green3"
-                                         "yellow3"
-                                         "blue2"
-                                         "magenta3"
-                                         "cyan3"
-                                         "white"]
+(defcustom rust-ansi-faces ["black"
+                            "red3"
+                            "green3"
+                            "yellow3"
+                            "blue2"
+                            "magenta3"
+                            "cyan3"
+                            "white"]
   "Term ansi faces."
   :type '(vector string string string string string string string string)
   :group 'rust-compilation)
@@ -50,33 +50,33 @@
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Compilation-mode
 
-(defvar rust-compile--compilation-arguments nil
+(defvar rust-compilation-arguments nil
   "Arguments that were given to `rust-mode--compile'")
 
 (define-compilation-mode rust-compilation-mode "rust-compilation"
   "Rust compilation mode."
   (setq buffer-read-only nil)
-  (setq-local compilation-message-face rust-compilation--message-face)
-  (setq-local xterm-color-names-bright rust-compilation--ansi-faces)
-  (setq-local xterm-color-names rust-compilation--ansi-faces))
+  (setq-local compilation-message-face rust-message-face)
+  (setq-local xterm-color-names-bright rust-ansi-faces)
+  (setq-local xterm-color-names rust-ansi-faces))
 
 
 ;;;;;;;;;;;;;
 ;; Process
 
-(defvar rust-compile--process-name "rust-process"
+(defvar rust-compile-process-name "rust-process"
   "Process name for rust compilation processes.")
 
-(defvar rust-compile--buffer-name "*rust-process-buffer*"
+(defvar rust-compile-buffer-name "*rust-process-buffer*"
   "Buffer name for rust compilation process buffers.")
 
-(defun rust-compile--start-process (command)
-  (let ((buf rust-compile--buffer-name)
+(defun rust-compile-start-process (command)
+  (let ((buf rust-compile-buffer-name)
         (coding-system-for-read 'binary)
         (process-environment (nconc
 	                          (list (format "TERM=%s" "ansi"))
                               process-environment)))
-    (make-process :name rust-compile--process-name
+    (make-process :name rust-compile-process-name
                   :buffer buf
                   :command command
                   :filter #'rust-compile--filter
@@ -86,7 +86,7 @@
     (with-current-buffer buf
       (erase-buffer)
       (rust-compilation-mode)
-      (funcall rust-compile--display-method buf))))
+      (funcall rust-compile-display-method buf))))
 
 (defun rust-compile--filter (proc output)
   "Filter for rust compilation process."
@@ -100,17 +100,17 @@
 ;; Interactive
 
 ;;;###autoload
-(defun rust-mode--compile (&optional arg)
-  "Compile rust project. If called without arguments use `rust-compile--command'.
+(defun rust-compile (&optional arg)
+  "Compile rust project. If called without arguments use `rust-compile-command'.
 
-Otherwise use provided arguments and store them in `rust-compile--compilation-arguments'."
+Otherwise use provided arguments and store them in `rust-compilation-arguments'."
   (interactive "P")
   (let ((command (if arg
-                     (setq rust-compile--compilation-arguments
+                     (setq rust-compilation-arguments
                            (read-from-minibuffer "Compile command: "))
-                   rust-compile--command))
-        (proc (get-process rust-compile--process-name)))
-    (if (process-live-p proc)
+                   rust-compile-command))
+        (proc (get-process rust-compile-process-name)))
+    (when (process-live-p proc)
         (if (yes-or-no-p
              (format "A rust-compile process is running; kill it? "))
             (condition-case ()
@@ -123,7 +123,7 @@ Otherwise use provided arguments and store them in `rust-compile--compilation-ar
                  (buffer-name))))
     (save-some-buffers (not compilation-ask-about-save)
                        compilation-save-buffers-predicate)
-    (rust-compile--start-process (split-string command))))
+    (rust-compile-start-process (split-string command))))
 
 ;;;###autoload
 (defun rust-recompile ()

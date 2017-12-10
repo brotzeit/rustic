@@ -102,15 +102,15 @@
   "Buffer name for rust compilation process buffers.")
 
 (defvar rustfmt-files nil
-  "Holds file and tmpfile for `rust-format---filter' and `rust-format--sentinel'")
+  "Holds file and tmpfile for `rust-format-filter' and `rust-format-sentinel'")
 
-(defun rust-format---filter (proc output)
+(defun rust-format-filter (proc output)
   (let ((buf (process-buffer proc)))
     (with-current-buffer buf
       (goto-char (point-max))
       (insert (xterm-color-filter (replace-regexp-in-string (cdr rustfmt-files) (car rustfmt-files) output))))))
 
-(defun rust-format--sentinel (proc output)
+(defun rust-format-sentinel (proc output)
   (let ((buf (process-buffer proc))
         (tmpfile (cdr rustfmt-files)))
     (if (string-match-p "^finished" output)
@@ -122,7 +122,7 @@
     (insert-file-contents tmpfile nil nil nil t)
     (delete-file tmpfile)))
 
-(defun rust-format--start-process (buf)
+(defun rust-format-start-process (buf)
   (let* ((file (buffer-file-name buf))
          (tmpf (make-temp-file "rustmodefmt"))
          (err-buf (get-buffer-create rust-format--buffer-name))
@@ -139,8 +139,8 @@
       (make-process :name rust-format--process-name
                     :buffer err-buf
                     :command `(,rust-rustfmt-bin ,tmpf)
-                    :filter #'rust-format---filter
-                    :sentinel #'rust-format--sentinel)
+                    :filter #'rust-format-filter
+                    :sentinel #'rust-format-sentinel)
       (let ((proc (get-buffer-process err-buf)))
         (accept-process-output proc 0.1)))))
 
@@ -148,7 +148,7 @@
 ;;;;;;;;;;;;;;;;
 ;; Interactive
 
-(defun rust-format--call ()
+(defun rust-format-call ()
   "Format the current buffer using rustfmt."
   (interactive)
   (unless (executable-find rust-rustfmt-bin)
@@ -175,7 +175,7 @@
                         (rust--format-get-loc buffer point))
                   window-loc)))))
     (unwind-protect
-        (rust-format--start-process (current-buffer))
+        (rust-format-start-process (current-buffer))
       (dolist (loc buffer-loc)
         (let* ((buffer (pop loc))
                (pos (rust--format-get-pos buffer (pop loc))))

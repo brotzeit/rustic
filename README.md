@@ -13,5 +13,5 @@ This is a fork of [rust-mode](https://github.com/rust-lang/rust-mode)
 
 Shortcuts for rust-mode:
 
-* `C-c C-f` rust-format--call
+* `C-c C-f` rust-format-call
 * `C-c C-+` rust-mode--compile
