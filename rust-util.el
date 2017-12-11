@@ -19,6 +19,9 @@
   :type 'string
   :group 'rust-mode)
 
+(defcustom rust-cargo-bin "cargo"
+"Path to cargo executable."
+
 (defcustom rust-format--display-method 'display-buffer
   "Default function used for displaying compilation buffer."
   :type 'function)
@@ -26,6 +29,16 @@
 
 (defconst rust--format-word "\\b\\(else\\|enum\\|fn\\|for\\|if\\|let\\|loop\\|match\\|struct\\|union\\|unsafe\\|while\\)\\b")
 (defconst rust--format-line "\\([\n]\\)")
+
+(defun rust-buffer-project ()
+  "Get project root if possible."
+  (with-temp-buffer
+    (let ((ret (call-process rust-cargo-bin nil t nil "locate-project")))
+      (when (/= ret 0)
+        (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
+      (goto-char 0)
+      (let ((output (json-read)))
+        (cdr (assoc-string "root" output))))))
 
 (defun rust--format-count (regex max-beginning)
   "Counts number of matches of regex beginning up to max-beginning,

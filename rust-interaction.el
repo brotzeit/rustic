@@ -18,17 +18,6 @@
   :type 'string
   :group 'rust-mode)
 
-
-(defun rust-buffer-project ()
-  "Get project root if possible."
-  (with-temp-buffer
-    (let ((ret (call-process rust-cargo-bin nil t nil "locate-project")))
-      (when (/= ret 0)
-        (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
-      (goto-char 0)
-      (let ((output (json-read)))
-        (cdr (assoc-string "root" output))))))
-
 (defun rust-rewind-to-beginning-of-current-level-expr ()
   (let ((current-level (rust-paren-level)))
     (back-to-indentation)
