@@ -178,7 +178,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
 (defvar rust-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-f") 'rust-format-call)
-    (define-key map (kbd "C-c C-+") 'rust-mode--compile)
+    (define-key map (kbd "C-c C-+") 'rust-compile)
     map)
   "Keymap for Rust major mode.")
 

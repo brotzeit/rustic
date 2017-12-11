@@ -1,5 +1,3 @@
-This is a fork of [rust-mode](https://github.com/rust-lang/rust-mode)
-
 ## Compilation
 
 
