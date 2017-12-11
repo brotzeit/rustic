@@ -26,6 +26,11 @@
   "Default function used for displaying compilation buffer."
   :type 'function)
 
+(defcustom rust-next-error-after-format t
+  "Automatically jump to first error after using `rust-format-call'."
+  :type 'bool
+  :group 'rust-mode)
+
 
 (defconst rust--format-word "\\b\\(else\\|enum\\|fn\\|for\\|if\\|let\\|loop\\|match\\|struct\\|union\\|unsafe\\|while\\)\\b")
 (defconst rust--format-line "\\([\n]\\)")
@@ -144,14 +149,15 @@
 (defun rust-format-sentinel (proc output)
   (let ((buf (process-buffer proc))
         (tmpfile (cdr rustfmt-files)))
+    (insert-file-contents tmpfile nil nil nil t)
+    (delete-file tmpfile)
     (if (string-match-p "^finished" output)
         (kill-buffer buf)
-      (and
-       (goto-char (point-min))
-       (next-error)
-       (display-buffer buf)))
-    (insert-file-contents tmpfile nil nil nil t)
-    (delete-file tmpfile)))
+      (with-current-buffer buf
+        (goto-char (point-min))
+        (when rust-next-error-after-format
+          (next-error))
+        (pop-to-buffer buf)))))
 
 (defun rust-format-start-process (buf)
   (let* ((file (buffer-file-name buf))
