@@ -51,7 +51,7 @@
 ;; Compilation-mode
 
 (defvar rust-compilation-arguments nil
-  "Arguments that were given to `rust-mode--compile'")
+  "Arguments that were given to `rust-compile'")
 
 (define-compilation-mode rust-compilation-mode "rust-compilation"
   "Rust compilation mode."
@@ -127,7 +127,7 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
 
 ;;;###autoload
 (defun rust-recompile ()
-  "Re-compile the program using the last `rust-mode--compile' arguments."
+  "Re-compile the program using the last `rust-compile' arguments."
   (interactive)
   (save-some-buffers (not compilation-ask-about-save)
                      compilation-save-buffers-predicate)

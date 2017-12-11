@@ -20,7 +20,7 @@
   :group 'rust-mode)
 
 (defcustom rust-cargo-bin "cargo"
-"Path to cargo executable."
+"Path to cargo executable.")
 
 (defcustom rust-format--display-method 'display-buffer
   "Default function used for displaying compilation buffer."
