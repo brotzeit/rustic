@@ -175,10 +175,13 @@ function or trait.  When nil, where will be aligned with fn or trait."
   (when rust-always-locate-project-on-open
     (rust-update-buffer-project)))
 
+;; TODO: use better default keybindings
 (defvar rust-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-f") 'rust-format-call)
     (define-key map (kbd "C-c C-+") 'rust-compile)
+    (define-key map (kbd "C-c C-#") 'rust-recompile)
+    (define-key map (kbd "C-c C-p") 'rust-run-clippy)
     map)
   "Keymap for Rust major mode.")
 
