@@ -22,8 +22,8 @@
 (defcustom rust-cargo-bin "cargo"
   "Path to cargo executable.")
 
-(defcustom rust-format--display-method 'display-buffer
-  "Default function used for displaying compilation buffer."
+(defcustom rust-format-display-method 'pop-to-buffer
+  "Default function used for displaying rustfmt buffer."
   :type 'function)
 
 (defcustom rust-next-error-after-format t
@@ -137,7 +137,7 @@
 (defvar rustfmt-files nil
   "Holds file and tmpfile for `rust-format-filter' and `rust-format-sentinel'")
 
-(defconst rust-tmp-file "rustmodefmt")
+(defconst rust-tmp-file "rustfmt")
 
 (defun rust-format-filter (proc output)
   (let ((buf (process-buffer proc)))
@@ -157,7 +157,7 @@
         (goto-char (point-min))
         (when rust-next-error-after-format
           (next-error))
-        (pop-to-buffer buf)))))
+        (funcall rust-format-display-method buf)))))
 
 (defun rust-format-start-process (buf)
   (let* ((file (buffer-file-name buf))
