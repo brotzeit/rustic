@@ -188,8 +188,6 @@
 ;;;;;;;;;;;;;;;;
 ;; Interactive
 
-;;; Functions to submit (parts of) buffers to the rust playpen, for
-;;; sharing.
 (defun rust-playpen-region (begin end)
   "Create a sharable URL for the contents of the current region
    on the Rust playpen."
@@ -204,10 +202,10 @@
             (url-request-method "POST"))
         (url-retrieve shortener-url
                       (lambda (state)
-                        ; filter out the headers etc. included at the
-                        ; start of the buffer: the relevant text
-                        ; (shortened url or error message) is exactly
-                        ; the last line.
+                        ;; filter out the headers etc. included at the
+                        ;; start of the buffer: the relevant text
+                        ;; (shortened url or error message) is exactly
+                        ;; the last line.
                         (goto-char (point-max))
                         (let ((last-line (thing-at-point 'line t))
                               (err (plist-get state :error)))
@@ -261,7 +259,7 @@
                (start (rust--format-get-pos buffer (pop loc)))
                (pos (rust--format-get-pos buffer (pop loc))))
           (unless (eq buffer current)
-           (set-window-start window start))
+            (set-window-start window start))
           (set-window-point window pos)))))
 
   (message "Formatted buffer with rustfmt."))

@@ -294,7 +294,7 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
             ;; If this isn't a type annotation foo::<, we've found a
             ;; match, so a return it!
             ((not (looking-at (rx (0+ space) "<")))
-	     (throw 'rust-path-font-lock-matcher match))))))))
+	         (throw 'rust-path-font-lock-matcher match))))))))
 
 (defvar rust-mode-font-lock-keywords
   (append
@@ -505,16 +505,16 @@ match data if found. Returns nil if not within a Rust string."
    ((member (char-before) '(?\] ?\) ))
     (let* ((is-paren (rust-looking-back-str ")"))
            (dest (save-excursion
-                  (backward-sexp)
-                  (rust-rewind-irrelevant)
-                  (or
-                   (when (rust-looking-back-str "->")
-                     (backward-char 2)
-                     (rust-rewind-irrelevant)
-                     (when (rust-looking-back-str ")")
-                       (backward-sexp)
-                       (point)))
-                   (and is-paren (point))))))
+                   (backward-sexp)
+                   (rust-rewind-irrelevant)
+                   (or
+                    (when (rust-looking-back-str "->")
+                      (backward-char 2)
+                      (rust-rewind-irrelevant)
+                      (when (rust-looking-back-str ")")
+                        (backward-sexp)
+                        (point)))
+                    (and is-paren (point))))))
       (when dest
         (goto-char dest))))))
 
@@ -528,23 +528,24 @@ match data if found. Returns nil if not within a Rust string."
                    (rust-rewind-irrelevant)
                    (rust-rewind-type-param-list)
                    (cond
-                       ((rust-looking-back-symbols '("fn" "trait" "enum" "struct" "union" "impl" "type")) ident-pos)
+                    ((rust-looking-back-symbols '("fn" "trait" "enum" "struct" "union" "impl" "type"))
+                     ident-pos)
 
-                       ((equal 5 (rust-syntax-class-before-point))
-                        (backward-sexp)
-                        (rust-rewind-to-decl-name))
+                    ((equal 5 (rust-syntax-class-before-point))
+                     (backward-sexp)
+                     (rust-rewind-to-decl-name))
 
-                       ((looking-back "[:,'+=]" (1- (point)))
-                        (backward-char)
-                        (rust-rewind-to-decl-name))
+                    ((looking-back "[:,'+=]" (1- (point)))
+                     (backward-char)
+                     (rust-rewind-to-decl-name))
 
-                       ((rust-looking-back-str "->")
-                        (backward-char 2)
-                        (rust-rewind-to-decl-name))
+                    ((rust-looking-back-str "->")
+                     (backward-char 2)
+                     (rust-rewind-to-decl-name))
 
-                       ((rust-looking-back-ident)
-                        (rust-rewind-qualified-ident)
-                        (rust-rewind-to-decl-name))))))
+                    ((rust-looking-back-ident)
+                     (rust-rewind-qualified-ident)
+                     (rust-rewind-to-decl-name))))))
     (when newpos (goto-char newpos))
     newpos))
 
@@ -685,7 +686,7 @@ match data if found. Returns nil if not within a Rust string."
            ;; Otherwise, if the ident: appeared with anything other than , or {
            ;; before it, it can't be part of a struct initializer and therefore
            ;; must be denoting a type.
-	   (t nil)
+	       (t nil)
            ))
          ))
 
@@ -712,11 +713,11 @@ match data if found. Returns nil if not within a Rust string."
        ((or
          (equal 4 (rust-syntax-class-before-point))
          (rust-looking-back-str ","))
-	(condition-case nil
-	    (progn
-	      (backward-up-list)
-	      (rust-is-in-expression-context 'open-brace))
-	  (scan-error nil)))
+	    (condition-case nil
+	        (progn
+	          (backward-up-list)
+	          (rust-is-in-expression-context 'open-brace))
+	      (scan-error nil)))
 
        ;; A => introduces an expression
        ((rust-looking-back-str "=>") t)
@@ -768,7 +769,7 @@ match data if found. Returns nil if not within a Rust string."
         (rust-looking-back-symbols '("self" "true" "false")))
 
        ((rust-looking-back-str "?")
-	(rust-is-in-expression-context 'ambiguous-operator))
+	    (rust-is-in-expression-context 'ambiguous-operator))
 
        ;; If we're looking back at an identifier, this depends on whether
        ;; the identifier is part of an expression or a type
@@ -829,8 +830,8 @@ should be considered a paired angle bracket."
      ;; Otherwise, treat the > as a closing angle bracket if it would
      ;; match an opening one
      ((save-excursion
-	(backward-up-list)
-	(not (looking-at "<"))))))))
+	    (backward-up-list)
+	    (not (looking-at "<"))))))))
 
 (defun rust-mode-syntactic-face-function (state)
   "Syntactic face function to distinguish doc comments from other comments."
@@ -839,24 +840,22 @@ should be considered a paired angle bracket."
       (goto-char (nth 8 state))
       (if (looking-at "/\\([*][*!][^*!]\\|/[/!][^/!]\\)")
           'font-lock-doc-face
-        'font-lock-comment-face
-    ))))
+        'font-lock-comment-face))))
 
 (eval-and-compile
-  (defconst rust--char-literal-rx
-    (rx (seq
-	 (group "'")
-	 (or
-	  (seq
-	   "\\"
+(defconst rust--char-literal-rx
+  (rx (seq
+	   (group "'")
 	   (or
-	    (: "u{" (** 1 6 xdigit) "}")
-	    (: "x" (= 2 xdigit))
-	    (any "'nrt0\"\\")))
-	  (not (any "'\\"))
-	  )
-	 (group "'")))
-    "A regular expression matching a character literal."))
+	    (seq
+	     "\\"
+	     (or
+	      (: "u{" (** 1 6 xdigit) "}")
+	      (: "x" (= 2 xdigit))
+	      (any "'nrt0\"\\")))
+	    (not (any "'\\")))
+	   (group "'")))
+  "A regular expression matching a character literal."))
 
 (defun rust--syntax-propertize-raw-string (end)
   "A helper for rust-syntax-propertize.
@@ -867,18 +866,18 @@ raw string, or to `end', whichever comes first."
   (let ((str-start (nth 8 (syntax-ppss))))
     (when str-start
       (when (save-excursion
-	      (goto-char str-start)
-	      (looking-at "r\\(#*\\)\\(\"\\)"))
-	;; In a raw string, so try to find the end.
-	(let ((hashes (match-string 1)))
-	  ;; Match \ characters at the end of the string to suppress
-	  ;; their normal character-quote syntax.
-	  (when (re-search-forward (concat "\\(\\\\*\\)\\(\"" hashes "\\)") end t)
-	    (put-text-property (match-beginning 1) (match-end 1)
-			       'syntax-table (string-to-syntax "_"))
-	    (put-text-property (1- (match-end 2)) (match-end 2)
-			       'syntax-table (string-to-syntax "|"))
-	    (goto-char (match-end 0))))))))
+	          (goto-char str-start)
+	          (looking-at "r\\(#*\\)\\(\"\\)"))
+	    ;; In a raw string, so try to find the end.
+	    (let ((hashes (match-string 1)))
+	      ;; Match \ characters at the end of the string to suppress
+	      ;; their normal character-quote syntax.
+	      (when (re-search-forward (concat "\\(\\\\*\\)\\(\"" hashes "\\)") end t)
+	        (put-text-property (match-beginning 1) (match-end 1)
+			                   'syntax-table (string-to-syntax "_"))
+	        (put-text-property (1- (match-end 2)) (match-end 2)
+			                   'syntax-table (string-to-syntax "|"))
+	        (goto-char (match-end 0))))))))
 
 (defun rust-syntax-propertize (start end)
   "A `syntax-propertize-function' for `rust-mode'."
@@ -891,17 +890,17 @@ raw string, or to `end', whichever comes first."
     ;; Raw strings.
     ("\\(r\\)#*\""
      (1 (prog1 "|"
-	  (goto-char (match-end 0))
-	  (rust--syntax-propertize-raw-string end))))
+	      (goto-char (match-end 0))
+	      (rust--syntax-propertize-raw-string end))))
     ("[<>]"
      (0 (ignore
-	 (when (save-match-data
-		 (save-excursion
-		   (goto-char (match-beginning 0))
-		   (rust-ordinary-lt-gt-p)))
-	   (put-text-property (match-beginning 0) (match-end 0)
-			      'syntax-table (string-to-syntax "."))
-	   (goto-char (match-end 0)))))))
+	     (when (save-match-data
+		         (save-excursion
+		           (goto-char (match-beginning 0))
+		           (rust-ordinary-lt-gt-p)))
+	       (put-text-property (match-beginning 0) (match-end 0)
+			                  'syntax-table (string-to-syntax "."))
+	       (goto-char (match-end 0)))))))
    (point) end))
 
 (defun rust-fill-prefix-for-comment-start (line-start)
