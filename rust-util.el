@@ -128,7 +128,7 @@
 ;;;;;;;;;;;;
 ;; Process
 
-(defvar rust-format--process-name "rust-process"
+(defvar rust-format-process-name "rust-process"
   "Process name for rust compilation processes.")
 
 (defvar rust-format--buffer-name "*rust-fmt-buffer*"
@@ -140,6 +140,7 @@
 (defconst rust-tmp-file "rustfmt")
 
 (defun rust-format-filter (proc output)
+  "Filter for rustfmt processes."
   (let ((buf (process-buffer proc)))
     (with-current-buffer buf
       (goto-char (point-max))
@@ -147,6 +148,7 @@
                (replace-regexp-in-string (cdr rustfmt-files) (car rustfmt-files) output))))))
 
 (defun rust-format-sentinel (proc output)
+  "Sentinel for rustfmt processes."
   (let ((buf (process-buffer proc))
         (tmpfile (cdr rustfmt-files)))
     (insert-file-contents tmpfile nil nil nil t)
@@ -160,6 +162,7 @@
         (funcall rust-format-display-method buf)))))
 
 (defun rust-format-start-process (buf)
+  "Start a new rustfmt process."
   (let* ((file (buffer-file-name buf))
          (tmpf (make-temp-file rust-tmp-file))
          (err-buf (get-buffer-create rust-format--buffer-name))
@@ -173,7 +176,7 @@
       (rust-compilation-mode))
     (with-current-buffer buf
       (write-region (point-min) (point-max) tmpf nil nil)
-      (make-process :name rust-format--process-name
+      (make-process :name rust-format-process-name
                     :buffer err-buf
                     :command `(,rust-rustfmt-bin ,tmpf)
                     :filter #'rust-format-filter
@@ -281,7 +284,7 @@
   (interactive)
   (when (null rust-buffer-project)
     (rust-update-buffer-project))
-  (let* ((command (list rust-cargo-bin "clippy" (concat "--manifest-path=" rust-buffer-project))))
+  (let ((command (list rust-cargo-bin "clippy" (concat "--manifest-path=" rust-buffer-project))))
     (rust-compile-start-process command)))
 
 (provide 'rust-util)
