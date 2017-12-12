@@ -46,6 +46,17 @@
                      (= current-level function-level)))
         (goto-char function-start)))))
 
+(defun rust-align-to-expr-after-brace ()
+  (save-excursion
+    (forward-char)
+    ;; We don't want to indent out to the open bracket if the
+    ;; open bracket ends the line
+    (when (not (looking-at "[[:blank:]]*\\(?://.*\\)?$"))
+      (when (looking-at "[[:space:]]")
+    (forward-word 1)
+    (backward-word 1))
+      (current-column))))
+
 (defun rust-align-to-method-chain ()
   (save-excursion
     ;; for method-chain alignment to apply, we must be looking at

@@ -367,10 +367,6 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
              ("use" . font-lock-constant-face)
              ("fn" . font-lock-function-name-face)))))
 
-
-;;;;;;;;;
-;; Misc
-
 (defun rust-looking-back-str (str)
   "Like `looking-back' but for fixed strings rather than regexps (so that it's not so slow)"
   (let ((len (length str)))
@@ -413,7 +409,6 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
         ;; Rewind until the point no longer moves
         (setq continue (/= starting (point)))))))
 
-
 (defun rust-in-macro ()
   (save-excursion
     (when (> (rust-paren-level) 0)
@@ -421,8 +416,7 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
       (rust-rewind-irrelevant)
       (or (rust-looking-back-macro)
           (and (rust-looking-back-ident) (save-excursion (backward-sexp) (rust-rewind-irrelevant) (rust-looking-back-str "macro_rules!")))
-          (rust-in-macro))
-      )))
+          (rust-in-macro)))))
 
 (defun rust-looking-at-where ()
   "Return T when looking at the \"where\" keyword."
@@ -438,17 +432,6 @@ buffer."
     (if (rust-in-str-or-cmnt)
         (rust-rewind-to-where limit)
       t)))
-
-(defun rust-align-to-expr-after-brace ()
-  (save-excursion
-    (forward-char)
-    ;; We don't want to indent out to the open bracket if the
-    ;; open bracket ends the line
-    (when (not (looking-at "[[:blank:]]*\\(?://.*\\)?$"))
-      (when (looking-at "[[:space:]]")
-    (forward-word 1)
-    (backward-word 1))
-      (current-column))))
 
 (defconst rust-re-pre-expression-operators "[-=!%&*/:<>[{(|.^;}]")
 (defun rust-re-shy (inner) (concat "\\(?:" inner "\\)"))
@@ -537,7 +520,6 @@ match data if found. Returns nil if not within a Rust string."
   can have a where clause, rewind back to just before the name of
   the subject of that where clause and return the new point.
   Otherwise return nil"
-
   (let* ((ident-pos (point))
          (newpos (save-excursion
                    (rust-rewind-irrelevant)
@@ -572,7 +554,6 @@ match data if found. Returns nil if not within a Rust string."
   This function is used as part of `rust-is-lt-char-operator' as
   part of angle bracket matching, and is not intended to be used
   outside of this context."
-
   (save-excursion
     (let ((postchar (char-after)))
       (rust-rewind-irrelevant)
