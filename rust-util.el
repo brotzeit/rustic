@@ -164,6 +164,7 @@
 (defun rust-format-start-process (buf)
   "Start a new rustfmt process."
   (let* ((file (buffer-file-name buf))
+         (temporary-file-directory rust-buffer-project-dir)
          (tmpf (make-temp-file rust-tmp-file))
          (err-buf (get-buffer-create rust-format--buffer-name))
          (coding-system-for-read 'binary)
@@ -279,11 +280,9 @@
 ;;;###autoload
 (defun rust-run-clippy ()
   "Run `cargo clippy'."
-  (interactive)
-  (when (null rust-buffer-project)
-    (rust-update-buffer-project))
-  (let ((command (list rust-cargo-bin "clippy" (concat "--manifest-path=" rust-buffer-project))))
-    (rust-compile-start-process command)))
+  (when (null rust-buffer-project-dir)
+  (let ((command (list rust-cargo-bin "clippy" (concat "--manifest-path=" rust-buffer-project-dir))))
+    (rust-compile-start-process command))))
 
 (provide 'rust-util)
 ;;; rust-util.el ends here

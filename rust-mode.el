@@ -27,7 +27,7 @@
 (defvar electric-pair-inhibit-predicate)
 (defvar electric-indent-chars)
 
-(defvar rust-buffer-project)
+(defvar rust-buffer-project-dir)
 (make-variable-buffer-local 'rust-buffer-project)
 
 ;; for GNU Emacs < 24.3
@@ -170,7 +170,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
 
   (add-hook 'before-save-hook 'rust--before-save-hook nil t)
 
-  (setq-local rust-buffer-project nil)
+  (setq-local rust-buffer-project-dir nil)
 
   (when rust-always-locate-project-on-open
     (rust-update-buffer-project)))
@@ -1045,7 +1045,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
   (when rust-format-on-save (rust-format-call)))
 
 (defun rust-update-buffer-project ()
-  (setq-local rust-buffer-project (rust-buffer-project)))
+  (setq-local rust-buffer-project-dir (rust-buffer-project)))
 
 
 ;;;;;;;;;;;;;;;;
