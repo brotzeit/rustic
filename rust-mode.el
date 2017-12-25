@@ -28,7 +28,7 @@
 (defvar electric-indent-chars)
 
 (defvar rust-buffer-project-dir)
-(make-variable-buffer-local 'rust-buffer-project)
+(make-variable-buffer-local 'rust-buffer-project-dir)
 
 ;; for GNU Emacs < 24.3
 (eval-when-compile
