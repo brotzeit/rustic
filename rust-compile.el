@@ -53,7 +53,6 @@
 (define-compilation-mode rust-compilation-mode "rust-compilation"
   "Rust compilation mode."
   (setq buffer-read-only nil)
-  (setq truncate-lines t)
   (setq-local compilation-message-face rust-message-face)
   (setq-local xterm-color-names-bright rust-ansi-faces)
   (setq-local xterm-color-names rust-ansi-faces))
