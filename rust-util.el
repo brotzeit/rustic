@@ -157,8 +157,8 @@
         (kill-buffer buf)
       (with-current-buffer buf
         (goto-char (point-min))
-        (when rust-next-error-after-format
-          (next-error))
+        ;; (when rust-next-error-after-format
+        ;;   (next-error))
         (funcall rust-format-display-method buf)))))
 
 (defun rust-format-start-process (buf)
