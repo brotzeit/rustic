@@ -280,9 +280,10 @@
 ;;;###autoload
 (defun rust-run-clippy ()
   "Run `cargo clippy'."
+  (interactive)
   (when (null rust-buffer-project-dir)
-  (let ((command (list rust-cargo-bin "clippy" (concat "--manifest-path=" rust-buffer-project-dir))))
-    (rust-compile-start-process command))))
+    (let ((command (list rust-cargo-bin "clippy")))
+      (rust-compile-start-process command))))
 
 (provide 'rust-util)
 ;;; rust-util.el ends here
