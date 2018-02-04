@@ -55,7 +55,21 @@
   (setq buffer-read-only nil)
   (setq-local compilation-message-face rust-message-face)
   (setq-local xterm-color-names-bright rust-ansi-faces)
-  (setq-local xterm-color-names rust-ansi-faces))
+  (setq-local xterm-color-names rust-ansi-faces)
+  (add-hook 'next-error-hook 'rust-next-error-hook nil t)
+
+  (make-local-variable 'compilation-error-regexp-alist-alist)
+  (add-to-list 'compilation-error-regexp-alist-alist
+               (cons 'rustc rustc-compilation-regexps))
+  (add-to-list 'compilation-error-regexp-alist-alist
+               (cons 'rustc-new rust-rustc-compilation-regexps))
+  (add-to-list 'compilation-error-regexp-alist-alist
+               (cons 'cargo rust-cargo-compilation-regexps))
+
+  (make-local-variable 'compilation-error-regexp-alist)
+  (add-to-list 'compilation-error-regexp-alist 'rustc)
+  (add-to-list 'compilation-error-regexp-alist 'rustc-new)
+  (add-to-list 'compilation-error-regexp-alist 'cargo))
 
 ;; Issue #6887: Rather than inheriting the 'gnu compilation error
 ;; regexp (which is broken on a few edge cases), add our own 'rust
@@ -90,19 +104,6 @@ See `compilation-error-regexp-alist' for help on their format.")
   '("^\\s-+thread '[^']+' panicked at \\('[^']+', \\([^:]+\\):\\([0-9]+\\)\\)" 2 3 nil nil 1)
   "Specifications for matching panics in cargo test invocations.
 2See `compilation-error-regexp-alist' for help on their format.")
-
-(eval-after-load 'compile
-  '(progn
-     (add-to-list 'compilation-error-regexp-alist-alist
-                  (cons 'rustc-new rust-rustc-compilation-regexps))
-     (add-to-list 'compilation-error-regexp-alist 'rustc-new)
-     (add-hook 'next-error-hook 'rust-next-error-hook)
-     (add-to-list 'compilation-error-regexp-alist-alist
-                  (cons 'rustc rustc-compilation-regexps))
-     (add-to-list 'compilation-error-regexp-alist 'rustc)
-     (add-to-list 'compilation-error-regexp-alist-alist
-                  (cons 'cargo rust-cargo-compilation-regexps))
-     (add-to-list 'compilation-error-regexp-alist 'cargo)))
 
 (defun rust-next-error-hook ()
   "In the new style error messages, the regular expression
