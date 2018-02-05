@@ -138,22 +138,20 @@ See `compilation-error-regexp-alist' for help on their format.")
   "Arguments that were given to `rust-compile'")
 
 (defun rust-compile-start-process (command)
-  (let ((buf rust-compile-buffer-name)
+  (let ((buf (get-buffer-create rust-compile-buffer-name))
         (coding-system-for-read 'binary)
         (process-environment (nconc
 	                          (list (format "TERM=%s" "ansi"))
                               process-environment)))
+    (with-current-buffer buf
+      (erase-buffer)
+      (rust-compilation-mode)
+      (funcall rust-compile-display-method buf))
     (make-process :name rust-compile-process-name
                   :buffer buf
                   :command command
                   :filter #'rust-compile--filter
-                  :sentinel #'(lambda (_proc _output)))
-    (let ((proc (get-buffer-process buf)))
-      (accept-process-output proc 0.1))
-    (with-current-buffer buf
-      (erase-buffer)
-      (rust-compilation-mode)
-      (funcall rust-compile-display-method buf))))
+                  :sentinel #'(lambda (_proc _output)))))
 
 (defun rust-compile--filter (proc output)
   "Filter for rust compilation process."
