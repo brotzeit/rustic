@@ -128,11 +128,14 @@
 ;;;;;;;;;;;;
 ;; Process
 
-(defvar rust-format-process-name "rust-process"
-  "Process name for rust compilation processes.")
+(defvar rust-format-process-name "rust-rustfmt-process"
+  "Process name for rustfmt processes.")
 
-(defvar rust-format--buffer-name "*rust-fmt-buffer*"
-  "Buffer name for rust compilation process buffers.")
+(defvar rust-format-buffer-name "*rustfmt*"
+  "Buffer name for rustfmt process buffers.")
+
+(defvar rust-clippy-buffer-name "*rust-clippy*"
+  "Buffer name for clippy buffers.")
 
 (defvar rustfmt-files nil
   "Holds file and tmpfile for `rust-format-filter' and `rust-format-sentinel'")
@@ -166,7 +169,7 @@
   (let* ((file (buffer-file-name buf))
          (temporary-file-directory rust-buffer-project-dir)
          (tmpf (make-temp-file rust-tmp-file))
-         (err-buf (get-buffer-create rust-format--buffer-name))
+         (err-buf (get-buffer-create rust-format-buffer-name))
          (coding-system-for-read 'binary)
          (process-environment (nconc
 	                           (list (format "TERM=%s" "ansi"))
@@ -181,9 +184,7 @@
                     :buffer err-buf
                     :command `(,rust-rustfmt-bin ,tmpf)
                     :filter #'rust-format-filter
-                    :sentinel #'rust-format-sentinel)
-      (let ((proc (get-buffer-process err-buf)))
-        (accept-process-output proc 0.1)))))
+                    :sentinel #'rust-format-sentinel))))
 
 
 ;;;;;;;;;;;;;;;;
