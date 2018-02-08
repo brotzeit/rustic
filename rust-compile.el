@@ -128,17 +128,17 @@ See `compilation-error-regexp-alist' for help on their format.")
 ;;;;;;;;;;;;;
 ;; Process
 
-(defvar rust-compile-process-name "rust-process"
+(defvar rust-compile-process-name "rust-comilation-process"
   "Process name for rust compilation processes.")
 
-(defvar rust-compile-buffer-name "*rust-process-buffer*"
+(defvar rust-compile-buffer-name "*rust-compilation*"
   "Buffer name for rust compilation process buffers.")
 
 (defvar rust-compilation-arguments nil
   "Arguments that were given to `rust-compile'")
 
-(defun rust-compile-start-process (command)
-  (let ((buf (get-buffer-create rust-compile-buffer-name))
+(defun rust-compile-start-process (command buffer)
+  (let ((buf (get-buffer-create buffer))
         (coding-system-for-read 'binary)
         (process-environment (nconc
 	                          (list (format "TERM=%s" "ansi"))
@@ -188,7 +188,7 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
                  (buffer-name))))
     (save-some-buffers (not compilation-ask-about-save)
                        compilation-save-buffers-predicate)
-    (rust-compile-start-process (split-string command))))
+    (rust-compile-start-process (split-string command) rust-compile-buffer-name)))
 
 ;;;###autoload
 (defun rust-recompile ()
@@ -199,7 +199,7 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
   (let ((command (if (not rust-compilation-arguments)
                      rust-compile-command
                    rust-compilation-arguments)))
-    (rust-compile-start-process command)))
+    (rust-compile-start-process command rust-compile-buffer-name)))
 
 (provide 'rust-compile)
 ;;; rust-compile.el ends here
