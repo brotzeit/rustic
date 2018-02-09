@@ -71,6 +71,9 @@
   (add-to-list 'compilation-error-regexp-alist 'rustc-new)
   (add-to-list 'compilation-error-regexp-alist 'cargo))
 
+(defvar rust-compilation-directory nil
+  "Directory to restore to when doing `rust-recompile'.")
+
 ;; Issue #6887: Rather than inheriting the 'gnu compilation error
 ;; regexp (which is broken on a few edge cases), add our own 'rust
 ;; compilation error regexp and use it instead.
@@ -189,6 +192,7 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
                (buffer-name))))
     (save-some-buffers (not compilation-ask-about-save)
                        compilation-save-buffers-predicate)
+    (setq-default rust-compilation-directory default-directory)
     (rust-compile-start-process (split-string command) rust-compile-buffer-name)))
 
 ;;;###autoload
@@ -197,7 +201,8 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
   (interactive)
   (save-some-buffers (not compilation-ask-about-save)
                      compilation-save-buffers-predicate)
-  (let ((command (if (not rust-compilation-arguments)
+  (let ((default-directory (or rust-compilation-directory default-directory))
+        (command (if (not rust-compilation-arguments)
                      rust-compile-command
                    rust-compilation-arguments)))
     (rust-compile-start-process command rust-compile-buffer-name)))
