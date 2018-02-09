@@ -36,14 +36,8 @@
 (defconst rust--format-line "\\([\n]\\)")
 
 (defun rust-buffer-project ()
-  "Get project root if possible."
-  (with-temp-buffer
-    (let ((ret (call-process rust-cargo-bin nil t nil "locate-project")))
-      (when (/= ret 0)
-        (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
-      (goto-char 0)
-      (let ((output (json-read)))
-        (cdr (assoc-string "root" output))))))
+  "Guess the project root."
+  (file-truename (locate-dominating-file (or buffer-file-name default-directory) "Cargo.toml")))
 
 (defun rust--format-count (regex max-beginning)
   "Counts number of matches of regex beginning up to max-beginning,
@@ -171,6 +165,7 @@
          (tmpf (make-temp-file rust-tmp-file))
          (err-buf (get-buffer-create rust-format-buffer-name))
          (coding-system-for-read 'binary)
+         ;; (default-directory (rust-buffer-project))
          (process-environment (nconc
 	                           (list (format "TERM=%s" "ansi"))
                                process-environment)))

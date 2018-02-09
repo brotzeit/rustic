@@ -174,18 +174,19 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
                      (setq rust-compilation-arguments
                            (read-from-minibuffer "Compile command: "))
                    rust-compile-command))
-        (proc (get-process rust-compile-process-name)))
+        (proc (get-process rust-compile-process-name))
+        (default-directory (rust-buffer-project)))
     (when (process-live-p proc)
-        (if (yes-or-no-p
-             (format "A rust-compile process is running; kill it? "))
-            (condition-case ()
-                (progn
-                  (interrupt-process proc)
-                  (sit-for 1)
-                  (delete-process proc))
-              (error nil))
-          (error "Cannot have two processes in `%s' at once"
-                 (buffer-name))))
+      (if (yes-or-no-p
+           (format "A rust-compile process is running; kill it? "))
+          (condition-case ()
+              (progn
+                (interrupt-process proc)
+                (sit-for 1)
+                (delete-process proc))
+            (error nil))
+        (error "Cannot have two processes in `%s' at once"
+               (buffer-name))))
     (save-some-buffers (not compilation-ask-about-save)
                        compilation-save-buffers-predicate)
     (rust-compile-start-process (split-string command) rust-compile-buffer-name)))
