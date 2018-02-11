@@ -26,11 +26,6 @@
   "Default function used for displaying rustfmt buffer."
   :type 'function)
 
-(defcustom rust-next-error-after-format t
-  "Automatically jump to first error after using `rust-format-call'."
-  :type 'bool
-  :group 'rust-mode)
-
 
 (defconst rust--format-word "\\b\\(else\\|enum\\|fn\\|for\\|if\\|let\\|loop\\|match\\|struct\\|union\\|unsafe\\|while\\)\\b")
 (defconst rust--format-line "\\([\n]\\)")
@@ -131,55 +126,50 @@
 (defvar rust-clippy-buffer-name "*rust-clippy*"
   "Buffer name for clippy buffers.")
 
-(defvar rustfmt-files nil
-  "Holds file and tmpfile for `rust-format-filter' and `rust-format-sentinel'")
-
-(defconst rust-tmp-file "rustfmt")
+(defvar rust-format-file-name nil
+  "Holds last file formatted by `rust-format-start-process'.")
 
 (defun rust-format-filter (proc output)
   "Filter for rustfmt processes."
   (let ((buf (process-buffer proc)))
     (with-current-buffer buf
       (goto-char (point-max))
-      (insert (xterm-color-filter
-               (replace-regexp-in-string (cdr rustfmt-files) (car rustfmt-files) output))))))
+      (insert (xterm-color-filter output)))))
 
 (defun rust-format-sentinel (proc output)
   "Sentinel for rustfmt processes."
-  (let ((buf (process-buffer proc))
-        (tmpfile (cdr rustfmt-files)))
-    (insert-file-contents tmpfile nil nil nil t)
-    (delete-file tmpfile)
+  (let ((buf (process-buffer proc)))
     (if (string-match-p "^finished" output)
         (kill-buffer buf)
       (with-current-buffer buf
         (goto-char (point-min))
-        ;; (when rust-next-error-after-format
-        ;;   (next-error))
+        (save-excursion
+          (when (search-forward "<stdin>")
+            (replace-match rust-format-file-name)))
         (funcall rust-format-display-method buf)))))
 
-(defun rust-format-start-process (buf)
+(defun rust-format-start-process (buffer string)
   "Start a new rustfmt process."
-  (let* ((file (buffer-file-name buf))
-         (temporary-file-directory rust-buffer-project-dir)
-         (tmpf (make-temp-file rust-tmp-file))
+  (let* ((file (buffer-file-name buffer))
          (err-buf (get-buffer-create rust-format-buffer-name))
          (coding-system-for-read 'binary)
-         ;; (default-directory (rust-buffer-project))
          (process-environment (nconc
 	                           (list (format "TERM=%s" "ansi"))
                                process-environment)))
-    (setq rustfmt-files (cons file tmpf))
     (with-current-buffer err-buf
       (erase-buffer)
       (rust-compilation-mode))
-    (with-current-buffer buf
-      (write-region (point-min) (point-max) tmpf nil nil)
-      (make-process :name rust-format-process-name
-                    :buffer err-buf
-                    :command `(,rust-rustfmt-bin ,tmpf)
-                    :filter #'rust-format-filter
-                    :sentinel #'rust-format-sentinel))))
+    (setq rust-format-file-name (buffer-file-name buffer))
+    (let ((proc (make-process :name rust-format-process-name
+                              :buffer err-buf
+                              :command `(,rust-rustfmt-bin)
+                              :filter #'rust-format-filter
+                              :sentinel #'rust-format-sentinel)))
+      (while (not (process-live-p proc))
+        (sleep-for 0.01))
+      (process-send-string proc string)
+      (process-send-eof proc)
+      (process-send-eof proc))))
 
 
 ;;;;;;;;;;;;;;;;
@@ -217,7 +207,7 @@
   (interactive)
   (rust-playpen-region (point-min) (point-max)))
 
-(defun rust-format-call ()
+(defun rust-format-buffer ()
   "Format the current buffer using rustfmt."
   (interactive)
   (unless (executable-find rust-rustfmt-bin)
@@ -244,7 +234,7 @@
                         (rust--format-get-loc buffer point))
                   window-loc)))))
     (unwind-protect
-        (rust-format-start-process (current-buffer))
+        (rust-format-start-process (current-buffer) (buffer-string))
       (dolist (loc buffer-loc)
         (let* ((buffer (pop loc))
                (pos (rust--format-get-pos buffer (pop loc))))

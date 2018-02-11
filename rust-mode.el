@@ -178,7 +178,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
 ;; TODO: use better default keybindings
 (defvar rust-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-f") 'rust-format-call)
+    (define-key map (kbd "C-c C-f") 'rust-format-buffer)
     (define-key map (kbd "C-c C-+") 'rust-compile)
     (define-key map (kbd "C-c C-#") 'rust-recompile)
     (define-key map (kbd "C-c C-p") 'rust-run-clippy)
@@ -1042,7 +1042,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
     (point)))
 
 (defun rust--before-save-hook ()
-  (when rust-format-on-save (rust-format-call)))
+  (when rust-format-on-save (rust-format-buffer)))
 
 (defun rust-update-buffer-project ()
   (setq-local rust-buffer-project-dir (rust-buffer-project)))

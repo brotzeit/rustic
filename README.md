@@ -11,5 +11,5 @@
 
 Shortcuts for rust-mode:
 
-* `C-c C-f` rust-format-call
+* `C-c C-f` rust-format-buffer
 * `C-c C-+` rust-compile
