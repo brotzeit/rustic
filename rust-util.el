@@ -277,9 +277,9 @@
 (defun rust-run-clippy ()
   "Run `cargo clippy'."
   (interactive)
-  (when (null rust-buffer-project-dir)
-    (let ((command (list rust-cargo-bin "clippy")))
-      (rust-compile-start-process command rust-clippy-buffer-name))))
+  (let ((command (list rust-cargo-bin "clippy"))
+        (default-directory (rust-buffer-project)))
+    (rust-compile-start-process command rust-clippy-buffer-name)))
 
 (provide 'rust-util)
 ;;; rust-util.el ends here
