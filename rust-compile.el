@@ -56,20 +56,13 @@
   (setq-local compilation-message-face rust-message-face)
   (setq-local xterm-color-names-bright rust-ansi-faces)
   (setq-local xterm-color-names rust-ansi-faces)
-  (add-hook 'next-error-hook 'rust-next-error-hook nil t)
 
-  (make-local-variable 'compilation-error-regexp-alist-alist)
+  (setq-local compilation-error-regexp-alist-alist nil)
   (add-to-list 'compilation-error-regexp-alist-alist
-               (cons 'rustc rustc-compilation-regexps))
-  (add-to-list 'compilation-error-regexp-alist-alist
-               (cons 'rustc-new rust-rustc-compilation-regexps))
-  (add-to-list 'compilation-error-regexp-alist-alist
-               (cons 'cargo rust-cargo-compilation-regexps))
+               (cons 'rust-arrow rust-compilation-regexps-arrow))
 
-  (make-local-variable 'compilation-error-regexp-alist)
-  (add-to-list 'compilation-error-regexp-alist 'rustc)
-  (add-to-list 'compilation-error-regexp-alist 'rustc-new)
-  (add-to-list 'compilation-error-regexp-alist 'cargo))
+  (setq-local compilation-error-regexp-alist nil)
+  (add-to-list 'compilation-error-regexp-alist 'rust-arrow))
 
 (defvar rust-compilation-directory nil
   "Directory to restore to when doing `rust-recompile'.")
@@ -88,18 +81,16 @@
                       ": " end-line ":" end-col
                       " " msg-type ":")))
       (cons re '(1 (2 . 4) (3 . 5) (6 . 7)))))
-  "Specifications for matching errors in rustc invocations.
-See `compilation-error-regexp-alist' for help on their format.")
+  "Specifications for matching errors in rustc invocations.")
 
-(defvar rust-rustc-compilation-regexps
+(defvar rust-compilation-regexps-arrow
   (let ((file "\\([^\n]+\\)")
         (start-line "\\([0-9]+\\)")
         (start-col  "\\([0-9]+\\)"))
     (let ((re (concat "^ *--> " file ":" start-line ":" start-col ; --> 1:2:3
                       )))
       (cons re '(1 2 3))))
-  "Specifications for matching errors in rustc invocations (new style).
-See `compilation-error-regexp-alist' for help on their format.")
+  "Create hyperlink in compilation buffers for file paths containing '-->'.")
 
 ;; Match test run failures and panics during compilation as
 ;; compilation warnings
