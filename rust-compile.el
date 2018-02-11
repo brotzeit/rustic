@@ -144,15 +144,69 @@
     (make-process :name rust-compile-process-name
                   :buffer buf
                   :command command
-                  :filter #'rust-compile--filter
+                  :filter #'rust-compile-filter
                   :sentinel #'(lambda (_proc _output)))))
 
-(defun rust-compile--filter (proc output)
-  "Filter for rust compilation process."
-  (let ((buf (process-buffer proc)))
-    (with-current-buffer buf
-      (goto-char (point-max))
-       (insert (xterm-color-filter output)))))
+;; compile.el functions
+
+(defun compile-goto-error (&optional event)
+  "We don't want paths preceeded by ':::' to be treated as an error, but this function has to
+be able to visit the source."
+  (interactive (list last-input-event))
+  (if event (posn-set-point (event-end event)))
+  (or (compilation-buffer-p (current-buffer))
+      (error "Not in a compilation buffer"))
+  (compilation--ensure-parse (point))
+  (let ((string (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
+        (regexp (concat "^ *::: " "\\([^\n]+\\)" ":" "\\([0-9]+\\)" ":" "\\([0-9]+\\)")))
+    (if (string-match regexp
+                      string)
+        (let* ((s (string-reverse (split-string string ":")))
+               (file (concat rust-compilation-directory (string-trim (nth 2 s))))
+               (line (nth 1 s))
+               (column (nth 0 s)))
+          (when  (file-exists-p file)
+            (find-file-other-window file)
+            (goto-line (string-to-number line))
+            (move-to-column (- (string-to-number column) 1))))
+      (if (get-text-property (point) 'compilation-directory)
+          (dired-other-window
+           (car (get-text-property (point) 'compilation-directory)))
+        (setq compilation-current-error (point))
+        (next-error-internal)))))
+
+(defun rust-compile-filter (proc string)
+  "This filter was copied from compile.el, but the text is inserted by xterm-color. "
+  (when (buffer-live-p (process-buffer proc))
+    (with-current-buffer (process-buffer proc)
+      (let ((inhibit-read-only t)
+            ;; `save-excursion' doesn't use the right insertion-type for us.
+            (pos (copy-marker (point) t))
+            ;; `save-restriction' doesn't use the right insertion type either:
+            ;; If we are inserting at the end of the accessible part of the
+            ;; buffer, keep the inserted text visible.
+	        (min (point-min-marker))
+	        (max (copy-marker (point-max) t))
+	        (compilation-filter-start (marker-position (process-mark proc))))
+        (unwind-protect
+            (progn
+	          (widen)
+	          (goto-char compilation-filter-start)
+              ;; We used to use `insert-before-markers', so that windows with
+              ;; point at `process-mark' scroll along with the output, but we
+              ;; now use window-point-insertion-type instead.
+              
+              (insert (xterm-color-filter string))
+              
+              (unless comint-inhibit-carriage-motion
+                (comint-carriage-motion (process-mark proc) (point)))
+              (set-marker (process-mark proc) (point))
+              (run-hooks 'compilation-filter-hook))
+	      (goto-char pos)
+          (narrow-to-region min max)
+	      (set-marker pos nil)
+	      (set-marker min nil)
+	      (set-marker max nil))))))
 
 
 ;;;;;;;;;;;;;;;;
