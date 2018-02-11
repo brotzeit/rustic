@@ -67,6 +67,7 @@
 (defvar rust-compilation-directory nil
   "Directory to restore to when doing `rust-recompile'.")
 
+;; TODO: verify that this regexp is still useful
 ;; Issue #6887: Rather than inheriting the 'gnu compilation error
 ;; regexp (which is broken on a few edge cases), add our own 'rust
 ;; compilation error regexp and use it instead.
@@ -92,6 +93,7 @@
       (cons re '(1 2 3))))
   "Create hyperlink in compilation buffers for file paths containing '-->'.")
 
+;; TODO: verify that this regexp is still useful
 ;; Match test run failures and panics during compilation as
 ;; compilation warnings
 (defvar rust-cargo-compilation-regexps
