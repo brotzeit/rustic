@@ -4,7 +4,7 @@
 ;; Author: Mozilla
 ;; Url: https://github.com/rust-lang/rust-mode
 ;; Keywords: languages
-;; Package-Requires: ((emacs "24.0") (xterm-color "1.6"))
+;; Package-Requires: ((emacs "24.3") (xterm-color "1.6"))
 
 ;; This file is distributed under the terms of both the MIT license and the
 ;; Apache License (version 2.0).
