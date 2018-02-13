@@ -68,11 +68,13 @@
             (copy-to-buffer file-buffer (point-min) (point-max))
             (with-current-buffer file-buffer
               (goto-char rust-save-pos))
-            (kill-buffer proc-buffer))
+            (kill-buffer proc-buffer)
+            (message "Formatted buffer with rustfmt."))
         (goto-char (point-min))
         (when (search-forward "<stdin>")
           (replace-match rust-format-file-name))
-        (funcall rust-format-display-method proc-buffer)))))
+        (funcall rust-format-display-method proc-buffer)
+        (message "Rustfmt error.")))))
 
 (defun rust-format-start-process (buffer string)
   "Start a new rustfmt process."
@@ -95,7 +97,6 @@
       (while (not (process-live-p proc))
         (sleep-for 0.01))
       (process-send-string proc string)
-      (process-send-eof proc)
       (process-send-eof proc))))
 
 
@@ -139,8 +140,7 @@
   (interactive)
   (unless (executable-find rust-rustfmt-bin)
     (error "Could not locate executable \"%s\"" rust-rustfmt-bin))
-  (rust-format-start-process (current-buffer) (buffer-string))
-  (message "Formatted buffer with rustfmt."))
+  (rust-format-start-process (current-buffer) (buffer-string)))
 
 ;;;###autoload
 (defun rust-format--enable-format-on-save ()
