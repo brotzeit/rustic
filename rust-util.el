@@ -34,85 +34,6 @@
   "Guess the project root."
   (file-truename (locate-dominating-file (or buffer-file-name default-directory) "Cargo.toml")))
 
-(defun rust--format-count (regex max-beginning)
-  "Counts number of matches of regex beginning up to max-beginning,
- leaving the point at the beginning of the last match."
-  (let ((count 0)
-        save-point
-        beginning)
-    (while (and (< (point) max-beginning)
-                (re-search-forward regex max-beginning t))
-      (setq count (1+ count))
-      (setq beginning (match-beginning 1)))
-    ;; try one more in case max-beginning lies in the middle of a match
-    (setq save-point (point))
-    (when (re-search-forward regex nil t)
-      (let ((try-beginning (match-beginning 1)))
-        (if (> try-beginning max-beginning)
-            (goto-char save-point)
-          (setq count (1+ count))
-          (setq beginning try-beginning))))
-    (when beginning (goto-char beginning))
-    count))
-
-(defun rust--format-get-loc (buffer &optional pos)
-  "Gets list describing pos or (point).
- The list contains:
- 1. the number of matches of rust--format-word,
- 2. the number of matches of rust--format-line after that,
- 3. the number of columns after that."
-  (with-current-buffer buffer
-    (save-excursion
-      (let ((pos (or pos (point)))
-            words lines columns)
-        (goto-char (point-min))
-        (setq words (rust--format-count rust--format-word pos))
-        (setq lines (rust--format-count rust--format-line pos))
-        (if (> lines 0)
-            (if (= (point) pos)
-                (setq columns -1)
-              (forward-char 1)
-              (goto-char pos)
-              (setq columns (current-column)))
-          (let ((initial-column (current-column)))
-            (goto-char pos)
-            (setq columns (- (current-column) initial-column))))
-        (list words lines columns)))))
-
-(defun rust--format-forward (regex count max-pos)
-  "Moves the point forward by count matches of regex up to max-pos,
- and returns new max-pos making sure final position does not include another match."
-  (when (< (point) max-pos)
-    (let ((beginning (point)))
-      (while (> count 0)
-        (setq count (1- count))
-        (re-search-forward regex nil t)
-        (setq beginning (match-beginning 1)))
-      (when (re-search-forward regex nil t)
-        (setq max-pos (min max-pos (match-beginning 1))))
-      (goto-char beginning)))
-  max-pos)
-
-(defun rust--format-get-pos (buffer loc)
-  "Gets the position from a location list obtained using rust--format-get-loc."
-  (with-current-buffer buffer
-    (save-excursion
-      (goto-char (point-min))
-      (let ((max-pos (point-max))
-            (words (pop loc))
-            (lines (pop loc))
-            (columns (pop loc)))
-        (setq max-pos (rust--format-forward rust--format-word words max-pos))
-        (setq max-pos (rust--format-forward rust--format-line lines max-pos))
-        (when (> lines 0) (forward-char))
-        (let ((initial-column (current-column))
-              (save-point (point)))
-          (move-end-of-line nil)
-          (when (> (current-column) (+ initial-column columns))
-            (goto-char save-point)
-            (forward-char columns)))
-        (min (point) max-pos)))))
-
 
 ;;;;;;;;;;;;
 ;; Process
@@ -129,6 +50,8 @@
 (defvar rust-format-file-name nil
   "Holds last file formatted by `rust-format-start-process'.")
 
+(defvar rust-save-pos nil)
+
 (defun rust-format-filter (proc output)
   "Filter for rustfmt processes."
   (let ((buf (process-buffer proc)))
@@ -138,15 +61,18 @@
 
 (defun rust-format-sentinel (proc output)
   "Sentinel for rustfmt processes."
-  (let ((buf (process-buffer proc)))
-    (if (string-match-p "^finished" output)
-        (kill-buffer buf)
-      (with-current-buffer buf
+  (let ((proc-buffer (process-buffer proc)))
+    (with-current-buffer proc-buffer
+      (if (string-match-p "^finished" output)
+          (let ((file-buffer (get-file-buffer rust-format-file-name)))
+            (copy-to-buffer file-buffer (point-min) (point-max))
+            (with-current-buffer file-buffer
+              (goto-char rust-save-pos))
+            (kill-buffer proc-buffer))
         (goto-char (point-min))
-        (save-excursion
-          (when (search-forward "<stdin>")
-            (replace-match rust-format-file-name)))
-        (funcall rust-format-display-method buf)))))
+        (when (search-forward "<stdin>")
+          (replace-match rust-format-file-name))
+        (funcall rust-format-display-method proc-buffer)))))
 
 (defun rust-format-start-process (buffer string)
   "Start a new rustfmt process."
@@ -160,6 +86,7 @@
       (erase-buffer)
       (rust-compilation-mode))
     (setq rust-format-file-name (buffer-file-name buffer))
+    (setq rust-save-pos (point))
     (let ((proc (make-process :name rust-format-process-name
                               :buffer err-buf
                               :command `(,rust-rustfmt-bin)
@@ -212,43 +139,7 @@
   (interactive)
   (unless (executable-find rust-rustfmt-bin)
     (error "Could not locate executable \"%s\"" rust-rustfmt-bin))
-
-  (let* ((current (current-buffer))
-         (base (or (buffer-base-buffer current) current))
-         buffer-loc
-         window-loc)
-    (dolist (buffer (buffer-list))
-      (when (or (eq buffer base)
-                (eq (buffer-base-buffer buffer) base))
-        (push (list buffer
-                    (rust--format-get-loc buffer nil))
-              buffer-loc)))
-    (dolist (window (window-list))
-      (let ((buffer (window-buffer window)))
-        (when (or (eq buffer base)
-                  (eq (buffer-base-buffer buffer) base))
-          (let ((start (window-start window))
-                (point (window-point window)))
-            (push (list window
-                        (rust--format-get-loc buffer start)
-                        (rust--format-get-loc buffer point))
-                  window-loc)))))
-    (unwind-protect
-        (rust-format-start-process (current-buffer) (buffer-string))
-      (dolist (loc buffer-loc)
-        (let* ((buffer (pop loc))
-               (pos (rust--format-get-pos buffer (pop loc))))
-          (with-current-buffer buffer
-            (goto-char pos))))
-      (dolist (loc window-loc)
-        (let* ((window (pop loc))
-               (buffer (window-buffer window))
-               (start (rust--format-get-pos buffer (pop loc)))
-               (pos (rust--format-get-pos buffer (pop loc))))
-          (unless (eq buffer current)
-            (set-window-start window start))
-          (set-window-point window pos)))))
-
+  (rust-format-start-process (current-buffer) (buffer-string))
   (message "Formatted buffer with rustfmt."))
 
 ;;;###autoload
