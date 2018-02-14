@@ -27,9 +27,6 @@
   :type 'function)
 
 
-(defconst rust--format-word "\\b\\(else\\|enum\\|fn\\|for\\|if\\|let\\|loop\\|match\\|struct\\|union\\|unsafe\\|while\\)\\b")
-(defconst rust--format-line "\\([\n]\\)")
-
 (defun rust-buffer-project ()
   "Guess the project root."
   (file-truename (locate-dominating-file (or buffer-file-name default-directory) "Cargo.toml")))
