@@ -71,10 +71,12 @@
             (kill-buffer proc-buffer)
             (message "Formatted buffer with rustfmt."))
         (goto-char (point-min))
-        (when (search-forward "<stdin>")
-          (replace-match rust-format-file-name))
-        (funcall rust-format-display-method proc-buffer)
-        (message "Rustfmt error.")))))
+        (save-excursion
+          (when (search-forward "<stdin>")
+            (replace-match rust-format-file-name))
+          (funcall rust-format-display-method proc-buffer)
+          (message "Rustfmt error."))
+        (compilation-next-error 1)))))
 
 (defun rust-format-start-process (buffer string)
   "Start a new rustfmt process."
