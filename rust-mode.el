@@ -274,6 +274,10 @@ function or trait.  When nil, where will be aligned with fn or trait."
   "\\(?:r#*\\)?\""
   "Regular expression to match the start of a Rust raw string.")
 
+(defun rust-buffer-project ()
+  "Guess the project root."
+  (file-truename (locate-dominating-file (or buffer-file-name default-directory) "Cargo.toml")))
+
 (defun rust-re-grab (inner) (concat "\\(" inner "\\)"))
 (defun rust-re-item-def (itype)
   (concat (rust-re-word itype) "[[:space:]]+" (rust-re-grab rust-re-ident)))

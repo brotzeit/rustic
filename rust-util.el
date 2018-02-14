@@ -27,11 +27,6 @@
   :type 'function)
 
 
-(defun rust-buffer-project ()
-  "Guess the project root."
-  (file-truename (locate-dominating-file (or buffer-file-name default-directory) "Cargo.toml")))
-
-
 ;;;;;;;;;;;;
 ;; Process
 
