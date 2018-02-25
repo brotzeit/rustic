@@ -68,23 +68,6 @@
 (defvar rust-compilation-directory nil
   "Directory to restore to when doing `rust-recompile'.")
 
-;; TODO: verify that this regexp is still useful
-;; Issue #6887: Rather than inheriting the 'gnu compilation error
-;; regexp (which is broken on a few edge cases), add our own 'rust
-;; compilation error regexp and use it instead.
-(defvar rustc-compilation-regexps
-  (let ((file "\\([^\n]+\\)")
-        (start-line "\\([0-9]+\\)")
-        (start-col  "\\([0-9]+\\)")
-        (end-line   "\\([0-9]+\\)")
-        (end-col    "\\([0-9]+\\)")
-        (msg-type   "\\(?:[Ee]rror\\|\\([Ww]arning\\)\\|\\([Nn]ote\\|[Hh]elp\\)\\)"))
-    (let ((re (concat "^" file ":" start-line ":" start-col
-                      ": " end-line ":" end-col
-                      " " msg-type ":")))
-      (cons re '(1 (2 . 4) (3 . 5) (6 . 7)))))
-  "Specifications for matching errors in rustc invocations.")
-
 (defvar rust-compilation-regexps-arrow
   (let ((file "\\([^\n]+\\)")
         (start-line "\\([0-9]+\\)")
@@ -100,7 +83,7 @@
 (defvar rust-cargo-compilation-regexps
   '("^\\s-+thread '[^']+' panicked at \\('[^']+', \\([^:]+\\):\\([0-9]+\\)\\)" 2 3 nil nil 1)
   "Specifications for matching panics in cargo test invocations.
-2See `compilation-error-regexp-alist' for help on their format.")
+See `compilation-error-regexp-alist' for help on their format.")
 
 ;;;;;;;;;;;;;
 ;; Process
