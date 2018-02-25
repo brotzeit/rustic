@@ -56,6 +56,7 @@
   (setq-local compilation-message-face rust-message-face)
   (setq-local xterm-color-names-bright rust-ansi-faces)
   (setq-local xterm-color-names rust-ansi-faces)
+  (add-hook 'next-error-hook 'rustc-scroll-down-after-next-error)
 
   (setq-local compilation-error-regexp-alist-alist nil)
   (add-to-list 'compilation-error-regexp-alist-alist
@@ -128,6 +129,26 @@
                   :command command
                   :filter #'rust-compile-filter
                   :sentinel #'(lambda (_proc _output)))))
+
+(defun rustc-scroll-down-after-next-error ()
+  "In the new style error messages, the regular expression
+   matches on the file name (which appears after `-->`), but the
+   start of the error appears a few lines earlier. This hook runs
+   after `M-x next-error`; it simply scrolls down a few lines in
+   the compilation window until the top of the error is visible."
+  (save-selected-window
+    (when (eq major-mode 'rust-mode)
+      (select-window (get-buffer-window next-error-last-buffer 'visible))
+      (when (save-excursion
+              (beginning-of-line)
+              (looking-at " *-->"))
+        (let ((start-of-error
+               (save-excursion
+                 (beginning-of-line)
+                 (while (not (looking-at "^[a-z]+:\\|^[a-z]+\\[E[0-9]+\\]:"))
+                   (forward-line -1))
+                 (point))))
+          (set-window-start (selected-window) start-of-error))))))
 
 ;; compile.el functions
 
