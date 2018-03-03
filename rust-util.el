@@ -93,6 +93,11 @@
       (process-send-string proc string)
       (process-send-eof proc))))
 
+(defun rust-before-save-hook ()
+  (when rust-format-on-save
+    (let ((proc (rust-format-buffer)))
+      (while (eq (process-status proc) 'run)
+        (sit-for 1)))))
 
 ;;;;;;;;;;;;;;;;
 ;; Interactive

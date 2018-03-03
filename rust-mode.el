@@ -168,7 +168,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
   (setq-local parse-sexp-lookup-properties t)
   (setq-local electric-pair-inhibit-predicate 'rust-electric-pair-inhibit-predicate-wrap)
 
-  (add-hook 'before-save-hook 'rust--before-save-hook nil t)
+  (add-hook 'before-save-hook 'rust-before-save-hook nil t)
 
   (setq-local rust-buffer-project-dir nil)
 
@@ -1044,9 +1044,6 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
     (skip-syntax-forward "^\"|")
     (skip-syntax-forward "\"|")
     (point)))
-
-(defun rust--before-save-hook ()
-  (when rust-format-on-save (rust-format-buffer)))
 
 (defun rust-update-buffer-project ()
   (setq-local rust-buffer-project-dir (rust-buffer-project)))
