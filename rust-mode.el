@@ -18,8 +18,8 @@
                    (require 'compile)
                    (require 'url-vars))
 
-(require 'json)
 
+(require 'json)
 (require 'rust-compile)
 (require 'rust-util)
 (require 'rust-interaction)
