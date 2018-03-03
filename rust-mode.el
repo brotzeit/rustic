@@ -30,13 +30,6 @@
 (defvar rust-buffer-project-dir)
 (make-variable-buffer-local 'rust-buffer-project-dir)
 
-;; for GNU Emacs < 24.3
-(eval-when-compile
-  (unless (fboundp 'setq-local)
-    (defmacro setq-local (var val)
-      "Set variable VAR to value VAL in current buffer."
-      (list 'set (list 'make-local-variable (list 'quote var)) val))))
-
 (defgroup rust-mode nil
   "Support for Rust code."
   :link '(url-link "https://www.rust-lang.org/")
