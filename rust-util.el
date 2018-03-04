@@ -43,14 +43,16 @@
 
 (defun rust-format-filter (proc output)
   "Filter for rustfmt processes."
-  (let ((buf (process-buffer proc)))
+  (let ((buf (process-buffer proc))
+        (inhibit-read-only t))
     (with-current-buffer buf
       (goto-char (point-max))
       (insert (xterm-color-filter output)))))
 
 (defun rust-format-sentinel (proc output)
   "Sentinel for rustfmt processes."
-  (let ((proc-buffer (process-buffer proc)))
+  (let ((proc-buffer (process-buffer proc))
+        (inhibit-read-only t))
     (with-current-buffer proc-buffer
       (if (string-match-p "^finished" output)
           (let ((file-buffer (get-file-buffer rust-format-file-name)))
@@ -74,7 +76,8 @@
          (coding-system-for-read 'binary)
          (process-environment (nconc
 	                           (list (format "TERM=%s" "ansi"))
-                               process-environment)))
+                               process-environment))
+         (inhibit-read-only t))
     (with-current-buffer err-buf
       (erase-buffer)
       (rust-format-mode))

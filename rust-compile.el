@@ -52,7 +52,6 @@
 
 (define-compilation-mode rust-compilation-mode "rust-compilation"
   "Rust compilation mode."
-  (setq buffer-read-only nil)
   (setq-local compilation-message-face rust-message-face)
   (setq-local xterm-color-names-bright rust-ansi-faces)
   (setq-local xterm-color-names rust-ansi-faces)
@@ -105,7 +104,8 @@ See `compilation-error-regexp-alist' for help on their format.")
         (coding-system-for-read 'binary)
         (process-environment (nconc
 	                          (list (format "TERM=%s" "ansi"))
-                              process-environment)))
+                              process-environment))
+        (inhibit-read-only t))
     (with-current-buffer buf
       (erase-buffer)
       (funcall mode)
