@@ -1040,7 +1040,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
   (when rust-format-on-save
     (let ((proc (rust-format-buffer)))
       (while (eq (process-status proc) 'run)
-        (sit-for 1)))))
+        (sit-for 0.01)))))
 
 (defun rust-buffer-project ()
   "Guess the project root."

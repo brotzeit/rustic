@@ -211,7 +211,7 @@ be able to visit the source."
         (condition-case ()
             (progn
               (interrupt-process proc)
-              (sit-for 1)
+              (sit-for 0.5)
               (delete-process proc))
           (error nil))
       (error "Cannot have two `%s' processes at once"
