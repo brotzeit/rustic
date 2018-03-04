@@ -99,7 +99,8 @@ See `compilation-error-regexp-alist' for help on their format.")
   "Arguments that were given to `rust-compile'")
 
 (defun rust-compile-start-process (command buffer process mode directory)
-  (let ((buf (get-buffer-create buffer))
+  (let ((c (split-string command))
+        (buf (get-buffer-create buffer))
         (default-directory directory)
         (coding-system-for-read 'binary)
         (process-environment (nconc
@@ -111,7 +112,7 @@ See `compilation-error-regexp-alist' for help on their format.")
       (funcall rust-compile-display-method buf))
     (make-process :name process
                   :buffer buf
-                  :command command
+                  :command c
                   :filter #'rust-compile-filter
                   :sentinel #'(lambda (_proc _output)))))
 
@@ -134,9 +135,6 @@ See `compilation-error-regexp-alist' for help on their format.")
                    (forward-line -1))
                  (point))))
           (set-window-start (selected-window) start-of-error))))))
-
-(defun rust-compilation-run (command buffer-name proc-name mode directory)
-    (rust-compile-start-process (split-string command) buffer-name proc-name mode directory))
 
 ;; compile.el functions
 
@@ -235,7 +233,7 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
          (mode 'rust-compilation-mode)
          (dir (setq rust-compilation-directory (rust-buffer-project))))
     (rust-compilation-process-live proc-name)
-    (rust-compilation-run command buffer-name proc-name mode dir)))
+    (rust-compile-start-process command buffer-name proc-name mode dir)))
 
 ;;;###autoload
 (defun rust-recompile ()
@@ -249,7 +247,7 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
         (mode 'rust-compilation-mode)
         (dir (or rust-compilation-directory default-directory)))
     (rust-compilation-process-live proc-name)
-    (rust-compilation-run command buffer-name proc-name mode dir)))
+    (rust-compile-start-process command buffer-name proc-name mode dir)))
 
 (provide 'rust-compile)
 ;;; rust-compile.el ends here
