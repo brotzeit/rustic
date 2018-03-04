@@ -109,10 +109,11 @@
 (defun rust-cargo-fmt ()
   (interactive)
   (let ((buffer-name rust-format-buffer-name)
+        (proc-name rust-format-process-name)
         (mode 'rust-format-mode)
         (dir (rust-buffer-project)))
-    (rust-compilation-process-live (get-process buffer-name))
-    (rust-compilation-run "cargo fmt" buffer-name mode dir)))
+    (rust-compilation-process-live proc-name)
+    (rust-compilation-run "cargo fmt" buffer-name proc-name mode dir)))
 
 (defun rust-format-buffer ()
   "Format the current buffer using rustfmt."
@@ -124,6 +125,9 @@
 
 ;;;;;;;;;;;
 ;; Clippy
+
+(defvar rust-clippy-process-name "rust-clippy-process"
+  "Process name for clippy processes.")
 
 (defvar rust-clippy-buffer-name "*rust-clippy*"
   "Buffer name for clippy buffers.")
@@ -137,10 +141,11 @@
   (interactive)
   (let ((command (concat rust-cargo-bin " clippy"))
         (buffer-name rust-clippy-buffer-name)
+        (proc-name rust-clippy-process-name)
         (mode 'rust-clippy-mode)
         (root (rust-buffer-project)))
-    (rust-compilation-process-live (get-process buffer-name))
-    (rust-compilation-run command buffer-name mode root)))
+    (rust-compilation-process-live proc-name)
+    (rust-compilation-run command buffer-name proc-name mode root)))
 
 
 ;;;;;;;;;;;;;;;;
