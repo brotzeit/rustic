@@ -28,16 +28,13 @@
 
 
 ;;;;;;;;;;;;
-;; Process
+;; Rustfmt 
 
 (defvar rust-format-process-name "rust-rustfmt-process"
   "Process name for rustfmt processes.")
 
 (defvar rust-format-buffer-name "*rustfmt*"
   "Buffer name for rustfmt process buffers.")
-
-(defvar rust-clippy-buffer-name "*rust-clippy*"
-  "Buffer name for clippy buffers.")
 
 (defvar rust-format-file-name nil
   "Holds last file formatted by `rust-format-start-process'.")
@@ -80,7 +77,7 @@
                                process-environment)))
     (with-current-buffer err-buf
       (erase-buffer)
-      (rust-compilation-mode))
+      (rust-format-mode))
     (setq rust-format-file-name (buffer-file-name buffer))
     (setq rust-save-pos (point))
     (let ((proc (make-process :name rust-format-process-name
@@ -93,11 +90,58 @@
       (process-send-string proc string)
       (process-send-eof proc))))
 
-(defun rust-before-save-hook ()
-  (when rust-format-on-save
-    (let ((proc (rust-format-buffer)))
-      (while (eq (process-status proc) 'run)
-        (sit-for 1)))))
+(define-derived-mode rust-format-mode rust-compilation-mode "rustfmt"
+  :group 'rust-mode)
+
+;;;###autoload
+(defun rust-format--enable-format-on-save ()
+  "Enable formatting using rustfmt when saving buffer."
+  (interactive)
+  (setq-local rust-format-on-save t))
+
+;;;###autoload
+(defun rust-format--disable-format-on-save ()
+  "Disable formatting using rustfmt when saving buffer."
+  (interactive)
+  (setq-local rust-format-on-save nil))
+
+;;;###autoload
+(defun rust-cargo-fmt ()
+  (interactive)
+  (let ((buffer-name rust-format-buffer-name)
+        (mode 'rust-format-mode)
+        (dir (rust-buffer-project)))
+    (rust-compilation-process-live (get-process buffer-name))
+    (rust-compilation-run "cargo fmt" buffer-name mode dir)))
+
+(defun rust-format-buffer ()
+  "Format the current buffer using rustfmt."
+  (interactive)
+  (unless (executable-find rust-rustfmt-bin)
+    (error "Could not locate executable \"%s\"" rust-rustfmt-bin))
+  (rust-format-start-process (current-buffer) (buffer-string)))
+
+
+;;;;;;;;;;;
+;; Clippy
+
+(defvar rust-clippy-buffer-name "*rust-clippy*"
+  "Buffer name for clippy buffers.")
+
+(define-derived-mode rust-clippy-mode rust-compilation-mode "rust clippy"
+  :group 'rust-mode)
+
+;;;###autoload
+(defun rust-run-clippy ()
+  "Run `cargo clippy'."
+  (interactive)
+  (let ((command (concat rust-cargo-bin " clippy"))
+        (buffer-name rust-clippy-buffer-name)
+        (mode 'rust-clippy-mode)
+        (root (rust-buffer-project)))
+    (rust-compilation-process-live (get-process buffer-name))
+    (rust-compilation-run command buffer-name mode root)))
+
 
 ;;;;;;;;;;;;;;;;
 ;; Interactive
@@ -134,32 +178,18 @@
   (interactive)
   (rust-playpen-region (point-min) (point-max)))
 
-(defun rust-format-buffer ()
-  "Format the current buffer using rustfmt."
+;;;###autoload
+(defun rust-cargo-build ()
   (interactive)
-  (unless (executable-find rust-rustfmt-bin)
-    (error "Could not locate executable \"%s\"" rust-rustfmt-bin))
-  (rust-format-start-process (current-buffer) (buffer-string)))
+  (call-interactively 'rust-compile "cargo build"))
+
+(define-derived-mode rust-test-mode rust-compilation-mode "rust test"
+  :group 'rust-mode)
 
 ;;;###autoload
-(defun rust-format--enable-format-on-save ()
-  "Enable formatting using rustfmt when saving buffer."
+(defun rust-cargo-test ()
   (interactive)
-  (setq-local rust-format-on-save t))
-
-;;;###autoload
-(defun rust-format--disable-format-on-save ()
-  "Disable formatting using rustfmt when saving buffer."
-  (interactive)
-  (setq-local rust-format-on-save nil))
-
-;;;###autoload
-(defun rust-run-clippy ()
-  "Run `cargo clippy'."
-  (interactive)
-  (let ((command (list rust-cargo-bin "clippy"))
-        (default-directory (rust-buffer-project)))
-    (rust-compile-start-process command rust-clippy-buffer-name)))
+  (call-interactively 'rust-compile "cargo test"))
 
 (provide 'rust-util)
 ;;; rust-util.el ends here

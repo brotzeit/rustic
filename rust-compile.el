@@ -85,8 +85,9 @@
   "Specifications for matching panics in cargo test invocations.
 See `compilation-error-regexp-alist' for help on their format.")
 
-;;;;;;;;;;;;;
-;; Process
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;; Compilation Process
 
 (defvar rust-compile-process-name "rust-comilation-process"
   "Process name for rust compilation processes.")
@@ -97,15 +98,16 @@ See `compilation-error-regexp-alist' for help on their format.")
 (defvar rust-compilation-arguments nil
   "Arguments that were given to `rust-compile'")
 
-(defun rust-compile-start-process (command buffer)
+(defun rust-compile-start-process (command buffer mode directory)
   (let ((buf (get-buffer-create buffer))
+        (default-directory directory)
         (coding-system-for-read 'binary)
         (process-environment (nconc
 	                          (list (format "TERM=%s" "ansi"))
                               process-environment)))
     (with-current-buffer buf
       (erase-buffer)
-      (rust-compilation-mode)
+      (funcall mode)
       (funcall rust-compile-display-method buf))
     (make-process :name rust-compile-process-name
                   :buffer buf
@@ -133,6 +135,9 @@ See `compilation-error-regexp-alist' for help on their format.")
                  (point))))
           (set-window-start (selected-window) start-of-error))))))
 
+(defun rust-compilation-run (command buffer-name mode directory)
+    (rust-compile-start-process (split-string command) buffer-name mode directory))
+
 ;; compile.el functions
 
 (defun compile-goto-error (&optional event)
@@ -149,6 +154,7 @@ be able to visit the source."
                       string)
         (let* ((s (string-reverse (split-string string ":")))
                (file (concat rust-compilation-directory (string-trim (nth 2 s))))
+               ;; TODO: look at default-directory of process buffer instead of rust-compilation-directory
                (line (nth 1 s))
                (column (nth 0 s)))
           (when  (file-exists-p file)
@@ -198,6 +204,21 @@ be able to visit the source."
 ;;;;;;;;;;;;;;;;
 ;; Interactive
 
+(defun rust-compilation-process-live (proc)
+  (when (process-live-p proc)
+    (if (yes-or-no-p
+         (format "A rust-compile process is running; kill it? "))
+        (condition-case ()
+            (progn
+              (interrupt-process proc)
+              (sit-for 1)
+              (delete-process proc))
+          (error nil))
+      (error "Cannot have two `%s' processes at once"
+             (process-name proc))))
+  (save-some-buffers (not compilation-ask-about-save)
+                     compilation-save-buffers-predicate))
+
 ;;;###autoload
 (defun rust-compile (&optional arg)
   "Compile rust project. If called without arguments use `rust-compile-command'.
@@ -208,35 +229,24 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
                      (setq rust-compilation-arguments
                            (read-from-minibuffer "Compile command: "))
                    rust-compile-command))
-        (proc (get-process rust-compile-process-name))
-        (default-directory (rust-buffer-project)))
-    (when (process-live-p proc)
-      (if (yes-or-no-p
-           (format "A rust-compile process is running; kill it? "))
-          (condition-case ()
-              (progn
-                (interrupt-process proc)
-                (sit-for 1)
-                (delete-process proc))
-            (error nil))
-        (error "Cannot have two processes in `%s' at once"
-               (buffer-name))))
-    (save-some-buffers (not compilation-ask-about-save)
-                       compilation-save-buffers-predicate)
-    (setq-default rust-compilation-directory default-directory)
-    (rust-compile-start-process (split-string command) rust-compile-buffer-name)))
+        (buffer-name rust-compile-buffer-name)
+        (mode 'rust-compilation-mode)
+        (dir (setq rust-compilation-directory (rust-buffer-project))))
+    (rust-compilation-process-live (get-process buffer-name))
+    (rust-compilation-run command buffer-name mode dir)))
 
 ;;;###autoload
 (defun rust-recompile ()
   "Re-compile the program using the last `rust-compile' arguments."
   (interactive)
-  (save-some-buffers (not compilation-ask-about-save)
-                     compilation-save-buffers-predicate)
-  (let ((default-directory (or rust-compilation-directory default-directory))
-        (command (if (not rust-compilation-arguments)
+  (let ((command (if (not rust-compilation-arguments)
                      rust-compile-command
-                   rust-compilation-arguments)))
-    (rust-compile-start-process command rust-compile-buffer-name)))
+                   rust-compilation-arguments))
+        (buffer-name rust-compile-buffer-name)
+        (mode 'rust-compilation-mode)
+        (dir (or rust-compilation-directory default-directory)))
+    (rust-compilation-process-live (get-process buffer-name))
+    (rust-compilation-run command buffer-name mode dir)))
 
 (provide 'rust-compile)
 ;;; rust-compile.el ends here

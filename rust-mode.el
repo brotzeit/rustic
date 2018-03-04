@@ -172,9 +172,11 @@ function or trait.  When nil, where will be aligned with fn or trait."
 (defvar rust-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-f") 'rust-format-buffer)
-    (define-key map (kbd "C-c C-+") 'rust-compile)
-    (define-key map (kbd "C-c C-#") 'rust-recompile)
-    (define-key map (kbd "C-c C-p") 'rust-run-clippy)
+    (define-key map (kbd "C-c C-b") 'rust-compile)
+    (define-key map (kbd "C-c C-n") 'rust-recompile)
+    (define-key map (kbd "C-c C-l") 'rust-run-clippy)
+
+    (define-key map (kbd "C-c C-p") 'rust-cargo-fmt)
     map)
   "Keymap for Rust major mode.")
 
@@ -266,10 +268,6 @@ function or trait.  When nil, where will be aligned with fn or trait."
 (defvar rust-start-of-string-re
   "\\(?:r#*\\)?\""
   "Regular expression to match the start of a Rust raw string.")
-
-(defun rust-buffer-project ()
-  "Guess the project root."
-  (file-truename (locate-dominating-file (or buffer-file-name default-directory) "Cargo.toml")))
 
 (defun rust-re-grab (inner) (concat "\\(" inner "\\)"))
 (defun rust-re-item-def (itype)
@@ -1038,9 +1036,18 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
     (skip-syntax-forward "\"|")
     (point)))
 
+(defun rust-before-save-hook ()
+  (when rust-format-on-save
+    (let ((proc (rust-format-buffer)))
+      (while (eq (process-status proc) 'run)
+        (sit-for 1)))))
+
+(defun rust-buffer-project ()
+  "Guess the project root."
+  (file-truename (locate-dominating-file (or buffer-file-name default-directory) "Cargo.toml")))
+
 (defun rust-update-buffer-project ()
   (setq-local rust-buffer-project-dir (rust-buffer-project)))
-
 
 ;;;;;;;;;;;;;;;;
 ;; Interactive
