@@ -62,7 +62,11 @@
                (cons 'rust-arrow rust-compilation-regexps-arrow))
 
   (setq-local compilation-error-regexp-alist nil)
-  (add-to-list 'compilation-error-regexp-alist 'rust-arrow))
+  (add-to-list 'compilation-error-regexp-alist 'rust-arrow)
+
+  (define-key rust-compilation-mode-map [return] 'rust-compile-goto-error)
+  (define-key rust-compilation-mode-map (kbd "C-c C-c") 'rust-compile-goto-error)
+  (define-key rust-compilation-mode-map (kbd "<mouse-2>") 'rust-compile-goto-error))
 
 (defvar rust-compilation-directory nil
   "Directory to restore to when doing `rust-recompile'.")
@@ -136,9 +140,7 @@ See `compilation-error-regexp-alist' for help on their format.")
                  (point))))
           (set-window-start (selected-window) start-of-error))))))
 
-;; compile.el functions
-
-(defun compile-goto-error (&optional event)
+(defun rust-compile-goto-error (&optional event)
   "We don't want paths preceeded by ':::' to be treated as an error, but this function has to
 be able to visit the source."
   (interactive (list last-input-event))
@@ -151,12 +153,14 @@ be able to visit the source."
     (if (string-match regexp
                       string)
         (let* ((s (string-reverse (split-string string ":")))
-               (file (concat rust-compilation-directory (string-trim (nth 2 s))))
-               ;; TODO: look at default-directory of process buffer instead of rust-compilation-directory
+               (file (file-name-directory
+                      (directory-file-name
+                       (file-name-directory (rust-buffer-project)))))
+               (path (concat file (string-trim (nth 2 s))))
                (line (nth 1 s))
                (column (nth 0 s)))
-          (when  (file-exists-p file)
-            (find-file-other-window file)
+          (when  (file-exists-p path)
+            (find-file-other-window path)
             (goto-line (string-to-number line))
             (move-to-column (- (string-to-number column) 1))))
       (if (get-text-property (point) 'compilation-directory)

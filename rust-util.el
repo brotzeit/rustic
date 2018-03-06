@@ -151,6 +151,18 @@
     (rust-compile-start-process command buffer-name proc-name mode root)))
 
 
+;;;;;;;;;
+;; Test
+
+(define-derived-mode rust-test-mode rust-compilation-mode "rust test"
+  :group 'rust-mode)
+
+;;;###autoload
+(defun rust-cargo-test ()
+  (interactive)
+  (call-interactively 'rust-compile "cargo test"))
+
+
 ;;;;;;;;;;;;;;;;
 ;; Interactive
 
@@ -190,14 +202,6 @@
 (defun rust-cargo-build ()
   (interactive)
   (call-interactively 'rust-compile "cargo build"))
-
-(define-derived-mode rust-test-mode rust-compilation-mode "rust test"
-  :group 'rust-mode)
-
-;;;###autoload
-(defun rust-cargo-test ()
-  (interactive)
-  (call-interactively 'rust-compile "cargo test"))
 
 (provide 'rust-util)
 ;;; rust-util.el ends here
