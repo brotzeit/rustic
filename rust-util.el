@@ -63,8 +63,9 @@
             (message "Formatted buffer with rustfmt."))
         (goto-char (point-min))
         (save-excursion
-          (when (search-forward "<stdin>")
-            (replace-match rust-format-file-name))
+          (save-match-data
+            (when (search-forward "<stdin>" nil t)
+              (replace-match rust-format-file-name)))
           (funcall rust-format-display-method proc-buffer)
           (message "Rustfmt error."))
         (compilation-next-error 1)))))
