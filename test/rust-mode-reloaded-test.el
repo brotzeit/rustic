@@ -3068,7 +3068,7 @@ extern \"rust-intrinsic\" fn five() {
 ;;     (lexical-let* ((test-dir (expand-file-name "test-project" default-directory))
 ;;                    (manifest-file (expand-file-name "Cargo.toml" test-dir)))
 ;;       (let ((default-directory test-dir))
-;;         (should (equal (expand-file-name (rust-buffer-project)) manifest-file))))))
+;;         (should (equal (expand-file-name (rust-buffer-workspace)) manifest-file))))))
 
 ;; If electric-pair-mode is available, load it and run the tests that use it.  If not,
 ;; no error--the tests will be skipped.

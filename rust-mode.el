@@ -27,8 +27,8 @@
 (defvar electric-pair-inhibit-predicate)
 (defvar electric-indent-chars)
 
-(defvar rust-buffer-project-dir)
-(make-variable-buffer-local 'rust-buffer-project-dir)
+(defvar rust-buffer-workspace-dir)
+(make-variable-buffer-local 'rust-buffer-workspace-dir)
 
 (defgroup rust-mode nil
   "Support for Rust code."
@@ -163,10 +163,10 @@ function or trait.  When nil, where will be aligned with fn or trait."
 
   (add-hook 'before-save-hook 'rust-before-save-hook nil t)
 
-  (setq-local rust-buffer-project-dir nil)
+  (setq-local rust-buffer-workspace-dir nil)
 
   (when rust-always-locate-project-on-open
-    (rust-update-buffer-project)))
+    (rust-update-buffer-workspace)))
 
 ;; TODO: use better default keybindings
 (defvar rust-mode-map
@@ -1042,12 +1042,15 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
       (while (eq (process-status proc) 'run)
         (sit-for 0.01)))))
 
-(defun rust-buffer-project ()
-  "Guess the project root."
-  (file-truename (locate-dominating-file (or buffer-file-name default-directory) "Cargo.toml")))
+(defun rust-buffer-workspace ()
+  "Guess the workspace root."
+  (let ((dir (locate-dominating-file (or buffer-file-name default-directory) "Cargo.toml")))
+    (if dir
+        (file-truename dir)
+      default-directory)))
 
-(defun rust-update-buffer-project ()
-  (setq-local rust-buffer-project-dir (rust-buffer-project)))
+(defun rust-update-buffer-workspace ()
+  (setq-local rust-buffer-workspace-dir (rust-buffer-workspace)))
 
 ;;;;;;;;;;;;;;;;
 ;; Interactive

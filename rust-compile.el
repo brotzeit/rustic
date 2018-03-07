@@ -155,7 +155,7 @@ be able to visit the source."
         (let* ((s (string-reverse (split-string string ":")))
                (file (file-name-directory
                       (directory-file-name
-                       (file-name-directory (rust-buffer-project)))))
+                       (file-name-directory (rust-buffer-workspace)))))
                (path (concat file (string-trim (nth 2 s))))
                (line (nth 1 s))
                (column (nth 0 s)))
@@ -235,7 +235,7 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
          (buffer-name rust-compile-buffer-name)
          (proc-name rust-compile-process-name)
          (mode 'rust-compilation-mode)
-         (dir (setq rust-compilation-directory (rust-buffer-project))))
+         (dir (setq rust-compilation-directory (rust-buffer-workspace))))
     (rust-compilation-process-live proc-name)
     (rust-compile-start-process command buffer-name proc-name mode dir)))
 
