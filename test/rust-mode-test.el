@@ -1,8 +1,5 @@
 ;;; rust-mode-tests.el --- ERT tests for rust-mode.el
 
-(add-to-list 'load-path "~/tmp/git/rust-mode-reloaded/")
-(load "rust-mode")
-
 (require 'rust-mode)
 (require 'ert)
 (require 'cl)
@@ -3062,14 +3059,6 @@ extern \"rust-intrinsic\" fn five() {
       "four"
       "five"))))
 
-;; TODO: fix test
-;; (when (executable-find rust-cargo-bin)
-;;   (ert-deftest rust-test-project-located ()
-;;     (lexical-let* ((test-dir (expand-file-name "test-project" default-directory))
-;;                    (manifest-file (expand-file-name "Cargo.toml" test-dir)))
-;;       (let ((default-directory test-dir))
-;;         (should (equal (expand-file-name (rust-buffer-workspace)) manifest-file))))))
-
 ;; If electric-pair-mode is available, load it and run the tests that use it.  If not,
 ;; no error--the tests will be skipped.
 (require 'elec-pair nil t)
@@ -3112,3 +3101,5 @@ extern \"rust-intrinsic\" fn five() {
   (ert-deftest rust-test-electric-pair-lt-expression-capitalized-keyword ()
     (test-electric-pair-insert "fn foo() -> Box" 16 ?< ?>))
   )
+
+;;; rust-mode-tests.el ends here
