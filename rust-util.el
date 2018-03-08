@@ -154,13 +154,26 @@
 ;;;;;;;;;
 ;; Test
 
+(defvar rust-test-process-name "rust-test-process"
+  "Process name for test processes.")
+
+(defvar rust-test-buffer-name "*rust-test*"
+  "Buffer name for test buffers.")
+
 (define-derived-mode rust-test-mode rust-compilation-mode "rust test"
   :group 'rust-mode)
 
 ;;;###autoload
 (defun rust-cargo-test ()
+  "Run `cargo test'."
   (interactive)
-  (call-interactively 'rust-compile "cargo test"))
+  (let ((command (list rust-cargo-bin "test"))
+        (buffer-name rust-test-buffer-name)
+        (proc-name rust-test-process-name)
+        (mode 'rust-test-mode)
+        (root (rust-buffer-workspace)))
+    (rust-compilation-process-live proc-name)
+    (rust-compile-start-process command buffer-name proc-name mode root)))
 
 
 ;;;;;;;;;;;;;;;;
