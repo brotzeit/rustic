@@ -1,15 +1,19 @@
-## Compilation
+## Shortcuts for rust-mode:
 
+* `C-c C-c C-u` rust-compile
+* `C-c C-c C-i` rust-recompile
+* `C-c C-c C-b` rust-cargo-build
+* `C-c C-c C-f` rust-cargo-fmt
+* `C-c C-c C-t` rust-cargo-test
+* `C-c C-c C-l` rust-cargo-clippy
+* `C-c C-c C-o` rust-format-buffer
 
-![Alt text](/images/rust-compile.png?raw=true "Optional Title")
+## Testing
 
-    
-## Formatting
+To run the tests, you will
+need [Cask](https://github.com/cask/cask).
 
-![Alt text](/images/rust-format.png?raw=true "Optional Title")
-   
-
-Shortcuts for rust-mode:
-
-* `C-c C-f` rust-format-buffer
-* `C-c C-+` rust-compile
+``` bash
+$ cask
+$ cask exec ert-runner
+```
