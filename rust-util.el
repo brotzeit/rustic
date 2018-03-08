@@ -111,12 +111,13 @@
 ;;;###autoload
 (defun rust-cargo-fmt ()
   (interactive)
-  (let ((buffer-name rust-format-buffer-name)
+  (let ((command (list rust-cargo-bin "fmt"))
+        (buffer-name rust-format-buffer-name)
         (proc-name rust-format-process-name)
         (mode 'rust-format-mode)
         (dir (rust-buffer-workspace)))
     (rust-compilation-process-live)
-    (rust-compile-start-process "cargo fmt" buffer-name proc-name mode dir)))
+    (rust-compile-start-process command buffer-name proc-name mode dir)))
 
 (defun rust-format-buffer ()
   "Format the current buffer using rustfmt."
