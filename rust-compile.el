@@ -13,7 +13,6 @@
 
 (defgroup rust-compilation nil
   "Rust Compilation."
-  :group 'tools
   :group 'processes)
 
 (defcustom rust-compile-command (purecopy "cargo build")
@@ -260,4 +259,3 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
 
 (provide 'rust-compile)
 ;;; rust-compile.el ends here
-
