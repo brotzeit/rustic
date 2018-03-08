@@ -102,8 +102,7 @@ See `compilation-error-regexp-alist' for help on their format.")
   "Arguments that were given to `rust-compile'")
 
 (defun rust-compile-start-process (command buffer process mode directory)
-  (let ((c (split-string command))
-        (buf (get-buffer-create buffer))
+  (let ((buf (get-buffer-create buffer))
         (default-directory directory)
         (coding-system-for-read 'binary)
         (process-environment (nconc
@@ -116,7 +115,7 @@ See `compilation-error-regexp-alist' for help on their format.")
       (funcall rust-compile-display-method buf))
     (make-process :name process
                   :buffer buf
-                  :command c
+                  :command command
                   :filter #'rust-compile-filter
                   :sentinel #'(lambda (_proc _output)))))
 
@@ -237,7 +236,7 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
          (mode 'rust-compilation-mode)
          (dir (setq rust-compilation-directory (rust-buffer-workspace))))
     (rust-compilation-process-live proc-name)
-    (rust-compile-start-process command buffer-name proc-name mode dir)))
+    (rust-compile-start-process (split-string command) buffer-name proc-name mode dir)))
 
 ;;;###autoload
 (defun rust-recompile ()
@@ -251,7 +250,7 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
         (mode 'rust-compilation-mode)
         (dir (or rust-compilation-directory default-directory)))
     (rust-compilation-process-live proc-name)
-    (rust-compile-start-process command buffer-name proc-name mode dir)))
+    (rust-compile-start-process (split-string command) buffer-name proc-name mode dir)))
 
 (provide 'rust-compile)
 ;;; rust-compile.el ends here

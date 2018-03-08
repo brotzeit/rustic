@@ -67,8 +67,7 @@
             (when (search-forward "<stdin>" nil t)
               (replace-match rust-format-file-name)))
           (funcall rust-format-display-method proc-buffer)
-          (message "Rustfmt error."))
-        (compilation-next-error 1)))))
+          (message "Rustfmt error."))))))
 
 (defun rust-format-start-process (buffer string)
   "Start a new rustfmt process."
@@ -143,7 +142,7 @@
 (defun rust-run-clippy ()
   "Run `cargo clippy'."
   (interactive)
-  (let ((command (concat rust-cargo-bin " clippy"))
+  (let ((command (list rust-cargo-bin "clippy"))
         (buffer-name rust-clippy-buffer-name)
         (proc-name rust-clippy-process-name)
         (mode 'rust-clippy-mode)
