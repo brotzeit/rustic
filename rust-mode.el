@@ -168,15 +168,15 @@ function or trait.  When nil, where will be aligned with fn or trait."
   (when rust-always-locate-project-on-open
     (rust-update-buffer-workspace)))
 
-;; TODO: use better default keybindings
 (defvar rust-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-f") 'rust-format-buffer)
-    (define-key map (kbd "C-c C-b") 'rust-compile)
-    (define-key map (kbd "C-c C-n") 'rust-recompile)
-    (define-key map (kbd "C-c C-l") 'rust-run-clippy)
-
-    (define-key map (kbd "C-c C-p") 'rust-cargo-fmt)
+    (define-key map (kbd "C-c C-c C-u") 'rust-compile)
+    (define-key map (kbd "C-c C-c C-i") 'rust-recompile)
+    (define-key map (kbd "C-c C-c C-b") 'rust-cargo-build)
+    (define-key map (kbd "C-c C-c C-f") 'rust-cargo-fmt)
+    (define-key map (kbd "C-c C-c C-t") 'rust-cargo-test)
+    (define-key map (kbd "C-c C-c C-l") 'rust-cargo-clippy)
+    (define-key map (kbd "C-c C-c C-o") 'rust-format-buffer)       
     map)
   "Keymap for Rust major mode.")
 
