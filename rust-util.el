@@ -115,7 +115,7 @@
         (proc-name rust-format-process-name)
         (mode 'rust-format-mode)
         (dir (rust-buffer-workspace)))
-    (rust-compilation-process-live proc-name)
+    (rust-compilation-process-live)
     (rust-compile-start-process "cargo fmt" buffer-name proc-name mode dir)))
 
 (defun rust-format-buffer ()
@@ -147,7 +147,7 @@
         (proc-name rust-clippy-process-name)
         (mode 'rust-clippy-mode)
         (root (rust-buffer-workspace)))
-    (rust-compilation-process-live proc-name)
+    (rust-compilation-process-live)
     (rust-compile-start-process command buffer-name proc-name mode root)))
 
 
@@ -172,7 +172,7 @@
         (proc-name rust-test-process-name)
         (mode 'rust-test-mode)
         (root (rust-buffer-workspace)))
-    (rust-compilation-process-live proc-name)
+    (rust-compilation-process-live)
     (rust-compile-start-process command buffer-name proc-name mode root)))
 
 

@@ -205,19 +205,25 @@ be able to visit the source."
 ;;;;;;;;;;;;;;;;
 ;; Interactive
 
-(defun rust-compilation-process-live (proc-name)
-  (let ((proc (get-process proc-name)))
-    (when (process-live-p proc)
-      (if (yes-or-no-p
-           (format "A rust-compile process is running; kill it? "))
-          (condition-case ()
-              (progn
-                (interrupt-process proc)
-                (sit-for 0.5)
-                (delete-process proc))
-            (error nil))
-        (error "Cannot have two `%s' processes at once"
-               proc-name)))) 
+(defun rust-compilation-process-live ()
+  "Check if there's already a running rust process. 
+
+Don't allow two rust processes at once."
+  (dolist (p-name (list rust-compile-process-name
+                        rust-format-process-name
+                        rust-clippy-process-name
+                        rust-test-process-name))
+    (let ((proc (get-process p-name)))
+      (when (process-live-p proc)
+        (if (yes-or-no-p
+             (format "`%s' is running; kill it? " p-name))
+            (condition-case ()
+                (progn
+                  (interrupt-process proc)
+                  (sit-for 0.5)
+                  (delete-process proc))
+              (error nil))
+          (error "Cannot have two rust processes at once.")))))
   (save-some-buffers (not compilation-ask-about-save)
                      compilation-save-buffers-predicate))
 
@@ -235,7 +241,7 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
          (proc-name rust-compile-process-name)
          (mode 'rust-compilation-mode)
          (dir (setq rust-compilation-directory (rust-buffer-workspace))))
-    (rust-compilation-process-live proc-name)
+    (rust-compilation-process-live)
     (rust-compile-start-process (split-string command) buffer-name proc-name mode dir)))
 
 ;;;###autoload
@@ -249,7 +255,7 @@ Otherwise use provided arguments and store them in `rust-compilation-arguments'.
         (proc-name rust-compile-process-name)
         (mode 'rust-compilation-mode)
         (dir (or rust-compilation-directory default-directory)))
-    (rust-compilation-process-live proc-name)
+    (rust-compilation-process-live)
     (rust-compile-start-process (split-string command) buffer-name proc-name mode dir)))
 
 (provide 'rust-compile)
