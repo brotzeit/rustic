@@ -183,7 +183,6 @@ function or trait.  When nil, where will be aligned with fn or trait."
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
 
-;; Syntax definitions and helpers
 (defvar rust-mode-syntax-table
   (let ((table (make-syntax-table)))
 
@@ -206,22 +205,22 @@ function or trait.  When nil, where will be aligned with fn or trait."
     (modify-syntax-entry ?\n "> b"    table)
     (modify-syntax-entry ?\^m "> b"   table)
 
-    table))
+    table)
+  "Syntax definitions and helpers")
 
-;;; Start of a Rust item
 (defvar rust-top-item-beg-re
   (concat "\\s-*\\(?:priv\\|pub\\)?\\s-*"
           (regexp-opt
            '("enum" "struct" "union" "type" "mod" "use" "fn" "static" "impl"
              "extern" "trait"))
-	  "\\_>"))
+	      "\\_>")
+  "Start of a Rust item")
 
 (defconst rust-re-type-or-constructor
   (rx symbol-start
       (group upper (0+ (any word nonascii digit "_")))
       symbol-end))
 
-;; Font-locking definitions and helpers
 (defconst rust-mode-keywords
   '("as"
     "box" "break"
@@ -239,7 +238,8 @@ function or trait.  When nil, where will be aligned with fn or trait."
     "use"
     "virtual"
     "where" "while"
-    "yield"))
+    "yield")
+  "Font-locking definitions and helpers")
 
 (defconst rust-special-types
   '("u8" "i8"

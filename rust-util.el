@@ -139,7 +139,7 @@
   :group 'rust-mode)
 
 ;;;###autoload
-(defun rust-run-clippy ()
+(defun rust-cargo-clippy ()
   "Run `cargo clippy'."
   (interactive)
   (let ((command (list rust-cargo-bin "clippy"))
