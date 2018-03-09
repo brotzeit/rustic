@@ -115,9 +115,16 @@
         (buffer-name rust-format-buffer-name)
         (proc-name rust-format-process-name)
         (mode 'rust-format-mode)
-        (dir (rust-buffer-workspace)))
+        (dir (rust-buffer-workspace))
+        (sentinel #'(lambda (proc output)
+                      (let ((proc-buffer (process-buffer proc))
+                            (inhibit-read-only t))
+                        (with-current-buffer proc-buffer
+                          (when (string-match-p "^finished" output)
+                            (kill-buffer proc-buffer)
+                            (message "Workspace formatted with rustfmt.")))))))
     (rust-compilation-process-live)
-    (rust-compile-start-process command buffer-name proc-name mode dir)))
+    (rust-compile-start-process command buffer-name proc-name mode dir sentinel)))
 
 (defun rust-format-buffer ()
   "Format the current buffer using rustfmt."

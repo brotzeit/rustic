@@ -100,7 +100,7 @@ See `compilation-error-regexp-alist' for help on their format.")
 (defvar rust-compilation-arguments nil
   "Arguments that were given to `rust-compile'")
 
-(defun rust-compile-start-process (command buffer process mode directory)
+(defun rust-compile-start-process (command buffer process mode directory &optional sentinel)
   (let ((buf (get-buffer-create buffer))
         (default-directory directory)
         (coding-system-for-read 'binary)
@@ -116,7 +116,7 @@ See `compilation-error-regexp-alist' for help on their format.")
                   :buffer buf
                   :command command
                   :filter #'rust-compile-filter
-                  :sentinel #'(lambda (_proc _output)))))
+                  :sentinel (if sentinel sentinel #'(lambda (proc output))))))
 
 (defun rustc-scroll-down-after-next-error ()
   "In the new style error messages, the regular expression
