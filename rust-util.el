@@ -26,6 +26,16 @@
   "Default function used for displaying rustfmt buffer."
   :type 'function)
 
+(defcustom rust-playpen-url-format "https://play.rust-lang.org/?code=%s"
+  "Format string to use when submitting code to the playpen"
+  :type 'string
+  :group 'rust-mode)
+
+(defcustom rust-shortener-url-format "https://is.gd/create.php?format=simple&url=%s"
+  "Format string to use for creating the shortened link of a playpen submission"
+  :type 'string
+  :group 'rust-mode)
+
 
 ;;;;;;;;;;;;
 ;; Rustfmt 
