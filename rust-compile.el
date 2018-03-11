@@ -59,9 +59,12 @@
   (setq-local compilation-error-regexp-alist-alist nil)
   (add-to-list 'compilation-error-regexp-alist-alist
                (cons 'rust-arrow rust-compilation-regexps-arrow))
+    (add-to-list 'compilation-error-regexp-alist-alist
+               (cons 'rust-colon rust-compilation-regexps-colon))
 
   (setq-local compilation-error-regexp-alist nil)
   (add-to-list 'compilation-error-regexp-alist 'rust-arrow)
+  (add-to-list 'compilation-error-regexp-alist 'rust-colon)
 
   (define-key rust-compilation-mode-map [return] 'rust-compile-goto-error)
   (define-key rust-compilation-mode-map (kbd "C-c C-c") 'rust-compile-goto-error)
@@ -78,6 +81,15 @@
                       )))
       (cons re '(1 2 3))))
   "Create hyperlink in compilation buffers for file paths containing '-->'.")
+
+(defvar rust-compilation-regexps-colon
+  (let ((file "\\([^\n]+\\)")
+        (start-line "\\([0-9]+\\)")
+        (start-col  "\\([0-9]+\\)"))
+    (let ((re (concat "^ *::: " file ":" start-line ":" start-col ; --> 1:2:3
+                      )))
+      (cons re '(1 2 3 0)))) ;; 0 for info type
+  "Create hyperlink in compilation buffers for file paths containing ':::'.")
 
 ;; Match test run failures and panics during compilation as
 ;; compilation warnings
