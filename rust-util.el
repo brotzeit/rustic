@@ -96,6 +96,9 @@
 (define-derived-mode rust-format-mode rust-compilation-mode "rustfmt"
   :group 'rust-mode)
 
+(define-derived-mode rust-cargo-fmt-mode rust-compilation-mode "cargo-fmt"
+  :group 'rust-mode)
+
 ;;;###autoload
 (defun rust-format--enable-format-on-save ()
   "Enable formatting using rustfmt when saving buffer."
@@ -114,7 +117,7 @@
   (let ((command (list rust-cargo-bin "fmt"))
         (buffer-name rust-format-buffer-name)
         (proc-name rust-format-process-name)
-        (mode 'rust-format-mode)
+        (mode 'rust-cargo-fmt-mode)
         (dir (rust-buffer-workspace))
         (sentinel #'(lambda (proc output)
                       (let ((proc-buffer (process-buffer proc))
@@ -122,7 +125,7 @@
                         (with-current-buffer proc-buffer
                           (when (string-match-p "^finished" output)
                             (kill-buffer proc-buffer)
-                            (message "Workspace formatted with rustfmt.")))))))
+                            (message "Workspace formatted with cargo-fmt.")))))))
     (rust-compilation-process-live)
     (rust-compile-start-process command buffer-name proc-name mode dir sentinel)))
 
@@ -137,13 +140,13 @@
 ;;;;;;;;;;;
 ;; Clippy
 
-(defvar rust-clippy-process-name "rust-clippy-process"
+(defvar rust-clippy-process-name "rust-cargo-clippy-process"
   "Process name for clippy processes.")
 
-(defvar rust-clippy-buffer-name "*rust-clippy*"
+(defvar rust-clippy-buffer-name "*cargo-clippy*"
   "Buffer name for clippy buffers.")
 
-(define-derived-mode rust-clippy-mode rust-compilation-mode "rust clippy"
+(define-derived-mode rust-clippy-mode rust-compilation-mode "cargo-clippy"
   :group 'rust-mode)
 
 ;;;###autoload
@@ -153,7 +156,7 @@
   (let ((command (list rust-cargo-bin "clippy"))
         (buffer-name rust-clippy-buffer-name)
         (proc-name rust-clippy-process-name)
-        (mode 'rust-clippy-mode)
+        (mode 'rust-cargo-clippy-mode)
         (root (rust-buffer-workspace)))
     (rust-compilation-process-live)
     (rust-compile-start-process command buffer-name proc-name mode root)))
@@ -162,13 +165,13 @@
 ;;;;;;;;;
 ;; Test
 
-(defvar rust-test-process-name "rust-test-process"
+(defvar rust-test-process-name "rust-cargo-test-process"
   "Process name for test processes.")
 
-(defvar rust-test-buffer-name "*rust-test*"
+(defvar rust-test-buffer-name "*cargo-test*"
   "Buffer name for test buffers.")
 
-(define-derived-mode rust-test-mode rust-compilation-mode "rust test"
+(define-derived-mode rust-cargo-test-mode rust-compilation-mode "cargo-test"
   :group 'rust-mode)
 
 ;;;###autoload
@@ -178,7 +181,7 @@
   (let ((command (list rust-cargo-bin "test"))
         (buffer-name rust-test-buffer-name)
         (proc-name rust-test-process-name)
-        (mode 'rust-test-mode)
+        (mode 'rust-cargo-test-mode)
         (root (rust-buffer-workspace)))
     (rust-compilation-process-live)
     (rust-compile-start-process command buffer-name proc-name mode root)))
