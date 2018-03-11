@@ -51,13 +51,29 @@
 
 (defvar rust-save-pos nil)
 
-(defun rust-format-filter (proc output)
-  "Filter for rustfmt processes."
-  (let ((buf (process-buffer proc))
-        (inhibit-read-only t))
-    (with-current-buffer buf
-      (goto-char (point-max))
-      (insert (xterm-color-filter output)))))
+(defun rust-format-start-process (buffer string)
+  "Start a new rustfmt process."
+  (let* ((file (buffer-file-name buffer))
+         (err-buf (get-buffer-create rust-format-buffer-name))
+         (coding-system-for-read 'binary)
+         (process-environment (nconc
+	                           (list (format "TERM=%s" "ansi"))
+                               process-environment))
+         (inhibit-read-only t))
+    (with-current-buffer err-buf
+      (erase-buffer)
+      (rust-format-mode))
+    (setq rust-format-file-name (buffer-file-name buffer))
+    (setq rust-save-pos (point))
+    (let ((proc (make-process :name rust-format-process-name
+                              :buffer err-buf
+                              :command `(,rust-rustfmt-bin)
+                              :filter #'rust-compile-filter
+                              :sentinel #'rust-format-sentinel)))
+      (while (not (process-live-p proc))
+        (sleep-for 0.01))
+      (process-send-string proc string)
+      (process-send-eof proc))))
 
 (defun rust-format-sentinel (proc output)
   "Sentinel for rustfmt processes."
@@ -78,30 +94,6 @@
               (replace-match rust-format-file-name)))
           (funcall rust-format-display-method proc-buffer)
           (message "Rustfmt error."))))))
-
-(defun rust-format-start-process (buffer string)
-  "Start a new rustfmt process."
-  (let* ((file (buffer-file-name buffer))
-         (err-buf (get-buffer-create rust-format-buffer-name))
-         (coding-system-for-read 'binary)
-         (process-environment (nconc
-	                           (list (format "TERM=%s" "ansi"))
-                               process-environment))
-         (inhibit-read-only t))
-    (with-current-buffer err-buf
-      (erase-buffer)
-      (rust-format-mode))
-    (setq rust-format-file-name (buffer-file-name buffer))
-    (setq rust-save-pos (point))
-    (let ((proc (make-process :name rust-format-process-name
-                              :buffer err-buf
-                              :command `(,rust-rustfmt-bin)
-                              :filter #'rust-format-filter
-                              :sentinel #'rust-format-sentinel)))
-      (while (not (process-live-p proc))
-        (sleep-for 0.01))
-      (process-send-string proc string)
-      (process-send-eof proc))))
 
 (define-derived-mode rust-format-mode rust-compilation-mode "rustfmt"
   :group 'rust-mode)
@@ -156,7 +148,7 @@
 (defvar rust-clippy-buffer-name "*cargo-clippy*"
   "Buffer name for clippy buffers.")
 
-(define-derived-mode rust-clippy-mode rust-compilation-mode "cargo-clippy"
+(define-derived-mode rust-cargo-clippy-mode rust-compilation-mode "cargo-clippy"
   :group 'rust-mode)
 
 ;;;###autoload

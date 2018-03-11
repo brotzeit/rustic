@@ -79,7 +79,6 @@
       (cons re '(1 2 3))))
   "Create hyperlink in compilation buffers for file paths containing '-->'.")
 
-;; TODO: verify that this regexp is still useful
 ;; Match test run failures and panics during compilation as
 ;; compilation warnings
 (defvar rust-cargo-compilation-regexps
@@ -117,6 +116,41 @@ See `compilation-error-regexp-alist' for help on their format.")
                   :command command
                   :filter #'rust-compile-filter
                   :sentinel (if sentinel sentinel #'(lambda (proc output))))))
+
+(defun rust-compile-filter (proc string)
+  "Insert the text emitted by PROC.
+Translate STRING with `xterm-color-filter'."
+  (when (buffer-live-p (process-buffer proc))
+    (with-current-buffer (process-buffer proc)
+      (let ((inhibit-read-only t)
+            ;; `save-excursion' doesn't use the right insertion-type for us.
+            (pos (copy-marker (point) t))
+            ;; `save-restriction' doesn't use the right insertion type either:
+            ;; If we are inserting at the end of the accessible part of the
+            ;; buffer, keep the inserted text visible.
+	        (min (point-min-marker))
+	        (max (copy-marker (point-max) t))
+	        (compilation-filter-start (marker-position (process-mark proc)))
+            (xterm-string (xterm-color-filter string)))
+        (unwind-protect
+            (progn
+	          (widen)
+	          (goto-char compilation-filter-start)
+              ;; We used to use `insert-before-markers', so that windows with
+              ;; point at `process-mark' scroll along with the output, but we
+              ;; now use window-point-insertion-type instead.
+
+              (insert xterm-string)
+
+              (unless comint-inhibit-carriage-motion
+                (comint-carriage-motion (process-mark proc) (point)))
+              (set-marker (process-mark proc) (point))
+              (run-hooks 'compilation-filter-hook))
+	      (goto-char pos)
+          (narrow-to-region min max)
+	      (set-marker pos nil)
+	      (set-marker min nil)
+	      (set-marker max nil))))))
 
 (defun rustc-scroll-down-after-next-error ()
   "In the new style error messages, the regular expression
@@ -166,39 +200,6 @@ be able to visit the source."
            (car (get-text-property (point) 'compilation-directory)))
         (setq compilation-current-error (point))
         (next-error-internal)))))
-
-(defun rust-compile-filter (proc string)
-  "This filter was copied from compile.el, but the text is inserted by xterm-color. "
-  (when (buffer-live-p (process-buffer proc))
-    (with-current-buffer (process-buffer proc)
-      (let ((inhibit-read-only t)
-            ;; `save-excursion' doesn't use the right insertion-type for us.
-            (pos (copy-marker (point) t))
-            ;; `save-restriction' doesn't use the right insertion type either:
-            ;; If we are inserting at the end of the accessible part of the
-            ;; buffer, keep the inserted text visible.
-	        (min (point-min-marker))
-	        (max (copy-marker (point-max) t))
-	        (compilation-filter-start (marker-position (process-mark proc))))
-        (unwind-protect
-            (progn
-	          (widen)
-	          (goto-char compilation-filter-start)
-              ;; We used to use `insert-before-markers', so that windows with
-              ;; point at `process-mark' scroll along with the output, but we
-              ;; now use window-point-insertion-type instead.
-              
-              (insert (xterm-color-filter string))
-              
-              (unless comint-inhibit-carriage-motion
-                (comint-carriage-motion (process-mark proc) (point)))
-              (set-marker (process-mark proc) (point))
-              (run-hooks 'compilation-filter-hook))
-	      (goto-char pos)
-          (narrow-to-region min max)
-	      (set-marker pos nil)
-	      (set-marker min nil)
-	      (set-marker max nil))))))
 
 
 ;;;;;;;;;;;;;;;;
