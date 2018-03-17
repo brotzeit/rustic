@@ -68,7 +68,8 @@
 
   (define-key rust-compilation-mode-map [return] 'rust-compile-goto-error)
   (define-key rust-compilation-mode-map (kbd "C-c C-c") 'rust-compile-goto-error)
-  (define-key rust-compilation-mode-map (kbd "<mouse-2>") 'rust-compile-goto-error))
+  (define-key rust-compilation-mode-map (kbd "<mouse-2>") 'rust-compile-goto-error)
+  (define-key rust-compilation-mode-map (kbd "g") 'rust-recompile))
 
 (defvar rust-compilation-directory nil
   "Directory to restore to when doing `rust-recompile'.")
