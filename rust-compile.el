@@ -64,7 +64,9 @@
 
   (setq-local compilation-error-regexp-alist nil)
   (add-to-list 'compilation-error-regexp-alist 'rust-arrow)
-  (add-to-list 'compilation-error-regexp-alist 'rust-colon))
+  (add-to-list 'compilation-error-regexp-alist 'rust-colon)
+
+  (define-key rust-compilation-mode-map (kbd "g") 'rust-recompile))
 
 (defvar rust-compilation-directory nil
   "Directory to restore to when doing `rust-recompile'.")
