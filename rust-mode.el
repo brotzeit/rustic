@@ -18,8 +18,9 @@
                    (require 'compile)
                    (require 'url-vars))
 
-
 (require 'json)
+(require 'newcomment)
+
 (require 'rust-compile)
 (require 'rust-util)
 (require 'rust-interaction)
@@ -176,7 +177,9 @@ function or trait.  When nil, where will be aligned with fn or trait."
     (define-key map (kbd "C-c C-c C-f") 'rust-cargo-fmt)
     (define-key map (kbd "C-c C-c C-t") 'rust-cargo-test)
     (define-key map (kbd "C-c C-c C-l") 'rust-cargo-clippy)
-    (define-key map (kbd "C-c C-c C-o") 'rust-format-buffer)       
+    (define-key map (kbd "C-c C-c C-o") 'rust-format-buffer)
+
+    (define-key map (kbd "C-c C-c C-,") 'rust-docstring-dwim)
     map)
   "Keymap for Rust major mode.")
 
@@ -1054,6 +1057,12 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
 
 ;;;;;;;;;;;;;;;;
 ;; Interactive
+
+(defun rust-docstring-dwim ()
+  "Use `comment-dwim' to make a docstring."
+  (interactive)
+  (let ((comment-start "/// "))
+    (call-interactively 'comment-dwim)))
 
 (defun rust-mode-reload ()
   (interactive)
