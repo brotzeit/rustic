@@ -17,3 +17,9 @@ need [Cask](https://github.com/cask/cask).
 $ cask
 $ cask exec ert-runner
 ```
+
+## Installation
+
+git clone https://github.com/brotzeit/rust-mode-reloaded.git
+
+You can use `package-install-file` on the package's root directory
