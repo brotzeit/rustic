@@ -163,6 +163,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
   (setq-local electric-pair-inhibit-predicate 'rust-electric-pair-inhibit-predicate-wrap)
 
   (add-hook 'before-save-hook 'rust-before-save-hook nil t)
+  (add-hook 'after-save-hook 'rust-after-save-hook nil t)
 
   (setq-local rust-buffer-workspace-dir nil)
 
@@ -1040,10 +1041,19 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
     (point)))
 
 (defun rust-before-save-hook ()
+  "Don't throw error if rustfmt isn't installed, as it makes saving impossible."
   (when rust-format-on-save
-    (let ((proc (rust-format-buffer)))
-      (while (eq (process-status proc) 'run)
-        (sit-for 0.01)))))
+    (condition-case rustfmt-err
+        (let ((proc (rust-format-buffer)))
+          (while (eq (process-status proc) 'run)
+            (sit-for 0.01)))
+      (error nil))))
+
+(defun rust-after-save-hook ()
+  "Check if rustfmt is installed after saving the file."
+  (when rust-format-on-save
+    (unless (executable-find rust-rustfmt-bin)
+      (error "Could not locate executable \"%s\"" rust-rustfmt-bin))))
 
 (defun rust-buffer-workspace ()
   "Guess the workspace root."
