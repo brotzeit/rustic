@@ -49,6 +49,14 @@
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Compilation-mode
 
+(defvar rust-compilation-mode-map
+  (let ((map (make-sparse-keymap)))
+    (suppress-keymap map t)
+    (set-keymap-parent map compilation-mode-map)
+    (define-key map "g" 'rust-recompile)
+    map)
+  "Keymap for rust compilation log buffers.")
+
 (define-compilation-mode rust-compilation-mode "rust-compilation"
   "Rust compilation mode."
   (setq-local compilation-message-face rust-message-face)
@@ -64,9 +72,7 @@
 
   (setq-local compilation-error-regexp-alist nil)
   (add-to-list 'compilation-error-regexp-alist 'rust-arrow)
-  (add-to-list 'compilation-error-regexp-alist 'rust-colon)
-
-  (define-key rust-compilation-mode-map (kbd "g") 'rust-recompile))
+  (add-to-list 'compilation-error-regexp-alist 'rust-colon))
 
 (defvar rust-compilation-directory nil
   "Directory to restore to when doing `rust-recompile'.")
