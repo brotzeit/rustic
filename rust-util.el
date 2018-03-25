@@ -60,6 +60,7 @@
 	                           (list (format "TERM=%s" "ansi"))
                                process-environment))
          (inhibit-read-only t))
+    (setq next-error-last-buffer buffer)
     (with-current-buffer err-buf
       (erase-buffer)
       (rust-format-mode))

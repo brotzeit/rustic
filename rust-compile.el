@@ -123,6 +123,7 @@ See `compilation-error-regexp-alist' for help on their format.")
 	                          (list (format "TERM=%s" "ansi"))
                               process-environment))
         (inhibit-read-only t))
+    (setq next-error-last-buffer buf)
     (with-current-buffer buf
       (erase-buffer)
       (funcall mode)
