@@ -59,9 +59,11 @@
          (process-environment (nconc
 	                           (list (format "TERM=%s" "ansi"))
                                process-environment))
-         (inhibit-read-only t))
+         (inhibit-read-only t)
+         (dir (rust-buffer-workspace)))
     (setq next-error-last-buffer buffer)
     (with-current-buffer err-buf
+      (setq-local default-directory dir)
       (erase-buffer)
       (rust-format-mode))
     (setq rust-format-file-name (buffer-file-name buffer))

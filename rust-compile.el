@@ -125,6 +125,7 @@ See `compilation-error-regexp-alist' for help on their format.")
         (inhibit-read-only t))
     (setq next-error-last-buffer buf)
     (with-current-buffer buf
+      (setq-local default-directory directory)
       (erase-buffer)
       (funcall mode)
       (funcall rust-compile-display-method buf))
