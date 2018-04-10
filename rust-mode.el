@@ -24,6 +24,7 @@
 (require 'rust-compile)
 (require 'rust-util)
 (require 'rust-interaction)
+(require 'rust-babel)
 
 (defvar electric-pair-inhibit-predicate)
 (defvar electric-indent-chars)
