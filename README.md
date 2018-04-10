@@ -8,6 +8,18 @@
 * `C-c C-c C-l` rust-cargo-clippy
 * `C-c C-c C-o` rust-format-buffer
 
+## Org-babel
+
+Provided command line paramaters are used by `cargo build`.
+
+```
+#+BEGIN_SRC rust
+fn main() {
+    println!("{}", "foo");
+}
+#+END_SRC
+```
+
 ## Testing
 
 To run the tests, you will
