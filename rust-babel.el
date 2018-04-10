@@ -22,12 +22,14 @@
 
 (defun rust-org-babel-eval (cmdline dir)
   (let* ((err-buff (get-buffer-create rust-babel-compilation-buffer))
-        (coding-system-for-read 'binary)
-        (process-environment (nconc
-	                          (list (format "TERM=%s" "ansi"))
-                              process-environment))
-        (inhibit-read-only t)
-        (params (append '("cargo" "build") (split-string cmdline))))
+         (coding-system-for-read 'binary)
+         (process-environment (nconc
+	                           (list (format "TERM=%s" "ansi"))
+                               process-environment))
+         (params '("cargo" "build"))
+         (inhibit-read-only t))
+    (when cmdline
+      (append params (split-string cmdline)))
     (with-current-buffer err-buff
       (erase-buffer)
       (setq-local default-directory dir)
@@ -38,8 +40,8 @@
                  :command params
                  :filter #'rust-compile-filter
                  :sentinel #'rust-babel-sentinel)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.1)))))
+      (while (eq (process-status proc) 'run)
+        (sit-for 0.1)))))
 
 (defun rust-babel-sentinel (proc string)
   (let ((proc-buffer (process-buffer proc))
