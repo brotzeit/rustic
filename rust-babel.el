@@ -62,6 +62,7 @@
 (defun org-babel-execute:rust (body params)
   "Execute a block of Rust code with Babel."
   (let* ((cmdline (cdr (assq :cmdline params)))
+         (result-params (list (cdr (assq :results params))))
          (deps (cdr (assq :deps params)))
          (full-body (org-element-property :value (org-element-at-point)))
          (dir-name (make-temp-file-internal "cargo" 0 "" nil))
@@ -74,7 +75,19 @@
       (rust-org-babel-eval cmdline dir)
       (if (not rust-babel-compilation-failed-p) 
           (let ((result (shell-command-to-string "cargo run --quiet")))
-            (org-babel-insert-result result))))))
+            (org-babel-result-cond result-params
+	          (let ((print-level nil)
+                    (print-length nil))
+                (if (or (member "scalar" result-params)
+                        (member "verbatim" result-params))
+                    (format "%S" result)
+                  (format "%s" result)))
+	          (org-babel-reassemble-table
+	           result
+               (org-babel-pick-name (cdr (assq :colname-names params))
+                                    (cdr (assq :colnames params)))
+               (org-babel-pick-name (cdr (assq :rowname-names params))
+                                    (cdr (assq :rownames params))))))))))
 
 (provide 'rust-babel)
 ;;; rust-babel.el ends here
