@@ -31,7 +31,7 @@
 
 (defvar rust-babel-params nil)
 
-(defun rust-org-babel-eval (cmdline dir)
+(defun rust-org-babel-eval (dir)
   "Start a rust babel compilation process."
   (let* ((err-buff (get-buffer-create rust-babel-compilation-buffer))
          (default-directory dir)
@@ -62,9 +62,10 @@
         (let* ((default-directory rust-babel-dir) 
                (result (shell-command-to-string "cargo run --quiet"))
                (result-params (list (cdr (assq :results rust-babel-params))))
-               (params rust-babel-params))
-          (with-current-buffer (elt rust-babel-src-location 0)
-            (goto-char (elt rust-babel-src-location 1))
+               (params rust-babel-params)
+               (marker rust-babel-src-location))
+          (with-current-buffer (marker-buffer marker)
+            (goto-char marker)
             (org-babel-remove-result rust-info)
             (org-babel-insert-result result result-params rust-info))
           (unless rust-babel-display-compilation-buffer
@@ -78,29 +79,28 @@
     (shell-command-to-string (format "cargo new %s --bin --quiet" dir))
     (setq rust-babel-dir (expand-file-name dir))))
 
-(defun rust-babel-cargo-toml (crates toml)
+(defun rust-babel-cargo-toml (dir params)
   "Append crates to Cargo.toml."
-  (let ((str ""))
+  (let ((crates (cdr (assq :crates params)))
+        (toml (expand-file-name "Cargo.toml" dir))
+        (str ""))
     (dolist (crate crates)
       (setq str (concat str (car crate) " = " "\"" (cdr crate) "\"" "\n")))
     (write-region str nil toml t)))
 
 (defun org-babel-execute:rust (body params)
   "Execute a block of Rust code with Babel."
-  (let* ((cmdline (cdr (assq :cmdline params)))
-         (full-body (org-element-property :value (org-element-at-point)))
+  (let* ((full-body (org-element-property :value (org-element-at-point)))
          (dir (rust-babel-generate-project))
          (project (car (reverse (split-string rust-babel-dir "\\/"))))
-         (main (expand-file-name "main.rs" (concat dir "/src")))
-         (toml (expand-file-name "Cargo.toml" dir))
-         (crates (cdr (assq :crates params))))
+         (main (expand-file-name "main.rs" (concat dir "/src"))))
     (setq rust-info (org-babel-get-src-block-info))
-    (rust-babel-cargo-toml crates toml)
+    (rust-babel-cargo-toml dir params)
     (setq rust-babel-params params)
     (let ((default-directory dir))
       (write-region full-body nil main nil 0)
-      (rust-org-babel-eval cmdline dir)
-      (setq rust-babel-src-location (vector (current-buffer) (point)))
+      (rust-org-babel-eval dir)
+      (setq rust-babel-src-location (set-marker (make-marker) (point) (current-buffer)))
       project)))
 
 (provide 'rust-babel)
