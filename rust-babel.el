@@ -29,7 +29,11 @@
 (defvar rust-babel-dir nil
   "Holds the latest rust babel project directory.")
 
-(defvar rust-babel-params nil)
+(defvar rust-babel-src-location nil
+  "Marker, holding location of last evaluated src block.")
+
+(defvar rust-babel-params nil
+  "Babel parameters.")
 
 (defun rust-org-babel-eval (dir)
   "Start a rust babel compilation process."
