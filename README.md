@@ -10,10 +10,8 @@
 
 ## Org-babel
 
-Provided command line paramaters are used by `cargo build`.
-
 ```
-#+BEGIN_SRC rust
+#+BEGIN_SRC rust :crates '(("regex" . "0.2") ("darling" . "0.1"))
 fn main() {
     println!("{}", "foo");
 }
