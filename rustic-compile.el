@@ -1,4 +1,4 @@
-;;; rust-compile.el --- Compile facilities for rust-mode -*-lexical-binding: t-*-
+;;; rustic-compile.el --- Compile facilities for rustic-mode -*-lexical-binding: t-*-
 
 ;; This file is distributed under the terms of both the MIT license and the
 ;; Apache License (version 2.0).
@@ -11,29 +11,29 @@
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
 
-(defgroup rust-compilation nil
+(defgroup rustic-compilation nil
   "Rust Compilation."
   :group 'processes)
 
-(defcustom rust-compile-command (purecopy "cargo build")
+(defcustom rustic-compile-command (purecopy "cargo build")
   "Default command for rust compilation."
   :type 'string
-  :group 'rust-compilation)
+  :group 'rustic-compilation)
 
-(defcustom rust-compile-display-method 'display-buffer
+(defcustom rustic-compile-display-method 'display-buffer
   "Default function used for displaying compilation buffer."
   :type 'function
-  :group 'rust-compile)
+  :group 'rustic-compile)
 
 ;; Faces
 
-(defcustom rust-message-face
+(defcustom rustic-message-face
   '((t :inherit default))
   "Don't use `compilation-message-face', as ansi colors get messed up."
   :type 'face
-  :group 'rust-compilation)
+  :group 'rustic-compilation)
 
-(defcustom rust-ansi-faces ["black"
+(defcustom rustic-ansi-faces ["black"
                             "red3"
                             "green3"
                             "yellow3"
@@ -43,41 +43,41 @@
                             "white"]
   "Term ansi faces."
   :type '(vector string string string string string string string string)
-  :group 'rust-compilation)
+  :group 'rustic-compilation)
 
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Compilation-mode
 
-(defvar rust-compilation-mode-map
+(defvar rustic-compilation-mode-map
   (let ((map (make-sparse-keymap)))
     (suppress-keymap map t)
     (set-keymap-parent map compilation-mode-map)
-    (define-key map "g" 'rust-recompile)
+    (define-key map "g" 'rustic-recompile)
     map)
   "Keymap for rust compilation log buffers.")
 
-(define-compilation-mode rust-compilation-mode "rust-compilation"
+(define-compilation-mode rustic-compilation-mode "rust-compilation"
   "Rust compilation mode."
-  (setq-local compilation-message-face rust-message-face)
-  (setq-local xterm-color-names-bright rust-ansi-faces)
-  (setq-local xterm-color-names rust-ansi-faces)
+  (setq-local compilation-message-face rustic-message-face)
+  (setq-local xterm-color-names-bright rustic-ansi-faces)
+  (setq-local xterm-color-names rustic-ansi-faces)
   (add-hook 'next-error-hook 'rustc-scroll-down-after-next-error)
 
   (setq-local compilation-error-regexp-alist-alist nil)
   (add-to-list 'compilation-error-regexp-alist-alist
-               (cons 'rust-arrow rust-compilation-regexps-arrow))
+               (cons 'rustic-arrow rustic-compilation-regexps-arrow))
     (add-to-list 'compilation-error-regexp-alist-alist
-               (cons 'rust-colon rust-compilation-regexps-colon))
+               (cons 'rustic-colon rustic-compilation-regexps-colon))
 
   (setq-local compilation-error-regexp-alist nil)
-  (add-to-list 'compilation-error-regexp-alist 'rust-arrow)
-  (add-to-list 'compilation-error-regexp-alist 'rust-colon))
+  (add-to-list 'compilation-error-regexp-alist 'rustic-arrow)
+  (add-to-list 'compilation-error-regexp-alist 'rustic-colon))
 
-(defvar rust-compilation-directory nil
-  "Directory to restore to when doing `rust-recompile'.")
+(defvar rustic-compilation-directory nil
+  "Directory to restore to when doing `rustic-recompile'.")
 
-(defvar rust-compilation-regexps-arrow
+(defvar rustic-compilation-regexps-arrow
   (let ((file "\\([^\n]+\\)")
         (start-line "\\([0-9]+\\)")
         (start-col  "\\([0-9]+\\)"))
@@ -86,7 +86,7 @@
       (cons re '(1 2 3))))
   "Create hyperlink in compilation buffers for file paths containing '-->'.")
 
-(defvar rust-compilation-regexps-colon
+(defvar rustic-compilation-regexps-colon
   (let ((file "\\([^\n]+\\)")
         (start-line "\\([0-9]+\\)")
         (start-col  "\\([0-9]+\\)"))
@@ -97,7 +97,7 @@
 
 ;; Match test run failures and panics during compilation as
 ;; compilation warnings
-(defvar rust-cargo-compilation-regexps
+(defvar rustic-cargo-compilation-regexps
   '("^\\s-+thread '[^']+' panicked at \\('[^']+', \\([^:]+\\):\\([0-9]+\\)\\)" 2 3 nil nil 1)
   "Specifications for matching panics in cargo test invocations.
 See `compilation-error-regexp-alist' for help on their format.")
@@ -106,16 +106,16 @@ See `compilation-error-regexp-alist' for help on their format.")
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Compilation Process
 
-(defvar rust-compile-process-name "rust-comilation-process"
+(defvar rustic-compile-process-name "rustic-comilation-process"
   "Process name for rust compilation processes.")
 
-(defvar rust-compile-buffer-name "*rust-compilation*"
+(defvar rustic-compile-buffer-name "*rustic-compilation*"
   "Buffer name for rust compilation process buffers.")
 
-(defvar rust-compilation-arguments nil
-  "Arguments that were given to `rust-compile'")
+(defvar rustic-compilation-arguments nil
+  "Arguments that were given to `rustic-compile'")
 
-(defun rust-compile-start-process (command buffer process mode directory &optional sentinel)
+(defun rustic-compile-start-process (command buffer process mode directory &optional sentinel)
   (let ((buf (get-buffer-create buffer))
         (default-directory directory)
         (coding-system-for-read 'binary)
@@ -128,14 +128,14 @@ See `compilation-error-regexp-alist' for help on their format.")
       (setq-local default-directory directory)
       (erase-buffer)
       (funcall mode)
-      (funcall rust-compile-display-method buf))
+      (funcall rustic-compile-display-method buf))
     (make-process :name process
                   :buffer buf
                   :command command
-                  :filter #'rust-compile-filter
+                  :filter #'rustic-compile-filter
                   :sentinel (if sentinel sentinel #'(lambda (proc output))))))
 
-(defun rust-compile-filter (proc string)
+(defun rustic-compile-filter (proc string)
   "Insert the text emitted by PROC.
 Translate STRING with `xterm-color-filter'."
   (when (buffer-live-p (process-buffer proc))
@@ -177,7 +177,7 @@ Translate STRING with `xterm-color-filter'."
    after `M-x next-error`; it simply scrolls down a few lines in
    the compilation window until the top of the error is visible."
   (save-selected-window
-    (when (eq major-mode 'rust-mode)
+    (when (eq major-mode 'rustic-mode)
       (select-window (get-buffer-window next-error-last-buffer 'visible))
       (when (save-excursion
               (beginning-of-line)
@@ -194,14 +194,14 @@ Translate STRING with `xterm-color-filter'."
 ;;;;;;;;;;;;;;;;
 ;; Interactive
 
-(defun rust-compilation-process-live ()
+(defun rustic-compilation-process-live ()
   "Check if there's already a running rust process. 
 
 Don't allow two rust processes at once."
-  (dolist (p-name (list rust-compile-process-name
-                        rust-format-process-name
-                        rust-clippy-process-name
-                        rust-test-process-name))
+  (dolist (p-name (list rustic-compile-process-name
+                        rustic-format-process-name
+                        rustic-clippy-process-name
+                        rustic-test-process-name))
     (let ((proc (get-process p-name)))
       (when (process-live-p proc)
         (if (yes-or-no-p
@@ -217,35 +217,35 @@ Don't allow two rust processes at once."
                      compilation-save-buffers-predicate))
 
 ;;;###autoload
-(defun rust-compile (&optional arg)
-  "Compile rust project. If called without arguments use `rust-compile-command'.
+(defun rustic-compile (&optional arg)
+  "Compile rust project. If called without arguments use `rustic-compile-command'.
 
-Otherwise use provided arguments and store them in `rust-compilation-arguments'."
+Otherwise use provided arguments and store them in `rustic-compilation-arguments'."
   (interactive "P")
   (let* ((command (if arg
-                      (setq rust-compilation-arguments
+                      (setq rustic-compilation-arguments
                             (read-from-minibuffer "Compile command: "))
-                    rust-compile-command))
-         (buffer-name rust-compile-buffer-name)
-         (proc-name rust-compile-process-name)
-         (mode 'rust-compilation-mode)
-         (dir (setq rust-compilation-directory (rust-buffer-workspace))))
-    (rust-compilation-process-live)
-    (rust-compile-start-process (split-string command) buffer-name proc-name mode dir)))
+                    rustic-compile-command))
+         (buffer-name rustic-compile-buffer-name)
+         (proc-name rustic-compile-process-name)
+         (mode 'rustic-compilation-mode)
+         (dir (setq rustic-compilation-directory (rustic-buffer-workspace))))
+    (rustic-compilation-process-live)
+    (rustic-compile-start-process (split-string command) buffer-name proc-name mode dir)))
 
 ;;;###autoload
-(defun rust-recompile ()
-  "Re-compile the program using the last `rust-compile' arguments."
+(defun rustic-recompile ()
+  "Re-compile the program using the last `rustic-compile' arguments."
   (interactive)
-  (let* ((command (if (not rust-compilation-arguments)
-                     rust-compile-command
-                   rust-compilation-arguments))
-        (buffer-name rust-compile-buffer-name)
-        (proc-name rust-compile-process-name)
-        (mode 'rust-compilation-mode)
-        (dir (or rust-compilation-directory default-directory)))
-    (rust-compilation-process-live)
-    (rust-compile-start-process (split-string command) buffer-name proc-name mode dir)))
+  (let* ((command (if (not rustic-compilation-arguments)
+                     rustic-compile-command
+                   rustic-compilation-arguments))
+        (buffer-name rustic-compile-buffer-name)
+        (proc-name rustic-compile-process-name)
+        (mode 'rustic-compilation-mode)
+        (dir (or rustic-compilation-directory default-directory)))
+    (rustic-compilation-process-live)
+    (rustic-compile-start-process (split-string command) buffer-name proc-name mode dir)))
 
-(provide 'rust-compile)
-;;; rust-compile.el ends here
+(provide 'rustic-compile)
+;;; rustic-compile.el ends here

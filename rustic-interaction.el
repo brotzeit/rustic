@@ -1,39 +1,39 @@
-;;; rust-interaction.el --- Common interactive functions -*-lexical-binding: t-*-
+;;; rustic-interaction.el --- Common interactive functions -*-lexical-binding: t-*-
 
 ;; This file is distributed under the terms of both the MIT license and the
 ;; Apache License (version 2.0).
 
 ;;; Code:
 
-(defun rust-rewind-to-beginning-of-current-level-expr ()
-  (let ((current-level (rust-paren-level)))
+(defun rustic-rewind-to-beginning-of-current-level-expr ()
+  (let ((current-level (rustic-paren-level)))
     (back-to-indentation)
     (when (looking-at "->")
-      (rust-rewind-irrelevant)
+      (rustic-rewind-irrelevant)
       (back-to-indentation))
-    (while (> (rust-paren-level) current-level)
+    (while (> (rustic-paren-level) current-level)
       (backward-up-list)
       (back-to-indentation))
     ;; When we're in the where clause, skip over it.  First find out the start
     ;; of the function and its paren level.
     (let ((function-start nil) (function-level nil))
       (save-excursion
-        (rust-beginning-of-defun)
+        (rustic-beginning-of-defun)
         (back-to-indentation)
         ;; Avoid using multiple-value-bind
         (setq function-start (point)
-              function-level (rust-paren-level)))
+              function-level (rustic-paren-level)))
       ;; On a where clause
-      (when (or (rust-looking-at-where)
+      (when (or (rustic-looking-at-where)
                 ;; or in one of the following lines, e.g.
                 ;; where A: Eq
                 ;;       B: Hash <- on this line
                 (and (save-excursion
-                       (rust-rewind-to-where function-start))
+                       (rustic-rewind-to-where function-start))
                      (= current-level function-level)))
         (goto-char function-start)))))
 
-(defun rust-align-to-expr-after-brace ()
+(defun rustic-align-to-expr-after-brace ()
   (save-excursion
     (forward-char)
     ;; We don't want to indent out to the open bracket if the
@@ -44,7 +44,7 @@
     (backward-word 1))
       (current-column))))
 
-(defun rust-align-to-method-chain ()
+(defun rustic-align-to-method-chain ()
   (save-excursion
     ;; for method-chain alignment to apply, we must be looking at
     ;; another method call or field access or something like
@@ -63,18 +63,18 @@
     ;; than to have an over-eager indent in all other cases which must
     ;; be undone via tab.
 
-    (when (looking-at (concat "\s*\." rust-re-ident))
+    (when (looking-at (concat "\s*\." rustic-re-ident))
       (forward-line -1)
       (end-of-line)
       ;; Keep going up (looking for a line that could contain a method chain)
       ;; while we're in a comment or on a blank line. Stop when the paren
       ;; level changes.
-      (let ((level (rust-paren-level)))
-        (while (and (or (rust-in-str-or-cmnt)
+      (let ((level (rustic-paren-level)))
+        (while (and (or (rustic-in-str-or-cmnt)
                         ;; Only whitespace (or nothing) from the beginning to
                         ;; the end of the line.
                         (looking-back "^\s*" (point-at-bol)))
-                    (= (rust-paren-level) level))
+                    (= (rustic-paren-level) level))
           (forward-line -1)
           (end-of-line)))
 
@@ -90,13 +90,13 @@
           ;;
           ((skip-dot-identifier
             (lambda ()
-              (when (and (rust-looking-back-ident) (save-excursion (forward-thing 'symbol -1) (= ?. (char-before))))
+              (when (and (rustic-looking-back-ident) (save-excursion (forward-thing 'symbol -1) (= ?. (char-before))))
                 (forward-thing 'symbol -1)
                 (backward-char)
-                (- (current-column) rust-indent-offset)))))
+                (- (current-column) rustic-indent-offset)))))
         (cond
          ;; foo.bar(...)
-         ((rust-looking-back-str ")")
+         ((rustic-looking-back-str ")")
           (backward-list 1)
           (funcall skip-dot-identifier))
 
@@ -107,13 +107,13 @@
 ;;;;;;;;;;;;;;;;
 ;; Interactive
 
-(defun rust-mode-indent-line ()
+(defun rustic-mode-indent-line ()
   (interactive)
   (let ((indent
          (save-excursion
            (back-to-indentation)
            ;; Point is now at beginning of current line
-           (let* ((level (rust-paren-level))
+           (let* ((level (rustic-paren-level))
                   (baseline
                    ;; Our "baseline" is one level out from the indentation of the expression
                    ;; containing the innermost enclosing opening bracket.  That
@@ -123,13 +123,13 @@
                    (if (= 0 level)
                        0
                      (or
-                      (when rust-indent-method-chain
-                        (rust-align-to-method-chain))
+                      (when rustic-indent-method-chain
+                        (rustic-align-to-method-chain))
                       (save-excursion
-                        (rust-rewind-irrelevant)
+                        (rustic-rewind-irrelevant)
                         (backward-up-list)
-                        (rust-rewind-to-beginning-of-current-level-expr)
-                        (+ (current-column) rust-indent-offset))))))
+                        (rustic-rewind-to-beginning-of-current-level-expr)
+                        (+ (current-column) rustic-indent-offset))))))
              (cond
               ;; Indent inside a non-raw string only if the the previous line
               ;; ends with a backslash that is inside the same string
@@ -182,11 +182,11 @@
               ((looking-at "->")
                (save-excursion
                  (backward-list)
-                 (or (rust-align-to-expr-after-brace)
-                     (+ baseline rust-indent-offset))))
+                 (or (rustic-align-to-expr-after-brace)
+                     (+ baseline rustic-indent-offset))))
 
               ;; A closing brace is 1 level unindented
-              ((looking-at "[]})]") (- baseline rust-indent-offset))
+              ((looking-at "[]})]") (- baseline rustic-indent-offset))
 
               ;; Doc comments in /** style with leading * indent to line up the *s
               ((and (nth 4 (syntax-ppss)) (looking-at "*"))
@@ -194,8 +194,8 @@
 
               ;; When the user chose not to indent the start of the where
               ;; clause, put it on the baseline.
-              ((and (not rust-indent-where-clause)
-                    (rust-looking-at-where))
+              ((and (not rustic-indent-where-clause)
+                    (rustic-looking-at-where))
                baseline)
 
               ;; If we're in any other token-tree / sexp, then:
@@ -206,10 +206,10 @@
                 ;; it as fields and align them.
                 (when (> level 0)
                   (save-excursion
-                    (rust-rewind-irrelevant)
+                    (rustic-rewind-irrelevant)
                     (backward-up-list)
                     ;; Point is now at the beginning of the containing set of braces
-                    (rust-align-to-expr-after-brace)))
+                    (rustic-align-to-expr-after-brace)))
 
                 ;; When where-clauses are spread over multiple lines, clauses
                 ;; should be aligned on the type parameters.  In this case we
@@ -224,20 +224,20 @@
                       ;; don't go back any farther.  We can easily do
                       ;; this by moving to the end of the line first.
                       (end-of-line)
-                      (rust-beginning-of-defun)
+                      (rustic-beginning-of-defun)
                       (back-to-indentation)
                       ;; Avoid using multiple-value-bind
                       (setq function-start (point)
-                            function-level (rust-paren-level)))
+                            function-level (rustic-paren-level)))
                     ;; When we're not on a line starting with "where ", but
                     ;; still on a where-clause line, go to "where "
                     (when (and
-                           (not (rust-looking-at-where))
+                           (not (rustic-looking-at-where))
                            ;; We're looking at something like "F: ..."
-                           (looking-at (concat rust-re-ident ":"))
+                           (looking-at (concat rustic-re-ident ":"))
                            ;; There is a "where " somewhere after the
                            ;; start of the function.
-                           (rust-rewind-to-where function-start)
+                           (rustic-rewind-to-where function-start)
                            ;; Make sure we're not inside the function
                            ;; already (e.g. initializing a struct) by
                            ;; checking we are the same level.
@@ -248,7 +248,7 @@
                       (if (eolp)
                           ;; in this case the type parameters bounds are just
                           ;; indented once
-                          (+ baseline rust-indent-offset)
+                          (+ baseline rustic-indent-offset)
                         ;; otherwise, skip over whitespace,
                         (skip-chars-forward "[:space:]")
                         ;; get the column of the type parameter and use that
@@ -269,10 +269,10 @@
 
                        ;; If this is the start of a top-level item,
                        ;; stay on the baseline.
-                       (looking-at rust-top-item-beg-re)
+                       (looking-at rustic-top-item-beg-re)
 
                        (save-excursion
-                         (rust-rewind-irrelevant)
+                         (rustic-rewind-irrelevant)
                          ;; Point is now at the end of the previous line
                          (or
                           ;; If we are at the start of the buffer, no
@@ -283,12 +283,12 @@
                           ;; then we are at the beginning of an expression, so stay on the baseline...
                           (looking-back "[(,:;?[{}]\\|[^|]|" (- (point) 2))
                           ;; or if the previous line is the end of an attribute, stay at the baseline...
-                          (progn (rust-rewind-to-beginning-of-current-level-expr) (looking-at "#")))))
+                          (progn (rustic-rewind-to-beginning-of-current-level-expr) (looking-at "#")))))
                       baseline
 
                     ;; Otherwise, we are continuing the same expression from the previous line,
                     ;; so add one additional indent level
-                    (+ baseline rust-indent-offset))))))))))
+                    (+ baseline rustic-indent-offset))))))))))
 
     (when indent
       ;; If we're at the beginning of the line (before or at the current
@@ -299,7 +299,7 @@
           (indent-line-to indent)
         (save-excursion (indent-line-to indent))))))
 
-(defun rust-promote-module-into-dir ()
+(defun rustic-promote-module-into-dir ()
   "Promote the module file visited by the current buffer into its own directory.
 
 For example, if the current buffer is visiting the file `foo.rs',
@@ -323,7 +323,7 @@ visit the new file."
 
 ;;; Defun Motions
 
-(defun rust-beginning-of-defun (&optional arg)
+(defun rustic-beginning-of-defun (&optional arg)
   "Move backward to the beginning of the current defun.
 
 With ARG, move backward multiple defuns.  Negative ARG means
@@ -343,14 +343,14 @@ which calls this, does that afterwards."
     (catch 'done
       (dotimes (_ magnitude)
 	;; Search until we find a match that is not in a string or comment.
-	(while (if (re-search-backward (concat "^\\(" rust-top-item-beg-re "\\)")
+	(while (if (re-search-backward (concat "^\\(" rustic-top-item-beg-re "\\)")
 				       nil 'move sign)
-		   (rust-in-str-or-cmnt)
+		   (rustic-in-str-or-cmnt)
 		 ;; Did not find it.
 		 (throw 'done nil)))))
     t))
 
-(defun rust-end-of-defun ()
+(defun rustic-end-of-defun ()
   "Move forward to the next end of defun.
 
 With argument, do it that many times.
@@ -375,6 +375,6 @@ This is written mainly to be used as `end-of-defun-function' for Rust."
     (goto-char (point-max))))
 
 
-(provide 'rust-interaction)
-;;; rust-interaction.el ends here
+(provide 'rustic-interaction)
+;;; rustic-interaction.el ends here
 
