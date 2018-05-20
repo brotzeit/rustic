@@ -98,7 +98,7 @@
           (funcall rustic-format-display-method proc-buffer)
           (message "Rustfmt error."))))))
 
-(define-derived-mode rustic-format-mode rustc-compilation-mode "rustfmt"
+(define-derived-mode rustic-format-mode rustic-compilation-mode "rustfmt"
   :group 'rustic)
 
 (define-derived-mode rustic-cargo-fmt-mode rustic-compilation-mode "cargo-fmt"
