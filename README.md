@@ -1,3 +1,13 @@
+This package is a fork of [rust-mode](https://github.com/rust-lang/rust-mode)
+
+Differences with rust-mode:
+
+- translation of ANSI control sequences through [xterm-color](https://github.com/atomontage/xterm-color)
+- async org babel
+- custom compilation process
+- rustfmt errors in compilation mode
+- cask for testing
+
 ## Shortcuts:
 
 * `C-c C-c C-u` rustic-compile
@@ -33,3 +43,4 @@ $ cask exec ert-runner
 git clone https://github.com/brotzeit/rust-mode-reloaded.git
 
 You can use `package-install-file` on the package's root directory
+
