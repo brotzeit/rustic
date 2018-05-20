@@ -18,6 +18,11 @@
   :type 'boolean
   :group 'rustic-mode)
 
+(defcustom rustic-babel-format-src-block t
+  "Whether to format a src block automatically after successful execution."
+  :type 'boolean
+  :group 'rustic-mode)
+
 (defvar rustic-babel-buffer-name '((:default . "*rust-babel*")))
 
 (defvar rustic-babel-process-name "rustic-babel-process"
@@ -68,13 +73,37 @@
                (result-params (list (cdr (assq :results rustic-babel-params))))
                (params rustic-babel-params)
                (marker rustic-babel-src-location))
+          (unless rustic-babel-display-compilation-buffer
+            (kill-buffer proc-buffer))
           (with-current-buffer (marker-buffer marker)
             (goto-char marker)
             (org-babel-remove-result rustic-info)
-            (org-babel-insert-result result result-params rustic-info))
-          (unless rustic-babel-display-compilation-buffer
-           (kill-buffer proc-buffer)))
+            (org-babel-insert-result result result-params rustic-info)
+            (if rustic-babel-format-src-block
+                (let ((full-body (org-element-property :value (org-element-at-point)))
+                      (proc (make-process :name "rustic-babel-format"
+                                          :buffer "rustic-babel-format-buffer"
+                                          :command `(,rustic-rustfmt-bin)
+                                          :filter #'rustic-compile-filter
+                                          :sentinel #'rustic-babel-format-sentinel)))
+                  (while (not (process-live-p proc))
+                    (sleep-for 0.01))
+                  (process-send-string proc full-body)
+                  (process-send-eof proc)))))
       (pop-to-buffer proc-buffer))))
+
+(defun rustic-babel-format-sentinel (proc output)
+  (let ((proc-buffer (process-buffer proc))
+        (marker rustic-babel-src-location))
+    (with-current-buffer proc-buffer
+      (when (string-match-p "^finished" output)
+        (with-current-buffer (marker-buffer marker)
+          (goto-char marker)
+          (save-excursion
+           (org-babel-update-block-body
+            (with-current-buffer "rustic-babel-format-buffer"
+              (buffer-string)))))))
+    (kill-buffer "rustic-babel-format-buffer")))
 
 (defun rustic-babel-generate-project ()
   "Create rust project in `org-babel-temporary-directory'."
@@ -102,7 +131,7 @@
     (rustic-babel-cargo-toml dir params)
     (setq rustic-babel-params params)
     (let ((default-directory dir))
-      (write-region full-body nil main nil 0)
+      (write-region (concat "#![allow(non_snake_case)]\n" full-body) nil main nil 0)
       (rustic-babel-eval dir)
       (setq rustic-babel-src-location (set-marker (make-marker) (point) (current-buffer)))
       project)))

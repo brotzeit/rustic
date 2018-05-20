@@ -51,7 +51,7 @@
 
 (defvar rustic-save-pos nil)
 
-(defun rustic-format-start-process (buffer string)
+(defun rustic-format-start-process (buffer string sentinel)
   "Start a new rustfmt process."
   (let* ((file (buffer-file-name buffer))
          (err-buf (get-buffer-create rustic-format-buffer-name))
@@ -72,7 +72,7 @@
                               :buffer err-buf
                               :command `(,rustic-rustfmt-bin)
                               :filter #'rustic-compile-filter
-                              :sentinel #'rustic-format-sentinel)))
+                              :sentinel sentinel)))
       (while (not (process-live-p proc))
         (sleep-for 0.01))
       (process-send-string proc string)
@@ -139,7 +139,7 @@
   (interactive)
   (unless (executable-find rustic-rustfmt-bin)
     (error "Could not locate executable \"%s\"" rustic-rustfmt-bin))
-  (rustic-format-start-process (current-buffer) (buffer-string)))
+  (rustic-format-start-process (current-buffer) (buffer-string) 'rustic-format-sentinel))
 
 
 ;;;;;;;;;;;
