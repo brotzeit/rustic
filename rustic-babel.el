@@ -1,4 +1,4 @@
-;;; rustic-babel.el --- Org babel facilities for rustic-mode -*-lexical-binding: t-*-
+;;; rustic-babel.el --- Org babel facilities for rustic -*-lexical-binding: t-*-
 
 ;; This file is distributed under the terms of both the MIT license and the
 ;; Apache License (version 2.0).
@@ -18,7 +18,7 @@
   :type 'boolean
   :group 'rustic-mode)
 
-(defvar rustic-babel-buffer-name '((:default . "*rustic-babel*")))
+(defvar rustic-babel-buffer-name '((:default . "*rust-babel*")))
 
 (defvar rustic-babel-process-name "rustic-babel-process"
   "Process name for org-babel rust compilation processes.")

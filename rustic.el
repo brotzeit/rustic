@@ -1,16 +1,17 @@
 ;;; rustic.el --- A major emacs mode for editing Rust source code -*-lexical-binding: t-*-
 
-;; Version: 0.3.0
+;; Version: 0.4
 ;; Author: Mozilla
 ;; 
 ;; Keywords: languages
-;; Package-Requires: ((emacs "24.3") (xterm-color "1.6"))
+;; Package-Requires: ((emacs "25.1") (xterm-color "1.6"))
 
 ;; This file is distributed under the terms of both the MIT license and the
 ;; Apache License (version 2.0).
 
 ;;; Commentary:
-;;
+
+;; This package is a fork of rust-mode.
 
 ;;; Code:
 
@@ -47,7 +48,7 @@
   :safe #'integerp)
 
 (defcustom rustic-indent-method-chain nil
-  "Indent Rust method chains, aligned by the '.' operators"
+  "Indent Rust method chains, aligned by the '.' operators."
   :type 'boolean
   :group 'rustic
   :safe #'booleanp)
@@ -1064,6 +1065,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
       default-directory)))
 
 (defun rustic-update-buffer-workspace ()
+  "Update current workspace."
   (setq-local rustic-buffer-workspace-dir (rustic-buffer-workspace)))
 
 ;;;;;;;;;;;;;;;;
@@ -1076,6 +1078,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
     (call-interactively 'comment-dwim)))
 
 (defun rustic-reload ()
+  "Reload rustic package."
   (interactive)
   (unload-feature 'rustic)
   (require 'rustic)
@@ -1083,4 +1086,3 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
 
 (provide 'rustic)
 ;;; rustic.el ends here
-

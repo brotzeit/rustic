@@ -34,13 +34,13 @@
   :group 'rustic-compilation)
 
 (defcustom rustic-ansi-faces ["black"
-                            "red3"
-                            "green3"
-                            "yellow3"
-                            "blue2"
-                            "magenta3"
-                            "cyan3"
-                            "white"]
+                              "red3"
+                              "green3"
+                              "yellow3"
+                              "blue2"
+                              "magenta3"
+                              "cyan3"
+                              "white"]
   "Term ansi faces."
   :type '(vector string string string string string string string string)
   :group 'rustic-compilation)
@@ -109,11 +109,11 @@ See `compilation-error-regexp-alist' for help on their format.")
 (defvar rustic-compile-process-name "rustic-comilation-process"
   "Process name for rust compilation processes.")
 
-(defvar rustic-compile-buffer-name "*rustic-compilation*"
+(defvar rustic-compile-buffer-name "*rust-compilation*"
   "Buffer name for rust compilation process buffers.")
 
 (defvar rustic-compilation-arguments nil
-  "Arguments that were given to `rustic-compile'")
+  "Arguments that were given to `rustic-compile'.")
 
 (defun rustic-compile-start-process (command buffer process mode directory &optional sentinel)
   (let ((buf (get-buffer-create buffer))
@@ -195,7 +195,7 @@ Translate STRING with `xterm-color-filter'."
 ;; Interactive
 
 (defun rustic-compilation-process-live ()
-  "Check if there's already a running rust process. 
+  "Check if there's already a running rust process.
 
 Don't allow two rust processes at once."
   (dolist (p-name (list rustic-compile-process-name
@@ -212,15 +212,17 @@ Don't allow two rust processes at once."
                   (sit-for 0.5)
                   (delete-process proc))
               (error nil))
-          (error "Cannot have two rust processes at once.")))))
+          (error "Cannot have two rust processes at once")))))
   (save-some-buffers (not compilation-ask-about-save)
                      compilation-save-buffers-predicate))
 
 ;;;###autoload
 (defun rustic-compile (&optional arg)
-  "Compile rust project. If called without arguments use `rustic-compile-command'.
+  "Compile rust project.
+If called without arguments use `rustic-compile-command'.
 
-Otherwise use provided arguments and store them in `rustic-compilation-arguments'."
+Otherwise use provided argument ARG and store it in
+`rustic-compilation-arguments'."
   (interactive "P")
   (let* ((command (if arg
                       (setq rustic-compilation-arguments
@@ -231,7 +233,8 @@ Otherwise use provided arguments and store them in `rustic-compilation-arguments
          (mode 'rustic-compilation-mode)
          (dir (setq rustic-compilation-directory (rustic-buffer-workspace))))
     (rustic-compilation-process-live)
-    (rustic-compile-start-process (split-string command) buffer-name proc-name mode dir)))
+    (rustic-compile-start-process
+     (split-string command) buffer-name proc-name mode dir)))
 
 ;;;###autoload
 (defun rustic-recompile ()
@@ -245,7 +248,8 @@ Otherwise use provided arguments and store them in `rustic-compilation-arguments
         (mode 'rustic-compilation-mode)
         (dir (or rustic-compilation-directory default-directory)))
     (rustic-compilation-process-live)
-    (rustic-compile-start-process (split-string command) buffer-name proc-name mode dir)))
+    (rustic-compile-start-process
+     (split-string command) buffer-name proc-name mode dir)))
 
 (provide 'rustic-compile)
 ;;; rustic-compile.el ends here
