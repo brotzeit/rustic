@@ -1,7 +1,8 @@
 ;;; rustic-util.el --- Rust utility functions -*-lexical-binding: t-*-
 
-;; This file is distributed under the terms of both the MIT license and the
-;; Apache License (version 2.0).
+;;; Commentary:
+
+;; Facilities for rust tools like rustfmt and clippy.
 
 ;;; Code:
 

@@ -1,7 +1,10 @@
 ;;; rustic-babel.el --- Org babel facilities for rustic -*-lexical-binding: t-*-
 
-;; This file is distributed under the terms of both the MIT license and the
-;; Apache License (version 2.0).
+;;; Commentary:
+
+;; Async org-babel execution using cargo. Building and running is seperated
+;; into two processes, as it's easier to get the output for the result of the
+;; current source block.
 
 ;;; Code:
 
@@ -41,7 +44,7 @@
   "Babel parameters.")
 
 (defun rustic-babel-eval (dir)
-  "Start a rust babel compilation process."
+  "Start a rust babel compilation process in directory DIR."
   (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer))
          (default-directory dir)
          (coding-system-for-read 'binary)
@@ -55,13 +58,13 @@
       (setq-local default-directory dir)
       (rustic-compilation-mode))
     (if rustic-babel-display-compilation-buffer
-     (display-buffer err-buff))
-    (let ((proc (make-process
+        (display-buffer err-buff))
+     (make-process
                  :name rustic-babel-process-name
                  :buffer err-buff
                  :command params
                  :filter #'rustic-compile-filter
-                 :sentinel #'rustic-babel-sentinel))))))
+                 :sentinel #'rustic-babel-sentinel)))
 
 (defun rustic-babel-sentinel (proc string)
   "Sentinel for rust babel compilation processes."
@@ -95,14 +98,14 @@
 (defun rustic-babel-format-sentinel (proc output)
   (let ((proc-buffer (process-buffer proc))
         (marker rustic-babel-src-location))
-    (with-current-buffer proc-buffer
-      (when (string-match-p "^finished" output)
-        (with-current-buffer (marker-buffer marker)
-          (goto-char marker)
-          (save-excursion
-           (org-babel-update-block-body
-            (with-current-buffer "rustic-babel-format-buffer"
-              (buffer-string)))))))
+    (save-excursion
+      (with-current-buffer proc-buffer
+        (when (string-match-p "^finished" output)
+          (with-current-buffer (marker-buffer marker)
+            (goto-char marker)
+            (org-babel-update-block-body
+             (with-current-buffer "rustic-babel-format-buffer"
+               (buffer-string)))))))
     (kill-buffer "rustic-babel-format-buffer")))
 
 (defun rustic-babel-generate-project ()

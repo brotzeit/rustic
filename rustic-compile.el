@@ -1,7 +1,6 @@
 ;;; rustic-compile.el --- Compile facilities for rustic-mode -*-lexical-binding: t-*-
 
-;; This file is distributed under the terms of both the MIT license and the
-;; Apache License (version 2.0).
+;;; Commentary:
 
 ;;; Code:
 
