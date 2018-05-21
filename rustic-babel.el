@@ -123,6 +123,7 @@
 
 (defun org-babel-execute:rust (body params)
   "Execute a block of Rust code with Babel."
+  (rustic-process-live rustic-babel-process-name)
   (let* ((full-body (org-element-property :value (org-element-at-point)))
          (dir (rustic-babel-generate-project))
          (project (car (reverse (split-string rustic-babel-dir "\\/"))))

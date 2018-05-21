@@ -195,26 +195,28 @@ Translate STRING with `xterm-color-filter'."
 ;; Interactive
 
 (defun rustic-compilation-process-live ()
-  "Check if there's already a running rust process.
-
-Don't allow two rust processes at once."
-  (dolist (p-name (list rustic-compile-process-name
+  "Check if there's already a running rust process."
+  (dolist (proc (list rustic-compile-process-name
                         rustic-format-process-name
                         rustic-clippy-process-name
                         rustic-test-process-name))
-    (let ((proc (get-process p-name)))
-      (when (process-live-p proc)
-        (if (yes-or-no-p
-             (format "`%s' is running; kill it? " p-name))
-            (condition-case ()
-                (progn
-                  (interrupt-process proc)
-                  (sit-for 0.5)
-                  (delete-process proc))
-              (error nil))
-          (error "Cannot have two rust processes at once")))))
+    (rustic-process-live proc))
   (save-some-buffers (not compilation-ask-about-save)
                      compilation-save-buffers-predicate))
+
+(defun rustic-process-live (name)
+  "Don't allow two rust processes at once."
+  (let ((proc (get-process name)))
+    (when (process-live-p proc)
+      (if (yes-or-no-p
+           (format "`%s' is running; kill it? " name))
+          (condition-case ()
+              (progn
+                (interrupt-process proc)
+                (sit-for 0.5)
+                (delete-process proc))
+            (error nil))
+        (error "Cannot have two rust processes at once")))))
 
 ;;;###autoload
 (defun rustic-compile (&optional arg)
