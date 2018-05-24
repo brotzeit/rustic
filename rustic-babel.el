@@ -1,4 +1,4 @@
-;;; rustic-babel.el --- Org babel facilities for rustic -*-lexical-binding: t-*-
+;;; rustic-babel.el --- Org babel facilities for cargo -*-lexical-binding: t-*-
 
 ;;; Commentary:
 
@@ -57,17 +57,21 @@
       (erase-buffer)
       (setq-local default-directory dir)
       (rustic-compilation-mode))
-    (if rustic-babel-display-compilation-buffer
+    (when rustic-babel-display-compilation-buffer
         (display-buffer err-buff))
-     (make-process
-                 :name rustic-babel-process-name
-                 :buffer err-buff
-                 :command params
-                 :filter #'rustic-compile-filter
-                 :sentinel #'rustic-babel-sentinel)))
+    (make-process
+     :name rustic-babel-process-name
+     :buffer err-buff
+     :command params
+     :filter #'rustic-compile-filter
+     :sentinel #'rustic-babel-sentinel)))
 
 (defun rustic-babel-sentinel (proc string)
-  "Sentinel for rust babel compilation processes."
+  "Sentinel for rust babel compilation processes.
+
+Use cargo run to get the results for org-babel.
+If `rustic-babel-format-src-block' is t, format src-block after successful 
+execution with rustfmt."
   (let ((proc-buffer (process-buffer proc))
         (inhibit-read-only t))
     (if (zerop (process-exit-status proc))
@@ -83,7 +87,7 @@
             (org-babel-remove-result rustic-info)
             (org-babel-insert-result result result-params rustic-info)
             (if rustic-babel-format-src-block
-                (let ((full-body (org-element-property :value (org-element-at-point)))
+                (let ((babel-body (org-element-property :value (org-element-at-point)))
                       (proc (make-process :name "rustic-babel-format"
                                           :buffer "rustic-babel-format-buffer"
                                           :command `(,rustic-rustfmt-bin)
@@ -91,7 +95,7 @@
                                           :sentinel #'rustic-babel-format-sentinel)))
                   (while (not (process-live-p proc))
                     (sleep-for 0.01))
-                  (process-send-string proc full-body)
+                  (process-send-string proc babel-body)
                   (process-send-eof proc)))))
       (pop-to-buffer proc-buffer))))
 
@@ -136,7 +140,8 @@
     (let ((default-directory dir))
       (write-region (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
       (rustic-babel-eval dir)
-      (setq rustic-babel-src-location (set-marker (make-marker) (point) (current-buffer)))
+      (setq rustic-babel-src-location (set-marker
+                                       (make-marker) (point) (current-buffer)))
       project)))
 
 (provide 'rustic-babel)

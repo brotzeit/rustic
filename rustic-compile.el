@@ -1,6 +1,11 @@
-;;; rustic-compile.el --- Compile facilities for rustic-mode -*-lexical-binding: t-*-
+;;; rustic-compile.el --- Compile facilities -*-lexical-binding: t-*-
 
 ;;; Commentary:
+
+;; Unlike compile.el, rustic makes use of a non dumb terminal in order to receive
+;; all ANSI control sequences, which get translated by xterm-color.
+;; This file also adds a dervied compilation mode. Error matching regexes from
+;; compile.el are removed.
 
 ;;; Code:
 
@@ -57,7 +62,9 @@
   "Keymap for rust compilation log buffers.")
 
 (define-compilation-mode rustic-compilation-mode "rust-compilation"
-  "Rust compilation mode."
+  "Rust compilation mode.
+
+Error matching regexes from compile.el are removed."
   (setq-local compilation-message-face rustic-message-face)
   (setq-local xterm-color-names-bright rustic-ansi-faces)
   (setq-local xterm-color-names rustic-ansi-faces)
@@ -66,7 +73,7 @@
   (setq-local compilation-error-regexp-alist-alist nil)
   (add-to-list 'compilation-error-regexp-alist-alist
                (cons 'rustic-arrow rustic-compilation-regexps-arrow))
-    (add-to-list 'compilation-error-regexp-alist-alist
+  (add-to-list 'compilation-error-regexp-alist-alist
                (cons 'rustic-colon rustic-compilation-regexps-colon))
 
   (setq-local compilation-error-regexp-alist nil)

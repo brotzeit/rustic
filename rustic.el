@@ -212,7 +212,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
     (modify-syntax-entry ?\^m "> b"   table)
 
     table)
-  "Syntax definitions and helpers")
+  "Syntax definitions and helpers.")
 
 (defvar rustic-top-item-beg-re
   (concat "\\s-*\\(?:priv\\|pub\\)?\\s-*"
@@ -220,7 +220,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
            '("enum" "struct" "union" "type" "mod" "use" "fn" "static" "impl"
              "extern" "trait"))
 	      "\\_>")
-  "Start of a Rust item")
+  "Start of a Rust item.")
 
 (defconst rustic-re-type-or-constructor
   (rx symbol-start
@@ -245,7 +245,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
     "virtual"
     "where" "while"
     "yield")
-  "Font-locking definitions and helpers")
+  "Font-locking definitions and helpers.")
 
 (defconst rustic-special-types
   '("u8" "i8"
@@ -265,7 +265,9 @@ function or trait.  When nil, where will be aligned with fn or trait."
     "format"
     "print"
     "println")
-  "List of builtin Rust macros for string formatting used by `rustic-font-lock-keywords'. (`write!' is handled separately.)")
+  "List of builtin Rust macros for string formatting used by
+`rustic-font-lock-keywords'.
+\\(`write!' is handled separately.)")
 
 (defvar rustic-formatting-macro-opening-re
   "[[:space:]]*[({[][[:space:]]*"
@@ -372,13 +374,13 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
              ("fn" . font-lock-function-name-face)))))
 
 (defun rustic-looking-back-str (str)
-  "Like `looking-back' but for fixed strings rather than regexps (so that it's not so slow)"
+  "Like `looking-back' but for fixed strings rather than regexps (so that it's not so slow)."
   (let ((len (length str)))
     (and (> (point) len)
          (equal str (buffer-substring-no-properties (- (point) len) (point))))))
 
 (defun rustic-looking-back-symbols (SYMS)
-  "Return non-nil if the point is just after a complete symbol that is a member of the list of strings SYMS"
+  "Return non-nil if the point is just after a complete symbol that is a member of the list of strings SYMS."
   (save-excursion
     (let* ((pt-orig (point))
            (beg-of-symbol (progn (forward-thing 'symbol -1) (point)))
@@ -388,12 +390,12 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
        (member (buffer-substring-no-properties beg-of-symbol pt-orig) SYMS)))))
 
 (defun rustic-looking-back-ident ()
-  "Non-nil if we are looking backwards at a valid rust identifier"
+  "Non-nil if we are looking backwards at a valid rust identifier."
   (let ((beg-of-symbol (save-excursion (forward-thing 'symbol -1) (point))))
     (looking-back rustic-re-ident beg-of-symbol)))
 
 (defun rustic-looking-back-macro ()
-  "Non-nil if looking back at an ident followed by a !"
+  "Non-nil if looking back at an ident followed by a '!'."
   (save-excursion (backward-char) (and (= ?! (char-after)) (rustic-looking-back-ident))))
 
 (defun rustic-paren-level () (nth 0 (syntax-ppss)))
@@ -608,7 +610,8 @@ match data if found. Returns nil if not within a Rust string."
           ;;   ident <maybe type params> [{([]
           ;; where [{([] denotes either a {, ( or [.  This character is bound as postchar.
           (cond
-           ;; If postchar is a paren or square bracket, then if the brace is a type if the identifier is one
+           ;; If postchar is a paren or square bracket, then if the brace is a type if the
+           ;; identifier is one
            ((member postchar '(?\( ?\[ )) (rustic-is-in-expression-context 'ident))
 
            ;; If postchar is a curly brace, the brace can only be a type if
@@ -624,13 +627,18 @@ match data if found. Returns nil if not within a Rust string."
 
          ((equal token 'ambiguous-operator)
           (cond
-           ;; An ampersand after an ident has to be an operator rather than a & at the beginning of a ref type
+           ;; An ampersand after an ident has to be an operator rather than a & at the beginning of
+           ;; a ref type
            ((equal postchar ?&) t)
 
-           ;; A : followed by a type then an = introduces an expression (unless it is part of a where clause of a "type" declaration)
+           ;; A : followed by a type then an = introduces an expression (unless it is part of a where
+           ;; clause of a "type" declaration)
            ((and (equal postchar ?=)
                  (looking-back "[^:]:" (- (point) 2))
-                 (not (save-excursion (and (rustic-rewind-to-decl-name) (progn (rustic-rewind-irrelevant) (rustic-looking-back-symbols '("type"))))))))
+                 (not (save-excursion
+                        (and (rustic-rewind-to-decl-name)
+                             (progn (rustic-rewind-irrelevant)
+                                    (rustic-looking-back-symbols '("type"))))))))
 
            ;; "let ident =" introduces an expression--and so does "const" and "mut"
            ((and (equal postchar ?=) (rustic-looking-back-symbols '("let" "const" "mut"))) t)
@@ -734,8 +742,7 @@ match data if found. Returns nil if not within a Rust string."
        ;; These operators always introduce expressions.  (Note that if this
        ;; regexp finds a < it must not be an angle bracket, or it'd
        ;; have been caught in the syntax-class check above instead of this.)
-       ((looking-back rustic-re-pre-expression-operators (1- (point))) t)
-       ))))
+       ((looking-back rustic-re-pre-expression-operators (1- (point))) t)))))
 
 (defun rustic-is-lt-char-operator ()
   "Return t if the < sign just after point is an operator rather
@@ -844,19 +851,19 @@ should be considered a paired angle bracket."
         'font-lock-comment-face))))
 
 (eval-and-compile
-(defconst rustic--char-literal-rx
-  (rx (seq
-	   (group "'")
-	   (or
-	    (seq
-	     "\\"
+  (defconst rustic--char-literal-rx
+    (rx (seq
+	     (group "'")
 	     (or
-	      (: "u{" (** 1 6 xdigit) "}")
-	      (: "x" (= 2 xdigit))
-	      (any "'nrt0\"\\")))
-	    (not (any "'\\")))
-	   (group "'")))
-  "A regular expression matching a character literal."))
+	      (seq
+	       "\\"
+	       (or
+	        (: "u{" (** 1 6 xdigit) "}")
+	        (: "x" (= 2 xdigit))
+	        (any "'nrt0\"\\")))
+	      (not (any "'\\")))
+	     (group "'")))
+    "A regular expression matching a character literal."))
 
 (defun rustic--syntax-propertize-raw-string (end)
   "A helper for rustic-syntax-propertize.
@@ -990,10 +997,12 @@ raw string, or to `end', whichever comes first."
     (funcall body)))
 
 (defun rustic-find-fill-prefix ()
-  (rustic-in-comment-paragraph (lambda () (rustic-with-comment-fill-prefix (lambda () fill-prefix)))))
+  (rustic-in-comment-paragraph
+   (lambda () (rustic-with-comment-fill-prefix (lambda () fill-prefix)))))
 
 (defun rustic-fill-paragraph (&rest args)
-  "Special wrapping for `fill-paragraph' to handle multi-line comments with a * prefix on each line."
+  "Special wrapping for `fill-paragraph' to handle multi-line comments with a * prefix 
+on each line."
   (rustic-in-comment-paragraph
    (lambda ()
      (rustic-with-comment-fill-prefix
@@ -1007,7 +1016,8 @@ raw string, or to `end', whichever comes first."
           t))))))
 
 (defun rustic-do-auto-fill (&rest args)
-  "Special wrapping for `do-auto-fill' to handle multi-line comments with a * prefix on each line."
+  "Special wrapping for `do-auto-fill' to handle multi-line comments with a * prefix 
+on each line."
   (rustic-with-comment-fill-prefix
    (lambda ()
      (apply 'do-auto-fill args)
@@ -1058,8 +1068,9 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
       (error "Could not locate executable \"%s\"" rustic-rustfmt-bin))))
 
 (defun rustic-buffer-workspace ()
-  "Guess the workspace root."
-  (let ((dir (locate-dominating-file (or buffer-file-name default-directory) "Cargo.toml")))
+  "Get the workspace root."
+  (let ((dir (locate-dominating-file
+              (or buffer-file-name default-directory) "Cargo.toml")))
     (if dir
         (file-truename dir)
       default-directory)))
