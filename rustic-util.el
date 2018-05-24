@@ -138,8 +138,6 @@
 (defun rustic-format-buffer ()
   "Format the current buffer using rustfmt."
   (interactive)
-  (unless (executable-find rustic-rustfmt-bin)
-    (error "Could not locate executable \"%s\"" rustic-rustfmt-bin))
   (rustic-format-start-process (current-buffer) (buffer-string) 'rustic-format-sentinel))
 
 
