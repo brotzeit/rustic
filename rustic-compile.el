@@ -37,6 +37,24 @@
   :type 'face
   :group 'rustic-compilation)
 
+(defcustom rustic-compilation-error-face
+  '((t :inherit default))
+  "Override `compilation-error-face' for rust compilation."
+  :type 'face
+  :group 'rustic-compilation)
+
+(defcustom rustic-compilation-line-face
+  '((t :inherit default))
+  "Override `compilation-line-face' for rust compilation."
+  :type 'face
+  :group 'rustic-compilation)
+
+(defcustom rustic-compilation-column-face
+  '((t :inherit default))
+  "Override `compilation-column-face' for rust compilation."
+  :type 'face
+  :group 'rustic-compilation)
+
 (defcustom rustic-ansi-faces ["black"
                               "red3"
                               "green3"
@@ -66,6 +84,10 @@
 
 Error matching regexes from compile.el are removed."
   (setq-local compilation-message-face rustic-message-face)
+  (setq-local compilation-error-face rustic-compilation-error-face)
+  (setq-local compilation-column-face rustic-compilation-line-face)
+  (setq-local compilation-line-face rustic-compilation-column-face)
+  
   (setq-local xterm-color-names-bright rustic-ansi-faces)
   (setq-local xterm-color-names rustic-ansi-faces)
   (add-hook 'next-error-hook 'rustc-scroll-down-after-next-error)
