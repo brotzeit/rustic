@@ -104,7 +104,7 @@
 ;;;;;;;;;;;;;;;;
 ;; Interactive
 
-(defun rustic-mode-indent-line ()
+(defun rustic-indent-line ()
   (interactive)
   (let ((indent
          (save-excursion
