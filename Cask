@@ -1,5 +1,5 @@
 (source melpa)
-(package-file "rust-mode.el")
+(package-file "rustic.el")
 (files "*.el")
 
 (development

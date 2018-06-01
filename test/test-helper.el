@@ -1,9 +1,8 @@
-;;; test-helper.el --- Helpers for rust-mode-reloaded-test.el
+;; -*- lexical-binding: t -*-
 
-(require 'ert)
 (require 'f)
 
-(let ((rust-mode-dir (f-parent (f-dirname (f-this-file)))))
-(add-to-list 'load-path rust-mode-dir))
+(let ((rustic-dir (f-parent (f-dirname (f-this-file)))))
+  (add-to-list 'load-path rustic-dir))
 
-;;; test-helper.el ends here
+(require 'rustic)
