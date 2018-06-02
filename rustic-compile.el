@@ -27,7 +27,7 @@
 (defcustom rustic-compile-display-method 'display-buffer
   "Default function used for displaying compilation buffer."
   :type 'function
-  :group 'rustic-compile)
+  :group 'rustic-compilation)
 
 ;; Faces
 

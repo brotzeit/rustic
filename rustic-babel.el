@@ -19,12 +19,12 @@
 (defcustom rustic-babel-display-compilation-buffer nil
   "Whether to display compilation buffer."
   :type 'boolean
-  :group 'rustic-mode)
+  :group 'rustic-babel)
 
 (defcustom rustic-babel-format-src-block t
   "Whether to format a src block automatically after successful execution."
   :type 'boolean
-  :group 'rustic-mode)
+  :group 'rustic-babel)
 
 (defvar rustic-babel-buffer-name '((:default . "*rust-babel*")))
 
