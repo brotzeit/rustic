@@ -21,7 +21,7 @@ Differences with rust-mode:
 ## Org-babel
 
 ```
-#+BEGIN_SRC rust :crates '(("regex" . "0.2") ("darling" . "0.1"))
+#+BEGIN_SRC rustic :crates '(("regex" . "0.2") ("darling" . "0.1"))
 fn main() {
     println!("{}", "foo");
 }

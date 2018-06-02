@@ -14,7 +14,7 @@
 (require 'ob-ref)
 (require 'ob-core)
 
-(add-to-list 'org-babel-tangle-lang-exts '("rust" . "rs"))
+(add-to-list 'org-babel-tangle-lang-exts '("rustic" . "rs"))
 
 (defcustom rustic-babel-display-compilation-buffer nil
   "Whether to display compilation buffer."
@@ -128,7 +128,7 @@ execution with rustfmt."
       (setq str (concat str (car crate) " = " "\"" (cdr crate) "\"" "\n")))
     (write-region str nil toml t)))
 
-(defun org-babel-execute:rust (body params)
+(defun org-babel-execute:rustic (body params)
   "Execute a block of Rust code with Babel."
   (rustic-process-live rustic-babel-process-name)
   (let* ((dir (rustic-babel-generate-project))

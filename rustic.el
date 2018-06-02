@@ -114,8 +114,12 @@ function or trait.  When nil, where will be aligned with fn or trait."
     (group symbol-start "union" symbol-end)
     (+ space) (regexp ,rustic-re-ident))))
 
+(defun rustic ()
+  (interactive)
+  (rustic-mode))
+
 ;;;###autoload
-(define-derived-mode rustic prog-mode "Rust"
+(define-derived-mode rustic-mode prog-mode "Rust"
   "Major mode for Rust code.
 
 \\{rustic-map}"
