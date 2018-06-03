@@ -54,8 +54,7 @@
 
 (defun rustic-format-start-process (buffer string sentinel)
   "Start a new rustfmt process."
-  (let* ((file (buffer-file-name buffer))
-         (err-buf (get-buffer-create rustic-format-buffer-name))
+  (let* ((err-buf (get-buffer-create rustic-format-buffer-name))
          (coding-system-for-read 'binary)
          (process-environment (nconc
 	                           (list (format "TERM=%s" "ansi"))
