@@ -114,6 +114,20 @@ function or trait.  When nil, where will be aligned with fn or trait."
     (group symbol-start "union" symbol-end)
     (+ space) (regexp ,rustic-re-ident))))
 
+(defvar rustic-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-c C-u") 'rustic-compile)
+    (define-key map (kbd "C-c C-c C-i") 'rustic-recompile)
+    (define-key map (kbd "C-c C-c C-b") 'rustic-cargo-build)
+    (define-key map (kbd "C-c C-c C-f") 'rustic-cargo-fmt)
+    (define-key map (kbd "C-c C-c C-t") 'rustic-cargo-test)
+    (define-key map (kbd "C-c C-c C-l") 'rustic-cargo-clippy)
+    (define-key map (kbd "C-c C-c C-o") 'rustic-format-buffer)
+
+    (define-key map (kbd "C-c C-c C-,") 'rustic-docstring-dwim)
+    map)
+  "Keymap for Rust major mode.")
+
 (defun rustic ()
   (interactive)
   (rustic-mode))
@@ -176,22 +190,8 @@ function or trait.  When nil, where will be aligned with fn or trait."
   (when rustic-always-locate-project-on-open
     (rustic-update-buffer-workspace)))
 
-(defvar rustic-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-c C-u") 'rustic-compile)
-    (define-key map (kbd "C-c C-c C-i") 'rustic-recompile)
-    (define-key map (kbd "C-c C-c C-b") 'rustic-cargo-build)
-    (define-key map (kbd "C-c C-c C-f") 'rustic-cargo-fmt)
-    (define-key map (kbd "C-c C-c C-t") 'rustic-cargo-test)
-    (define-key map (kbd "C-c C-c C-l") 'rustic-cargo-clippy)
-    (define-key map (kbd "C-c C-c C-o") 'rustic-format-buffer)
-
-    (define-key map (kbd "C-c C-c C-,") 'rustic-docstring-dwim)
-    map)
-  "Keymap for Rust major mode.")
-
 ;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic))
+(add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
 
 (defvar rustic-syntax-table
   (let ((table (make-syntax-table)))
