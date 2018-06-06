@@ -151,7 +151,7 @@ See `compilation-error-regexp-alist' for help on their format.")
   "Arguments that were given to `rustic-compile'.")
 
 (defun rustic-compile-start-process (command buffer process mode directory &optional sentinel)
-  (let ((buf (get-buffer-create buffer))
+  (let* ((buf (get-buffer-create buffer))
         (default-directory directory)
         (coding-system-for-read 'binary)
         (process-environment (nconc

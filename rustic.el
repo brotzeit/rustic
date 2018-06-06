@@ -190,6 +190,21 @@ function or trait.  When nil, where will be aligned with fn or trait."
   (when rustic-always-locate-project-on-open
     (rustic-update-buffer-workspace)))
 
+(defvar rustic-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-c C-u") 'rustic-compile)
+    (define-key map (kbd "C-c C-c C-i") 'rustic-recompile)
+    (define-key map (kbd "C-c C-c C-b") 'rustic-cargo-build)
+    (define-key map (kbd "C-c C-c C-f") 'rustic-cargo-fmt)
+    (define-key map (kbd "C-c C-c C-t") 'rustic-cargo-test)
+    (define-key map (kbd "C-c C-c C-l") 'rustic-cargo-clippy)
+    (define-key map (kbd "C-c C-c C-o") 'rustic-format-buffer)
+
+    (define-key map (kbd "C-c C-c C-,") 'rustic-docstring-dwim)
+    (define-key map (kbd "C-c C-c C-n") 'rustic-cargo-list-outdated)
+    map)
+  "Keymap for Rust major mode.")
+
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
 
