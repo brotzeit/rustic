@@ -253,14 +253,23 @@
 
 (defun rustic-cargo-outdated-sentinel (proc output)
   (let ((buf (process-buffer proc))
-        (inhibit-read-only t))
-    (if (zerop (process-exit-status proc))
+        (inhibit-read-only t)
+        (exit-status (process-exit-status proc)))
+    (if (zerop exit-status)
         (with-current-buffer buf
           (goto-char (point-min))
           (forward-line 2)
           (rustic-cargo-outdated-generate-menu (buffer-substring (point) (point-max)) buf))
       (with-current-buffer buf
-        (message (buffer-string))))))
+        (let ((out (buffer-string)))
+          (if (= exit-status 101)
+              (rustic-cargo-install-crate "outdated")
+            (message out)))))))
+
+(defun rustic-cargo-install-crate (crate)
+  (let ((cmd (format "cargo install cargo-%s" crate)))
+    (when (yes-or-no-p (format "Cargo-%s missing. Install ? " crate))
+      (async-shell-command cmd "cargo" "cargo-error"))))
 
 (defun rustic-cargo-outdated-generate-menu (output buf)
   (let ((inhibit-read-only t))
@@ -329,16 +338,18 @@
     (if crates
         (let ((msg (format "Upgrade %s ?" (mapconcat 'identity crates " "))))
           (when (yes-or-no-p msg)
-            (rustic-cargo-upgrade-crates crates)
-            (when (yes-or-no-p "Run rustic-compile ? ")
-              (call-interactively 'rustic-compile))))
+            (rustic-cargo-upgrade-crates crates)))
       (user-error "No operations specified"))))
 
 (defun rustic-cargo-upgrade-crates (crates)
   (let (cmd)
     (dolist (crate crates)
       (setq cmd (concat cmd (format " -d %s" crate))))
-    (shell-command-to-string (format "cargo upgrade %s" cmd))))
+    (if (string-match "error: no such subcommand:"
+                      (shell-command-to-string (format "cargo upgrade %s" cmd)))
+         (rustic-cargo-install-crate "edit")
+      (when (yes-or-no-p "Run rustic-compile ? ")
+        (call-interactively 'rustic-compile)))))
 
 
 ;;;;;;;;;;;;;;;;
