@@ -39,6 +39,12 @@ $ cask
 $ cask exec ert-runner
 ```
 
+## RLS through eglot
+
+``` emacs-lisp
+(setq eglot-server-programs '((rustic-mode . (eglot-rls "rls"))))
+```
+
 ## Installation
 
 git clone https://github.com/brotzeit/rust-mode-reloaded.git
