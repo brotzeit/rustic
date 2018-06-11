@@ -395,5 +395,10 @@ src-block or buffer on the Rust playpen."
   (interactive)
   (call-interactively 'rustic-compile "cargo build"))
 
+;;;###autoload
+(defun rustic-cargo-run ()
+  (interactive)
+  (call-interactively 'rustic-compile "cargo run"))
+
 (provide 'rustic-util)
 ;;; rustic-util.el ends here
