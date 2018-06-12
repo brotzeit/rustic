@@ -342,14 +342,16 @@
       (user-error "No operations specified"))))
 
 (defun rustic-cargo-upgrade-crates (crates)
-  (let (cmd)
+  (let (upgrade
+        update)
     (dolist (crate crates)
-      (setq cmd (concat cmd (format " -d %s" crate))))
-    (if (string-match "error: no such subcommand:"
-                      (shell-command-to-string (format "cargo upgrade %s" cmd)))
-         (rustic-cargo-install-crate "edit")
-      (when (yes-or-no-p "Run rustic-compile ? ")
-        (call-interactively 'rustic-compile)))))
+      (setq upgrade (concat upgrade (format " -d %s" crate)))
+      (setq update (concat update (format " -p %s" crate))))
+    (let ((output (shell-command-to-string (format "cargo upgrade %s" upgrade))))
+      (if (string-match "error: no such subcommand:" output)
+          (rustic-cargo-install-crate "edit")
+        (and (shell-command-to-string (format "cargo update %s" update))
+             (rustic-cargo-reload-outdated))))))
 
 
 ;;;;;;;;;;;;;;;;
