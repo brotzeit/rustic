@@ -20,6 +20,7 @@ Differences with rust-mode:
 * `C-c C-c C-l` rustic-cargo-clippy
 * `C-c C-c C-o` rustic-format-buffer
 * `C-c C-c C-n` rustic-cargo-list-outdated
+* `C-c C-c C-d` rustic-racer-describe
 
 ## Org-babel
 

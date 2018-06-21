@@ -4,7 +4,7 @@
 ;; Author: Mozilla
 ;; 
 ;; Keywords: languages
-;; Package-Requires: ((emacs "25.1") (xterm-color "1.6"))
+;; Package-Requires: ((emacs "25.1") (xterm-color "1.6") (dash "2.13.0") (s "1.10.0") (f "0.18.2") (pos-tip "0.4.6"))
 
 ;; This file is distributed under the terms of both the MIT license and the
 ;; Apache License (version 2.0).
@@ -26,6 +26,7 @@
 (require 'rustic-util)
 (require 'rustic-interaction)
 (require 'rustic-babel)
+(require 'rustic-racer)
 
 (defvar electric-pair-inhibit-predicate)
 (defvar electric-indent-chars)
@@ -352,7 +353,7 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
      (,rustic-re-type-or-constructor 1 font-lock-type-face)
 
      ;; Type-inferred binding
-     (,(concat "\\_<\\(?:let\\|ref\\)\\s-+\\(?:mut\\s-+\\)?" (rustic-re-grab rustic-re-ident) "\\_>") 1 font-lock-variable-name-face)
+     (,(concat "\\_<\\(?:let\\s-+ref\\|let\\|ref\\)\\s-+\\(?:mut\\s-+\\)?" (rustic-re-grab rustic-re-ident) "\\_>") 1 font-lock-variable-name-face)
 
      ;; Type names like `Foo::`, highlight excluding the ::
      (,(rustic-path-font-lock-matcher rustic-re-uc-ident) 1 font-lock-type-face)
