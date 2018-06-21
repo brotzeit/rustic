@@ -2948,174 +2948,178 @@ extern \"rustic-intrinsic\" fn five() {
     (test-electric-pair-insert "fn foo() -> Box" 16 ?< ?>))
   )
 
-;; TODO: fix test
-;; (ert-deftest rustic-formatting-macro-font-lock ()
-;;   ;; test that the block delimiters aren't highlighted and the comment
-;;   ;; is ignored
-;;   (rustic-test-font-lock
-;;    "print!(\"\"); { /* print!(\"\"); */ }"
-;;    '("print!" rustic-builtin-formatting-macro-face
-;;      "\"\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "print!(\"\"); */" font-lock-comment-face))
-;;   ;; with newline directly following delimiter
-;;   (rustic-test-font-lock
-;;    "print!(\n\"\"\n); { /* print!(\"\"); */ }"
-;;    '("print!" rustic-builtin-formatting-macro-face
-;;      "\"\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "print!(\"\"); */" font-lock-comment-face))
-;;   ;; with empty println!()
-;;   (rustic-test-font-lock
-;;    "println!(); { /* println!(); */ }"
-;;    '("println!" rustic-builtin-formatting-macro-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "println!(); */" font-lock-comment-face))
-;;   ;; other delimiters
-;;   (rustic-test-font-lock
-;;    "print!{\"\"}; { /* no-op */ }"
-;;    '("print!" rustic-builtin-formatting-macro-face
-;;      "\"\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face))
-;;   ;; other delimiters
-;;   (rustic-test-font-lock
-;;    "print![\"\"]; { /* no-op */ }"
-;;    '("print!" rustic-builtin-formatting-macro-face
-;;      "\"\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face))
-;;   ;; no interpolation
-;;   (rustic-test-font-lock
-;;    "print!(\"abcd\"); { /* no-op */ }"
-;;    '("print!" rustic-builtin-formatting-macro-face
-;;      "\"abcd\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face))
-;;   ;; only interpolation
-;;   (rustic-test-font-lock
-;;    "print!(\"{}\"); { /* no-op */ }"
-;;    '("print!" rustic-builtin-formatting-macro-face
-;;      "\"" font-lock-string-face
-;;      "{}" rustic-string-interpolation-face
-;;      "\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face))
-;;   ;; text + interpolation
-;;   (rustic-test-font-lock
-;;    "print!(\"abcd {}\", foo); { /* no-op */ }"
-;;    '("print!" rustic-builtin-formatting-macro-face
-;;      "\"abcd " font-lock-string-face
-;;      "{}" rustic-string-interpolation-face
-;;      "\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face))
-;;   ;; text + interpolation with specification
-;;   (rustic-test-font-lock
-;;    "print!(\"abcd {0}\", foo); { /* no-op */ }"
-;;    '("print!" rustic-builtin-formatting-macro-face
-;;      "\"abcd " font-lock-string-face
-;;      "{0}" rustic-string-interpolation-face
-;;      "\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face))
-;;   ;; text + interpolation with specification and escape
-;;   (rustic-test-font-lock
-;;    "print!(\"abcd {0}}}\", foo); { /* no-op */ }"
-;;    '("print!" rustic-builtin-formatting-macro-face
-;;      "\"abcd " font-lock-string-face
-;;      "{0}" rustic-string-interpolation-face
-;;      "}}\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face))
-;;   ;; multiple pairs
-;;   (rustic-test-font-lock
-;;    "print!(\"abcd {0} efgh {1}\", foo, bar); { /* no-op */ }"
-;;    '("print!" rustic-builtin-formatting-macro-face
-;;      "\"abcd " font-lock-string-face
-;;      "{0}" rustic-string-interpolation-face
-;;      " efgh " font-lock-string-face
-;;      "{1}" rustic-string-interpolation-face
-;;      "\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face))
-;;   ;; println
-;;   (rustic-test-font-lock
-;;    "println!(\"abcd {0} efgh {1}\", foo, bar); { /* no-op */ }"
-;;    '("println!" rustic-builtin-formatting-macro-face
-;;      "\"abcd " font-lock-string-face
-;;      "{0}" rustic-string-interpolation-face
-;;      " efgh " font-lock-string-face
-;;      "{1}" rustic-string-interpolation-face
-;;      "\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face))
-;;   ;; eprint
-;;   (rustic-test-font-lock
-;;    "eprint!(\"abcd {0} efgh {1}\", foo, bar); { /* no-op */ }"
-;;    '("eprint!" rustic-builtin-formatting-macro-face
-;;      "\"abcd " font-lock-string-face
-;;      "{0}" rustic-string-interpolation-face
-;;      " efgh " font-lock-string-face
-;;      "{1}" rustic-string-interpolation-face
-;;      "\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face))
-;;   ;; eprintln
-;;   (rustic-test-font-lock
-;;    "eprintln!(\"abcd {0} efgh {1}\", foo, bar); { /* no-op */ }"
-;;    '("eprintln!" rustic-builtin-formatting-macro-face
-;;      "\"abcd " font-lock-string-face
-;;      "{0}" rustic-string-interpolation-face
-;;      " efgh " font-lock-string-face
-;;      "{1}" rustic-string-interpolation-face
-;;      "\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face))
-;;   ;; format
-;;   (rustic-test-font-lock
-;;    "format!(\"abcd {0} efgh {1}\", foo, bar); { /* no-op */ }"
-;;    '("format!" rustic-builtin-formatting-macro-face
-;;      "\"abcd " font-lock-string-face
-;;      "{0}" rustic-string-interpolation-face
-;;      " efgh " font-lock-string-face
-;;      "{1}" rustic-string-interpolation-face
-;;      "\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face))
-;;   ;; print + raw string
-;;   (rustic-test-font-lock
-;;    "format!(r\"abcd {0} efgh {1}\", foo, bar); { /* no-op */ }"
-;;    '("format!" rustic-builtin-formatting-macro-face
-;;      "r\"abcd " font-lock-string-face
-;;      "{0}" rustic-string-interpolation-face
-;;      " efgh " font-lock-string-face
-;;      "{1}" rustic-string-interpolation-face
-;;      "\"" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face))
-;;   ;; print + raw string with hash
-;;   (rustic-test-font-lock
-;;    "format!(r#\"abcd {0} efgh {1}\"#, foo, bar); { /* no-op */ }"
-;;    '("format!" rustic-builtin-formatting-macro-face
-;;      "r#\"abcd " font-lock-string-face
-;;      "{0}" rustic-string-interpolation-face
-;;      " efgh " font-lock-string-face
-;;      "{1}" rustic-string-interpolation-face
-;;      "\"#" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face))
-;;   ;; print + raw string with two hashes
-;;   (rustic-test-font-lock
-;;    "format!(r##\"abcd {0} efgh {1}\"##, foo, bar); { /* no-op */ }"
-;;    '("format!" rustic-builtin-formatting-macro-face
-;;      "r##\"abcd " font-lock-string-face
-;;      "{0}" rustic-string-interpolation-face
-;;      " efgh " font-lock-string-face
-;;      "{1}" rustic-string-interpolation-face
-;;      "\"##" font-lock-string-face
-;;      "/* " font-lock-comment-delimiter-face
-;;      "no-op */" font-lock-comment-face)))
-
+;;TODO: fix test
+(ert-deftest rustic-formatting-macro-font-lock ()
+  ;; test that the block delimiters aren't highlighted and the comment
+  ;; is ignored
+  (rustic-test-font-lock
+   "print!(\"\"); { /* print!(\"\"); */ }"
+   '("print!" rustic-builtin-formatting-macro-face
+     "\"\"" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "print!(\"\"); */" font-lock-comment-face))
+  ;; ;; with newline directly following delimiter
+  ;; (rustic-test-font-lock
+  ;;  "print!(\n\"\"\n); { /* print!(\"\"); */ }"
+  ;;  '("print!" rustic-builtin-formatting-macro-face
+  ;;    "\"\"" font-lock-string-face
+  ;;    "/* " font-lock-comment-delimiter-face
+  ;;    "print!(\"\"); */" font-lock-comment-face))
+  ;; ;; with empty println!()
+  ;; (rustic-test-font-lock
+  ;;  "println!(); { /* println!(); */ }"
+  ;;  '("println!" rustic-builtin-formatting-macro-face
+  ;;    "/* " font-lock-comment-delimiter-face
+  ;;    "println!(); */" font-lock-comment-face))
+  (rustic-test-font-lock
+   "let ref foo;"
+   '("let" font-lock-keyword-face
+     "ref" font-lock-keyword-face
+     "foo" font-lock-variable-name-face))  
+  ;; other delimiters
+  (rustic-test-font-lock
+   "print!{\"\"}; { /* no-op */ }"
+   '("print!" rustic-builtin-formatting-macro-face
+     "\"\"" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face))
+  ;; other delimiters
+  (rustic-test-font-lock
+   "print![\"\"]; { /* no-op */ }"
+   '("print!" rustic-builtin-formatting-macro-face
+     "\"\"" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face))
+  ;; no interpolation
+  (rustic-test-font-lock
+   "print!(\"abcd\"); { /* no-op */ }"
+   '("print!" rustic-builtin-formatting-macro-face
+     "\"abcd\"" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face))
+  ;; only interpolation
+  (rustic-test-font-lock
+   "print!(\"{}\"); { /* no-op */ }"
+   '("print!" rustic-builtin-formatting-macro-face
+     "\"" font-lock-string-face
+     "{}" rustic-string-interpolation-face
+     "\"" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face))
+  ;; text + interpolation
+  (rustic-test-font-lock
+   "print!(\"abcd {}\", foo); { /* no-op */ }"
+   '("print!" rustic-builtin-formatting-macro-face
+     "\"abcd " font-lock-string-face
+     "{}" rustic-string-interpolation-face
+     "\"" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face))
+  ;; text + interpolation with specification
+  (rustic-test-font-lock
+   "print!(\"abcd {0}\", foo); { /* no-op */ }"
+   '("print!" rustic-builtin-formatting-macro-face
+     "\"abcd " font-lock-string-face
+     "{0}" rustic-string-interpolation-face
+     "\"" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face))
+  ;; text + interpolation with specification and escape
+  (rustic-test-font-lock
+   "print!(\"abcd {0}}}\", foo); { /* no-op */ }"
+   '("print!" rustic-builtin-formatting-macro-face
+     "\"abcd " font-lock-string-face
+     "{0}" rustic-string-interpolation-face
+     "}}\"" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face))
+  ;; multiple pairs
+  (rustic-test-font-lock
+   "print!(\"abcd {0} efgh {1}\", foo, bar); { /* no-op */ }"
+   '("print!" rustic-builtin-formatting-macro-face
+     "\"abcd " font-lock-string-face
+     "{0}" rustic-string-interpolation-face
+     " efgh " font-lock-string-face
+     "{1}" rustic-string-interpolation-face
+     "\"" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face))
+  ;; println
+  (rustic-test-font-lock
+   "println!(\"abcd {0} efgh {1}\", foo, bar); { /* no-op */ }"
+   '("println!" rustic-builtin-formatting-macro-face
+     "\"abcd " font-lock-string-face
+     "{0}" rustic-string-interpolation-face
+     " efgh " font-lock-string-face
+     "{1}" rustic-string-interpolation-face
+     "\"" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face))
+  ;; eprint
+  (rustic-test-font-lock
+   "eprint!(\"abcd {0} efgh {1}\", foo, bar); { /* no-op */ }"
+   '("eprint!" rustic-builtin-formatting-macro-face
+     "\"abcd " font-lock-string-face
+     "{0}" rustic-string-interpolation-face
+     " efgh " font-lock-string-face
+     "{1}" rustic-string-interpolation-face
+     "\"" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face))
+  ;; eprintln
+  (rustic-test-font-lock
+   "eprintln!(\"abcd {0} efgh {1}\", foo, bar); { /* no-op */ }"
+   '("eprintln!" rustic-builtin-formatting-macro-face
+     "\"abcd " font-lock-string-face
+     "{0}" rustic-string-interpolation-face
+     " efgh " font-lock-string-face
+     "{1}" rustic-string-interpolation-face
+     "\"" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face))
+  ;; format
+  (rustic-test-font-lock
+   "format!(\"abcd {0} efgh {1}\", foo, bar); { /* no-op */ }"
+   '("format!" rustic-builtin-formatting-macro-face
+     "\"abcd " font-lock-string-face
+     "{0}" rustic-string-interpolation-face
+     " efgh " font-lock-string-face
+     "{1}" rustic-string-interpolation-face
+     "\"" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face))
+  ;; print + raw string
+  (rustic-test-font-lock
+   "format!(r\"abcd {0} efgh {1}\", foo, bar); { /* no-op */ }"
+   '("format!" rustic-builtin-formatting-macro-face
+     "r\"abcd " font-lock-string-face
+     "{0}" rustic-string-interpolation-face
+     " efgh " font-lock-string-face
+     "{1}" rustic-string-interpolation-face
+     "\"" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face))
+  ;; print + raw string with hash
+  (rustic-test-font-lock
+   "format!(r#\"abcd {0} efgh {1}\"#, foo, bar); { /* no-op */ }"
+   '("format!" rustic-builtin-formatting-macro-face
+     "r#\"abcd " font-lock-string-face
+     "{0}" rustic-string-interpolation-face
+     " efgh " font-lock-string-face
+     "{1}" rustic-string-interpolation-face
+     "\"#" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face))
+  ;; print + raw string with two hashes
+  (rustic-test-font-lock
+   "format!(r##\"abcd {0} efgh {1}\"##, foo, bar); { /* no-op */ }"
+   '("format!" rustic-builtin-formatting-macro-face
+     "r##\"abcd " font-lock-string-face
+     "{0}" rustic-string-interpolation-face
+     " efgh " font-lock-string-face
+     "{1}" rustic-string-interpolation-face
+     "\"##" font-lock-string-face
+     "/* " font-lock-comment-delimiter-face
+     "no-op */" font-lock-comment-face)))
 
 ;;; rustic-mode-tests.el ends here
