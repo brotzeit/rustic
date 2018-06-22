@@ -71,7 +71,7 @@
     (let ((proc (make-process :name rustic-format-process-name
                               :buffer err-buf
                               :command `(,rustic-rustfmt-bin)
-                              :filter #'rustic-compile-filter
+                              :filter #'rustic-compilation-filter
                               :sentinel sentinel)))
       (while (not (process-live-p proc))
         (sleep-for 0.01))
@@ -132,7 +132,7 @@
                             (kill-buffer proc-buffer)
                             (message "Workspace formatted with cargo-fmt.")))))))
     (rustic-compilation-process-live)
-    (rustic-compile-start-process command buffer-name proc-name mode dir sentinel)))
+    (rustic-compilation-start command buffer-name proc-name mode dir sentinel)))
 
 (defun rustic-format-buffer ()
   "Format the current buffer using rustfmt."
@@ -162,7 +162,7 @@
         (mode 'rustic-cargo-clippy-mode)
         (root (rustic-buffer-workspace)))
     (rustic-compilation-process-live)
-    (rustic-compile-start-process command buffer-name proc-name mode root)))
+    (rustic-compilation-start command buffer-name proc-name mode root)))
 
 
 ;;;;;;;;;
@@ -187,7 +187,7 @@
         (mode 'rustic-cargo-test-mode)
         (root (rustic-buffer-workspace)))
     (rustic-compilation-process-live)
-    (rustic-compile-start-process command buffer-name proc-name mode root)))
+    (rustic-compilation-start command buffer-name proc-name mode root)))
 
 ;;;;;;;;;;;;;
 ;; Outdated

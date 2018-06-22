@@ -141,36 +141,40 @@ See `compilation-error-regexp-alist' for help on their format.")
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Compilation Process
 
-(defvar rustic-compile-process-name "rustic-comilation-process"
+(defvar rustic-compilation-process-name "rustic-comilation-process"
   "Process name for rust compilation processes.")
 
-(defvar rustic-compile-buffer-name "*rust-compilation*"
+(defvar rustic-compilation-buffer-name "*rust-compilation*"
   "Buffer name for rust compilation process buffers.")
 
 (defvar rustic-compilation-arguments nil
   "Arguments that were given to `rustic-compile'.")
 
-(defun rustic-compile-start-process (command buffer process mode directory &optional sentinel)
+(defun rustic-compilation-start (command buffer process mode directory &optional sentinel)
   (let* ((buf (get-buffer-create buffer))
-        (default-directory directory)
-        (coding-system-for-read 'binary)
-        (process-environment (nconc
-	                          (list (format "TERM=%s" "ansi"))
-                              process-environment))
-        (inhibit-read-only t))
+         (default-directory directory)
+         (coding-system-for-read 'binary)
+         (process-environment (nconc
+	                           (list (format "TERM=%s" "ansi"))
+                               process-environment))
+         (inhibit-read-only t))
     (setq next-error-last-buffer buf)
     (with-current-buffer buf
       (setq-local default-directory directory)
       (erase-buffer)
       (funcall mode)
-      (funcall rustic-compile-display-method buf))
-    (make-process :name process
-                  :buffer buf
-                  :command command
-                  :filter #'rustic-compile-filter
-                  :sentinel (if sentinel sentinel #'(lambda (proc output))))))
+      (funcall rustic-compile-display-method buf)
+      (make-process :name process
+                    :buffer buf
+                    :command command
+                    :filter #'rustic-compilation-filter
+                    :sentinel (if sentinel sentinel #'compilation-sentinel))
+      (setq mode-line-process
+            '((:propertize ":%s" face compilation-mode-line-run)
+              compilation-mode-line-errors))
+      (force-mode-line-update))))
 
-(defun rustic-compile-filter (proc string)
+(defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.
 Translate STRING with `xterm-color-filter'."
   (when (buffer-live-p (process-buffer proc))
@@ -231,7 +235,7 @@ Translate STRING with `xterm-color-filter'."
 
 (defun rustic-compilation-process-live ()
   "Check if there's already a running rust process."
-  (dolist (proc (list rustic-compile-process-name
+  (dolist (proc (list rustic-compilation-process-name
                         rustic-format-process-name
                         rustic-clippy-process-name
                         rustic-test-process-name))
@@ -265,12 +269,12 @@ Otherwise use provided argument ARG and store it in
                       (setq rustic-compilation-arguments
                             (read-from-minibuffer "Compile command: "))
                     rustic-compile-command))
-         (buffer-name rustic-compile-buffer-name)
-         (proc-name rustic-compile-process-name)
+         (buffer-name rustic-compilation-buffer-name)
+         (proc-name rustic-compilation-process-name)
          (mode 'rustic-compilation-mode)
          (dir (setq rustic-compilation-directory (rustic-buffer-workspace))))
     (rustic-compilation-process-live)
-    (rustic-compile-start-process
+    (rustic-compilation-start
      (split-string command) buffer-name proc-name mode dir)))
 
 ;;;###autoload
@@ -280,12 +284,12 @@ Otherwise use provided argument ARG and store it in
   (let* ((command (if (not rustic-compilation-arguments)
                      rustic-compile-command
                    rustic-compilation-arguments))
-        (buffer-name rustic-compile-buffer-name)
-        (proc-name rustic-compile-process-name)
+        (buffer-name rustic-compilation-buffer-name)
+        (proc-name rustic-compilation-process-name)
         (mode 'rustic-compilation-mode)
         (dir (or rustic-compilation-directory default-directory)))
     (rustic-compilation-process-live)
-    (rustic-compile-start-process
+    (rustic-compilation-start
      (split-string command) buffer-name proc-name mode dir)))
 
 (provide 'rustic-compile)

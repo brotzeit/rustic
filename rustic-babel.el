@@ -63,7 +63,7 @@
      :name rustic-babel-process-name
      :buffer err-buff
      :command params
-     :filter #'rustic-compile-filter
+     :filter #'rustic-compilation-filter
      :sentinel #'rustic-babel-sentinel)))
 
 (defun rustic-babel-sentinel (proc string)
@@ -91,7 +91,7 @@ execution with rustfmt."
                       (proc (make-process :name "rustic-babel-format"
                                           :buffer "rustic-babel-format-buffer"
                                           :command `(,rustic-rustfmt-bin)
-                                          :filter #'rustic-compile-filter
+                                          :filter #'rustic-compilation-filter
                                           :sentinel #'rustic-babel-format-sentinel)))
                   (while (not (process-live-p proc))
                     (sleep-for 0.01))
