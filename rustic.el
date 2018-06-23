@@ -126,6 +126,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
     (define-key map (kbd "C-c C-c C-l") 'rustic-cargo-clippy)
     (define-key map (kbd "C-c C-c C-o") 'rustic-format-buffer)
 
+    (define-key map (kbd "C-c C-c C-d") 'rustic-racer-describe)
     (define-key map (kbd "C-c C-c C-,") 'rustic-docstring-dwim)
     (define-key map (kbd "C-c C-c C-n") 'rustic-cargo-list-outdated)
     map)
