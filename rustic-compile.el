@@ -107,7 +107,9 @@ Error matching regexes from compile.el are removed."
 
   (setq-local compilation-error-regexp-alist nil)
   (add-to-list 'compilation-error-regexp-alist 'rustic-arrow)
-  (add-to-list 'compilation-error-regexp-alist 'rustic-colon))
+  (add-to-list 'compilation-error-regexp-alist 'rustic-colon)
+
+  (add-hook 'compilation-filter-hook #'rustic-insert-errno-button nil t))
 
 (defvar rustic-compilation-directory nil
   "Directory to restore to when doing `rustic-recompile'.")
@@ -229,10 +231,6 @@ Translate STRING with `xterm-color-filter'."
                  (point))))
           (set-window-start (selected-window) start-of-error))))))
 
-
-;;;;;;;;;;;;;;;;
-;; Interactive
-
 (defun rustic-compilation-process-live ()
   "Check if there's already a running rust process."
   (dolist (proc (list rustic-compilation-process-name
@@ -256,6 +254,57 @@ Translate STRING with `xterm-color-filter'."
                 (delete-process proc))
             (error nil))
         (error "Cannot have two rust processes at once")))))
+
+
+;;;;;;;;;;
+;; Rustc
+
+(defface rustic-errno-face
+  '((t :foreground "red3"))
+  "Error number face"
+  :group 'rustic-compilation)
+
+(defun rustic-insert-errno-button ()
+  (save-excursion
+    (let ((start compilation-filter-start)
+          (end (point)))
+      (goto-char start)
+      (while (re-search-forward (concat "error\\[E[0-9]+\\]") end t)
+        (make-button (match-beginning 0)
+                     (match-end 0)
+                     :type 'rustc-errno)))))
+
+(defun rustic-explain-error (button)
+  (let* ((button-string (button-label button))
+         (errno (progn (string-match "E[0-9]+" button-string)
+                       (match-string 0 button-string)))
+         (buf (get-buffer-create "*rust errno*"))
+         (inhibit-read-only t))
+    (with-current-buffer buf
+      (erase-buffer)
+      (insert (shell-command-to-string
+               (concat "rustc --explain=" errno)))
+      (markdown-view-mode)
+      (setq
+       header-line-format
+       (concat (propertize " " 'display
+                           `(space :align-to (- right-fringe ,(1+ (length errno)))))
+               (propertize errno 'face 'rustic-errno-face)))
+      (setq-local markdown-fontify-code-blocks-natively t)
+      (setq-local markdown-fontify-code-block-default-mode 'rustic-mode)
+      (markdown-toggle-markup-hiding 1)
+      (goto-char (point-min)))
+    (pop-to-buffer buf)))
+
+(define-button-type 'rustc-errno
+  'action #'rustic-explain-error
+  'follow-link t
+  'face 'rustic-errno-face
+  'help-echo "mouse-1, RET: Explain errno")
+
+
+;;;;;;;;;;;;;;;;
+;; Interactive
 
 ;;;###autoload
 (defun rustic-compile (&optional arg)
