@@ -504,7 +504,7 @@ split it into its constituent parts."
   (interactive)
   (let ((buf (rustic-racer-doc (thing-at-point 'symbol))))
     (if buf
-        (temp-buffer-window-show buf)
+        (pop-to-buffer buf)
       (user-error "No function or type found at point"))))
 
 (provide 'rustic-racer)
