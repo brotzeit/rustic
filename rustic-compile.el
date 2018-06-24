@@ -269,10 +269,11 @@ Translate STRING with `xterm-color-filter'."
     (let ((start compilation-filter-start)
           (end (point)))
       (goto-char start)
-      (while (re-search-forward (concat "error\\[E[0-9]+\\]") end t)
-        (make-button (match-beginning 0)
-                     (match-end 0)
-                     :type 'rustc-errno)))))
+      (save-match-data
+        (while (re-search-forward (concat "error\\[E[0-9]+\\]") end t)
+          (make-button (match-beginning 0)
+                       (match-end 0)
+                       :type 'rustc-errno))))))
 
 (defun rustic-explain-error (button)
   (let* ((button-string (button-label button))
