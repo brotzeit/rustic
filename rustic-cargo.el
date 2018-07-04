@@ -239,5 +239,10 @@
   (interactive)
   (call-interactively 'rustic-compile "cargo run"))
 
+;;;###autoload
+(defun rustic-cargo-clean ()
+  (interactive)
+  (call-interactively 'rustic-compile "cargo clean"))
+
 (provide 'rustic-cargo)
 ;;; rustic-cargo.el ends here
