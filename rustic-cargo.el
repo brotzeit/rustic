@@ -2,6 +2,8 @@
 
 ;;; Code:
 
+(require 'tabulated-list)
+
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
 
