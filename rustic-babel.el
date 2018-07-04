@@ -130,7 +130,7 @@ execution with rustfmt."
           (progn
             (put-text-property beg end 'project (make-symbol project))  
             project)
-        (let* ((new (rustic-babel-generate-project)))
+        (let ((new (rustic-babel-generate-project)))
           (put-text-property beg end 'project (make-symbol new))
           new)))))
     
