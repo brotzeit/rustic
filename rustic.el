@@ -23,6 +23,7 @@
 (require 'newcomment)
 
 (require 'rustic-compile)
+(require 'rustic-cargo)
 (require 'rustic-util)
 (require 'rustic-interaction)
 (require 'rustic-babel)
