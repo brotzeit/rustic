@@ -257,7 +257,6 @@ Translate STRING with `xterm-color-filter'."
 
 (defun rustic-save-some-buffers ()
   (let* ((buffers (projectile-buffers-with-file (projectile-project-buffers)))
-         (rustic-format-on-save nil)
          (sentinel (lambda (proc output)
                      (let ((proc-buffer (process-buffer proc)))
                        (with-current-buffer proc-buffer
@@ -273,16 +272,26 @@ Translate STRING with `xterm-color-filter'."
       (when (and (buffer-live-p buffer)
     	         (buffer-modified-p buffer))
         (with-current-buffer buffer
-          (save-buffer)
-          (when (eq major-mode 'rustic-mode)
-            (let* ((file (buffer-file-name buffer))
-                   (proc (rustic-format-start-process buffer
-                                                      sentinel
-                                                      nil
-                                                      `(,rustic-rustfmt-bin ,file))))
-              (while (eq (process-status proc) 'run)
-                (sit-for 0.1)))
-            (revert-buffer t t)))))))
+          (let ((saved-p nil))
+            (let ((rustic-format-on-save nil))
+              (setq saved-p
+                    (if buffer-save-without-query
+                        (progn (save-buffer) t)
+                      (if (yes-or-no-p (format "Save file %s ? "
+                                               (buffer-file-name buffer)))
+                          (progn (save-buffer) t)
+                        nil))))
+            (when (and saved-p
+                       rustic-format-on-save
+                       (eq major-mode 'rustic-mode))
+              (let* ((file (buffer-file-name buffer))
+                     (proc (rustic-format-start-process buffer
+                                                        sentinel
+                                                        nil
+                                                        `(,rustic-rustfmt-bin ,file))))
+                (while (eq (process-status proc) 'run)
+                  (sit-for 0.1)))
+              (revert-buffer t t))))))))
 
 
 ;;;;;;;;;;
