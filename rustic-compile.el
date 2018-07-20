@@ -274,14 +274,15 @@ Translate STRING with `xterm-color-filter'."
     	         (buffer-modified-p buffer))
         (with-current-buffer buffer
           (save-buffer)
-          (let* ((file (buffer-file-name buffer))
-                 (proc (rustic-format-start-process buffer
-                                                    sentinel
-                                                    nil
-                                                    `(,rustic-rustfmt-bin ,file))))
-            (while (eq (process-status proc) 'run)
-              (sit-for 0.1)))
-          (revert-buffer t t))))))
+          (when (eq major-mode 'rustic-mode)
+            (let* ((file (buffer-file-name buffer))
+                   (proc (rustic-format-start-process buffer
+                                                      sentinel
+                                                      nil
+                                                      `(,rustic-rustfmt-bin ,file))))
+              (while (eq (process-status proc) 'run)
+                (sit-for 0.1)))
+            (revert-buffer t t)))))))
 
 
 ;;;;;;;;;;
