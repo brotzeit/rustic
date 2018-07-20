@@ -45,7 +45,7 @@
 
 (defvar rustic-save-pos nil)
 
-(defun rustic-format-start-process (buffer string sentinel)
+(defun rustic-format-start-process (buffer sentinel &optional string command)
   "Start a new rustfmt process."
   (let* ((err-buf (get-buffer-create rustic-format-buffer-name))
          (coding-system-for-read 'binary)
@@ -63,13 +63,16 @@
     (setq rustic-save-pos (point))
     (let ((proc (make-process :name rustic-format-process-name
                               :buffer err-buf
-                              :command `(,rustic-rustfmt-bin)
+                              :command (if command command
+                                         `(,rustic-rustfmt-bin))
                               :filter #'rustic-compilation-filter
                               :sentinel sentinel)))
       (while (not (process-live-p proc))
         (sleep-for 0.01))
-      (process-send-string proc string)
-      (process-send-eof proc))))
+      (when string 
+        (process-send-string proc string)
+        (process-send-eof proc))
+      proc)))
 
 (defun rustic-format-sentinel (proc output)
   "Sentinel for rustfmt processes."
@@ -130,7 +133,7 @@
 (defun rustic-format-buffer ()
   "Format the current buffer using rustfmt."
   (interactive)
-  (rustic-format-start-process (current-buffer) (buffer-string) 'rustic-format-sentinel))
+  (rustic-format-start-process (current-buffer) 'rustic-format-sentinel (buffer-string)))
 
 
 ;;;;;;;;;;;;;;;;

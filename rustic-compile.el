@@ -9,8 +9,9 @@
 
 ;;; Code:
 
-(require 'xterm-color)
 (require 'compile)
+(require 'xterm-color)
+(require 'projectile)
 
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
@@ -238,8 +239,7 @@ Translate STRING with `xterm-color-filter'."
                         rustic-clippy-process-name
                         rustic-test-process-name))
     (rustic-process-live proc))
-  (save-some-buffers (not compilation-ask-about-save)
-                     compilation-save-buffers-predicate))
+  (rustic-save-some-buffers))
 
 (defun rustic-process-live (name)
   "Don't allow two rust processes at once."
@@ -254,6 +254,34 @@ Translate STRING with `xterm-color-filter'."
                 (delete-process proc))
             (error nil))
         (error "Cannot have two rust processes at once")))))
+
+(defun rustic-save-some-buffers ()
+  (let* ((buffers (projectile-buffers-with-file (projectile-project-buffers)))
+         (rustic-format-on-save nil)
+         (sentinel (lambda (proc output)
+                     (let ((proc-buffer (process-buffer proc)))
+                       (with-current-buffer proc-buffer
+                         (if (string-match-p "^finished" output)
+                             (kill-buffer proc-buffer)
+                           (goto-char (point-min))
+                           (funcall rustic-format-display-method proc-buffer)
+                           (message "Rustfmt error.")))))))
+    (when-let (b (get-buffer rustic-format-buffer-name))
+      (when (buffer-live-p b)
+        (kill-buffer b)))
+    (dolist (buffer buffers)
+      (when (and (buffer-live-p buffer)
+    	         (buffer-modified-p buffer))
+        (with-current-buffer buffer
+          (save-buffer)
+          (let* ((file (buffer-file-name buffer))
+                 (proc (rustic-format-start-process buffer
+                                                    sentinel
+                                                    nil
+                                                    `(,rustic-rustfmt-bin ,file))))
+            (while (eq (process-status proc) 'run)
+              (sit-for 0.1)))
+          (revert-buffer t t))))))
 
 
 ;;;;;;;;;;
@@ -324,23 +352,25 @@ Otherwise use provided argument ARG and store it in
          (mode 'rustic-compilation-mode)
          (dir (setq rustic-compilation-directory (rustic-buffer-workspace))))
     (rustic-compilation-process-live)
-    (rustic-compilation-start
-     (split-string command) buffer-name proc-name mode dir)))
+    (unless (buffer-live-p (get-buffer rustic-format-buffer-name))
+      (rustic-compilation-start
+       (split-string command) buffer-name proc-name mode dir))))
 
 ;;;###autoload
 (defun rustic-recompile ()
   "Re-compile the program using the last `rustic-compile' arguments."
   (interactive)
   (let* ((command (if (not rustic-compilation-arguments)
-                     rustic-compile-command
-                   rustic-compilation-arguments))
-        (buffer-name rustic-compilation-buffer-name)
-        (proc-name rustic-compilation-process-name)
-        (mode 'rustic-compilation-mode)
-        (dir (or rustic-compilation-directory default-directory)))
+                      rustic-compile-command
+                    rustic-compilation-arguments))
+         (buffer-name rustic-compilation-buffer-name)
+         (proc-name rustic-compilation-process-name)
+         (mode 'rustic-compilation-mode)
+         (dir (or rustic-compilation-directory default-directory)))
     (rustic-compilation-process-live)
-    (rustic-compilation-start
-     (split-string command) buffer-name proc-name mode dir)))
+    (unless (buffer-live-p (get-buffer rustic-format-buffer-name))
+      (rustic-compilation-start
+       (split-string command) buffer-name proc-name mode dir))))
 
 (provide 'rustic-compile)
 ;;; rustic-compile.el ends here
