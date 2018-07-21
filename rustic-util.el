@@ -114,6 +114,7 @@
 
 ;;;###autoload
 (defun rustic-cargo-fmt ()
+  "Use rustfmt via cargo."
   (interactive)
   (let ((command (list rustic-cargo-bin "fmt"))
         (buffer-name rustic-format-buffer-name)

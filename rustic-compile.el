@@ -256,6 +256,9 @@ Translate STRING with `xterm-color-filter'."
         (error "Cannot have two rust processes at once")))))
 
 (defun rustic-save-some-buffers ()
+  "Unlike `save-some-buffers', only project related files are considered.
+
+The variable `buffer-save-without-query' can be used for customization."
   (let* ((buffers (projectile-buffers-with-file (projectile-project-buffers)))
          (sentinel (lambda (proc output)
                      (let ((proc-buffer (process-buffer proc)))
@@ -303,6 +306,7 @@ Translate STRING with `xterm-color-filter'."
   :group 'rustic-compilation)
 
 (defun rustic-insert-errno-button ()
+  "Insert buttons in `rustic-compilation-mode'."
   (save-excursion
     (let ((start compilation-filter-start)
           (end (point)))
@@ -314,6 +318,7 @@ Translate STRING with `xterm-color-filter'."
                        :type 'rustc-errno))))))
 
 (defun rustic-explain-error (button)
+  "Open buffer with explanation for error at point."
   (let* ((button-string (button-label button))
          (errno (progn (string-match "E[0-9]+" button-string)
                        (match-string 0 button-string)))
