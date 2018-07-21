@@ -144,7 +144,7 @@ See `compilation-error-regexp-alist' for help on their format.")
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Compilation Process
 
-(defvar rustic-compilation-process-name "rustic-comilation-process"
+(defvar rustic-compilation-process-name "rustic-compilation-process"
   "Process name for rust compilation processes.")
 
 (defvar rustic-compilation-buffer-name "*rust-compilation*"
@@ -232,28 +232,34 @@ Translate STRING with `xterm-color-filter'."
                  (point))))
           (set-window-start (selected-window) start-of-error))))))
 
-(defun rustic-compilation-process-live ()
-  "Check if there's already a running rust process."
-  (dolist (proc (list rustic-compilation-process-name
-                        rustic-format-process-name
-                        rustic-clippy-process-name
-                        rustic-test-process-name))
-    (rustic-process-live proc))
-  (rustic-save-some-buffers))
+(defun rustic-compilation-process-live (&optional nosave)
+  "List live rustic processes."
+  (let ((procs (list rustic-compilation-process-name
+                     rustic-format-process-name
+                     rustic-clippy-process-name
+                     rustic-test-process-name))
+        live)
+    (setq live (-non-nil (cl-loop for proc in procs
+                                  collect (let ((p (get-process proc)))
+                                            (if (process-live-p p) p nil)))))
+    (cl-assert (<= (length live) 1))
+    (when live
+      (rustic-process-kill-p (car live)))
+    (unless nosave
+      (rustic-save-some-buffers))
+    live))
 
-(defun rustic-process-live (name)
+(defun rustic-process-kill-p (proc)
   "Don't allow two rust processes at once."
-  (let ((proc (get-process name)))
-    (when (process-live-p proc)
-      (if (yes-or-no-p
-           (format "`%s' is running; kill it? " name))
-          (condition-case ()
-              (progn
-                (interrupt-process proc)
-                (sit-for 0.5)
-                (delete-process proc))
-            (error nil))
-        (error "Cannot have two rust processes at once")))))
+  (if (yes-or-no-p
+       (format "`%s' is running; kill it? " proc))
+      (condition-case ()
+          (progn
+            (interrupt-process proc)
+            (sit-for 0.5)
+            (delete-process proc))
+        (error nil))
+    (error "Cannot have two rust processes at once")))
 
 (defun rustic-save-some-buffers ()
   "Unlike `save-some-buffers', only project related files are considered.

@@ -151,7 +151,8 @@ execution with rustfmt."
 
 (defun org-babel-execute:rustic (body params)
   "Execute a block of Rust code with Babel."
-  (rustic-process-live rustic-babel-process-name)
+  (when-let (p (process-live-p (get-process rustic-babel-process-name)))
+    (rustic-kill-live-process-p p))
   (let* ((default-directory org-babel-temporary-directory)
          (project (rustic-babel-project))
          (dir (setq rustic-babel-dir (expand-file-name project)))
