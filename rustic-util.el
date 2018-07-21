@@ -132,6 +132,7 @@
   (interactive)
   (unless (eq major-mode 'rustic-mode)
     (error "Not a rustic-mode buffer."))
+  (rustic-compilation-process-live t)
   (rustic-format-start-process (current-buffer) 'rustic-format-sentinel (buffer-string)))
 
 

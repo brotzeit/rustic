@@ -1063,7 +1063,8 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
 
 (defun rustic-before-save-hook ()
   "Don't throw error if rustfmt isn't installed, as it makes saving impossible."
-  (when rustic-format-on-save
+  (when (and rustic-format-on-save
+             (not (rustic-compilation-process-live t)))
     (condition-case rustfmt-err
         (let ((proc (rustic-format-buffer)))
           (while (eq (process-status proc) 'run)
