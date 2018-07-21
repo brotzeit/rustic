@@ -134,6 +134,8 @@
 (defun rustic-format-buffer ()
   "Format the current buffer using rustfmt."
   (interactive)
+  (unless (eq major-mode 'rustic-mode)
+    (error "Not a rustic-mode buffer."))
   (rustic-format-start-process (current-buffer) 'rustic-format-sentinel (buffer-string)))
 
 
