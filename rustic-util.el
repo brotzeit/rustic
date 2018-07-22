@@ -66,12 +66,12 @@
       (while (not (process-live-p proc))
         (sleep-for 0.01))
       (when string 
-        (process-send-string proc string)
+        (process-send-string proc (concat string "\n"))
         (process-send-eof proc))
       proc)))
 
 (defun rustic-format-sentinel (proc output)
-  "Sentinel for rustfmt processes."
+  "Sentinel for rustfmt processes when using stdin."
   (let ((proc-buffer (process-buffer proc))
         (inhibit-read-only t))
     (with-current-buffer proc-buffer
@@ -89,6 +89,16 @@
               (replace-match rustic-format-file-name)))
           (funcall rustic-format-display-method proc-buffer)
           (message "Rustfmt error."))))))
+
+(defun rustic-format-file-sentinel ()
+  "Sentinel for rustfmt processes when formatting a file."
+  (let ((proc-buffer (process-buffer proc)))
+    (with-current-buffer proc-buffer
+      (if (string-match-p "^finished" output)
+          (kill-buffer proc-buffer)
+        (goto-char (point-min))
+        (funcall rustic-format-display-method proc-buffer)
+        (message "Rustfmt error.")))))
 
 (define-derived-mode rustic-format-mode rustic-compilation-mode "rustfmt"
   :group 'rustic)

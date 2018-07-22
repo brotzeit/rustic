@@ -264,16 +264,9 @@ Translate STRING with `xterm-color-filter'."
 (defun rustic-save-some-buffers ()
   "Unlike `save-some-buffers', only project related files are considered.
 
-The variable `buffer-save-without-query' can be used for customization."
-  (let* ((buffers (projectile-buffers-with-file (projectile-project-buffers)))
-         (sentinel (lambda (proc output)
-                     (let ((proc-buffer (process-buffer proc)))
-                       (with-current-buffer proc-buffer
-                         (if (string-match-p "^finished" output)
-                             (kill-buffer proc-buffer)
-                           (goto-char (point-min))
-                           (funcall rustic-format-display-method proc-buffer)
-                           (message "Rustfmt error.")))))))
+The variable `buffer-save-without-query' can be used for customization and
+buffers are formatted after saving if `rustic-format-on-save' is t."
+  (let* ((buffers (projectile-buffers-with-file (projectile-project-buffers))))
     (when-let (b (get-buffer rustic-format-buffer-name))
       (when (buffer-live-p b)
         (kill-buffer b)))
@@ -295,7 +288,7 @@ The variable `buffer-save-without-query' can be used for customization."
                        (eq major-mode 'rustic-mode))
               (let* ((file (buffer-file-name buffer))
                      (proc (rustic-format-start-process buffer
-                                                        sentinel
+                                                        'rustic-format-file-sentinel
                                                         nil
                                                         `(,rustic-rustfmt-bin ,file))))
                 (while (eq (process-status proc) 'run)
