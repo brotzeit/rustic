@@ -13,15 +13,15 @@ Differences with rust-mode:
 
 ## Some Commands:
 
-rustic-compile
-rustic-recompile
-rustic-cargo-build
-rustic-cargo-fmt
-rustic-cargo-test
-rustic-cargo-clippy
-rustic-cargo-list-outdated
-rustic-format-buffer
-rustic-racer-describe
+* rustic-compile
+* rustic-recompile
+* rustic-cargo-build
+* rustic-cargo-fmt
+* rustic-cargo-test
+* rustic-cargo-clippy
+* rustic-cargo-list-outdated
+* rustic-format-buffer
+* rustic-racer-describe
 
 ## Org-babel
 
