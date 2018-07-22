@@ -8,10 +8,13 @@
     (with-current-buffer buf
       (should-error (rustic-format-buffer))
       (rustic-mode)
-      (let ((proc (rustic-format-start-process (current-buffer) 'rustic-format-sentinel string)))
+      (insert string)
+      (backward-char 10)
+      (let ((proc (rustic-format-start-process (current-buffer) 'rustic-format-sentinel (buffer-string))))
         (while (eq (process-status proc) 'run)
           (sit-for 0.1)))
-      (should (string= (buffer-string) formatted-string)))))
+      (should (string= (buffer-string) formatted-string))
+      (should-not (= (point) (or (point-min) (point-max)))))))
 
 (ert-deftest rust-test-format-file ()
   (let* ((string "fn main()      {}")
