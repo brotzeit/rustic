@@ -1,3 +1,7 @@
+(require 'cl)
+(require 'imenu)
+(require 'f)
+
 (defun rustic-test-fontify-string (str)
   (with-temp-buffer
     (rustic)
