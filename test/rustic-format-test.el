@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t -*-
 
-(ert-deftest rust-test-format-buffer ()
+(ert-deftest rustic-test-format-buffer ()
   (let ((string "fn main()      {}")
         (formatted-string "fn main() {}\n")
         (buf (get-buffer-create "test"))
@@ -17,7 +17,7 @@
       (should (string= (buffer-string) formatted-string))
       (should-not (= (point) (or (point-min) (point-max)))))))
 
-(ert-deftest rust-test-format-file ()
+(ert-deftest rustic-test-format-file ()
   (let* ((string "fn main()      {}")
          (formatted-string "fn main() {}\n")
          (default-directory org-babel-temporary-directory)
@@ -38,3 +38,32 @@
                    'rustic-format-file-sentinel
                    nil
                    `(,rustic-rustfmt-bin "/tmp/nofile")))))
+
+(ert-deftest rustic-test-format-buffer-before-save ()
+  (let* ((string "fn main()      {}")
+         (formatted-string "fn main() {}\n")
+         (buf (get-buffer-create "test"))
+         (default-directory org-babel-temporary-directory)
+         (file (progn (shell-command-to-string "touch test.rs")
+                      (expand-file-name "test.rs")))
+         (buffer-read-only nil))
+    (let ((rustic-format-on-save t))
+      (with-current-buffer buf
+        (write-file file)
+        (erase-buffer)
+        (rustic-mode)
+        (insert string)
+        (backward-char 10)
+        (save-buffer)
+        (if-let ((proc (get-process rustic-format-process-name)))
+            (while (eq (process-status proc) 'run)
+              (sit-for 0.01)))
+        (should (string= (buffer-string) formatted-string))
+        (should-not (= (point) (or (point-min) (point-max))))))
+    (let ((rustic-format-on-save nil))
+      (with-current-buffer buf
+        (erase-buffer)
+        (rustic-mode)
+        (insert string)
+        (save-buffer)
+        (should (string= (buffer-string) (concat string "\n")))))))
