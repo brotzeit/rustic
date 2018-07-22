@@ -5,7 +5,7 @@
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
 
-(defcustom rustic-format-on-save nil
+(defcustom rustic-format-on-save t
   "Format future rust buffers before saving using rustfmt."
   :type 'boolean
   :safe #'booleanp
