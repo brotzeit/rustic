@@ -1,4 +1,4 @@
-;;; rust-format-test.el --- ERT tests for rust-mode.el
+;; -*- lexical-binding: t -*-
 
 (ert-deftest rust-test-format-buffer ()
   (let ((string "fn main()      {}")
@@ -10,7 +10,8 @@
       (rustic-mode)
       (insert string)
       (backward-char 10)
-      (let ((proc (rustic-format-start-process (current-buffer) 'rustic-format-sentinel (buffer-string))))
+      (let ((proc (rustic-format-start-process
+                   (current-buffer) 'rustic-format-sentinel (buffer-string))))
         (while (eq (process-status proc) 'run)
           (sit-for 0.1)))
       (should (string= (buffer-string) formatted-string))
