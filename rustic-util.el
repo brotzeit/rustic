@@ -61,6 +61,11 @@
       (setq-local default-directory dir)
       (erase-buffer)
       (rustic-format-mode))
+    (when command
+      (let ((file (nth 1 command)))
+        (unless (file-exists-p file)
+          (error (format "File %s does not exist." file))))
+      (cl-assert (= (length command) 2)))
     (let ((proc (make-process :name rustic-format-process-name
                               :buffer err-buf
                               :command (if command command
