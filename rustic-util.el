@@ -40,6 +40,9 @@
 (defvar rustic-format-buffer-name "*rustfmt*"
   "Buffer name for rustfmt process buffers.")
 
+(defvar rustic-format-file-name nil
+  "Holds last file formatted by `rustic-format-start-process'.")
+
 (defvar rustic-save-pos nil)
 
 (defun rustic-format-start-process (buffer sentinel &optional string command)
@@ -53,6 +56,7 @@
          (dir (rustic-buffer-workspace)))
     (setq next-error-last-buffer buffer)
     (setq rustic-save-pos (point))
+    (setq rustic-format-file-name (buffer-file-name buffer))
     (with-current-buffer err-buf
       (setq-local default-directory dir)
       (erase-buffer)
@@ -90,7 +94,7 @@
           (funcall rustic-format-display-method proc-buffer)
           (message "Rustfmt error."))))))
 
-(defun rustic-format-file-sentinel ()
+(defun rustic-format-file-sentinel (proc output)
   "Sentinel for rustfmt processes when formatting a file."
   (let ((proc-buffer (process-buffer proc)))
     (with-current-buffer proc-buffer
