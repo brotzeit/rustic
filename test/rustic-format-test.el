@@ -31,7 +31,6 @@
       (insert-file-contents main)
       (should (string= (buffer-string) formatted-string)))
     (should-error (rustic-format-start-process
-                   (current-buffer)
                    'rustic-format-file-sentinel
                    nil
-                   `(,rustic-rustfmt-bin nil)))))
+                   `(,rustic-rustfmt-bin "/tmp/nofile")))))
