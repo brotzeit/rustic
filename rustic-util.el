@@ -177,7 +177,8 @@
             ((and (eq rls-pkg 'lsp-mode)
                   (featurep 'lsp-mode))
              (lsp-rust-enable)
-             (flycheck-mode))
+             (when (featurep 'flycheck)
+               (flycheck-mode)))
             (t
              (rustic-setup-rls-1 rls-pkg))))))
 

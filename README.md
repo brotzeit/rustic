@@ -1,5 +1,7 @@
 [![MELPA](https://melpa.org/packages/rustic-badge.svg)](https://melpa.org/#/rustic)
 
+# Rustic
+
 This package is a fork of [rust-mode](https://github.com/rust-lang/rust-mode)
 
 Differences with rust-mode:
@@ -8,6 +10,7 @@ Differences with rust-mode:
 - async org babel
 - custom compilation process
 - rustfmt errors in a rust compilation mode
+- automatic RLS configuration with [eglot](https://github.com/joaotavora/eglot) or [lsp-mode](https://github.com/emacs-lsp/lsp-mode)
 - cask for testing
 - etc.
 
