@@ -4,7 +4,7 @@
 ;; Author: Mozilla
 ;; 
 ;; Keywords: languages
-;; Package-Requires: ((emacs "25.1") (xterm-color "1.6") (dash "2.13.0") (s "1.10.0") (f "0.18.2") (projectile "0.14.0"))
+;; Package-Requires: ((emacs "25.3") (xterm-color "1.6") (dash "2.13.0") (s "1.10.0") (f "0.18.2") (projectile "0.14.0")  (lsp-mode "3.0") (markdown-mode "2.3"))
 
 ;; This file is distributed under the terms of both the MIT license and the
 ;; Apache License (version 2.0).
@@ -29,6 +29,19 @@
 (require 'rustic-babel)
 (require 'rustic-racer)
 
+(with-eval-after-load 'lsp-mode
+  (require 'rustic-lsp))
+
+(with-eval-after-load 'eglot
+  ;; replace rust-mode with rustic
+  (setq eglot-server-programs
+        `((rustic-mode . (eglot-rls "rls"))
+          ,@(-remove-first (lambda (mode)
+                              (string= (car mode) 'rust-mode))
+                            eglot-server-programs)))
+  ;; don't allow formatting with rls
+  (add-to-list 'eglot-ignored-server-capabilites :documentFormattingProvider))
+
 (defvar electric-pair-inhibit-predicate)
 (defvar electric-indent-chars)
 
@@ -42,6 +55,12 @@
 
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
+
+(defcustom rustic-rls-pkg 'eglot
+  "Emacs package for interaction with rls."
+  :type '(choice (symbol :tag 'eglot "eglot")
+                 (symbol :tag 'lsp-mode "lsp-mode"))
+  :group 'rustic)
 
 (defcustom rustic-indent-offset 4
   "Indent Rust code by this number of spaces."
@@ -174,7 +193,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
   ;; Allow paragraph fills for comments
   (setq-local comment-start-skip "\\(?://[/!]*\\|/\\*[*!]?\\)[[:space:]]*")
   (setq-local paragraph-start
-       (concat "[[:space:]]*\\(?:" comment-start-skip "\\|\\*/?[[:space:]]*\\|\\)$"))
+              (concat "[[:space:]]*\\(?:" comment-start-skip "\\|\\*/?[[:space:]]*\\|\\)$"))
   (setq-local paragraph-separate paragraph-start)
   (setq-local normal-auto-fill-function 'rustic-do-auto-fill)
   (setq-local fill-paragraph-function 'rustic-fill-paragraph)
@@ -196,7 +215,17 @@ function or trait.  When nil, where will be aligned with fn or trait."
   (setq-local rustic-buffer-workspace-dir nil)
 
   (when rustic-always-locate-project-on-open
-    (rustic-update-buffer-workspace)))
+    (rustic-update-buffer-workspace))
+
+  (unless noninteractive ;; TODO: fix tests to work with eglot/lsp-mode activated
+   (cond ((and (eq rustic-rls-pkg 'eglot)
+               (featurep 'eglot))
+          (eglot-ensure))
+         ((and (eq rustic-rls-pkg 'lsp-mode)
+               (featurep 'lsp-mode))
+          (lsp-rust-enable))
+         (t
+          (error "No RLS package available.")))))
 
 (defvar rustic-syntax-table
   (let ((table (make-syntax-table)))
