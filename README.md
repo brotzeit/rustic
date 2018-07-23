@@ -46,6 +46,18 @@ $ cask exec ert-runner
 ## RLS through eglot
 
 ``` emacs-lisp
-(setq eglot-server-programs '((rustic-mode . (eglot-rls "rls"))))
+(require 'eglot)
+;; replace rust-mode with rustic
+(setq eglot-server-programs
+      `((rustic-mode . (eglot-rls "rls"))
+        ,@(-remove-first  (lambda (mode)
+                            (string= (car mode) 'rust-mode))
+                          eglot-server-programs)))
+
+;; start rls server automatically
+(add-hook 'rustic-mode-hook 'eglot-ensure)
+
+;; don't allow formatting with rls
+(add-to-list 'eglot-ignored-server-capabilites :documentFormattingProvider)
 ```
 
