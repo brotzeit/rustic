@@ -2,7 +2,6 @@
 
 ;;; Code:
 
-(require 'lsp-mode)
 (require 'cl-lib)
 (require 'json)
 (require 'font-lock)

@@ -155,6 +155,46 @@
   (rustic-format-start-process (current-buffer) 'rustic-format-sentinel (buffer-string)))
 
 
+;;;;;;;;
+;; RLS
+
+(defun rustic-setup-eglot ()
+  ;; replace rust-mode with rustic
+  (setq eglot-server-programs
+        `((rustic-mode . (eglot-rls "rls"))
+          ,@(-remove-first (lambda (mode)
+                             (string= (car mode) 'rust-mode))
+                           eglot-server-programs)))
+  ;; don't allow formatting with rls
+  (add-to-list 'eglot-ignored-server-capabilites :documentFormattingProvider))
+
+(defun rustic-setup-rls ()
+  (unless noninteractive ;; TODO: fix tests to work with eglot/lsp-mode activated
+    (let ((rls-pkg rustic-rls-pkg))
+      (cond ((and (eq rls-pkg 'eglot)
+                  (featurep 'eglot))
+             (eglot-ensure))
+            ((and (eq rls-pkg 'lsp-mode)
+                  (featurep 'lsp-mode))
+             (lsp-rust-enable)
+             (flycheck-mode))
+            (t
+             (rustic-setup-rls-1 rls-pkg))))))
+
+(defun rustic-setup-rls-1 (rls-pkg)
+  (if (yes-or-no-p (format "%s not found. Install it ?" rls-pkg))
+      (condition-case err
+          (and (package-install rls-pkg)
+               (require rls-pkg)
+               (if (eq rls-pkg 'eglot)
+                   (rustic-setup-eglot)
+                 (require 'rustic-lsp)))
+        (error err))
+    (message "No RLS server running.")))
+
+(add-hook 'rustic-mode-hook 'rustic-setup-rls)
+
+
 ;;;;;;;;;;;;;;;;
 ;; Interactive
 

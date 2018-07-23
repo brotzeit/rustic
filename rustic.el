@@ -4,7 +4,7 @@
 ;; Author: Mozilla
 ;; 
 ;; Keywords: languages
-;; Package-Requires: ((emacs "25.3") (xterm-color "1.6") (dash "2.13.0") (s "1.10.0") (f "0.18.2") (projectile "0.14.0")  (lsp-mode "3.0") (markdown-mode "2.3"))
+;; Package-Requires: ((emacs "25.3") (xterm-color "1.6") (dash "2.13.0") (s "1.10.0") (f "0.18.2") (projectile "0.14.0") (markdown-mode "2.3"))
 
 ;; This file is distributed under the terms of both the MIT license and the
 ;; Apache License (version 2.0).
@@ -33,14 +33,7 @@
   (require 'rustic-lsp))
 
 (with-eval-after-load 'eglot
-  ;; replace rust-mode with rustic
-  (setq eglot-server-programs
-        `((rustic-mode . (eglot-rls "rls"))
-          ,@(-remove-first (lambda (mode)
-                              (string= (car mode) 'rust-mode))
-                            eglot-server-programs)))
-  ;; don't allow formatting with rls
-  (add-to-list 'eglot-ignored-server-capabilites :documentFormattingProvider))
+  (rustic-setup-eglot))
 
 (defvar electric-pair-inhibit-predicate)
 (defvar electric-indent-chars)
@@ -217,15 +210,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
   (when rustic-always-locate-project-on-open
     (rustic-update-buffer-workspace))
 
-  (unless noninteractive ;; TODO: fix tests to work with eglot/lsp-mode activated
-   (cond ((and (eq rustic-rls-pkg 'eglot)
-               (featurep 'eglot))
-          (eglot-ensure))
-         ((and (eq rustic-rls-pkg 'lsp-mode)
-               (featurep 'lsp-mode))
-          (lsp-rust-enable))
-         (t
-          (error "No RLS package available.")))))
+  (rustic-setup-rls))
 
 (defvar rustic-syntax-table
   (let ((table (make-syntax-table)))
