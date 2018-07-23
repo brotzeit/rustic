@@ -195,6 +195,46 @@
 (add-hook 'rustic-mode-hook 'rustic-setup-rls)
 
 
+;;;;;;;;;;;;;
+;; Flycheck
+
+(with-eval-after-load 'flycheck
+
+  (flycheck-define-checker rustic-clippy
+    "A Rust syntax checker using clippy.
+
+See URL `https://github.com/rust-lang-nursery/rust-clippy'."
+    :command ("cargo" "+nightly" "clippy" "--message-format=json")
+    :error-parser flycheck-parse-cargo-rustc
+    :error-filter flycheck-rust-error-filter
+    :error-explainer flycheck-rust-error-explainer
+
+    ;; The reason I had to copy the checker from flycheck
+    :modes rustic-mode
+
+    :predicate flycheck-buffer-saved-p
+    :enabled (lambda ()
+               (and (flycheck-rust-cargo-has-command-p "clippy")
+                    (flycheck-rust-manifest-directory)))
+    :working-directory (lambda (_) (flycheck-rust-manifest-directory))
+    :verify
+    (lambda (_)
+      (and buffer-file-name
+           (let ((has-toml (flycheck-rust-manifest-directory))
+                 (has-clippy (flycheck-rust-cargo-has-command-p "clippy")))
+             (list
+              (flycheck-verification-result-new
+               :label "Clippy"
+               :message (if has-clippy "Found"
+                          "Cannot find the `cargo clippy' command")
+               :face (if has-clippy 'success '(bold warning)))
+              (flycheck-verification-result-new
+               :label "Cargo.toml"
+               :message (if has-toml "Found" "Missing")
+               :face (if has-toml 'success '(bold warning))))))))
+
+  (push 'rustic-clippy flycheck-checkers))
+
 ;;;;;;;;;;;;;;;;
 ;; Interactive
 
