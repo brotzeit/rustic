@@ -49,7 +49,7 @@
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
 
-(defcustom rustic-rls-pkg 'eglot
+(defcustom rustic-rls-pkg 'lsp-mode
   "Emacs package for interaction with rls."
   :type '(choice (symbol :tag 'eglot "eglot")
                  (symbol :tag 'lsp-mode "lsp-mode"))
