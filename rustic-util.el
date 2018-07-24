@@ -199,12 +199,14 @@
 ;;;;;;;;;;;;;
 ;; Flycheck
 
+;; flycheck.el contains 3 checkers but I think clippy handles
+;; everything
 (with-eval-after-load 'flycheck
 
   (flycheck-define-checker rustic-clippy
     "A Rust syntax checker using clippy.
 
-See URL `https://github.com/rust-lang-nursery/rust-clippy'."
+     See URL `https://github.com/rust-lang-nursery/rust-clippy'."
     :command ("cargo" "+nightly" "clippy" "--message-format=json")
     :error-parser flycheck-parse-cargo-rustc
     :error-filter flycheck-rust-error-filter
