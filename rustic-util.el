@@ -199,7 +199,7 @@
 ;;;;;;;;;;;;;
 ;; Flycheck
 
-;; flycheck.el contains 3 checkers but I think clippy handles
+;; flycheck contains 3 checkers but I think clippy handles
 ;; everything
 (with-eval-after-load 'flycheck
 
