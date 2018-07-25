@@ -160,13 +160,18 @@
 
 (defun rustic-setup-eglot ()
   ;; replace rust-mode with rustic
-  (setq eglot-server-programs
-        `((rustic-mode . (eglot-rls "rls"))
-          ,@(-remove-first (lambda (mode)
-                             (string= (car mode) 'rust-mode))
-                           eglot-server-programs)))
+  (let ((rls '(rustic-mode . (eglot-rls "rls"))))
+    (unless (member rls eglot-server-programs)
+      (setq eglot-server-programs
+            `(,rls
+              ,@(-remove-first (lambda (mode)
+                                 (when (symbolp (car mode))
+                                   (when (eq (car mode) 'rust-mode))))
+                               eglot-server-programs)))))
   ;; don't allow formatting with rls
-  (add-to-list 'eglot-ignored-server-capabilites :documentFormattingProvider))
+  (let ((feature :documentFormattingProvider))
+    (unless (-contains? eglot-ignored-server-capabilites feature)
+      (add-to-list 'eglot-ignored-server-capabilites feature))))
 
 (defun rustic-setup-rls ()
   (unless noninteractive ;; TODO: fix tests to work with eglot/lsp-mode activated
@@ -176,9 +181,7 @@
              (eglot-ensure))
             ((and (eq rls-pkg 'lsp-mode)
                   (featurep 'lsp-mode))
-             (lsp-rust-enable)
-             (when (featurep 'flycheck)
-               (flycheck-mode)))
+             (lsp-rust-enable))
             (t
              (rustic-setup-rls-1 rls-pkg))))))
 
@@ -199,12 +202,14 @@
 ;;;;;;;;;;;;;
 ;; Flycheck
 
+;; flycheck contains 3 checkers but I think clippy handles
+;; everything
 (with-eval-after-load 'flycheck
-
+  (add-hook 'rustic-mode-hook 'flycheck-mode)
   (flycheck-define-checker rustic-clippy
     "A Rust syntax checker using clippy.
 
-See URL `https://github.com/rust-lang-nursery/rust-clippy'."
+     See URL `https://github.com/rust-lang-nursery/rust-clippy'."
     :command ("cargo" "+nightly" "clippy" "--message-format=json")
     :error-parser flycheck-parse-cargo-rustc
     :error-filter flycheck-rust-error-filter

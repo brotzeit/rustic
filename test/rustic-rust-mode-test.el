@@ -2,7 +2,6 @@
 
 (require 'cl)
 (require 'imenu)
-(require 'f)
 
 (defun rustic-test-group-str-by-face (str)
   "Fontify `STR' in rust-mode and group it by face, returning a

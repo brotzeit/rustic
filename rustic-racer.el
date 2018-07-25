@@ -1,6 +1,5 @@
 ;;; rustic-racer.el --- Racer support -*-lexical-binding: t-*-
 
-(require 'dash)
 (require 'etags)
 (require 's)
 (require 'f)

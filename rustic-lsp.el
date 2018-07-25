@@ -3,11 +3,8 @@
 ;;; Code:
 
 (require 'cl-lib)
-(require 'json)
 (require 'font-lock)
 (require 'xref)
-(require 'dash)
-(require 'markdown-mode)
 
 (defvar lsp-rust--config-options (make-hash-table))
 (defvar lsp-rust--diag-counters (make-hash-table))
@@ -22,7 +19,7 @@ If this variable is nil, lsp-rust will try to use the RLS located
 at the environment variable RLS_ROOT, if set."
   :type '(repeat (string)))
 
-(defun lsp-rust-explain-error-at-point ()
+(defun rustic-lsp-explain-error-at-point ()
   "Explain the error at point.
 The explaination comes from 'rustc --explain=ID'."
   (interactive)
@@ -56,7 +53,7 @@ The explaination comes from 'rustc --explain=ID'."
          (current-buffer)))
     (message "explain-error: No error at point")))
 
-(defun lsp-rust-find-implementations ()
+(defun rustic-lsp-find-implementations ()
   "List all implementation blocks for a trait, struct, or enum at point."
   (interactive)
   (let* ((impls (lsp--send-request (lsp--make-request
@@ -67,7 +64,7 @@ The explaination comes from 'rustc --explain=ID'."
         (xref--show-xrefs items nil)
       (message "No implementation found for: %s" (thing-at-point 'symbol t)))))
 
-(defun lsp-rust--rls-command ()
+(defun rustic-lsp-rls-command ()
   "Return the command used to start the RLS for defining the LSP Rust client."
   (or lsp-rust-rls-command
       (-when-let (rls-root (getenv "RLS_ROOT"))
@@ -78,7 +75,7 @@ The explaination comes from 'rustc --explain=ID'."
                     "Cargo.toml"))
           "--release"))))
 
-(defun lsp-rust--get-root ()
+(defun rustic-lsp-get-root ()
   (let (dir)
     (unless
 	(ignore-errors
@@ -88,10 +85,10 @@ The explaination comes from 'rustc --explain=ID'."
       (error "Couldn't find root for project at %s" default-directory))
     (file-name-directory dir)))
 
-(define-inline lsp-rust--as-percent (fraction)
+(define-inline rustic-lsp-as-percent (fraction)
   (inline-quote (format "%d%%" (round (* ,fraction 100)))))
 
-(defconst lsp-rust--handlers
+(defconst rustic-lsp-handlers
   '(("window/progress" .
      (lambda (workspace progress)
        (let ((id (gethash "id" progress))
@@ -107,7 +104,7 @@ The explaination comes from 'rustc --explain=ID'."
 	 (setq lsp-status
 	       (if workspace-progress
 		   (cond
-		    ((numberp percentage) (lsp-rust--as-percent percentage))
+		    ((numberp percentage) (rustic-lsp-as-percent percentage))
 		    (message (format "(%s)" message))
 		    (title (format "(%s)" (downcase title))))
 		 nil)))))
@@ -124,7 +121,7 @@ The explaination comes from 'rustc --explain=ID'."
        (cl-incf (gethash w lsp-rust--diag-counters 0))
        (setq lsp-status "(building)")))))
 
-(defun lsp-rust--render-string (str)
+(defun rustic-lsp-render-string (str)
   (condition-case nil
       (with-temp-buffer
 	(delay-mode-hooks (rustic-mode))
@@ -133,39 +130,39 @@ The explaination comes from 'rustc --explain=ID'."
 	(buffer-string))
     (error str)))
 
-(defun lsp-rust--initialize-client (client)
+(defun rustic-lsp-initialize-client (client)
   (mapcar #'(lambda (p) (lsp-client-on-notification client (car p) (cdr p)))
-	  lsp-rust--handlers)
-  (lsp-provide-marked-string-renderer client "rust" #'lsp-rust--render-string))
+	  rustic-lsp-handlers)
+  (lsp-provide-marked-string-renderer client "rust" #'rustic-lsp-render-string))
 
-(lsp-define-stdio-client lsp-rust "rust" #'lsp-rust--get-root nil
-			 :command-fn #'lsp-rust--rls-command
-			 :initialize #'lsp-rust--initialize-client)
+(lsp-define-stdio-client lsp-rust "rust" #'rustic-lsp-get-root nil
+			 :command-fn #'rustic-lsp-rls-command
+			 :initialize #'rustic-lsp-initialize-client)
 
-(defun lsp-rust--set-configuration ()
+(defun rust-lsp-set-configuration ()
   (lsp--set-configuration `(:rust ,lsp-rust--config-options)))
 
-(add-hook 'lsp-after-initialize-hook 'lsp-rust--set-configuration)
+(add-hook 'lsp-after-initialize-hook 'rust-lsp-set-configuration)
 
-(defun lsp-rust-set-config (name option)
+(defun rustic-lsp-set-config (name option)
   "Set a config option in the rust lsp server."
   (puthash name option lsp-rust--config-options))
 
-(defun lsp-rust-set-build-lib (build)
+(defun rustic-lsp-set-build-lib (build)
   "Enable(t)/Disable(nil) building the lib target."
-  (lsp-rust-set-config "build_lib" build))
+  (rustic-lsp-set-config "build_lib" build))
 
-(defun lsp-rust-set-build-bin (build)
+(defun rustic-lsp-set-build-bin (build)
   "The bin target to build."
-  (lsp-rust-set-config "build_bin" build))
+  (rustic-lsp-set-config "build_bin" build))
 
-(defun lsp-rust-set-cfg-test (val)
+(defun rustic-lsp-set-cfg-test (val)
   "Enable(t)/Disable(nil) #[cfg(test)]."
-  (lsp-rust-set-config "cfg_test" val))
+  (rustic-lsp-set-config "cfg_test" val))
 
-(defun lsp-rust-set-goto-def-racer-fallback (val)
+(defun rustic-lsp-set-goto-def-racer-fallback (val)
   "Enable(t)/Disable(nil) goto-definition should use racer as fallback."
-  (lsp-rust-set-config "goto_def_racer_fallback" val))
+  (rustic-lsp-set-config "goto_def_racer_fallback" val))
 
 (provide 'rustic-lsp)
 ;;; rustic-lsp.el ends here

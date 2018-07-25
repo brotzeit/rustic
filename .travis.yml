@@ -1,27 +1,40 @@
-language: generic
+language: emacs-lisp
 
-env:
-  matrix:
-    - EMACS=emacs24
-    - EMACS=emacs-snapshot
+sudo: required
 
-install:
-  - if [ "$EMACS" = 'emacs24' ]; then
-       sudo add-apt-repository -y ppa:cassou/emacs &&
-       sudo apt-get -qq update &&
-       sudo apt-get -qq -f install &&
-       sudo apt-get -qq install emacs24 emacs24-el;
-    fi
-  - if [ "$EMACS" = 'emacs-snapshot' ]; then
-       sudo add-apt-repository -y ppa:ubuntu-elisp/ppa &&
-       sudo apt-get -qq update &&
-       sudo apt-get -qq -f install &&
-       sudo apt-get -qq install emacs-snapshot &&
-       sudo apt-get -qq install emacs-snapshot-el;
-    fi
-
-script:
-  - ./run_rust_emacs_tests.sh
+dist: trusty
 
 notifications:
   email: false
+
+cache:
+  - directories:
+      - "$HOME/emacs/"
+
+matrix:
+  fast_finish: true
+  
+env:
+  - EMACS_VERSION=26.1
+
+before_install:
+  # Configure $PATH: Executables are installed to $HOME/bin
+  - export PATH="$HOME/bin:$PATH"
+  # Download the makefile to emacs-travis.mk
+  - wget 'https://raw.githubusercontent.com/flycheck/emacs-travis/master/emacs-travis.mk'
+  # Install Emacs (according to $EMACS_VERSION) and Cask
+  - make -f emacs-travis.mk install_emacs
+  - make -f emacs-travis.mk install_cask
+
+  - sudo apt update
+  - sudo apt install -y gnutls-bin
+  - sudo apt install -y texinfo libgif-dev libxpm-dev
+  - curl -sSf https://build.travis-ci.com/files/rustup-init.sh | sh -s -- --default-toolchain=nightly -y
+  - source $HOME/.cargo/env
+  - cargo install --force rustfmt-nightly
+
+install:
+  - cask install
+  
+script:
+  - cask exec ert-runner

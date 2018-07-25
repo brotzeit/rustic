@@ -1,6 +1,6 @@
 ;;; rustic.el --- A major emacs mode for editing Rust source code -*-lexical-binding: t-*-
 
-;; Version: 0.6
+;; Version: 0.6.2
 ;; Author: Mozilla
 ;; 
 ;; Keywords: languages
@@ -20,7 +20,10 @@
                    (require 'url-vars))
 
 (require 'json)
+(require 'markdown-mode)
 (require 'newcomment)
+
+(require 'dash)
 
 (require 'rustic-compile)
 (require 'rustic-cargo)
@@ -49,7 +52,7 @@
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
 
-(defcustom rustic-rls-pkg 'eglot
+(defcustom rustic-rls-pkg 'lsp-mode
   "Emacs package for interaction with rls."
   :type '(choice (symbol :tag 'eglot "eglot")
                  (symbol :tag 'lsp-mode "lsp-mode"))

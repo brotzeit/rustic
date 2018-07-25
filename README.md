@@ -48,9 +48,8 @@ $ cask exec ert-runner
 
 ## Rust Language Server
 
-The default package is eglot. But you can also use lsp-mode.
+The default package is lsp-mode. But you can also use eglot.
 
 ``` emacs-lisp
-(setq rustic-rls-pkg 'lsp-mode)
+(setq rustic-rls-pkg 'eglot)
 ```
-
