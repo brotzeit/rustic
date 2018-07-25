@@ -181,9 +181,7 @@
              (eglot-ensure))
             ((and (eq rls-pkg 'lsp-mode)
                   (featurep 'lsp-mode))
-             (lsp-rust-enable)
-             (when (featurep 'flycheck)
-               (flycheck-mode)))
+             (lsp-rust-enable))
             (t
              (rustic-setup-rls-1 rls-pkg))))))
 
@@ -207,7 +205,7 @@
 ;; flycheck contains 3 checkers but I think clippy handles
 ;; everything
 (with-eval-after-load 'flycheck
-
+  (add-hook 'rustic-mode-hook 'flycheck-mode)
   (flycheck-define-checker rustic-clippy
     "A Rust syntax checker using clippy.
 
