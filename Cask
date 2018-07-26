@@ -9,7 +9,8 @@
 (depends-on "f" "0.18.2")
 (depends-on "projectile" "0.14.0")
 (depends-on "markdown-mode" "2.3")
-    
+(depends-on "spinner" "1.7.3")
+
 (development
  (depends-on "ert-runner")
  (depends-on "f"))
