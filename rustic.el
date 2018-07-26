@@ -20,10 +20,7 @@
                    (require 'url-vars))
 
 (require 'json)
-(require 'markdown-mode)
 (require 'newcomment)
-
-(require 'dash)
 
 (require 'rustic-compile)
 (require 'rustic-cargo)
