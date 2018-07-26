@@ -110,7 +110,9 @@ execution with rustfmt."
             (org-babel-update-block-body
              (with-current-buffer "rustic-babel-format-buffer"
                (buffer-string)))))))
-    (kill-buffer "rustic-babel-format-buffer")))
+    (kill-buffer "rustic-babel-format-buffer"))
+  (rustic-babel-stop-spinner)
+  (setq mode-line-process nil))
 
 (defun rustic-babel-generate-project ()
   "Create rust project in `org-babel-temporary-directory'."
@@ -160,12 +162,50 @@ execution with rustfmt."
     (rustic-babel-cargo-toml dir params)
     (setq rustic-info (org-babel-get-src-block-info))
     (setq rustic-babel-params params)
+    (setq mode-line-process
+          '(rustic-babel-spinner
+            (":Executing " (:eval (spinner-print rustic-babel-spinner)))))
+    (rustic-babel-start-spinner)
     (let ((default-directory dir))
       (write-region (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
       (rustic-babel-eval dir)
       (setq rustic-babel-src-location (set-marker
                                        (make-marker) (point) (current-buffer)))
       project)))
+
+
+;;;;;;;;;;;;
+;; Spinner
+
+(defvar rustic-babel-spinner nil)
+
+(eval-and-compile (require 'spinner))
+(defcustom rustic-babel-spinner-type 'horizontal-moving
+  "Holds the type of spinner to be used in the mode-line.
+Takes a value accepted by `spinner-start'."
+  :type `(choice (choice :tag "Choose a spinner by name"
+                         ,@(mapcar (lambda (c) (list 'const (car c)))
+                                   spinner-types))
+                 (const :tag "A random spinner" random)
+                 (repeat :tag "A list of symbols from `spinner-types' to randomly choose from"
+                         (choice :tag "Choose a spinner by name"
+                                 ,@(mapcar (lambda (c) (list 'const (car c)))
+                                           spinner-types)))
+                 (vector :tag "A user defined vector"
+                         (repeat :inline t string)))
+  :group 'rustic-babel)
+
+(defun rustic-babel-start-spinner ()
+  (when (spinner-p rustic-babel-spinner)
+    (spinner-stop rustic-babel-spinner))
+  (setq rustic-babel-spinner
+        (make-spinner rustic-babel-spinner-type t 10))
+  (spinner-start rustic-babel-spinner))
+
+(defun rustic-babel-stop-spinner ()
+  (when (spinner-p rustic-babel-spinner)
+    (spinner-stop rustic-babel-spinner))
+  (setq rustic-babel-spinner nil))
 
 (provide 'rustic-babel)
 ;;; rustic-babel.el ends here
