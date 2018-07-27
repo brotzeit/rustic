@@ -120,7 +120,7 @@ execution with rustfmt."
        (dir (make-temp-file-internal "cargo" 0 "" nil)))
     (shell-command-to-string (format "cargo new %s --bin --quiet" dir))
     (if expand 
-        (expand-file-name dir)
+        (concat (expand-file-name dir) "/")
       dir)))
 
 (defun rustic-babel-project ()

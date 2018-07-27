@@ -246,8 +246,8 @@ Translate STRING with `xterm-color-filter'."
 
 (defun rustic-process-kill-p (proc)
   "Don't allow two rust processes at once."
-  (if ((yes-or-no-p
-        (format "`%s' is running; kill it? " proc)))
+  (if (yes-or-no-p
+       (format "`%s' is running; kill it? " proc))
       (condition-case ()
           (progn
             (interrupt-process proc)

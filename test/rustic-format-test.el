@@ -15,7 +15,8 @@
         (while (eq (process-status proc) 'run)
           (sit-for 0.1)))
       (should (string= (buffer-string) formatted-string))
-      (should-not (= (point) (or (point-min) (point-max)))))))
+      (should-not (= (point) (or (point-min) (point-max)))))
+    (kill-buffer buf)))
 
 (ert-deftest rustic-test-format-file ()
   (let* ((string "fn main()      {}")
@@ -65,4 +66,5 @@
         (rustic-mode)
         (insert string)
         (save-buffer)
-        (should (string= (buffer-string) (concat string "\n")))))))
+        (should (string= (buffer-string) (concat string "\n")))))
+    (kill-buffer buf)))

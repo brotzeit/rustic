@@ -1096,7 +1096,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
   (let ((dir (locate-dominating-file
               (or buffer-file-name default-directory) "Cargo.toml")))
     (if dir
-        (file-truename dir)
+        (expand-file-name dir)
       default-directory)))
 
 (defun rustic-update-buffer-workspace ()
