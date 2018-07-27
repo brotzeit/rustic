@@ -20,8 +20,7 @@
 (ert-deftest rustic-test-format-file ()
   (let* ((string "fn main()      {}")
          (formatted-string "fn main() {}\n")
-         (default-directory org-babel-temporary-directory)
-         (dir (rustic-babel-generate-project))
+         (dir (rustic-babel-generate-project t))
          (main (expand-file-name "main.rs" (concat dir "/src"))))
     (write-region string nil main nil 0)
     (let ((proc (rustic-format-start-process

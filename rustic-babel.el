@@ -114,12 +114,14 @@ execution with rustfmt."
   (rustic-babel-stop-spinner)
   (setq mode-line-process nil))
 
-(defun rustic-babel-generate-project ()
+(defun rustic-babel-generate-project (&optional expand)
   "Create rust project in `org-babel-temporary-directory'."
-(let* ((default-directory org-babel-temporary-directory)
+  (let* ((default-directory org-babel-temporary-directory)
        (dir (make-temp-file-internal "cargo" 0 "" nil)))
-  (shell-command-to-string (format "cargo new %s --bin --quiet" dir))
-  dir))
+    (shell-command-to-string (format "cargo new %s --bin --quiet" dir))
+    (if expand 
+        (expand-file-name dir)
+      dir)))
 
 (defun rustic-babel-project ()
   (let* ((beg (org-babel-where-is-src-block-head))
