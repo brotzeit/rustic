@@ -105,15 +105,15 @@ Error matching regexes from compile.el are removed."
                (cons 'rustic-arrow rustic-compilation-regexps-arrow))
   (add-to-list 'compilation-error-regexp-alist-alist
                (cons 'rustic-colon rustic-compilation-regexps-colon))
+  (add-to-list 'compilation-error-regexp-alist-alist
+               (cons 'rustic-panic rustic-compilation-regexps-panic))
 
   (setq-local compilation-error-regexp-alist nil)
   (add-to-list 'compilation-error-regexp-alist 'rustic-arrow)
   (add-to-list 'compilation-error-regexp-alist 'rustic-colon)
+  (add-to-list 'compilation-error-regexp-alist 'rustic-panic)
 
   (add-hook 'compilation-filter-hook #'rustic-insert-errno-button nil t))
-
-(defvar rustic-compilation-directory nil
-  "Directory to restore to when doing `rustic-recompile'.")
 
 (defvar rustic-compilation-regexps-arrow
   (let ((file "\\([^\n]+\\)")
@@ -133,12 +133,9 @@ Error matching regexes from compile.el are removed."
       (cons re '(1 2 3 0)))) ;; 0 for info type
   "Create hyperlink in compilation buffers for file paths containing ':::'.")
 
-;; Match test run failures and panics during compilation as
-;; compilation warnings
-(defvar rustic-cargo-compilation-regexps
+(defvar rustic-compilation-regexps-panic
   '("^\\s-+thread '[^']+' panicked at \\('[^']+', \\([^:]+\\):\\([0-9]+\\)\\)" 2 3 nil nil 1)
-  "Specifications for matching panics in cargo test invocations.
-See `compilation-error-regexp-alist' for help on their format.")
+  "Match test run failures and panics during compilation.")
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -150,8 +147,8 @@ See `compilation-error-regexp-alist' for help on their format.")
 (defvar rustic-compilation-buffer-name "*rust-compilation*"
   "Buffer name for rust compilation process buffers.")
 
-(defvar rustic-compilation-arguments nil
-  "Arguments that were given to `rustic-compile'.")
+(defvar rustic-compilation-directory nil
+  "Directory to restore to when doing `rustic-recompile'.")
 
 (defun rustic-compilation-start (command buffer process mode directory &optional sentinel)
   (let* ((buf (get-buffer-create buffer))
@@ -262,7 +259,7 @@ Translate STRING with `xterm-color-filter'."
     (error "Cannot have two rust processes at once")))
 
 (defun rustic-save-some-buffers ()
-  "Unlike `save-some-buffers', only project related files are considered.
+  "Unlike `save-some-buffers', only consider project related files. 
 
 The variable `buffer-save-without-query' can be used for customization and
 buffers are formatted after saving if `rustic-format-on-save' is t."
@@ -355,10 +352,10 @@ buffers are formatted after saving if `rustic-format-on-save' is t."
 If called without arguments use `rustic-compile-command'.
 
 Otherwise use provided argument ARG and store it in
-`rustic-compilation-arguments'."
+`compilation-arguments'."
   (interactive "P")
   (let* ((command (if arg
-                      (setq rustic-compilation-arguments
+                      (setq compilation-arguments
                             (read-from-minibuffer "Compile command: "))
                     rustic-compile-command))
          (buffer-name rustic-compilation-buffer-name)
@@ -374,9 +371,9 @@ Otherwise use provided argument ARG and store it in
 (defun rustic-recompile ()
   "Re-compile the program using the last `rustic-compile' arguments."
   (interactive)
-  (let* ((command (if (not rustic-compilation-arguments)
+  (let* ((command (if (not compilation-arguments)
                       rustic-compile-command
-                    rustic-compilation-arguments))
+                    compilation-arguments))
          (buffer-name rustic-compilation-buffer-name)
          (proc-name rustic-compilation-process-name)
          (mode 'rustic-compilation-mode)

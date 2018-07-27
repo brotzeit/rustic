@@ -3,8 +3,11 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'json)
 (require 'font-lock)
 (require 'xref)
+(require 'dash)
+(require 'markdown-mode)
 
 (defvar lsp-rust--config-options (make-hash-table))
 (defvar lsp-rust--diag-counters (make-hash-table))
