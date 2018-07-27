@@ -159,6 +159,7 @@
 ;; RLS
 
 (defun rustic-setup-eglot ()
+  "Configure eglot for rustic."
   ;; replace rust-mode with rustic
   (let ((rls '(rustic-mode . (eglot-rls "rls"))))
     (unless (member rls eglot-server-programs)

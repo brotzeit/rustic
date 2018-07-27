@@ -259,7 +259,7 @@ Translate STRING with `xterm-color-filter'."
     (error "Cannot have two rust processes at once")))
 
 (defun rustic-save-some-buffers ()
-  "Unlike `save-some-buffers', only project related files are considered.
+  "Unlike `save-some-buffers', only consider project related files. 
 
 The variable `buffer-save-without-query' can be used for customization and
 buffers are formatted after saving if `rustic-format-on-save' is t."
