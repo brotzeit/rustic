@@ -115,9 +115,6 @@ Error matching regexes from compile.el are removed."
 
   (add-hook 'compilation-filter-hook #'rustic-insert-errno-button nil t))
 
-(defvar rustic-compilation-directory nil
-  "Directory to restore to when doing `rustic-recompile'.")
-
 (defvar rustic-compilation-regexps-arrow
   (let ((file "\\([^\n]+\\)")
         (start-line "\\([0-9]+\\)")
@@ -150,8 +147,8 @@ Error matching regexes from compile.el are removed."
 (defvar rustic-compilation-buffer-name "*rust-compilation*"
   "Buffer name for rust compilation process buffers.")
 
-(defvar rustic-compilation-arguments nil
-  "Arguments that were given to `rustic-compile'.")
+(defvar rustic-compilation-directory nil
+  "Directory to restore to when doing `rustic-recompile'.")
 
 (defun rustic-compilation-start (command buffer process mode directory &optional sentinel)
   (let* ((buf (get-buffer-create buffer))
@@ -355,10 +352,10 @@ buffers are formatted after saving if `rustic-format-on-save' is t."
 If called without arguments use `rustic-compile-command'.
 
 Otherwise use provided argument ARG and store it in
-`rustic-compilation-arguments'."
+`compilation-arguments'."
   (interactive "P")
   (let* ((command (if arg
-                      (setq rustic-compilation-arguments
+                      (setq compilation-arguments
                             (read-from-minibuffer "Compile command: "))
                     rustic-compile-command))
          (buffer-name rustic-compilation-buffer-name)
@@ -374,9 +371,9 @@ Otherwise use provided argument ARG and store it in
 (defun rustic-recompile ()
   "Re-compile the program using the last `rustic-compile' arguments."
   (interactive)
-  (let* ((command (if (not rustic-compilation-arguments)
+  (let* ((command (if (not compilation-arguments)
                       rustic-compile-command
-                    rustic-compilation-arguments))
+                    compilation-arguments))
          (buffer-name rustic-compilation-buffer-name)
          (proc-name rustic-compilation-process-name)
          (mode 'rustic-compilation-mode)
