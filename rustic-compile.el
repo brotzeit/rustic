@@ -105,10 +105,13 @@ Error matching regexes from compile.el are removed."
                (cons 'rustic-arrow rustic-compilation-regexps-arrow))
   (add-to-list 'compilation-error-regexp-alist-alist
                (cons 'rustic-colon rustic-compilation-regexps-colon))
+  (add-to-list 'compilation-error-regexp-alist-alist
+               (cons 'rustic-panic rustic-compilation-regexps-panic))
 
   (setq-local compilation-error-regexp-alist nil)
   (add-to-list 'compilation-error-regexp-alist 'rustic-arrow)
   (add-to-list 'compilation-error-regexp-alist 'rustic-colon)
+  (add-to-list 'compilation-error-regexp-alist 'rustic-panic)
 
   (add-hook 'compilation-filter-hook #'rustic-insert-errno-button nil t))
 
@@ -133,12 +136,9 @@ Error matching regexes from compile.el are removed."
       (cons re '(1 2 3 0)))) ;; 0 for info type
   "Create hyperlink in compilation buffers for file paths containing ':::'.")
 
-;; Match test run failures and panics during compilation as
-;; compilation warnings
-(defvar rustic-cargo-compilation-regexps
+(defvar rustic-compilation-regexps-panic
   '("^\\s-+thread '[^']+' panicked at \\('[^']+', \\([^:]+\\):\\([0-9]+\\)\\)" 2 3 nil nil 1)
-  "Specifications for matching panics in cargo test invocations.
-See `compilation-error-regexp-alist' for help on their format.")
+  "Match test run failures and panics during compilation.")
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
