@@ -147,9 +147,6 @@ Error matching regexes from compile.el are removed."
 (defvar rustic-compilation-buffer-name "*rust-compilation*"
   "Buffer name for rust compilation process buffers.")
 
-(defvar rustic-compilation-directory nil
-  "Directory to restore to when doing `rustic-recompile'.")
-
 (defun rustic-compilation-start (command buffer process mode directory &optional sentinel)
   (let* ((buf (get-buffer-create buffer))
          (default-directory directory)
@@ -164,15 +161,16 @@ Error matching regexes from compile.el are removed."
       (erase-buffer)
       (funcall mode)
       (funcall rustic-compile-display-method buf)
-      (make-process :name process
+      (let ((proc (make-process :name process
                     :buffer buf
                     :command command
                     :filter #'rustic-compilation-filter
-                    :sentinel (if sentinel sentinel #'compilation-sentinel))
+                    :sentinel (if sentinel sentinel #'compilation-sentinel))))
       (setq mode-line-process
             '((:propertize ":%s" face compilation-mode-line-run)
               compilation-mode-line-errors))
-      (force-mode-line-update))))
+      (force-mode-line-update)
+      proc))))
 
 (defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.
@@ -248,8 +246,8 @@ Translate STRING with `xterm-color-filter'."
 
 (defun rustic-process-kill-p (proc)
   "Don't allow two rust processes at once."
-  (if (yes-or-no-p
-       (format "`%s' is running; kill it? " proc))
+  (if ((yes-or-no-p
+        (format "`%s' is running; kill it? " proc)))
       (condition-case ()
           (progn
             (interrupt-process proc)
@@ -354,21 +352,21 @@ If called without arguments use `rustic-compile-command'.
 Otherwise use provided argument ARG and store it in
 `compilation-arguments'."
   (interactive "P")
-  (let* ((command (if arg
-                      (setq compilation-arguments
-                            (read-from-minibuffer "Compile command: "))
-                    rustic-compile-command))
+  (let* ((command (setq compilation-arguments
+                        (if arg
+                            (read-from-minibuffer "Compile command: ")
+                          rustic-compile-command)))
          (buffer-name rustic-compilation-buffer-name)
          (proc-name rustic-compilation-process-name)
          (mode 'rustic-compilation-mode)
-         (dir (setq rustic-compilation-directory (rustic-buffer-workspace))))
+         (dir (setq compilation-directory (rustic-buffer-workspace))))
     (rustic-compilation-process-live)
     (rustic-compilation-start
      (split-string command) buffer-name proc-name mode dir)))
 
 ;;;###autoload
 (defun rustic-recompile ()
-  "Re-compile the program using the last `rustic-compile' arguments."
+  "Re-compile the program using `compilation-arguments'."
   (interactive)
   (let* ((command (if (not compilation-arguments)
                       rustic-compile-command
@@ -376,7 +374,7 @@ Otherwise use provided argument ARG and store it in
          (buffer-name rustic-compilation-buffer-name)
          (proc-name rustic-compilation-process-name)
          (mode 'rustic-compilation-mode)
-         (dir (or rustic-compilation-directory default-directory)))
+         (dir (or compilation-directory default-directory)))
     (rustic-compilation-process-live)
     (rustic-compilation-start
      (split-string command) buffer-name proc-name mode dir)))

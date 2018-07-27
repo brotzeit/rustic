@@ -24,3 +24,18 @@
         (should (string= (buffer-string) formatted-string)))
       (with-current-buffer buffer2
         (should (string= (buffer-string) formatted-string))))))
+
+(ert-deftest rustic-test-compile ()
+  (let* ((buffer1 (get-buffer-create "compile"))
+         (default-directory org-babel-temporary-directory)
+         (dir (expand-file-name (rustic-babel-generate-project))))
+    (should-not compilation-directory)
+    (should-not compilation-arguments)
+    (let* ((default-directory dir)
+           (proc (rustic-compile)))
+      (should-error (rustic-compile))
+      (should (process-live-p proc))
+      (while (eq (process-status proc) 'run)
+          (sit-for 0.1))
+      (should compilation-arguments)
+      (should compilation-directory))))
