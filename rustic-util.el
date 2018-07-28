@@ -159,6 +159,7 @@
 ;; RLS
 
 (defun rustic-setup-eglot ()
+  "Configure eglot for rustic."
   ;; replace rust-mode with rustic
   (let ((rls '(rustic-mode . (eglot-rls "rls"))))
     (unless (member rls eglot-server-programs)
@@ -166,7 +167,7 @@
             `(,rls
               ,@(-remove-first (lambda (mode)
                                  (when (symbolp (car mode))
-                                   (when (eq (car mode) 'rust-mode))))
+                                   (eq (car mode) 'rust-mode)))
                                eglot-server-programs)))))
   ;; don't allow formatting with rls
   (let ((feature :documentFormattingProvider))
