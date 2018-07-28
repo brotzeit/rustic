@@ -26,6 +26,11 @@
   :type 'boolean
   :group 'rustic-babel)
 
+(defcustom rustic-babel-display-spinner t
+  "Display spinner, that indicates a babel process is running."
+  :type 'boolean
+  :group 'rustic-babel)
+
 (defvar rustic-babel-buffer-name '((:default . "*rust-babel*")))
 
 (defvar rustic-babel-process-name "rustic-babel-process"
@@ -111,8 +116,9 @@ execution with rustfmt."
              (with-current-buffer "rustic-babel-format-buffer"
                (buffer-string)))))))
     (kill-buffer "rustic-babel-format-buffer"))
-  (rustic-babel-stop-spinner)
-  (setq mode-line-process nil))
+  (when rustic-babel-display-spinner
+    (rustic-babel-stop-spinner)
+    (setq mode-line-process nil)))
 
 (defun rustic-babel-generate-project (&optional expand)
   "Create rust project in `org-babel-temporary-directory'."
@@ -164,10 +170,11 @@ execution with rustfmt."
     (rustic-babel-cargo-toml dir params)
     (setq rustic-info (org-babel-get-src-block-info))
     (setq rustic-babel-params params)
-    (setq mode-line-process
-          '(rustic-babel-spinner
-            (":Executing " (:eval (spinner-print rustic-babel-spinner)))))
-    (rustic-babel-start-spinner)
+    (when rustic-babel-display-spinner
+      (setq mode-line-process
+            '(rustic-babel-spinner
+              (":Executing " (:eval (spinner-print rustic-babel-spinner)))))
+      (rustic-babel-start-spinner))
     (let ((default-directory dir))
       (write-region (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
       (rustic-babel-eval dir)
