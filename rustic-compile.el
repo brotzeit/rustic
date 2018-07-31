@@ -363,9 +363,8 @@ Otherwise use provided argument ARG and store it in
          (mode 'rustic-compilation-mode)
          (dir (setq rustic-compilation-directory (rustic-buffer-workspace))))
     (rustic-compilation-process-live)
-    (unless (buffer-live-p (get-buffer rustic-format-buffer-name))
-      (rustic-compilation-start
-       (split-string command) buffer-name proc-name mode dir))))
+    (rustic-compilation-start
+     (split-string command) buffer-name proc-name mode dir)))
 
 ;;;###autoload
 (defun rustic-recompile ()
@@ -379,9 +378,8 @@ Otherwise use provided argument ARG and store it in
          (mode 'rustic-compilation-mode)
          (dir (or rustic-compilation-directory default-directory)))
     (rustic-compilation-process-live)
-    (unless (buffer-live-p (get-buffer rustic-format-buffer-name))
-      (rustic-compilation-start
-       (split-string command) buffer-name proc-name mode dir))))
+    (rustic-compilation-start
+     (split-string command) buffer-name proc-name mode dir)))
 
 (provide 'rustic-compile)
 ;;; rustic-compile.el ends here
