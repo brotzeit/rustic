@@ -1,6 +1,6 @@
 ;;; rustic.el --- A major emacs mode for editing Rust source code -*-lexical-binding: t-*-
 
-;; Version: 0.7
+;; Version: 0.8
 ;; Author: Mozilla
 ;; 
 ;; Keywords: languages
