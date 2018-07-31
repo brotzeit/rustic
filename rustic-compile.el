@@ -30,6 +30,13 @@
   :type 'function
   :group 'rustic-compilation)
 
+(defcustom rustic-compile-backtrace t
+  "Set process variable `RUST_BACKTRACE=1'."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'rustic-compilation)
+
+
 ;; Faces
 
 (defcustom rustic-message-face
@@ -152,7 +159,9 @@ Error matching regexes from compile.el are removed."
          (default-directory directory)
          (coding-system-for-read 'binary)
          (process-environment (nconc
-	                           (list (format "TERM=%s" "ansi"))
+	                           (list (format "TERM=%s" "ansi")
+                                     (format "RUST_BACKTRACE=%s"
+                                             (if rustic-compile-backtrace 1 0)))
                                process-environment))
          (inhibit-read-only t))
     (setq next-error-last-buffer buf)
@@ -261,7 +270,9 @@ Translate STRING with `xterm-color-filter'."
 
 The variable `buffer-save-without-query' can be used for customization and
 buffers are formatted after saving if `rustic-format-on-save' is t."
-  (let* ((buffers (projectile-buffers-with-file (projectile-project-buffers))))
+  (let* ((buffers (condition-case ()
+                      (projectile-buffers-with-file (projectile-project-buffers))
+                    (error nil))))
     (when-let (b (get-buffer rustic-format-buffer-name))
       (when (buffer-live-p b)
         (kill-buffer b)))
