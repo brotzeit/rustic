@@ -35,6 +35,9 @@
 (with-eval-after-load 'eglot
   (rustic-setup-eglot))
 
+(with-eval-after-load 'flycheck
+  (require 'rustic-flycheck))
+
 (defvar electric-pair-inhibit-predicate)
 (defvar electric-indent-chars)
 
