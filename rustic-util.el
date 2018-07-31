@@ -18,7 +18,8 @@
 
 (defcustom rustic-format-display-method 'pop-to-buffer
   "Default function used for displaying rustfmt buffer."
-  :type 'function)
+  :type 'function
+  :group 'rustic)
 
 (defcustom rustic-playpen-url-format "https://play.rustic-lang.org/?code=%s"
   "Format string to use when submitting code to the playpen"
