@@ -57,7 +57,6 @@
          (dir (rustic-buffer-workspace)))
     (setq next-error-last-buffer buffer)
     (setq rustic-save-pos (point))
-    (setq rustic-format-file-name (buffer-file-name buffer))
     (with-current-buffer err-buf
       (setq-local default-directory dir)
       (erase-buffer)
@@ -93,12 +92,13 @@
             (kill-buffer proc-buffer)
             (message "Formatted buffer with rustfmt."))
         (goto-char (point-min))
-        (save-excursion
-          (save-match-data
-            (when (search-forward "<stdin>" nil t)
-              (replace-match rustic-format-file-name)))
-          (funcall rustic-format-display-method proc-buffer)
-          (message "Rustfmt error."))))))
+        (when-let ((file (buffer-file-name next-error-last-buffer)))
+          (save-excursion
+            (save-match-data
+              (when (search-forward "<stdin>" nil t)
+                (replace-match file)))))
+        (funcall rustic-format-display-method proc-buffer)
+        (message "Rustfmt error.")))))
 
 (defun rustic-format-file-sentinel (proc output)
   "Sentinel for rustfmt processes when formatting a file."

@@ -37,7 +37,11 @@
     (should-error (rustic-format-start-process
                    'rustic-format-file-sentinel
                    nil
-                   `(,rustic-rustfmt-bin "/tmp/nofile")))))
+                   `(,rustic-rustfmt-bin "/tmp/nofile")))
+    (kill-process (get-process rustic-format-process-name))
+    (when-let ((proc (get-process rustic-format-process-name)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.01)))))
 
 (ert-deftest rustic-test-format-buffer-before-save ()
   (let* ((string "fn main()      {}")
