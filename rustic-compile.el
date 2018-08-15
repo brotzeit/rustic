@@ -109,20 +109,20 @@ Error matching regexes from compile.el are removed."
 
   (setq-local compilation-error-regexp-alist-alist nil)
   (add-to-list 'compilation-error-regexp-alist-alist
-               (cons 'rustic-arrow rustic-compilation-regexps-arrow))
+               (cons 'rustic-error rustic-compilation-error))
   (add-to-list 'compilation-error-regexp-alist-alist
-               (cons 'rustic-colon rustic-compilation-regexps-colon))
+               (cons 'rustic-info rustic-compilation-info))
   (add-to-list 'compilation-error-regexp-alist-alist
-               (cons 'rustic-panic rustic-compilation-regexps-panic))
+               (cons 'rustic-panic rustic-compilation-panic))
 
   (setq-local compilation-error-regexp-alist nil)
-  (add-to-list 'compilation-error-regexp-alist 'rustic-arrow)
-  (add-to-list 'compilation-error-regexp-alist 'rustic-colon)
+  (add-to-list 'compilation-error-regexp-alist 'rustic-error)
+  (add-to-list 'compilation-error-regexp-alist 'rustic-info)
   (add-to-list 'compilation-error-regexp-alist 'rustic-panic)
 
   (add-hook 'compilation-filter-hook #'rustic-insert-errno-button nil t))
 
-(defvar rustic-compilation-regexps-arrow
+(defvar rustic-compilation-error
   (let ((file "\\([^\n]+\\)")
         (start-line "\\([0-9]+\\)")
         (start-col  "\\([0-9]+\\)"))
@@ -131,7 +131,7 @@ Error matching regexes from compile.el are removed."
       (cons re '(1 2 3))))
   "Create hyperlink in compilation buffers for file paths containing '-->'.")
 
-(defvar rustic-compilation-regexps-colon
+(defvar rustic-compilation-info
   (let ((file "\\([^\n]+\\)")
         (start-line "\\([0-9]+\\)")
         (start-col  "\\([0-9]+\\)"))
@@ -140,9 +140,15 @@ Error matching regexes from compile.el are removed."
       (cons re '(1 2 3 0)))) ;; 0 for info type
   "Create hyperlink in compilation buffers for file paths containing ':::'.")
 
-(defvar rustic-compilation-regexps-panic
-  '("^\\s-+thread '[^']+' panicked at \\('[^']+', \\([^:]+\\):\\([0-9]+\\)\\)" 2 3 nil nil 1)
-  "Match test run failures and panics during compilation.")
+(defvar rustic-compilation-panic
+  (let ((file "\\([^\n]+\\)")
+        (start-line "\\([0-9]+\\)")
+        (start-col  "\\([0-9]+\\)"))
+    (let ((re (concat "^thread '[^']+' panicked at '[^']+', "
+                      file ":" start-line ":" start-col ; --> 1:2:3
+                      )))
+      (cons re '(1 2 3))))
+  "Match panics during compilation.")
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
