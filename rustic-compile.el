@@ -30,10 +30,11 @@
   :type 'function
   :group 'rustic-compilation)
 
-(defcustom rustic-compile-backtrace t
-  "Set process variable `RUST_BACKTRACE=1'."
-  :type 'boolean
-  :safe #'booleanp
+(defcustom rustic-compile-backtrace "1"
+  "Set process variable `RUST_BACKTRACE'."
+  :type '(choice (string :tag "0")
+                 (string :tag "1")
+                 (string :tag "full"))
   :group 'rustic-compilation)
 
 
@@ -166,8 +167,7 @@ Error matching regexes from compile.el are removed."
          (coding-system-for-read 'binary)
          (process-environment (nconc
 	                           (list (format "TERM=%s" "ansi")
-                                     (format "RUST_BACKTRACE=%s"
-                                             (if rustic-compile-backtrace 1 0)))
+                                     (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
                                process-environment))
          (inhibit-read-only t))
     (setq next-error-last-buffer buf)
