@@ -14,6 +14,8 @@
 (require 'ob-ref)
 (require 'ob-core)
 
+(require 'rustic-cargo)
+
 (add-to-list 'org-babel-tangle-lang-exts '("rustic" . "rs"))
 
 (defcustom rustic-babel-display-compilation-buffer nil
@@ -63,7 +65,7 @@
       (setq-local default-directory dir)
       (rustic-compilation-mode))
     (when rustic-babel-display-compilation-buffer
-        (display-buffer err-buff))
+      (display-buffer err-buff))
     (make-process
      :name rustic-babel-process-name
      :buffer err-buff
@@ -117,13 +119,13 @@ execution with rustfmt."
                (buffer-string)))))))
     (kill-buffer "rustic-babel-format-buffer"))
   (when rustic-babel-display-spinner
-    (rustic-babel-stop-spinner)
+    (rustic-stop-spinner)
     (setq mode-line-process nil)))
 
 (defun rustic-babel-generate-project (&optional expand)
   "Create rust project in `org-babel-temporary-directory'."
   (let* ((default-directory org-babel-temporary-directory)
-       (dir (make-temp-file-internal "cargo" 0 "" nil)))
+         (dir (make-temp-file-internal "cargo" 0 "" nil)))
     (shell-command-to-string (format "cargo new %s --bin --quiet" dir))
     (if expand 
         (concat (expand-file-name dir) "/")
@@ -143,7 +145,7 @@ execution with rustfmt."
         (let ((new (rustic-babel-generate-project)))
           (put-text-property beg end 'project (make-symbol new))
           new)))))
-    
+
 (defun rustic-babel-cargo-toml (dir params)
   "Append crates to Cargo.toml."
   (let ((crates (cdr (assq :crates params)))
@@ -172,49 +174,15 @@ execution with rustfmt."
     (setq rustic-babel-params params)
     (when rustic-babel-display-spinner
       (setq mode-line-process
-            '(rustic-babel-spinner
-              (":Executing " (:eval (spinner-print rustic-babel-spinner)))))
-      (rustic-babel-start-spinner))
+            '(rustic-spinner
+              (":Executing " (:eval (spinner-print rustic-spinner)))))
+      (rustic-start-spinner))
     (let ((default-directory dir))
       (write-region (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
       (rustic-babel-eval dir)
       (setq rustic-babel-src-location (set-marker
                                        (make-marker) (point) (current-buffer)))
       project)))
-
-
-;;;;;;;;;;;;
-;; Spinner
-
-(defvar rustic-babel-spinner nil)
-
-(eval-and-compile (require 'spinner))
-(defcustom rustic-babel-spinner-type 'horizontal-moving
-  "Holds the type of spinner to be used in the mode-line.
-Takes a value accepted by `spinner-start'."
-  :type `(choice (choice :tag "Choose a spinner by name"
-                         ,@(mapcar (lambda (c) (list 'const (car c)))
-                                   spinner-types))
-                 (const :tag "A random spinner" random)
-                 (repeat :tag "A list of symbols from `spinner-types' to randomly choose from"
-                         (choice :tag "Choose a spinner by name"
-                                 ,@(mapcar (lambda (c) (list 'const (car c)))
-                                           spinner-types)))
-                 (vector :tag "A user defined vector"
-                         (repeat :inline t string)))
-  :group 'rustic-babel)
-
-(defun rustic-babel-start-spinner ()
-  (when (spinner-p rustic-babel-spinner)
-    (spinner-stop rustic-babel-spinner))
-  (setq rustic-babel-spinner
-        (make-spinner rustic-babel-spinner-type t 10))
-  (spinner-start rustic-babel-spinner))
-
-(defun rustic-babel-stop-spinner ()
-  (when (spinner-p rustic-babel-spinner)
-    (spinner-stop rustic-babel-spinner))
-  (setq rustic-babel-spinner nil))
 
 (provide 'rustic-babel)
 ;;; rustic-babel.el ends here

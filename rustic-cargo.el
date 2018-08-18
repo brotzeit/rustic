@@ -102,9 +102,9 @@
 (defun rustic-cargo-list-outdated (&optional path)
   (interactive)
   (let* ((dir (or path (rustic-buffer-workspace)))
-        (buf (get-buffer-create rustic-cargo-oudated-buffer-name))
-        (default-directory dir)
-        (inhibit-read-only t))
+         (buf (get-buffer-create rustic-cargo-oudated-buffer-name))
+         (default-directory dir)
+         (inhibit-read-only t))
     (make-process :name rustic-cargo-outdated-process-name
                   :buffer buf
                   :command '("cargo" "outdated" "--depth" "1")
@@ -112,7 +112,13 @@
                   :sentinel #'rustic-cargo-outdated-sentinel)
     (with-current-buffer buf
       (setq-local default-directory dir)
-      (erase-buffer))))
+      (erase-buffer)
+      (rustic-cargo-outdated-mode)            
+      (setq mode-line-process
+            '(rustic-spinner
+              (":Executing " (:eval (spinner-print rustic-spinner)))))
+      (rustic-start-spinner))
+    (display-buffer buf)))
 
 (defun rustic-cargo-reload-outdated ()
   (interactive)
@@ -136,7 +142,8 @@
         (let ((out (buffer-string)))
           (if (= exit-status 101)
               (rustic-cargo-install-crate "outdated")
-            (message out)))))))
+            (message out))))))
+  (rustic-stop-spinner))
 
 (defun rustic-cargo-install-crate (crate)
   (let ((cmd (format "cargo install cargo-%s" crate)))
@@ -146,7 +153,6 @@
 (defun rustic-cargo-outdated-generate-menu (output buf)
   (let ((inhibit-read-only t))
     (with-current-buffer buf
-      (rustic-cargo-outdated-mode)
       (erase-buffer)
       (goto-char (point-min))
       (setq tabulated-list-entries
@@ -161,8 +167,8 @@
          (compat (nth 2 fields)))
     (list name `[,name
                  ,project
-                 ,(if (when (not (string= "---" compat))
-                          (version< project compat))
+                 ,(if (when (not (string-match "^-" compat))
+                        (version< project compat))
                       (propertize compat 'font-lock-face `(:foreground ,rustic-cargo-outdated-face))
                     compat)
                  ,(nth 3 fields)
@@ -174,7 +180,7 @@
   (interactive)
   (let ((project (aref (tabulated-list-get-entry) 1))
         (compat (aref (tabulated-list-get-entry) 2)))
-    (unless (or (string= "---" compat)
+    (unless (or (string-match "^-" compat)
                 (not (version< project compat)))
       (tabulated-list-put-tag "U" t))))
 
@@ -186,7 +192,7 @@
     (while (not (eobp))
       (let ((project (aref (tabulated-list-get-entry) 1))
             (compat (aref (tabulated-list-get-entry) 2)))
-        (if (or (string= "---" compat)
+        (if (or (string-match "^-" compat)
                 (not (version< project compat)))
             (forward-line)
           (tabulated-list-put-tag "U" t))))))
@@ -224,6 +230,40 @@
           (rustic-cargo-install-crate "edit")
         (and (shell-command-to-string (format "cargo update %s" update))
              (rustic-cargo-reload-outdated))))))
+
+
+;;;;;;;;;;;;
+;; Spinner
+
+(defvar rustic-spinner nil)
+
+(eval-and-compile (require 'spinner))
+(defcustom rustic-spinner-type 'horizontal-moving
+  "Holds the type of spinner to be used in the mode-line.
+Takes a value accepted by `spinner-start'."
+  :type `(choice (choice :tag "Choose a spinner by name"
+                         ,@(mapcar (lambda (c) (list 'const (car c)))
+                                   spinner-types))
+                 (const :tag "A random spinner" random)
+                 (repeat :tag "A list of symbols from `spinner-types' to randomly choose from"
+                         (choice :tag "Choose a spinner by name"
+                                 ,@(mapcar (lambda (c) (list 'const (car c)))
+                                           spinner-types)))
+                 (vector :tag "A user defined vector"
+                         (repeat :inline t string)))
+  :group 'rustic-babel)
+
+(defun rustic-start-spinner ()
+  (when (spinner-p rustic-spinner)
+    (spinner-stop rustic-spinner))
+  (setq rustic-spinner
+        (make-spinner rustic-spinner-type t 10))
+  (spinner-start rustic-spinner))
+
+(defun rustic-stop-spinner ()
+  (when (spinner-p rustic-spinner)
+    (spinner-stop rustic-spinner))
+  (setq rustic-spinner nil))
 
 
 ;;;;;;;;;;;;;;;;
