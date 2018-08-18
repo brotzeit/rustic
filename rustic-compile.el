@@ -177,15 +177,15 @@ Error matching regexes from compile.el are removed."
       (funcall mode)
       (funcall rustic-compile-display-method buf)
       (let ((proc (make-process :name process
-                    :buffer buf
-                    :command command
-                    :filter #'rustic-compilation-filter
-                    :sentinel (if sentinel sentinel #'compilation-sentinel))))
-      (setq mode-line-process
-            '((:propertize ":%s" face compilation-mode-line-run)
-              compilation-mode-line-errors))
-      (force-mode-line-update)
-      proc))))
+                                :buffer buf
+                                :command command
+                                :filter #'rustic-compilation-filter
+                                :sentinel (if sentinel sentinel #'compilation-sentinel))))
+        (setq mode-line-process
+              '((:propertize ":%s" face compilation-mode-line-run)
+                compilation-mode-line-errors))
+        (force-mode-line-update)
+        proc))))
 
 (defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.

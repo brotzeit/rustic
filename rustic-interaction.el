@@ -37,8 +37,8 @@
     ;; open bracket ends the line
     (when (not (looking-at "[[:blank:]]*\\(?://.*\\)?$"))
       (when (looking-at "[[:space:]]")
-    (forward-word 1)
-    (backward-word 1))
+        (forward-word 1)
+        (backward-word 1))
       (current-column))))
 
 (defun rustic-align-to-method-chain ()
@@ -331,20 +331,20 @@ Don't move to the beginning of the line. `beginning-of-defun',
 which calls this, does that afterwards."
   (interactive "p")
   (let* ((arg (or arg 1))
-	 (magnitude (abs arg))
-	 (sign (if (< arg 0) -1 1)))
+	     (magnitude (abs arg))
+	     (sign (if (< arg 0) -1 1)))
     ;; If moving forward, don't find the defun we might currently be
     ;; on.
     (when (< sign 0)
       (end-of-line))
     (catch 'done
       (dotimes (_ magnitude)
-	;; Search until we find a match that is not in a string or comment.
-	(while (if (re-search-backward (concat "^\\(" rustic-top-item-beg-re "\\)")
-				       nil 'move sign)
-		   (rustic-in-str-or-cmnt)
-		 ;; Did not find it.
-		 (throw 'done nil)))))
+	    ;; Search until we find a match that is not in a string or comment.
+	    (while (if (re-search-backward (concat "^\\(" rustic-top-item-beg-re "\\)")
+				                       nil 'move sign)
+		           (rustic-in-str-or-cmnt)
+		         ;; Did not find it.
+		         (throw 'done nil)))))
     t))
 
 (defun rustic-end-of-defun ()

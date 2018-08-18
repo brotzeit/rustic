@@ -127,9 +127,9 @@ function or trait.  When nil, where will be aligned with fn or trait."
 (defconst rustic-re-union
   (rx-to-string
    `(seq
-    (or space line-start)
-    (group symbol-start "union" symbol-end)
-    (+ space) (regexp ,rustic-re-ident))))
+     (or space line-start)
+     (group symbol-start "union" symbol-end)
+     (+ space) (regexp ,rustic-re-ident))))
 
 (defvar rustic-mode-map
   (let ((map (make-sparse-keymap)))
@@ -474,7 +474,7 @@ buffer."
           (rustic-re-shy (concat (rustic-re-word "default") "[[:space:]]+")) "?"
           (rustic-re-shy (concat (rustic-re-word rustic-re-unsafe) "[[:space:]]+")) "?"
           (rustic-re-shy (concat (rustic-re-word rustic-re-extern) "[[:space:]]+"
-                               (rustic-re-shy "\"[^\"]+\"[[:space:]]+") "?")) "?"
+                                 (rustic-re-shy "\"[^\"]+\"[[:space:]]+") "?")) "?"
           (rustic-re-item-def itype)))
 
 (defconst rustic-re-special-types (regexp-opt rustic-special-types 'symbols))

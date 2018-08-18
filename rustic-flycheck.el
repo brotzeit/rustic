@@ -64,8 +64,8 @@ more information on setting your PATH with Emacs."))
                                  (json-read)))
                            .packages))
       (seq-map (lambda (pkg)
-                    (let-alist pkg .targets))
-                  packages))))
+                 (let-alist pkg .targets))
+               packages))))
 
 (defun rustic-flycheck-find-cargo-target (file-name)
   "Return the Cargo build target associated with FILE-NAME.
@@ -101,7 +101,7 @@ description of the conventional Cargo project layout."
                   (-table-flat
                    'cons targets
                    (rustic-flycheck-dirs-list file-name
-                                            (file-name-directory manifest)))))
+                                              (file-name-directory manifest)))))
             ;; If all else fails, just pick the first target
             (car targets))))
       ;; If target is 'custom-build', we pick another target from the same package (see GH-62)
