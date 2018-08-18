@@ -307,6 +307,11 @@ buffers are formatted after saving if `rustic-format-on-save' is t."
                   (sit-for 0.1)))
               (revert-buffer t t))))))))
 
+(defun rustic-save-some-buffers-advice (orig-fun &rest args)
+  (let ((rustic-format-on-save nil))
+    (apply orig-fun args)))
+
+(advice-add 'save-some-buffers :around #'rustic-save-some-buffers-advice)
 
 ;;;;;;;;;;
 ;; Rustc
