@@ -99,7 +99,7 @@
   (setq tabulated-list-padding 2)
   (tabulated-list-init-header))
 
-(defun rustic-cargo-list-outdated (&optional path)
+(defun rustic-cargo-outdated (&optional path)
   (interactive)
   (let* ((dir (or path (rustic-buffer-workspace)))
          (buf (get-buffer-create rustic-cargo-oudated-buffer-name))
@@ -122,7 +122,7 @@
 
 (defun rustic-cargo-reload-outdated ()
   (interactive)
-  (rustic-cargo-list-outdated default-directory))
+  (rustic-cargo-outdated default-directory))
 
 (defun rustic-cargo-outdated-filter (proc output)
   (let ((inhibit-read-only t))

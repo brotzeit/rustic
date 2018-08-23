@@ -144,7 +144,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
 
     (define-key map (kbd "C-c C-c C-d") 'rustic-racer-describe)
     (define-key map (kbd "C-c C-c C-,") 'rustic-docstring-dwim)
-    (define-key map (kbd "C-c C-c C-n") 'rustic-cargo-list-outdated)
+    (define-key map (kbd "C-c C-c C-n") 'rustic-cargo-outdated)
     map)
   "Keymap for Rust major mode.")
 

@@ -23,7 +23,7 @@ Differences with rust-mode:
 * rustic-cargo-fmt
 * rustic-cargo-test
 * rustic-cargo-clippy
-* rustic-cargo-list-outdated
+* rustic-cargo-outdated
 * rustic-format-buffer
 * rustic-racer-describe
 
