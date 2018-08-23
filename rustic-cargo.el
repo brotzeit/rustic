@@ -8,7 +8,8 @@
 ;; Customization
 
 (defcustom rustic-cargo-bin "cargo"
-  "Path to cargo executable.")
+  "Path to cargo executable."
+  :group 'rustic-cargo)
 
 
 ;;;;;;;;;;;
@@ -129,7 +130,7 @@
     (with-current-buffer (process-buffer proc)
       (insert output))))
 
-(defun rustic-cargo-outdated-sentinel (proc output)
+(defun rustic-cargo-outdated-sentinel (proc _output)
   (let ((buf (process-buffer proc))
         (inhibit-read-only t)
         (exit-status (process-exit-status proc)))
