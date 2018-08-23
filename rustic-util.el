@@ -218,11 +218,11 @@ src-block or buffer on the Rust playpen."
      (t
       (setq data (buffer-substring (point-min) (point-max)))))
     (let* ((escaped-data (url-hexify-string data))
-           (escaped-playpen-url (url-hexify-string (format rust-playpen-url-format escaped-data))))
+           (escaped-playpen-url (url-hexify-string (format rustic-playpen-url-format escaped-data))))
       (if (> (length escaped-playpen-url) 5000)
           (error "encoded playpen data exceeds 5000 character limit (length %s)"
                  (length escaped-playpen-url))
-        (let ((shortener-url (format rust-shortener-url-format escaped-playpen-url))
+        (let ((shortener-url (format rustic-shortener-url-format escaped-playpen-url))
               (url-request-method "POST"))
           (url-retrieve shortener-url
                         (lambda (state)
