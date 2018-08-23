@@ -148,10 +148,6 @@ function or trait.  When nil, where will be aligned with fn or trait."
     map)
   "Keymap for Rust major mode.")
 
-(defun rustic ()
-  (interactive)
-  (rustic-mode))
-
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
 
@@ -1120,7 +1116,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
   (interactive)
   (unload-feature 'rustic)
   (require 'rustic)
-  (rustic))
+  (rustic-mode))
 
 (provide 'rustic)
 ;;; rustic.el ends here

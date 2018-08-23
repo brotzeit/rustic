@@ -2,7 +2,7 @@
 
 (defun rustic-test-fontify-string (str)
   (with-temp-buffer
-    (rustic)
+    (rustic-mode)
     (insert str)
     (font-lock-fontify-buffer)
     (buffer-string)))
@@ -14,7 +14,7 @@
 
 (defun rustic-test-fontify-string (str)
   (with-temp-buffer
-    (rustic)
+    (rustic-mode)
     (insert str)
     (font-lock-fontify-buffer)
     (buffer-string)))
@@ -250,7 +250,7 @@ this_is_not_a_string();)"
 
 (ert-deftest font-lock-recognize-closing-raw-string ()
   (with-temp-buffer
-    (rustic)
+    (rustic-mode)
     (insert "const foo = r##\"
 1...............................................50
 1...............................................50

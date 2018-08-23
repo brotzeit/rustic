@@ -40,7 +40,7 @@ If ARGS are provided, send them to MANIP-FUNC.
 
 INIT-POS, FINAL-POS are position symbols found in `rust-test-positions-alist'."
   (with-temp-buffer
-    (rustic)
+    (rustic-mode)
     (insert source-code)
     (goto-char (rustic-get-buffer-pos init-pos))
     (apply manip-func args)
@@ -52,7 +52,7 @@ INIT-POS, FINAL-POS are position symbols found in `rust-test-positions-alist'."
 
 (defun rustic-test-manip-code (original point-pos manip-func expected)
   (with-temp-buffer
-    (rustic)
+    (rustic-mode)
     (insert original)
     (goto-char point-pos)
     (funcall manip-func)
@@ -505,7 +505,7 @@ INIT-POS is the initial position of point.
 If ARGS are provided, send them to MANIP-FUNC.
 All positions are position symbols found in `rustic-test-positions-alist'."
   (with-temp-buffer
-    (rustic)
+    (rustic-mode)
     (insert source-code)
     (goto-char (rustic-get-buffer-pos init-pos))
     (apply manip-func args)
@@ -565,7 +565,7 @@ All positions are position symbols found in `rustic-test-positions-alist'."
 (ert-deftest rustic-beginning-of-defun-string-comment ()
   (let (fn-1 fn-2 p-1 p-2)
     (with-temp-buffer
-      (rustic)
+      (rustic-mode)
       (insert "fn test1() {
   let s=r#\"
 fn test2();
@@ -671,7 +671,7 @@ fn test4();")
 
 (ert-deftest no-stack-overflow-in-rustic-rewind-irrelevant ()
   (with-temp-buffer
-    (rustic)
+    (rustic-mode)
     (insert "fn main() {\n    let x = 1;")
     ;; Insert 150 separate comments on the same line
     (dotimes (i 150)
@@ -708,7 +708,7 @@ pattern to what did and did not trip it."
   ;; were needed to expose the error, for instance--deleting either of them
   ;; would make the failure go away.
   (with-temp-buffer
-    (rustic)
+    (rustic-mode)
     (insert "fn blank_line(arg:i32) -> bool {
 
 }
@@ -795,7 +795,7 @@ impl Foo for Bar {
   in the list and the test still passes (as long as none of their
   positions appear in `nonparen-positions'.)"
   (with-temp-buffer
-    (rustic)
+    (rustic-mode)
     (insert content)
     (font-lock-fontify-buffer)
     (dolist (pair pairs)
@@ -829,7 +829,7 @@ impl Foo for Bar {
 
 (ert-deftest rustic-test-two-character-quotes-in-a-row ()
   (with-temp-buffer
-    (rustic)
+    (rustic-mode)
     (font-lock-fontify-buffer)
     (insert "'\\n','a', fn")
     (font-lock-after-change-function 1 12 0)
@@ -1478,7 +1478,7 @@ type Foo<T> where T: Copy = Box<T>;
       (insert base-contents))
     (with-temp-buffer
       (insert-file-contents tmp-file-name 'VISIT nil nil 'REPLACE)
-      (rustic)
+      (rustic-mode)
       (goto-char (point-max))
       (should (= 0 (rustic-paren-level)))
       (with-temp-file tmp-file-name
@@ -1494,7 +1494,7 @@ type Foo<T> where T: Copy = Box<T>;
 
 (defun test-imenu (code expected-items)
   (with-temp-buffer
-    (rustic)
+    (rustic-mode)
     (insert code)
     (let ((actual-items
            ;; Replace ("item" . #<marker at ? in ?.rs) with "item"
@@ -1544,7 +1544,7 @@ extern \"rustic-intrinsic\" fn five() {
       (electric-pair-mode 1)
       (unwind-protect
           (with-temp-buffer
-            (rustic)
+            (rustic-mode)
             (insert original)
             (font-lock-fontify-buffer)
 
