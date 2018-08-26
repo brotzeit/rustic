@@ -184,6 +184,8 @@
             ((and (eq rls-pkg 'lsp-mode)
                   (featurep 'lsp-mode))
              (lsp-rust-enable))
+            ((eq rls-pkg nil)
+             nil)
             (t
              (rustic-setup-rls-1 rls-pkg))))))
 

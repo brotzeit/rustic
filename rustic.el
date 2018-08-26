@@ -55,7 +55,8 @@
 (defcustom rustic-rls-pkg 'lsp-mode
   "Emacs package for interaction with rls."
   :type '(choice (symbol :tag 'eglot "eglot")
-                 (symbol :tag 'lsp-mode "lsp-mode"))
+                 (symbol :tag 'lsp-mode "lsp-mode")
+                 (symbol :tag nil "No RLS client"))
   :group 'rustic)
 
 (defcustom rustic-indent-offset 4
