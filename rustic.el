@@ -210,6 +210,10 @@ function or trait.  When nil, where will be aligned with fn or trait."
   (when rustic-always-locate-project-on-open
     (rustic-update-buffer-workspace))
 
+  (let ((mode '("\\.rs\\'" . rust-mode)))
+    (when (member mode auto-mode-alist)
+      (setq auto-mode-alist (remove mode auto-mode-alist))))
+
   (rustic-setup-rls))
 
 (defvar rustic-syntax-table
