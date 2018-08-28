@@ -37,16 +37,6 @@ fn main() {
 #+END_SRC
 ```
 
-## Testing
-
-To run the tests, you will
-need [Cask](https://github.com/cask/cask).
-
-``` bash
-$ cask
-$ cask exec ert-runner
-```
-
 ## Rust Language Server
 
 The default package is lsp-mode. But you can also use eglot.
