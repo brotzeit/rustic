@@ -15,17 +15,17 @@ Differences with rust-mode:
 - requires emacs 26
 - etc.
 
-## Some Commands:
+## Some basic commands:
 
 * rustic-compile
 * rustic-recompile
-* rustic-cargo-build
-* rustic-cargo-fmt
-* rustic-cargo-test
-* rustic-cargo-clippy
-* rustic-cargo-outdated
 * rustic-format-buffer
 * rustic-racer-describe
+
+## Cargo popup
+
+You can execute cargo commands with `rustic-cargo-popup`. The list of commands can be customized
+with `rustic-cargo-popup-commands`.
 
 ## Org-babel
 
