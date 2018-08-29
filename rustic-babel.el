@@ -56,7 +56,9 @@
          (default-directory dir)
          (coding-system-for-read 'binary)
          (process-environment (nconc
-	                           (list (format "TERM=%s" "ansi"))
+                               (list
+                                (format "TERM=%s" "ansi")
+                                (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
                                process-environment))
          (params '("cargo" "build"))
          (inhibit-read-only t))

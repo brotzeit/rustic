@@ -167,8 +167,9 @@ Error matching regexes from compile.el are removed."
          (default-directory directory)
          (coding-system-for-read 'binary)
          (process-environment (nconc
-	                           (list (format "TERM=%s" "ansi")
-                                     (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
+	                           (list
+                                (format "TERM=%s" "ansi")
+                                (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
                                process-environment))
          (inhibit-read-only t))
     (setq next-error-last-buffer buf)
