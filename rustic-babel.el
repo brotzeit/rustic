@@ -106,7 +106,10 @@ execution with rustfmt."
                     (sleep-for 0.01))
                   (process-send-string proc babel-body)
                   (process-send-eof proc)))))
-      (pop-to-buffer proc-buffer))))
+      (pop-to-buffer proc-buffer)))
+  (when rustic-babel-display-spinner
+    (rustic-stop-spinner)
+    (setq mode-line-process nil)))
 
 (defun rustic-babel-format-sentinel (proc output)
   (let ((proc-buffer (process-buffer proc))
@@ -119,10 +122,7 @@ execution with rustfmt."
             (org-babel-update-block-body
              (with-current-buffer "rustic-babel-format-buffer"
                (buffer-string)))))))
-    (kill-buffer "rustic-babel-format-buffer"))
-  (when rustic-babel-display-spinner
-    (rustic-stop-spinner)
-    (setq mode-line-process nil)))
+    (kill-buffer "rustic-babel-format-buffer")))
 
 (defun rustic-babel-generate-project (&optional expand)
   "Create rust project in `org-babel-temporary-directory'."
