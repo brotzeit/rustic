@@ -10,6 +10,7 @@
 
 (defcustom rustic-cargo-bin "cargo"
   "Path to cargo executable."
+  :type 'string
   :group 'rustic-cargo)
 
 
