@@ -163,9 +163,9 @@ Error matching regexes from compile.el are removed."
 (defvar rustic-compilation-buffer-name "*rust-compilation*"
   "Buffer name for rust compilation process buffers.")
 
-(defun rustic-compilation-start (command buffer process mode directory &optional sentinel)
+(defun rustic-compilation-start (command buffer process mode &optional directory sentinel)
   (let* ((buf (get-buffer-create buffer))
-         (default-directory directory)
+         (default-directory (or directory default-directory))
          (coding-system-for-read 'binary)
          (process-environment (nconc
 	                           (list
@@ -183,7 +183,8 @@ Error matching regexes from compile.el are removed."
                                 :buffer buf
                                 :command command
                                 :filter #'rustic-compilation-filter
-                                :sentinel (if sentinel sentinel #'compilation-sentinel))))
+                                :sentinel (if sentinel sentinel
+                                            #'compilation-sentinel))))
         (setq mode-line-process
               '((:propertize ":%s" face compilation-mode-line-run)
                 compilation-mode-line-errors))

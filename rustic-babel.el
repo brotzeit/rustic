@@ -39,7 +39,7 @@
 (defvar rustic-babel-process-name "rustic-babel-process"
   "Process name for org-babel rust compilation processes.")
 
-(defvar rustic-babel-compilation-buffer "*rustic-babel-compilation-buffer*"
+(defvar rustic-babel-compilation-buffer-name "*rustic-babel-compilation-buffer*"
   "Buffer name for org-babel rust compilation process buffers.")
 
 (defvar rustic-babel-dir nil
@@ -53,7 +53,7 @@
 
 (defun rustic-babel-eval (dir)
   "Start a rust babel compilation process in directory DIR."
-  (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer))
+  (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
          (default-directory dir)
          (coding-system-for-read 'binary)
          (process-environment
@@ -75,42 +75,61 @@
      :buffer err-buff
      :command params
      :filter #'rustic-compilation-filter
-     :sentinel #'rustic-babel-sentinel)))
+     :sentinel #'rustic-babel-build-sentinel)))
 
-(defun rustic-babel-sentinel (proc _string)
+(defun rustic-babel-build-sentinel (proc _output)
   "Sentinel for rust babel compilation process PROC.
 If `rustic-babel-format-src-block' is t, format src-block after successful
 execution with rustfmt."
   (let ((proc-buffer (process-buffer proc))
         (inhibit-read-only t))
     (if (zerop (process-exit-status proc))
-        (let* ((default-directory rustic-babel-dir)
-               (result (shell-command-to-string "cargo run --quiet"))
-               (result-params (list (cdr (assq :results rustic-babel-params))))
-               (marker rustic-babel-src-location))
+        (let* ((default-directory rustic-babel-dir))
           (unless rustic-babel-display-compilation-buffer
             (kill-buffer proc-buffer))
+          ;; format babel block
+          (when rustic-babel-format-src-block
+            (let ((babel-body
+                   (org-element-property :value (org-element-at-point)))
+                  (proc
+                   (make-process :name "rustic-babel-format"
+                                 :buffer "rustic-babel-format-buffer"
+                                 :command `(,rustic-rustfmt-bin)
+                                 :filter #'rustic-compilation-filter
+                                 :sentinel #'rustic-babel-format-sentinel)))
+              (while (not (process-live-p proc))
+                (sleep-for 0.01))
+              (process-send-string proc babel-body)
+              (process-send-eof proc)
+              (while (eq (process-status proc) 'run)
+                (sit-for 0.1))))
+          ;; run project
+          (rustic-compilation-start
+           (split-string "cargo run --quiet")
+           rustic-babel-compilation-buffer-name
+           rustic-babel-process-name
+           'rustic-compilation-mode
+           default-directory #'rustic-babel-run-sentinel))
+      (progn (when rustic-babel-display-spinner
+               (rustic-stop-spinner)
+               (setq mode-line-process nil))
+             (pop-to-buffer proc-buffer)))))
+
+(defun rustic-babel-run-sentinel (proc _output)
+  "Sentinel for babel project execution."
+  (let ((proc-buffer (process-buffer proc)))
+    (if (zerop (process-exit-status proc))
+        (let ((marker rustic-babel-src-location)
+              (result-params (list (cdr (assq :results rustic-babel-params)))))
+          ;; update result block
           (with-current-buffer (marker-buffer marker)
             (goto-char marker)
             (org-babel-remove-result rustic-info)
-            (org-babel-insert-result result result-params rustic-info)
-            (when rustic-babel-format-src-block
-              (let ((babel-body
-                     (org-element-property :value (org-element-at-point)))
-                    (proc
-                     (make-process :name "rustic-babel-format"
-                                   :buffer "rustic-babel-format-buffer"
-                                   :command `(,rustic-rustfmt-bin)
-                                   :filter #'rustic-compilation-filter
-                                   :sentinel #'rustic-babel-format-sentinel)))
-                (while (not (process-live-p proc))
-                  (sleep-for 0.01))
-                (process-send-string proc babel-body)
-                (process-send-eof proc)))))
-      (pop-to-buffer proc-buffer)))
-  (when rustic-babel-display-spinner
-    (rustic-stop-spinner)
-    (setq mode-line-process nil)))
+            (org-babel-insert-result result result-params rustic-info)))
+      (pop-to-buffer proc-buffer))
+    (when rustic-babel-display-spinner
+      (rustic-stop-spinner)
+      (setq mode-line-process nil))))
 
 (defun rustic-babel-format-sentinel (proc output)
   "This sentinel is used by the process `rustic-babel-format', that runs
