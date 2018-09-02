@@ -56,11 +56,12 @@
   (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer))
          (default-directory dir)
          (coding-system-for-read 'binary)
-         (process-environment (nconc
-                               (list
-                                (format "TERM=%s" "ansi")
-                                (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
-                               process-environment))
+         (process-environment
+          (nconc
+           (list
+            (format "TERM=%s" "ansi")
+            (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
+           process-environment))
          (params '("cargo" "build"))
          (inhibit-read-only t))
     (with-current-buffer err-buff
@@ -95,17 +96,19 @@ execution with rustfmt."
             (goto-char marker)
             (org-babel-remove-result rustic-info)
             (org-babel-insert-result result result-params rustic-info)
-            (if rustic-babel-format-src-block
-                (let ((babel-body (org-element-property :value (org-element-at-point)))
-                      (proc (make-process :name "rustic-babel-format"
-                                          :buffer "rustic-babel-format-buffer"
-                                          :command `(,rustic-rustfmt-bin)
-                                          :filter #'rustic-compilation-filter
-                                          :sentinel #'rustic-babel-format-sentinel)))
-                  (while (not (process-live-p proc))
-                    (sleep-for 0.01))
-                  (process-send-string proc babel-body)
-                  (process-send-eof proc)))))
+            (when rustic-babel-format-src-block
+              (let ((babel-body
+                     (org-element-property :value (org-element-at-point)))
+                    (proc
+                     (make-process :name "rustic-babel-format"
+                                   :buffer "rustic-babel-format-buffer"
+                                   :command `(,rustic-rustfmt-bin)
+                                   :filter #'rustic-compilation-filter
+                                   :sentinel #'rustic-babel-format-sentinel)))
+                (while (not (process-live-p proc))
+                  (sleep-for 0.01))
+                (process-send-string proc babel-body)
+                (process-send-eof proc)))))
       (pop-to-buffer proc-buffer)))
   (when rustic-babel-display-spinner
     (rustic-stop-spinner)
@@ -190,10 +193,11 @@ directory DIR."
               (":Executing " (:eval (spinner-print rustic-spinner)))))
       (rustic-start-spinner))
     (let ((default-directory dir))
-      (write-region (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
+      (write-region
+       (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
       (rustic-babel-eval dir)
-      (setq rustic-babel-src-location (set-marker
-                                       (make-marker) (point) (current-buffer)))
+      (setq rustic-babel-src-location
+            (set-marker (make-marker) (point) (current-buffer)))
       project)))
 
 (provide 'rustic-babel)

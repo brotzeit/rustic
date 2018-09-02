@@ -172,7 +172,9 @@
                  ,project
                  ,(if (when (not (string-match "^-" compat))
                         (version< project compat))
-                      (propertize compat 'font-lock-face `(:foreground ,rustic-cargo-outdated-face))
+                      (propertize compat
+                                  'font-lock-face
+                                  `(:foreground ,rustic-cargo-outdated-face))
                     compat)
                  ,(nth 3 fields)
                  ,(nth 4 fields)
