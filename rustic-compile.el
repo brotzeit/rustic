@@ -12,6 +12,7 @@
 (require 'compile)
 (require 'xterm-color)
 (require 'projectile)
+(require 'markdown-mode)
 
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
