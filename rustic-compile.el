@@ -281,7 +281,7 @@ The variable `buffer-save-without-query' can be used for customization and
 buffers are formatted after saving if `rustic-format-on-save' is t."
   (let* ((buffers (condition-case ()
                       (projectile-buffers-with-file (projectile-project-buffers))
-                    (error nil))))
+                    (buffer-list))))
     (when-let* ((b (get-buffer rustic-format-buffer-name)))
       (when (buffer-live-p b)
         (kill-buffer b)))
