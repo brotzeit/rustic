@@ -79,8 +79,6 @@
 
 (defun rustic-babel-sentinel (proc _string)
   "Sentinel for rust babel compilation process PROC.
-
-Use 'cargo run' to get the results for org-babel.
 If `rustic-babel-format-src-block' is t, format src-block after successful
 execution with rustfmt."
   (let ((proc-buffer (process-buffer proc))

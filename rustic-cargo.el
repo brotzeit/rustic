@@ -103,6 +103,8 @@
   (tabulated-list-init-header))
 
 (defun rustic-cargo-outdated (&optional path)
+  "Use 'cargo outdated' to list outdated packages in `tabulated-list-mode'.
+Execute process in PATH."
   (interactive)
   (let* ((dir (or path (rustic-buffer-workspace)))
          (buf (get-buffer-create rustic-cargo-oudated-buffer-name))
@@ -124,15 +126,18 @@
     (display-buffer buf)))
 
 (defun rustic-cargo-reload-outdated ()
+  "Update list of outdated packages."
   (interactive)
   (rustic-cargo-outdated default-directory))
 
 (defun rustic-cargo-outdated-filter (proc output)
+  "Filter for rustic-cargo-outdated-process."
   (let ((inhibit-read-only t))
     (with-current-buffer (process-buffer proc)
       (insert output))))
 
 (defun rustic-cargo-outdated-sentinel (proc _output)
+  "Sentinel for rustic-cargo-outdated-process."
   (let ((buf (process-buffer proc))
         (inhibit-read-only t)
         (exit-status (process-exit-status proc)))
@@ -144,16 +149,18 @@
       (with-current-buffer buf
         (let ((out (buffer-string)))
           (if (= exit-status 101)
-              (rustic-cargo-install-crate "outdated")
+              (rustic-cargo-install-crate-p "outdated")
             (message out))))))
   (rustic-stop-spinner))
 
-(defun rustic-cargo-install-crate (crate)
+(defun rustic-cargo-install-crate-p (crate)
+  "Ask whether to install crate CRATE."
   (let ((cmd (format "cargo install cargo-%s" crate)))
     (when (yes-or-no-p (format "Cargo-%s missing. Install ? " crate))
       (async-shell-command cmd "cargo" "cargo-error"))))
 
 (defun rustic-cargo-outdated-generate-menu (output buf)
+  "Re-populate the `tabulated-list-entries' with PACKAGES."
   (let ((inhibit-read-only t))
     (with-current-buffer buf
       (erase-buffer)
@@ -164,6 +171,7 @@
       (pop-to-buffer buf))))
 
 (defun rustic-cargo-outdated-menu-entry (crate)
+  "Return a package entry of CRATE suitable for `tabulated-list-entries'."
   (let* ((fields (split-string crate "\s\s+" ))
          (name (nth 0 fields))
          (project (nth 1 fields))
@@ -208,6 +216,7 @@
   (tabulated-list-put-tag " " t))
 
 (defun rustic-cargo-upgrade-execute ()
+  "Perform marked menu actions."
   (interactive)
   (let (crates)
     (save-excursion
@@ -225,6 +234,7 @@
       (user-error "No operations specified"))))
 
 (defun rustic-cargo-upgrade-crates (crates)
+  "Upgrade crates CRATES."
   (let (upgrade
         update)
     (dolist (crate crates)
