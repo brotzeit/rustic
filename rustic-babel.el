@@ -176,7 +176,7 @@ directory DIR."
 
 (defun org-babel-execute:rustic (body params)
   "Execute a block of Rust code with org-babel."
-  (when-let* (p (process-live-p (get-process rustic-babel-process-name)))
+  (when-let* ((p (process-live-p (get-process rustic-babel-process-name))))
     (rustic-process-kill-p p))
   (let* ((default-directory org-babel-temporary-directory)
          (project (rustic-babel-project))
