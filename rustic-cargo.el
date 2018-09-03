@@ -330,5 +330,20 @@ Takes a value accepted by `spinner-start'."
   (interactive)
   (call-interactively 'rustic-compile "cargo clean"))
 
+;;;###autoload
+(defun rustic-cargo-check ()
+  (interactive)
+  (call-interactively 'rustic-compile "cargo check"))
+
+;;;###autoload
+(defun rustic-cargo-bench ()
+  (interactive)
+  (call-interactively 'rustic-compile "cargo bench"))
+
+;;;###autoload
+(defun rustic-cargo-new ()
+  (interactive)
+  (call-interactively 'rustic-compile "cargo new"))
+
 (provide 'rustic-cargo)
 ;;; rustic-cargo.el ends here
