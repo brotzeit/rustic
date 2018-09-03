@@ -145,7 +145,11 @@ Execute process in PATH."
         (with-current-buffer buf
           (goto-char (point-min))
           (forward-line 2)
-          (rustic-cargo-outdated-generate-menu (buffer-substring (point) (point-max)) buf))
+          (let ((packages (split-string
+                           (buffer-substring (point) (point-max)) "\n" t)))
+            (erase-buffer)
+            (rustic-cargo-outdated-generate-menu packages))
+          (pop-to-buffer buf))
       (with-current-buffer buf
         (let ((out (buffer-string)))
           (if (= exit-status 101)
@@ -159,16 +163,11 @@ Execute process in PATH."
     (when (yes-or-no-p (format "Cargo-%s missing. Install ? " crate))
       (async-shell-command cmd "cargo" "cargo-error"))))
 
-(defun rustic-cargo-outdated-generate-menu (output buf)
+(defun rustic-cargo-outdated-generate-menu (packages)
   "Re-populate the `tabulated-list-entries' with PACKAGES."
-  (let ((inhibit-read-only t))
-    (with-current-buffer buf
-      (erase-buffer)
-      (goto-char (point-min))
-      (setq tabulated-list-entries
-            (mapcar #'rustic-cargo-outdated-menu-entry (split-string output "\n" t)))
-      (tabulated-list-print t)
-      (pop-to-buffer buf))))
+  (setq tabulated-list-entries
+        (mapcar #'rustic-cargo-outdated-menu-entry packages))
+  (tabulated-list-print t))
 
 (defun rustic-cargo-outdated-menu-entry (crate)
   "Return a package entry of CRATE suitable for `tabulated-list-entries'."
