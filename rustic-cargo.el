@@ -76,6 +76,8 @@
 
 (defvar rustic-cargo-oudated-buffer-name "*cargo-outdated*")
 
+(defvar rustic-outdated-spinner nil)
+
 (defvar rustic-cargo-outdated-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
@@ -119,10 +121,10 @@ Execute process in PATH."
       (setq-local default-directory dir)
       (erase-buffer)
       (rustic-cargo-outdated-mode)            
-      (setq mode-line-process
-            '(rustic-spinner
-              (":Executing " (:eval (spinner-print rustic-spinner)))))
-      (rustic-start-spinner))
+      (with-rustic-spinner rustic-outdated-spinner
+        (make-spinner rustic-spinner-type t 10)
+        '(rustic-outdated-spinner (":Executing " (:eval (spinner-print rustic-outdated-spinner))))
+        (spinner-start rustic-outdated-spinner)))
     (display-buffer buf)))
 
 (defun rustic-cargo-reload-outdated ()
@@ -155,7 +157,7 @@ Execute process in PATH."
           (if (= exit-status 101)
               (rustic-cargo-install-crate-p "outdated")
             (message out))))))
-  (rustic-stop-spinner))
+  (with-rustic-spinner rustic-outdated-spinner nil nil))
 
 (defun rustic-cargo-install-crate-p (crate)
   "Ask whether to install crate CRATE."
@@ -249,8 +251,6 @@ Execute process in PATH."
 ;;;;;;;;;;;;
 ;; Spinner
 
-(defvar rustic-spinner nil)
-
 (eval-and-compile (require 'spinner))
 (defcustom rustic-spinner-type 'horizontal-moving
   "Holds the type of spinner to be used in the mode-line.
@@ -267,17 +267,14 @@ Takes a value accepted by `spinner-start'."
                          (repeat :inline t string)))
   :group 'rustic-babel)
 
-(defun rustic-start-spinner ()
-  (when (spinner-p rustic-spinner)
-    (spinner-stop rustic-spinner))
-  (setq rustic-spinner
-        (make-spinner rustic-spinner-type t 10))
-  (spinner-start rustic-spinner))
-
-(defun rustic-stop-spinner ()
-  (when (spinner-p rustic-spinner)
-    (spinner-stop rustic-spinner))
-  (setq rustic-spinner nil))
+(defmacro with-rustic-spinner (spinner val mode-line &rest body)
+  (declare (indent defun))
+  `(when rustic-babel-display-spinner
+     (when (spinner-p ,spinner)
+         (spinner-stop ,spinner))
+     (setq ,spinner ,val)
+     (setq mode-line-process ,mode-line)
+     ,@body))
 
 
 ;;;;;;;;;;
