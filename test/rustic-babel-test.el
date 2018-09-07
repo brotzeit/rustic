@@ -74,7 +74,22 @@
         (should (spinner-p rustic-babel-spinner))
         (should-not (eq mode-line-process nil))
         (goto-char (point-min))
-        (sit-for 0.1))
-      (should-not (spinner-p rustic-babel-spinner))
-      (should (eq mode-line-process nil)))))
+        (sit-for 0.1)))))
+
+(ert-deftest rustic-test-babel-format ()
+  (let* ((string "fn main()      {}")
+         (formatted-string "  fn main() {}\n")
+         (buf (rustic-test-get-babel-block string)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (sit-for 1)
+      (should (string= (org-element-property :value (org-element-at-point)) formatted-string))))
+  ;; turn off rustic-babel-format-src-block
+  (let* ((string "fn main()      {}")
+         (newstring (concat string "\n"))
+         (buf (rustic-test-get-babel-block string))
+         (rustic-babel-format-src-block nil))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (should (string= (org-element-property :value (org-element-at-point)) newstring)))))
 
