@@ -131,26 +131,42 @@ execution with rustfmt."
              :command params
              :filter #'rustic-compilation-filter
              :sentinel #'rustic-babel-run-sentinel)))
+      (let (result)
+        (with-current-buffer proc-buffer
+          (setq result
+                (nth 3 (reverse
+                        (split-string
+                         (buffer-substring-no-properties (point-min) (point-max)) "\n" )))))
+        (rustic-babel-update-result-block result))
       (with-rustic-spinner rustic-babel-spinner nil nil)
       (pop-to-buffer proc-buffer))))
 
 (defun rustic-babel-run-sentinel (proc _output)
   "Sentinel for babel project execution."
-  (let ((proc-buffer (process-buffer proc)))
+  (let ((proc-buffer (process-buffer proc))
+        result)
     (if (zerop (process-exit-status proc))
-        (let ((marker rustic-babel-src-location)
-              (result-params (list (cdr (assq :results rustic-babel-params))))
-              result)
+        (progn
           (with-current-buffer proc-buffer
             (setq result (buffer-string)))
-          ;; update result block
-          (with-current-buffer (marker-buffer marker)
-            (goto-char marker)
-            (org-babel-remove-result rustic-info)
-            (org-babel-insert-result result result-params rustic-info))
+          (rustic-babel-update-result-block result)
           (kill-buffer proc-buffer))
-      (pop-to-buffer proc-buffer))
+      (progn
+        (with-current-buffer proc-buffer
+          (setq result
+                (car (split-string
+                      (buffer-substring-no-properties (point-min) (point-max)) "\n" ))))
+        (rustic-babel-update-result-block result)
+        (pop-to-buffer proc-buffer)))
     (with-rustic-spinner rustic-babel-spinner nil nil)))
+
+(defun rustic-babel-update-result-block (result)
+  (let ((marker rustic-babel-src-location)
+        (result-params (list (cdr (assq :results rustic-babel-params)))))
+    (with-current-buffer (marker-buffer marker)
+      (goto-char marker)
+      (org-babel-remove-result rustic-info)
+      (org-babel-insert-result result result-params rustic-info))))
 
 (defun rustic-babel-format-sentinel (proc output)
   "This sentinel is used by the process `rustic-babel-format', that runs
