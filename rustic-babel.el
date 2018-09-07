@@ -150,6 +150,7 @@ execution with rustfmt."
           (with-current-buffer proc-buffer
             (setq result (buffer-string)))
           (rustic-babel-update-result-block result)
+          (with-rustic-spinner rustic-babel-spinner nil nil)
           (kill-buffer proc-buffer))
       (progn
         (with-current-buffer proc-buffer
@@ -157,10 +158,11 @@ execution with rustfmt."
                 (car (split-string
                       (buffer-substring-no-properties (point-min) (point-max)) "\n" ))))
         (rustic-babel-update-result-block result)
-        (pop-to-buffer proc-buffer)))
-    (with-rustic-spinner rustic-babel-spinner nil nil)))
+        (with-rustic-spinner rustic-babel-spinner nil nil)  
+        (pop-to-buffer proc-buffer)))))
 
 (defun rustic-babel-update-result-block (result)
+  "Update result block with RESULT."
   (let ((marker rustic-babel-src-location)
         (result-params (list (cdr (assq :results rustic-babel-params)))))
     (with-current-buffer (marker-buffer marker)

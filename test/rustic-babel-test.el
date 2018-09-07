@@ -74,7 +74,24 @@
         (should (spinner-p rustic-babel-spinner))
         (should-not (eq mode-line-process nil))
         (goto-char (point-min))
-        (sit-for 0.1)))))
+        (sit-for 0.1))))
+  ;; check if spinner stops in case of build error
+  (let* ((string "fn main() {")
+         (buf (rustic-test-get-babel-block string)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (should-not (spinner-p rustic-babel-spinner))
+      (should (eq mode-line-process nil))))
+  ;; check if spinner stops in case of thread panic
+  (let* ((string " fn main() {
+                     let v = vec![1, 2, 3];
+                     v[99];
+                 }")
+         (buf (rustic-test-get-babel-block string)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (should-not (spinner-p rustic-babel-spinner))
+      (should (eq mode-line-process nil)))))
 
 (ert-deftest rustic-test-babel-format ()
   (let* ((string "fn main()      {}")
