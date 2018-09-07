@@ -11,8 +11,7 @@
       (insert "#+BEGIN_SRC rustic\n")
       (insert contents)
       (insert "\n#+END_SRC")
-      (forward-line -1))
-    buf))
+      buf)))
 
 (defun rustic-test-babel-wait ()
   "Wait for babel results."
@@ -23,13 +22,14 @@
       (goto-char (point-min))
       (sit-for 0.5))))
 
-(defun rustic-test-babel-execute-block (buf)
+(defun rustic-test-babel-execute-block (buf &optional nowait)
   "Execute babel block in BUF."
   (with-current-buffer buf
     (call-interactively 'org-ctrl-c-ctrl-c)
-    (rustic-test-babel-wait)))
+    (unless nowait
+      (rustic-test-babel-wait))))
 
-(defun rustic-test-check-results (string buf)
+(defun rustic-test-babel-check-results (string buf)
   "Returns t if babel result in BUF equals STRING."
   (let (result)
     (with-current-buffer buf
@@ -44,6 +44,37 @@
                     println!(\"{}\", \"foo\");
                   }")
          (buf (rustic-test-get-babel-block string)))
-    (rustic-babel-test-execute-block buf)
-    (should (rustic-babel-check-results "foo\n" buf))
+    (rustic-test-babel-execute-block buf)
+    (should (rustic-test-babel-check-results "foo\n" buf))
+    (should-not (buffer-live-p rustic-babel-compilation-buffer-name)))
+  (let* ((string "fn main() {
+                    let foo = 1;
+                  }")
+         (buf (rustic-test-get-babel-block string)))
+    (rustic-test-babel-execute-block buf)
+    (should (rustic-test-babel-check-results nil buf))
     (should-not (buffer-live-p rustic-babel-compilation-buffer-name))))
+
+(ert-deftest rustic-test-babel-spinner ()
+  (let* ((string "fn main() {
+                    use std::{thread, time};
+                    let ten_millis = time::Duration::from_millis(2000);
+                    let now = time::Instant::now();
+                    thread::sleep(ten_millis);
+                  }")
+         (buf (rustic-test-get-babel-block string)))
+    (with-current-buffer buf
+      (should-not (spinner-p rustic-babel-spinner))
+      (should (eq mode-line-process nil))
+      (rustic-test-babel-execute-block buf t)
+      (should (spinner-p rustic-babel-spinner))
+      (should-not (eq mode-line-process nil))
+      (goto-char (point-min))
+      (while (search-forward "#+RESULTS:\n: cargo" nil t)
+        (should (spinner-p rustic-babel-spinner))
+        (should-not (eq mode-line-process nil))
+        (goto-char (point-min))
+        (sit-for 0.1))
+      (should-not (spinner-p rustic-babel-spinner))
+      (should (eq mode-line-process nil)))))
+
