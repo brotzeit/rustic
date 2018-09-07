@@ -218,26 +218,26 @@ directory DIR."
   "Execute a block of Rust code with org-babel."
   (when-let* ((p (process-live-p (get-process rustic-babel-process-name))))
     (rustic-process-kill-p p))
-(let* ((default-directory org-babel-temporary-directory)
-       (project (rustic-babel-project))
-       (dir (setq rustic-babel-dir (expand-file-name project)))
-       (main (expand-file-name "main.rs" (concat dir "/src"))))
-  (rustic-babel-cargo-toml dir params)
-  (setq rustic-info (org-babel-get-src-block-info))
-  (setq rustic-babel-params params)
+  (let* ((default-directory org-babel-temporary-directory)
+         (project (rustic-babel-project))
+         (dir (setq rustic-babel-dir (expand-file-name project)))
+         (main (expand-file-name "main.rs" (concat dir "/src"))))
+    (rustic-babel-cargo-toml dir params)
+    (setq rustic-info (org-babel-get-src-block-info))
+    (setq rustic-babel-params params)
 
-  (with-rustic-spinner rustic-babel-spinner
-    (make-spinner rustic-spinner-type t 10)
-    '(rustic-babel-spinner (":Executing " (:eval (spinner-print rustic-babel-spinner))))
-    (spinner-start rustic-babel-spinner))
+    (with-rustic-spinner rustic-babel-spinner
+      (make-spinner rustic-spinner-type t 10)
+      '(rustic-babel-spinner (":Executing " (:eval (spinner-print rustic-babel-spinner))))
+      (spinner-start rustic-babel-spinner))
 
-  (let ((default-directory dir))
-    (write-region
-     (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
-    (rustic-babel-eval dir)
-    (setq rustic-babel-src-location
-          (set-marker (make-marker) (point) (current-buffer)))
-    project)))
+    (let ((default-directory dir))
+      (write-region
+       (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
+      (rustic-babel-eval dir)
+      (setq rustic-babel-src-location
+            (set-marker (make-marker) (point) (current-buffer)))
+      project)))
 
 (provide 'rustic-babel)
 ;;; rustic-babel.el ends here

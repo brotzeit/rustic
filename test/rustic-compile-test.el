@@ -35,7 +35,7 @@
            (proc (rustic-compile)))
       (should (process-live-p proc))
       (while (eq (process-status proc) 'run)
-          (sit-for 0.1))
+        (sit-for 0.1))
       (should (string= compilation-directory dir))
       (let ((proc (rustic-recompile)))
         (while (eq (process-status proc) 'run)
