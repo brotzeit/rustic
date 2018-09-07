@@ -10,6 +10,7 @@
 
 (defcustom rustic-cargo-bin "cargo"
   "Path to cargo executable."
+  :type 'string
   :group 'rustic-cargo)
 
 
@@ -75,6 +76,8 @@
 
 (defvar rustic-cargo-oudated-buffer-name "*cargo-outdated*")
 
+(defvar rustic-outdated-spinner nil)
+
 (defvar rustic-cargo-outdated-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
@@ -102,6 +105,8 @@
   (tabulated-list-init-header))
 
 (defun rustic-cargo-outdated (&optional path)
+  "Use 'cargo outdated' to list outdated packages in `tabulated-list-mode'.
+Execute process in PATH."
   (interactive)
   (let* ((dir (or path (rustic-buffer-workspace)))
          (buf (get-buffer-create rustic-cargo-oudated-buffer-name))
@@ -116,22 +121,25 @@
       (setq-local default-directory dir)
       (erase-buffer)
       (rustic-cargo-outdated-mode)            
-      (setq mode-line-process
-            '(rustic-spinner
-              (":Executing " (:eval (spinner-print rustic-spinner)))))
-      (rustic-start-spinner))
+      (with-rustic-spinner rustic-outdated-spinner
+        (make-spinner rustic-spinner-type t 10)
+        '(rustic-outdated-spinner (":Executing " (:eval (spinner-print rustic-outdated-spinner))))
+        (spinner-start rustic-outdated-spinner)))
     (display-buffer buf)))
 
 (defun rustic-cargo-reload-outdated ()
+  "Update list of outdated packages."
   (interactive)
   (rustic-cargo-outdated default-directory))
 
 (defun rustic-cargo-outdated-filter (proc output)
+  "Filter for rustic-cargo-outdated-process."
   (let ((inhibit-read-only t))
     (with-current-buffer (process-buffer proc)
       (insert output))))
 
 (defun rustic-cargo-outdated-sentinel (proc _output)
+  "Sentinel for rustic-cargo-outdated-process."
   (let ((buf (process-buffer proc))
         (inhibit-read-only t)
         (exit-status (process-exit-status proc)))
@@ -139,30 +147,32 @@
         (with-current-buffer buf
           (goto-char (point-min))
           (forward-line 2)
-          (rustic-cargo-outdated-generate-menu (buffer-substring (point) (point-max)) buf))
+          (let ((packages (split-string
+                           (buffer-substring (point) (point-max)) "\n" t)))
+            (erase-buffer)
+            (rustic-cargo-outdated-generate-menu packages))
+          (pop-to-buffer buf))
       (with-current-buffer buf
         (let ((out (buffer-string)))
           (if (= exit-status 101)
-              (rustic-cargo-install-crate "outdated")
+              (rustic-cargo-install-crate-p "outdated")
             (message out))))))
-  (rustic-stop-spinner))
+  (with-rustic-spinner rustic-outdated-spinner nil nil))
 
-(defun rustic-cargo-install-crate (crate)
+(defun rustic-cargo-install-crate-p (crate)
+  "Ask whether to install crate CRATE."
   (let ((cmd (format "cargo install cargo-%s" crate)))
     (when (yes-or-no-p (format "Cargo-%s missing. Install ? " crate))
       (async-shell-command cmd "cargo" "cargo-error"))))
 
-(defun rustic-cargo-outdated-generate-menu (output buf)
-  (let ((inhibit-read-only t))
-    (with-current-buffer buf
-      (erase-buffer)
-      (goto-char (point-min))
-      (setq tabulated-list-entries
-            (mapcar #'rustic-cargo-outdated-menu-entry (split-string output "\n" t)))
-      (tabulated-list-print t)
-      (pop-to-buffer buf))))
+(defun rustic-cargo-outdated-generate-menu (packages)
+  "Re-populate the `tabulated-list-entries' with PACKAGES."
+  (setq tabulated-list-entries
+        (mapcar #'rustic-cargo-outdated-menu-entry packages))
+  (tabulated-list-print t))
 
 (defun rustic-cargo-outdated-menu-entry (crate)
+  "Return a package entry of CRATE suitable for `tabulated-list-entries'."
   (let* ((fields (split-string crate "\s\s+" ))
          (name (nth 0 fields))
          (project (nth 1 fields))
@@ -171,7 +181,9 @@
                  ,project
                  ,(if (when (not (string-match "^-" compat))
                         (version< project compat))
-                      (propertize compat 'font-lock-face `(:foreground ,rustic-cargo-outdated-face))
+                      (propertize compat
+                                  'font-lock-face
+                                  `(:foreground ,rustic-cargo-outdated-face))
                     compat)
                  ,(nth 3 fields)
                  ,(nth 4 fields)
@@ -205,6 +217,7 @@
   (tabulated-list-put-tag " " t))
 
 (defun rustic-cargo-upgrade-execute ()
+  "Perform marked menu actions."
   (interactive)
   (let (crates)
     (save-excursion
@@ -222,6 +235,7 @@
       (user-error "No operations specified"))))
 
 (defun rustic-cargo-upgrade-crates (crates)
+  "Upgrade crates CRATES."
   (let (upgrade
         update)
     (dolist (crate crates)
@@ -236,8 +250,6 @@
 
 ;;;;;;;;;;;;
 ;; Spinner
-
-(defvar rustic-spinner nil)
 
 (eval-and-compile (require 'spinner))
 (defcustom rustic-spinner-type 'horizontal-moving
@@ -255,17 +267,14 @@ Takes a value accepted by `spinner-start'."
                          (repeat :inline t string)))
   :group 'rustic-babel)
 
-(defun rustic-start-spinner ()
-  (when (spinner-p rustic-spinner)
-    (spinner-stop rustic-spinner))
-  (setq rustic-spinner
-        (make-spinner rustic-spinner-type t 10))
-  (spinner-start rustic-spinner))
-
-(defun rustic-stop-spinner ()
-  (when (spinner-p rustic-spinner)
-    (spinner-stop rustic-spinner))
-  (setq rustic-spinner nil))
+(defmacro with-rustic-spinner (spinner val mode-line &rest body)
+  (declare (indent defun))
+  `(when rustic-babel-display-spinner
+     (when (spinner-p ,spinner)
+         (spinner-stop ,spinner))
+     (setq ,spinner ,val)
+     (setq mode-line-process ,mode-line)
+     ,@body))
 
 
 ;;;;;;;;;;
@@ -316,6 +325,21 @@ Takes a value accepted by `spinner-start'."
 (defun rustic-cargo-clean ()
   (interactive)
   (call-interactively 'rustic-compile "cargo clean"))
+
+;;;###autoload
+(defun rustic-cargo-check ()
+  (interactive)
+  (call-interactively 'rustic-compile "cargo check"))
+
+;;;###autoload
+(defun rustic-cargo-bench ()
+  (interactive)
+  (call-interactively 'rustic-compile "cargo bench"))
+
+;;;###autoload
+(defun rustic-cargo-new ()
+  (interactive)
+  (call-interactively 'rustic-compile "cargo new"))
 
 (provide 'rustic-cargo)
 ;;; rustic-cargo.el ends here

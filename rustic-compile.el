@@ -12,6 +12,7 @@
 (require 'compile)
 (require 'xterm-color)
 (require 'projectile)
+(require 'markdown-mode)
 
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
@@ -162,9 +163,9 @@ Error matching regexes from compile.el are removed."
 (defvar rustic-compilation-buffer-name "*rust-compilation*"
   "Buffer name for rust compilation process buffers.")
 
-(defun rustic-compilation-start (command buffer process mode directory &optional sentinel)
+(defun rustic-compilation-start (command buffer process mode &optional directory sentinel)
   (let* ((buf (get-buffer-create buffer))
-         (default-directory directory)
+         (default-directory (or directory default-directory))
          (coding-system-for-read 'binary)
          (process-environment (nconc
 	                           (list
@@ -182,7 +183,8 @@ Error matching regexes from compile.el are removed."
                                 :buffer buf
                                 :command command
                                 :filter #'rustic-compilation-filter
-                                :sentinel (if sentinel sentinel #'compilation-sentinel))))
+                                :sentinel (if sentinel sentinel
+                                            #'compilation-sentinel))))
         (setq mode-line-process
               '((:propertize ":%s" face compilation-mode-line-run)
                 compilation-mode-line-errors))
@@ -280,8 +282,8 @@ The variable `buffer-save-without-query' can be used for customization and
 buffers are formatted after saving if `rustic-format-on-save' is t."
   (let* ((buffers (condition-case ()
                       (projectile-buffers-with-file (projectile-project-buffers))
-                    (error nil))))
-    (when-let (b (get-buffer rustic-format-buffer-name))
+                    (buffer-list))))
+    (when-let* ((b (get-buffer rustic-format-buffer-name)))
       (when (buffer-live-p b)
         (kill-buffer b)))
     (dolist (buffer buffers)

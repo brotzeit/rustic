@@ -1,6 +1,6 @@
 ;;; rustic.el --- Rust development environment -*-lexical-binding: t-*-
 
-;; Version: 0.9
+;; Version: 0.10
 ;; Author: Mozilla
 ;; 
 ;; Keywords: languages
@@ -255,7 +255,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
       symbol-end))
 
 (defconst rustic-keywords
-  '("as"
+  '("as" "async"
     "box" "break"
     "const" "continue" "crate"
     "do"
@@ -267,7 +267,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
     "priv" "pub"
     "ref" "return"
     "self" "static" "struct" "super"
-    "true" "trait" "type"
+    "true" "trait" "type" "try"
     "use"
     "virtual"
     "where" "while"

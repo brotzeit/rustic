@@ -150,7 +150,7 @@ fn foo4(a:i32,
 (ert-deftest indent-body-after-where ()
   (let ((rustic-indent-where-clause t))
     (test-indent
-   "
+     "
 fn foo1(a: A, b: B) -> A
     where A: Clone + Default, B: Eq {
     let body;
@@ -172,7 +172,7 @@ fn foo2(a: A, b: B) -> A
 (ert-deftest indent-align-where-clauses-style1a ()
   (let ((rustic-indent-where-clause t))
     (test-indent
-   "
+     "
 fn foo1a(a: A, b: B, c: C) -> D
     where A: Clone + Default,
           B: Eq,
@@ -188,7 +188,7 @@ fn foo1a(a: A, b: B, c: C) -> D
 (ert-deftest indent-align-where-clauses-style1b ()
   (let ((rustic-indent-where-clause t))
     (test-indent
-   "
+     "
 fn foo1b(a: A, b: B, c: C) -> D
     where A: Clone + Default,
           B: Eq,
@@ -298,7 +298,7 @@ where A: Clone + Default,
 (ert-deftest indent-align-where-clauses-impl-example ()
   (let ((rustic-indent-where-clause t))
     (test-indent
-   "
+     "
 impl<'a, K, Q: ?Sized, V, S> Index<&'a Q> for HashMap<K, V, S>
     where K: Eq + Hash + Borrow<Q>,
           Q: Eq + Hash,
@@ -314,7 +314,7 @@ impl<'a, K, Q: ?Sized, V, S> Index<&'a Q> for HashMap<K, V, S>
 (ert-deftest indent-align-where-clauses-first-line ()
   (let ((rustic-indent-where-clause t))
     (test-indent
-   "fn foo1(a: A, b: B) -> A
+     "fn foo1(a: A, b: B) -> A
     where A: Clone + Default, B: Eq {
     let body;
     Foo {
@@ -336,7 +336,7 @@ pub struct Region { // <-- this should be flush with left margin!
 (ert-deftest indent-align-where-in-comment2 ()
   (let ((rustic-indent-where-clause t))
     (test-indent
-   "fn foo<F,G>(f:F, g:G)
+     "fn foo<F,G>(f:F, g:G)
     where F:Send,
 // where
           G:Sized
@@ -347,8 +347,8 @@ pub struct Region { // <-- this should be flush with left margin!
 
 (ert-deftest indent-align-where-in-comment3 ()
   (let ((rustic-indent-where-clause t))
-  (test-indent
-   "fn foo<F,G>(f:F, g:G)
+    (test-indent
+     "fn foo<F,G>(f:F, g:G)
     where F:Send,
 // where      F:ThisIsNotActualCode,
           G:Sized
@@ -553,14 +553,14 @@ struct A {
 
 (ert-deftest indent-method-chains-no-align ()
   (let ((rustic-indent-method-chain nil)) (test-indent
-   "
+                                           "
 fn main() {
     let x = thing.do_it()
         .aligned()
         .more_alignment();
 }
 "
-   )))
+                                           )))
 
 ;; TODO: fix test
 ;; (ert-deftest indent-method-chains-no-align-with-question-mark-operator ()
@@ -577,14 +577,14 @@ fn main() {
 
 (ert-deftest indent-method-chains-with-align ()
   (let ((rustic-indent-method-chain t)) (test-indent
-   "
+                                         "
 fn main() {
     let x = thing.do_it()
                  .aligned()
                  .more_alignment();
 }
 "
-   )))
+                                         )))
 
 ;; TODO: fix test
 ;; (ert-deftest indent-method-chains-with-align-with-question-mark-operator ()
@@ -601,7 +601,7 @@ fn main() {
 
 (ert-deftest indent-method-chains-with-align-and-second-stmt ()
   (let ((rustic-indent-method-chain t)) (test-indent
-   "
+                                         "
 fn main() {
     let x = thing.do_it()
                  .aligned()
@@ -609,44 +609,44 @@ fn main() {
     foo.bar();
 }
 "
-   )))
+                                         )))
 
 (ert-deftest indent-method-chains-field ()
   (let ((rustic-indent-method-chain t)) (test-indent
-   "
+                                         "
 fn main() {
     let x = thing.do_it
                  .aligned
                  .more_alignment();
 }
 "
-   )))
+                                         )))
 
 (ert-deftest indent-method-chains-double-field-on-first-line ()
   (let ((rustic-indent-method-chain t)) (test-indent
-   "
+                                         "
 fn main() {
     let x = thing.a.do_it
                    .aligned
                    .more_alignment();
 }
 "
-   )))
+                                         )))
 
 (ert-deftest indent-method-chains-no-let ()
   (let ((rustic-indent-method-chain t)) (test-indent
-   "
+                                         "
 fn main() {
     thing.a.do_it
            .aligned
            .more_alignment();
 }
 "
-   )))
+                                         )))
 
 (ert-deftest indent-method-chains-look-over-comment ()
   (let ((rustic-indent-method-chain t)) (test-indent
-   "
+                                         "
 fn main() {
     thing.a.do_it
     // A comment
@@ -655,49 +655,49 @@ fn main() {
            .more_alignment();
 }
 "
-   )))
+                                         )))
 
 (ert-deftest indent-method-chains-comment ()
   (let ((rustic-indent-method-chain t)) (test-indent
-   "
+                                         "
 fn main() {
     // thing.do_it()
     // .aligned()
 }
 "
-   )))
+                                         )))
 
 (ert-deftest indent-method-chains-close-block ()
   (let ((rustic-indent-method-chain t)) (test-indent
-   "
+                                         "
 fn main() {
     foo.bar()
 }
 "
-   )))
+                                         )))
 
 (ert-deftest indent-method-chains-after-comment ()
   (let ((rustic-indent-method-chain t)) (test-indent
-   "
+                                         "
 fn main() { // comment here should not push next line out
     foo.bar()
 }
 "
-   )))
+                                         )))
 
 (ert-deftest indent-method-chains-after-comment2 ()
   (let ((rustic-indent-method-chain t)) (test-indent
-   "
+                                         "
 fn main() {
     // Lorem ipsum lorem ipsum lorem ipsum lorem.ipsum
     foo.bar()
 }
 "
-   )))
+                                         )))
 
 (ert-deftest indent-function-after-where ()
   (let ((rustic-indent-method-chain t)) (test-indent
-   "
+                                         "
 fn each_split_within<'a, F>(ss: &'a str, lim: usize, mut it: F)
                             -> bool where F: FnMut(&'a str) -> bool {
 }
@@ -706,11 +706,11 @@ fn each_split_within<'a, F>(ss: &'a str, lim: usize, mut it: F)
 fn test_split_within() {
 }
 "
-   )))
+                                         )))
 
 (ert-deftest indent-function-after-where-nested ()
   (let ((rustic-indent-method-chain t)) (test-indent
-   "
+                                         "
 fn outer() {
     fn each_split_within<'a, F>(ss: &'a str, lim: usize, mut it: F)
                                 -> bool where F: FnMut(&'a str) -> bool {
@@ -722,7 +722,7 @@ fn outer() {
     }
 }
 "
-   )))
+                                         )))
 
 
 (ert-deftest test-indent-string-with-eol-backslash ()

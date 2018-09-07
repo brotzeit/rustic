@@ -112,37 +112,37 @@ fn indented_already() {
 
       ;; Symbol -> (line column)
       rustic-test-positions-alist '((start-of-fn1 (2 0))
-                                  (start-of-fn1-middle-of-line (2 15))
-                                  (middle-of-fn1 (3 7))
-                                  (end-of-fn1 (6 0))
-                                  (between-fn1-fn2 (7 0))
-                                  (start-of-fn2 (8 0))
-                                  (middle-of-fn2 (10 4))
-                                  (before-start-of-fn1 (1 0))
-                                  (after-end-of-fn2 (13 0))
-                                  (beginning-of-fn3 (14 0))
-                                  (middle-of-fn3 (16 4))
-                                  (middle-of-struct (21 10))
-                                  (before-start-of-struct (19 0))
-                                  (after-end-of-struct (23 0))
-                                  (blank-line-indent-start (3 0))
-                                  (blank-line-indent-target (3 4))
-                                  (closing-brace-indent-start (8 1))
-                                  (closing-brace-indent-target (8 5))
-                                  (middle-push-indent-start (13 2))
-                                  (middle-push-indent-target (13 9))
-                                  (after-whitespace-indent-start (13 1))
-                                  (after-whitespace-indent-target (13 8))
-                                  (middle-pull-indent-start (15 19))
-                                  (middle-pull-indent-target (15 12))
-                                  (blank-line-indented-already-bol-start (20 0))
-                                  (blank-line-indented-already-bol-target (20 4))
-                                  (blank-line-indented-already-middle-start (20 2))
-                                  (blank-line-indented-already-middle-target (20 4))
-                                  (nonblank-line-indented-already-bol-start (21 0))
-                                  (nonblank-line-indented-already-bol-target (21 4))
-                                  (nonblank-line-indented-already-middle-start (21 2))
-                                  (nonblank-line-indented-already-middle-target (21 4))))
+                                    (start-of-fn1-middle-of-line (2 15))
+                                    (middle-of-fn1 (3 7))
+                                    (end-of-fn1 (6 0))
+                                    (between-fn1-fn2 (7 0))
+                                    (start-of-fn2 (8 0))
+                                    (middle-of-fn2 (10 4))
+                                    (before-start-of-fn1 (1 0))
+                                    (after-end-of-fn2 (13 0))
+                                    (beginning-of-fn3 (14 0))
+                                    (middle-of-fn3 (16 4))
+                                    (middle-of-struct (21 10))
+                                    (before-start-of-struct (19 0))
+                                    (after-end-of-struct (23 0))
+                                    (blank-line-indent-start (3 0))
+                                    (blank-line-indent-target (3 4))
+                                    (closing-brace-indent-start (8 1))
+                                    (closing-brace-indent-target (8 5))
+                                    (middle-push-indent-start (13 2))
+                                    (middle-push-indent-target (13 9))
+                                    (after-whitespace-indent-start (13 1))
+                                    (after-whitespace-indent-target (13 8))
+                                    (middle-pull-indent-start (15 19))
+                                    (middle-pull-indent-target (15 12))
+                                    (blank-line-indented-already-bol-start (20 0))
+                                    (blank-line-indented-already-bol-target (20 4))
+                                    (blank-line-indented-already-middle-start (20 2))
+                                    (blank-line-indented-already-middle-target (20 4))
+                                    (nonblank-line-indented-already-bol-start (21 0))
+                                    (nonblank-line-indented-already-bol-target (21 4))
+                                    (nonblank-line-indented-already-middle-start (21 2))
+                                    (nonblank-line-indented-already-middle-target (21 4))))
 
 (ert-deftest indent-line-blank-line-motion ()
   (rustic-test-motion
@@ -883,7 +883,7 @@ fn foo() {
    '((8 9) ;; Parens of foo()
      (11 36) ;; Curly braces
      (25 33) ;; Square brackets
-   )))
+     )))
 
 (ert-deftest rustic-test-paren-matching-generic-fn ()
   (rustic-test-matching-parens
@@ -933,24 +933,24 @@ fn foo() {
 
 (ert-deftest rustic-test-paren-matching-bitshift-operators ()
   (rustic-test-matching-parens
-  "
+   "
 fn foo(z:i32) {
     let a:Option<Result<i32,i32>> = Some(Ok(4 >> 1));
     let b = a.map(|x| x.map(|y| y << 3));
     let trick_question = z<<<Type as Trait>::method();  // First two <s are not brackets, third is
 }"
-    '((34 50) ;; angle brackets of Option
-      (41 49) ;; angle brackets of Result
-      (142 156) ;; angle brackets of <Type as Trait>
-      )
-    '(64 ;; The >> inside Some(Ok()) are not angle brackets
-      65 ;; The >> inside Some(Ok()) are not angle brackets
-      106 ;; The << inside map() are not angle brackets
-      107 ;; The << inside map() are not angle brackets
-      140 ;; The << before <Type as Trait> are not angle brackets
-      141 ;; The << before <Type as Trait> are not angle brackets
-      183 ;; The < inside the comment
-      )))
+   '((34 50) ;; angle brackets of Option
+     (41 49) ;; angle brackets of Result
+     (142 156) ;; angle brackets of <Type as Trait>
+     )
+   '(64 ;; The >> inside Some(Ok()) are not angle brackets
+     65 ;; The >> inside Some(Ok()) are not angle brackets
+     106 ;; The << inside map() are not angle brackets
+     107 ;; The << inside map() are not angle brackets
+     140 ;; The << before <Type as Trait> are not angle brackets
+     141 ;; The << before <Type as Trait> are not angle brackets
+     183 ;; The < inside the comment
+     )))
 
 (ert-deftest rustic-test-paren-matching-angle-bracket-after-colon-ident ()
   (rustic-test-matching-parens
@@ -988,10 +988,10 @@ fn foo(x:i32) -> Bar {
         b:x<3
     }
 }"
-  '()
-  '(17 ;; the -> is not a brace
-    46 ;; x<3 the < is a less than sign
-    ))
+   '()
+   '(17 ;; the -> is not a brace
+     46 ;; x<3 the < is a less than sign
+     ))
   )
 
 (ert-deftest rustic-test-paren-matching-nested-struct-literals ()

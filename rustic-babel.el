@@ -2,7 +2,7 @@
 
 ;;; Commentary:
 
-;; Async org-babel execution using cargo. Building and running is seperated
+;; Async org-babel execution using cargo.  Building and running is seperated
 ;; into two processes, as it's easier to get the output for the result of the
 ;; current source block.
 
@@ -15,6 +15,7 @@
 (require 'ob-core)
 
 (require 'rustic-cargo)
+(require 'rustic-compile)
 
 (add-to-list 'org-babel-tangle-lang-exts '("rustic" . "rs"))
 
@@ -38,7 +39,7 @@
 (defvar rustic-babel-process-name "rustic-babel-process"
   "Process name for org-babel rust compilation processes.")
 
-(defvar rustic-babel-compilation-buffer "*rustic-babel-compilation-buffer*"
+(defvar rustic-babel-compilation-buffer-name "*rustic-babel-compilation-buffer*"
   "Buffer name for org-babel rust compilation process buffers.")
 
 (defvar rustic-babel-dir nil
@@ -50,16 +51,19 @@
 (defvar rustic-babel-params nil
   "Babel parameters.")
 
+(defvar rustic-babel-spinner nil)
+
 (defun rustic-babel-eval (dir)
   "Start a rust babel compilation process in directory DIR."
-  (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer))
+  (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
          (default-directory dir)
          (coding-system-for-read 'binary)
-         (process-environment (nconc
-                               (list
-                                (format "TERM=%s" "ansi")
-                                (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
-                               process-environment))
+         (process-environment
+          (nconc
+           (list
+            (format "TERM=%s" "ansi")
+            (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
+           process-environment))
          (params '("cargo" "build"))
          (inhibit-read-only t))
     (with-current-buffer err-buff
@@ -73,45 +77,102 @@
      :buffer err-buff
      :command params
      :filter #'rustic-compilation-filter
-     :sentinel #'rustic-babel-sentinel)))
+     :sentinel #'rustic-babel-build-sentinel)))
 
-(defun rustic-babel-sentinel (proc string)
-  "Sentinel for rust babel compilation processes.
-
-Use cargo run to get the results for org-babel.
-If `rustic-babel-format-src-block' is t, format src-block after successful 
+(defun rustic-babel-build-sentinel (proc _output)
+  "Sentinel for rust babel compilation process PROC.
+If `rustic-babel-format-src-block' is t, format src-block after successful
 execution with rustfmt."
   (let ((proc-buffer (process-buffer proc))
         (inhibit-read-only t))
     (if (zerop (process-exit-status proc))
-        (let* ((default-directory rustic-babel-dir) 
-               (result (shell-command-to-string "cargo run --quiet"))
-               (result-params (list (cdr (assq :results rustic-babel-params))))
-               (params rustic-babel-params)
-               (marker rustic-babel-src-location))
+        (let* ((default-directory rustic-babel-dir))
           (unless rustic-babel-display-compilation-buffer
             (kill-buffer proc-buffer))
-          (with-current-buffer (marker-buffer marker)
-            (goto-char marker)
-            (org-babel-remove-result rustic-info)
-            (org-babel-insert-result result result-params rustic-info)
-            (if rustic-babel-format-src-block
-                (let ((babel-body (org-element-property :value (org-element-at-point)))
-                      (proc (make-process :name "rustic-babel-format"
-                                          :buffer "rustic-babel-format-buffer"
-                                          :command `(,rustic-rustfmt-bin)
-                                          :filter #'rustic-compilation-filter
-                                          :sentinel #'rustic-babel-format-sentinel)))
-                  (while (not (process-live-p proc))
-                    (sleep-for 0.01))
-                  (process-send-string proc babel-body)
-                  (process-send-eof proc)))))
-      (pop-to-buffer proc-buffer)))
-  (when rustic-babel-display-spinner
-    (rustic-stop-spinner)
-    (setq mode-line-process nil)))
+
+          ;; format babel block
+          (when rustic-babel-format-src-block
+            (let ((babel-body
+                   (org-element-property :value (org-element-at-point)))
+                  (proc
+                   (make-process :name "rustic-babel-format"
+                                 :buffer "rustic-babel-format-buffer"
+                                 :command `(,rustic-rustfmt-bin)
+                                 :filter #'rustic-compilation-filter
+                                 :sentinel #'rustic-babel-format-sentinel)))
+              (while (not (process-live-p proc))
+                (sleep-for 0.01))
+              (process-send-string proc babel-body)
+              (process-send-eof proc)
+              (while (eq (process-status proc) 'run)
+                (sit-for 0.1))))
+
+          ;; run project
+          (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
+                 (dir default-directory)
+                 (coding-system-for-read 'binary)
+                 (process-environment
+                  (nconc
+                   (list
+                    (format "TERM=%s" "ansi")
+                    (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
+                   process-environment))
+                 (params '("cargo" "run" "--quiet"))
+                 (inhibit-read-only t))
+            (with-current-buffer err-buff
+              (erase-buffer)
+              (setq-local default-directory dir)
+              (rustic-compilation-mode))
+            (when rustic-babel-display-compilation-buffer
+              (display-buffer err-buff))
+            (make-process
+             :name rustic-babel-process-name
+             :buffer err-buff
+             :command params
+             :filter #'rustic-compilation-filter
+             :sentinel #'rustic-babel-run-sentinel)))
+      (let (result)
+        (with-current-buffer proc-buffer
+          (setq result
+                (nth 3 (reverse
+                        (split-string
+                         (buffer-substring-no-properties (point-min) (point-max)) "\n" )))))
+        (rustic-babel-update-result-block result))
+      (with-rustic-spinner rustic-babel-spinner nil nil)
+      (pop-to-buffer proc-buffer))))
+
+(defun rustic-babel-run-sentinel (proc _output)
+  "Sentinel for babel project execution."
+  (let ((proc-buffer (process-buffer proc))
+        result)
+    (if (zerop (process-exit-status proc))
+        (progn
+          (with-current-buffer proc-buffer
+            (setq result (buffer-string)))
+          (rustic-babel-update-result-block result)
+          (with-rustic-spinner rustic-babel-spinner nil nil)
+          (kill-buffer proc-buffer))
+      (progn
+        (with-current-buffer proc-buffer
+          (setq result
+                (car (split-string
+                      (buffer-substring-no-properties (point-min) (point-max)) "\n" ))))
+        (rustic-babel-update-result-block result)
+        (with-rustic-spinner rustic-babel-spinner nil nil)  
+        (pop-to-buffer proc-buffer)))))
+
+(defun rustic-babel-update-result-block (result)
+  "Update result block with RESULT."
+  (let ((marker rustic-babel-src-location)
+        (result-params (list (cdr (assq :results rustic-babel-params)))))
+    (with-current-buffer (marker-buffer marker)
+      (goto-char marker)
+      (org-babel-remove-result rustic-info)
+      (org-babel-insert-result result result-params rustic-info))))
 
 (defun rustic-babel-format-sentinel (proc output)
+  "This sentinel is used by the process `rustic-babel-format', that runs
+after successful compilation."
   (let ((proc-buffer (process-buffer proc))
         (marker rustic-babel-src-location))
     (save-excursion
@@ -125,15 +186,21 @@ execution with rustfmt."
     (kill-buffer "rustic-babel-format-buffer")))
 
 (defun rustic-babel-generate-project (&optional expand)
-  "Create rust project in `org-babel-temporary-directory'."
+  "Create rust project in `org-babel-temporary-directory'.
+Return full path if EXPAND is t."
   (let* ((default-directory org-babel-temporary-directory)
          (dir (make-temp-file-internal "cargo" 0 "" nil)))
     (shell-command-to-string (format "cargo new %s --bin --quiet" dir))
-    (if expand 
+    (if expand
         (concat (expand-file-name dir) "/")
       dir)))
 
 (defun rustic-babel-project ()
+  "In order to reduce the execution time when the project has
+dependencies, the project name is stored as a text property in the
+header of the org-babel block to check if the project already exists
+in `org-babel-temporary-directory'.  If the project exists, reuse it.
+Otherwise create it with `rustic-babel-generate-project'."
   (let* ((beg (org-babel-where-is-src-block-head))
          (end (save-excursion (goto-char beg)
                               (line-end-position)))
@@ -142,14 +209,16 @@ execution with rustfmt."
            (path (concat org-babel-temporary-directory "/" project "/")))
       (if (file-directory-p path)
           (progn
-            (put-text-property beg end 'project (make-symbol project))  
+            (put-text-property beg end 'project (make-symbol project))
             project)
         (let ((new (rustic-babel-generate-project)))
           (put-text-property beg end 'project (make-symbol new))
           new)))))
 
 (defun rustic-babel-cargo-toml (dir params)
-  "Append crates to Cargo.toml."
+  "Append crates to Cargo.toml.
+Use org-babel parameter crates from PARAMS and add them to the project in
+directory DIR."
   (let ((crates (cdr (assq :crates params)))
         (toml (expand-file-name "Cargo.toml" dir))
         (str ""))
@@ -164,26 +233,28 @@ execution with rustfmt."
         (insert str)))))
 
 (defun org-babel-execute:rustic (body params)
-  "Execute a block of Rust code with Babel."
-  (when-let (p (process-live-p (get-process rustic-babel-process-name)))
-    (rustic-kill-live-process-p p))
+  "Execute a block of Rust code with org-babel."
+  (when-let* ((p (process-live-p (get-process rustic-babel-process-name))))
+    (rustic-process-kill-p p))
   (let* ((default-directory org-babel-temporary-directory)
          (project (rustic-babel-project))
          (dir (setq rustic-babel-dir (expand-file-name project)))
-         (main (expand-file-name "main.rs" (concat dir "/src"))))    
+         (main (expand-file-name "main.rs" (concat dir "/src"))))
     (rustic-babel-cargo-toml dir params)
     (setq rustic-info (org-babel-get-src-block-info))
     (setq rustic-babel-params params)
-    (when rustic-babel-display-spinner
-      (setq mode-line-process
-            '(rustic-spinner
-              (":Executing " (:eval (spinner-print rustic-spinner)))))
-      (rustic-start-spinner))
+
+    (with-rustic-spinner rustic-babel-spinner
+      (make-spinner rustic-spinner-type t 10)
+      '(rustic-babel-spinner (":Executing " (:eval (spinner-print rustic-babel-spinner))))
+      (spinner-start rustic-babel-spinner))
+
     (let ((default-directory dir))
-      (write-region (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
+      (write-region
+       (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
       (rustic-babel-eval dir)
-      (setq rustic-babel-src-location (set-marker
-                                       (make-marker) (point) (current-buffer)))
+      (setq rustic-babel-src-location
+            (set-marker (make-marker) (point) (current-buffer)))
       project)))
 
 (provide 'rustic-babel)
