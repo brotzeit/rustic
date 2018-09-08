@@ -163,15 +163,23 @@ Error matching regexes from compile.el are removed."
 (defvar rustic-compilation-buffer-name "*rust-compilation*"
   "Buffer name for rust compilation process buffers.")
 
-(defun rustic-compilation-start (command buffer process mode &optional directory sentinel)
-  (let* ((buf (get-buffer-create buffer))
-         (default-directory (or directory default-directory))
-         (coding-system-for-read 'binary)
+(defun rustic-make-process (&rest args)
+  "Wrapper for `make-process'."
+  (let* ((coding-system-for-read 'binary)
          (process-environment (nconc
 	                           (list
                                 (format "TERM=%s" "ansi")
                                 (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
-                               process-environment))
+                               process-environment)))
+    (make-process :name (plist-get args :name)
+                  :buffer (plist-get args :buffer)
+                  :command (plist-get args :command)
+                  :filter (plist-get args :filter)
+                  :sentinel (plist-get args :sentinel))))
+
+(defun rustic-compilation-start (command buffer process mode &optional directory sentinel)
+  (let* ((buf (get-buffer-create buffer))
+         (default-directory (or directory default-directory))
          (inhibit-read-only t))
     (setq next-error-last-buffer buf)
     (with-current-buffer buf
@@ -179,12 +187,12 @@ Error matching regexes from compile.el are removed."
       (erase-buffer)
       (funcall mode)
       (funcall rustic-compile-display-method buf)
-      (let ((proc (make-process :name process
-                                :buffer buf
-                                :command command
-                                :filter #'rustic-compilation-filter
-                                :sentinel (if sentinel sentinel
-                                            #'compilation-sentinel))))
+      (let ((proc (rustic-make-process :name process
+                                       :buffer buf
+                                       :command command
+                                       :filter #'rustic-compilation-filter
+                                       :sentinel (if sentinel sentinel
+                                                   #'compilation-sentinel))))
         (setq mode-line-process
               '((:propertize ":%s" face compilation-mode-line-run)
                 compilation-mode-line-errors))

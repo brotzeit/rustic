@@ -57,13 +57,6 @@
   "Start a rust babel compilation process in directory DIR."
   (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
          (default-directory dir)
-         (coding-system-for-read 'binary)
-         (process-environment
-          (nconc
-           (list
-            (format "TERM=%s" "ansi")
-            (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
-           process-environment))
          (params '("cargo" "build"))
          (inhibit-read-only t))
     (with-current-buffer err-buff
@@ -72,7 +65,7 @@
       (rustic-compilation-mode))
     (when rustic-babel-display-compilation-buffer
       (display-buffer err-buff))
-    (make-process
+    (rustic-make-process
      :name rustic-babel-process-name
      :buffer err-buff
      :command params
@@ -110,13 +103,6 @@ execution with rustfmt."
           ;; run project
           (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
                  (dir default-directory)
-                 (coding-system-for-read 'binary)
-                 (process-environment
-                  (nconc
-                   (list
-                    (format "TERM=%s" "ansi")
-                    (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
-                   process-environment))
                  (params '("cargo" "run" "--quiet"))
                  (inhibit-read-only t))
             (with-current-buffer err-buff
@@ -125,7 +111,7 @@ execution with rustfmt."
               (rustic-compilation-mode))
             (when rustic-babel-display-compilation-buffer
               (display-buffer err-buff))
-            (make-process
+            (rustic-make-process
              :name rustic-babel-process-name
              :buffer err-buff
              :command params

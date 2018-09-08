@@ -49,10 +49,6 @@
 (defun rustic-format-start-process (buffer sentinel &optional string command)
   "Start a new rustfmt process."
   (let* ((err-buf (get-buffer-create rustic-format-buffer-name))
-         (coding-system-for-read 'binary)
-         (process-environment (nconc
-	                           (list (format "TERM=%s" "ansi"))
-                               process-environment))
          (inhibit-read-only t)
          (dir (rustic-buffer-workspace)))
     (setq next-error-last-buffer buffer)
@@ -66,12 +62,12 @@
         (unless (file-exists-p file)
           (error (format "File %s does not exist." file))))
       (cl-assert (and (listp command) (= (length command) 2))))
-    (let ((proc (make-process :name rustic-format-process-name
-                              :buffer err-buf
-                              :command (if command command
-                                         `(,rustic-rustfmt-bin))
-                              :filter #'rustic-compilation-filter
-                              :sentinel sentinel)))
+    (let ((proc (rustic-make-process :name rustic-format-process-name
+                                     :buffer err-buf
+                                     :command (if command command
+                                                `(,rustic-rustfmt-bin))
+                                     :filter #'rustic-compilation-filter
+                                     :sentinel sentinel)))
       (while (not (process-live-p proc))
         (sleep-for 0.01))
       (when string 

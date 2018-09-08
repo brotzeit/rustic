@@ -15,12 +15,11 @@
 
 (defun rustic-test-babel-wait ()
   "Wait for babel results."
-  (sit-for 2)
   (save-excursion
     (goto-char (point-min))
     (while (search-forward "#+RESULTS:\n: cargo" nil t)
       (goto-char (point-min))
-      (sit-for 0.5))))
+      (sit-for 0.1))))
 
 (defun rustic-test-babel-execute-block (buf &optional nowait)
   "Execute babel block in BUF."
