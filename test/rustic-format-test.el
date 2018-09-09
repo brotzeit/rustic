@@ -6,12 +6,15 @@
         (buf (get-buffer-create "test"))
         (buffer-read-only nil))
     (with-current-buffer buf
+      (erase-buffer)
       (should-error (rustic-format-buffer))
       (rustic-mode)
       (insert string)
       (backward-char 10)
       (let ((proc (rustic-format-start-process
-                   (current-buffer) 'rustic-format-sentinel (buffer-string))))
+                   'rustic-format-sentinel
+                   :buffer (current-buffer)
+                   :stdin (buffer-string))))
         (while (eq (process-status proc) 'run)
           (sit-for 0.1)))
       (should (string= (buffer-string) formatted-string))

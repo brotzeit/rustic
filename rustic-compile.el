@@ -177,10 +177,14 @@ Error matching regexes from compile.el are removed."
                   :filter (plist-get args :filter)
                   :sentinel (plist-get args :sentinel))))
 
-(defun rustic-compilation-start (command buffer process mode &optional directory sentinel)
-  (let* ((buf (get-buffer-create buffer))
-         (default-directory (or directory default-directory))
-         (inhibit-read-only t))
+(defun rustic-compilation-start (command &rest args)
+  (let ((buf (get-buffer-create
+              (or (plist-get args :buffer) rustic-compilation-buffer-name)))
+        (process (or (plist-get args :process) rustic-compilation-process-name))
+        (mode (or (plist-get args :mode) 'rustic-compilation-mode))
+        (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
+        (sentinel (or (plist-get args :sentinel) #'compilation-sentinel))
+        (inhibit-read-only t))
     (setq next-error-last-buffer buf)
     (with-current-buffer buf
       (setq-local default-directory directory)
@@ -191,8 +195,7 @@ Error matching regexes from compile.el are removed."
                                        :buffer buf
                                        :command command
                                        :filter #'rustic-compilation-filter
-                                       :sentinel (if sentinel sentinel
-                                                   #'compilation-sentinel))))
+                                       :sentinel sentinel)))
         (setq mode-line-process
               '((:propertize ":%s" face compilation-mode-line-run)
                 compilation-mode-line-errors))
@@ -311,10 +314,9 @@ buffers are formatted after saving if `rustic-format-on-save' is t."
                        rustic-format-on-save
                        (eq major-mode 'rustic-mode))
               (let* ((file (buffer-file-name buffer))
-                     (proc (rustic-format-start-process buffer
-                                                        'rustic-format-file-sentinel
-                                                        nil
-                                                        `(,rustic-rustfmt-bin ,file))))
+                     (proc (rustic-format-start-process 'rustic-format-file-sentinel
+                                                        :buffer buffer
+                                                        :command `(,rustic-rustfmt-bin ,file))))
                 (while (eq (process-status proc) 'run)
                   (sit-for 0.1)))
               (revert-buffer t t))))))))
@@ -390,13 +392,9 @@ Otherwise use provided argument ARG and store it in
                         (if arg
                             (read-from-minibuffer "Compile command: ")
                           rustic-compile-command)))
-         (buffer-name rustic-compilation-buffer-name)
-         (proc-name rustic-compilation-process-name)
-         (mode 'rustic-compilation-mode)
          (dir (setq compilation-directory (rustic-buffer-workspace))))
     (rustic-compilation-process-live)
-    (rustic-compilation-start
-     (split-string command) buffer-name proc-name mode dir)))
+    (rustic-compilation-start (split-string command) :directory dir)))
 
 ;;;###autoload
 (defun rustic-recompile ()
@@ -405,13 +403,9 @@ Otherwise use provided argument ARG and store it in
   (let* ((command (if (not compilation-arguments)
                       rustic-compile-command
                     compilation-arguments))
-         (buffer-name rustic-compilation-buffer-name)
-         (proc-name rustic-compilation-process-name)
-         (mode 'rustic-compilation-mode)
-         (dir (or compilation-directory default-directory)))
+         (dir compilation-directory))
     (rustic-compilation-process-live)
-    (rustic-compilation-start
-     (split-string command) buffer-name proc-name mode dir)))
+    (rustic-compilation-start (split-string command) :directory dir)))
 
 (provide 'rustic-compile)
 ;;; rustic-compile.el ends here

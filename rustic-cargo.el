@@ -31,12 +31,14 @@
   "Run `cargo clippy'."
   (interactive)
   (let ((command (list rustic-cargo-bin "clippy"))
-        (buffer-name rustic-clippy-buffer-name)
-        (proc-name rustic-clippy-process-name)
-        (mode 'rustic-cargo-clippy-mode)
-        (root (rustic-buffer-workspace)))
+        (buf rustic-clippy-buffer-name)
+        (proc rustic-clippy-process-name)
+        (mode 'rustic-cargo-clippy-mode))
     (rustic-compilation-process-live)
-    (rustic-compilation-start command buffer-name proc-name mode root)))
+    (rustic-compilation-start command
+                              :buffer buf
+                              :process proc
+                              :mode mode)))
 
 
 ;;;;;;;;;
@@ -53,15 +55,17 @@
 
 ;;;###autoload
 (defun rustic-cargo-test ()
-  "Run `cargo test'."
+  "Run 'cargo test'."
   (interactive)
   (let ((command (list rustic-cargo-bin "test"))
-        (buffer-name rustic-test-buffer-name)
-        (proc-name rustic-test-process-name)
-        (mode 'rustic-cargo-test-mode)
-        (root (rustic-buffer-workspace)))
+        (buf rustic-test-buffer-name)
+        (proc rustic-test-process-name)
+        (mode 'rustic-cargo-test-mode))
     (rustic-compilation-process-live)
-    (rustic-compilation-start command buffer-name proc-name mode root)))
+    (rustic-compilation-start command
+                              :buffer buf
+                              :process proc
+                              :mode mode)))
 
 
 ;;;;;;;;;;;;;
@@ -271,7 +275,7 @@ Takes a value accepted by `spinner-start'."
   (declare (indent defun))
   `(when rustic-babel-display-spinner
      (when (spinner-p ,spinner)
-         (spinner-stop ,spinner))
+       (spinner-stop ,spinner))
      (setq ,spinner ,val)
      (setq mode-line-process ,mode-line)
      ,@body))

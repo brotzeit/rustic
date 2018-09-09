@@ -46,11 +46,14 @@
 
 (defvar rustic-save-pos nil)
 
-(defun rustic-format-start-process (buffer sentinel &optional string command)
+(defun rustic-format-start-process (sentinel &rest args)
   "Start a new rustfmt process."
   (let* ((err-buf (get-buffer-create rustic-format-buffer-name))
          (inhibit-read-only t)
-         (dir (rustic-buffer-workspace)))
+         (dir (rustic-buffer-workspace))
+         (buffer (plist-get args :buffer))
+         (string (plist-get args :stdin))
+         (command (plist-get args :command)))
     (setq next-error-last-buffer buffer)
     (setq rustic-save-pos (point))
     (with-current-buffer err-buf
@@ -64,13 +67,12 @@
       (cl-assert (and (listp command) (= (length command) 2))))
     (let ((proc (rustic-make-process :name rustic-format-process-name
                                      :buffer err-buf
-                                     :command (if command command
-                                                `(,rustic-rustfmt-bin))
+                                     :command (or command `(,rustic-rustfmt-bin))
                                      :filter #'rustic-compilation-filter
                                      :sentinel sentinel)))
-      (while (not (process-live-p proc))
-        (sleep-for 0.01))
-      (when string 
+      (when string
+        (while (not (process-live-p proc))
+          (sleep-for 0.01))
         (process-send-string proc (concat string "\n"))
         (process-send-eof proc))
       proc)))
@@ -132,7 +134,7 @@
         (buffer-name rustic-format-buffer-name)
         (proc-name rustic-format-process-name)
         (mode 'rustic-cargo-fmt-mode)
-        (dir (rustic-buffer-workspace))
+        ;; (dir (rustic-buffer-workspace))
         (sentinel #'(lambda (proc output)
                       (let ((proc-buffer (process-buffer proc))
                             (inhibit-read-only t))
@@ -141,7 +143,11 @@
                             (kill-buffer proc-buffer)
                             (message "Workspace formatted with cargo-fmt.")))))))
     (rustic-compilation-process-live)
-    (rustic-compilation-start command buffer-name proc-name mode dir sentinel)))
+    (rustic-compilation-start command
+                              :buffer buffer-name
+                              :process proc-name
+                              :mode mode
+                              :sentinel sentinel)))
 
 (defun rustic-format-buffer ()
   "Format the current buffer using rustfmt."
@@ -149,7 +155,9 @@
   (unless (eq major-mode 'rustic-mode)
     (error "Not a rustic-mode buffer."))
   (rustic-compilation-process-live t)
-  (rustic-format-start-process (current-buffer) 'rustic-format-sentinel (buffer-string)))
+  (rustic-format-start-process 'rustic-format-sentinel
+                               :buffer (current-buffer)
+                               :stdin (buffer-string)))
 
 
 ;;;;;;;;
