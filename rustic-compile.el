@@ -32,7 +32,7 @@
   :group 'rustic-compilation)
 
 (defcustom rustic-compile-backtrace "1"
-  "Set process variable `RUST_BACKTRACE'."
+  "Set environment variable `RUST_BACKTRACE'."
   :type '(choice (string :tag "0")
                  (string :tag "1")
                  (string :tag "full"))
@@ -164,7 +164,9 @@ Error matching regexes from compile.el are removed."
   "Buffer name for rust compilation process buffers.")
 
 (defun rustic-make-process (&rest args)
-  "Wrapper for `make-process'."
+  "Wrapper for `make-process'.
+
+Set environment variables for rust process."
   (let* ((coding-system-for-read 'binary)
          (process-environment (nconc
 	                           (list
@@ -178,6 +180,7 @@ Error matching regexes from compile.el are removed."
                   :sentinel (plist-get args :sentinel))))
 
 (defun rustic-compilation-start (command &rest args)
+  "Start a compilation process with COMMAND."
   (let ((buf (get-buffer-create
               (or (plist-get args :buffer) rustic-compilation-buffer-name)))
         (process (or (plist-get args :process) rustic-compilation-process-name))
@@ -321,6 +324,7 @@ buffers are formatted after saving if `rustic-format-on-save' is t."
                   (sit-for 0.1)))
               (revert-buffer t t))))))))
 
+;; disable formatting for save-some-buffers
 (defun rustic-save-some-buffers-advice (orig-fun &rest args)
   (let ((rustic-format-on-save nil))
     (apply orig-fun args)))
