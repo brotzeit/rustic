@@ -41,9 +41,6 @@
 (defvar rustic-format-buffer-name "*rustfmt*"
   "Buffer name for rustfmt process buffers.")
 
-(defvar rustic-format-file-name nil
-  "Holds last file formatted by `rustic-format-start-process'.")
-
 (defvar rustic-save-pos nil)
 
 (defun rustic-format-start-process (sentinel &rest args)
