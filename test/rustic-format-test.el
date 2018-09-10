@@ -25,13 +25,13 @@
   (let* ((string "fn main()      {}")
          (formatted-string "fn main() {}\n")
          (dir (rustic-babel-generate-project t))
-         (main (expand-file-name "main.rs" (concat dir "/src"))))
+         (main (expand-file-name "main.rs" (concat dir "/src")))
+         (buf (get-buffer-create "test")))
     (write-region string nil main nil 0)
     (let ((proc (rustic-format-start-process
-                 (current-buffer)
                  'rustic-format-file-sentinel
-                 nil
-                 `(,rustic-rustfmt-bin ,main))))
+                 :buffer buf
+                 :command `(,rustic-rustfmt-bin ,main))))
       (while (eq (process-status proc) 'run)
         (sit-for 0.1)))
     (with-temp-buffer
@@ -39,12 +39,8 @@
       (should (string= (buffer-string) formatted-string)))
     (should-error (rustic-format-start-process
                    'rustic-format-file-sentinel
-                   nil
-                   `(,rustic-rustfmt-bin "/tmp/nofile")))
-    (kill-process (get-process rustic-format-process-name))
-    (when-let ((proc (get-process rustic-format-process-name)))
-      (while (eq (process-status proc) 'run)
-        (sit-for 0.01)))))
+                   :buffer "dummy"
+                   :command `(,rustic-rustfmt-bin "/tmp/nofile")))))
 
 (ert-deftest rustic-test-format-buffer-before-save ()
   (let* ((string "fn main()      {}")
