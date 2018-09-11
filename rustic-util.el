@@ -128,10 +128,9 @@
   "Use rustfmt via cargo."
   (interactive)
   (let ((command (list rustic-cargo-bin "fmt"))
-        (buffer-name rustic-format-buffer-name)
-        (proc-name rustic-format-process-name)
+        (buffer rustic-format-buffer-name)
+        (proc rustic-format-process-name)
         (mode 'rustic-cargo-fmt-mode)
-        ;; (dir (rustic-buffer-workspace))
         (sentinel #'(lambda (proc output)
                       (let ((proc-buffer (process-buffer proc))
                             (inhibit-read-only t))
@@ -141,8 +140,8 @@
                             (message "Workspace formatted with cargo-fmt.")))))))
     (rustic-compilation-process-live)
     (rustic-compilation-start command
-                              :buffer buffer-name
-                              :process proc-name
+                              :buffer buffer
+                              :process proc
                               :mode mode
                               :sentinel sentinel)))
 
