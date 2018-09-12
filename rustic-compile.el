@@ -323,8 +323,11 @@ buffers are formatted after saving if `rustic-format-on-save' is t."
 ;; TODO: there has to be a better way to do this
 ;; fix multiline error parsing
 (defun rustic-compilation--ensure-parse-advice (orig-fun &rest args)
-  (let ((limit (point-max)))
-    (apply orig-fun (list limit))))
+  (let ((limit (point-max))
+        (mode (with-current-buffer next-error-last-buffer major-mode)))
+    (if (eq mode 'rustic-mode)
+        (apply orig-fun (list limit))
+      (apply orig-fun args))))
 
 (advice-add 'compilation--ensure-parse :around #'rustic-compilation--ensure-parse-advice)
 
