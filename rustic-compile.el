@@ -113,44 +113,54 @@ Error matching regexes from compile.el are removed."
   (add-to-list 'compilation-error-regexp-alist-alist
                (cons 'rustic-error rustic-compilation-error))
   (add-to-list 'compilation-error-regexp-alist-alist
+               (cons 'rustic-warning rustic-compilation-warning))
+  (add-to-list 'compilation-error-regexp-alist-alist
                (cons 'rustic-info rustic-compilation-info))
   (add-to-list 'compilation-error-regexp-alist-alist
                (cons 'rustic-panic rustic-compilation-panic))
 
   (setq-local compilation-error-regexp-alist nil)
   (add-to-list 'compilation-error-regexp-alist 'rustic-error)
+  (add-to-list 'compilation-error-regexp-alist 'rustic-warning)
   (add-to-list 'compilation-error-regexp-alist 'rustic-info)
   (add-to-list 'compilation-error-regexp-alist 'rustic-panic)
 
   (add-hook 'compilation-filter-hook #'rustic-insert-errno-button nil t))
 
 (defvar rustic-compilation-error
-  (let ((file "\\([^\n]+\\)")
+  (let ((err "^error[E[0-9]+]:[^\n]*\n\s*-->\s")
+        (file "\\([^\n]+\\)")
         (start-line "\\([0-9]+\\)")
         (start-col  "\\([0-9]+\\)"))
-    (let ((re (concat "^ *--> " file ":" start-line ":" start-col ; --> 1:2:3
-                      )))
+    (let ((re (concat err file ":" start-line ":" start-col)))
       (cons re '(1 2 3))))
-  "Create hyperlink in compilation buffers for file paths containing '-->'.")
+  "Create hyperlink in compilation buffers for rust errors.")
+
+(defvar rustic-compilation-warning
+  (let ((warning "^warning:[^\n]*\n\s*-->\s")
+        (file "\\([^\n]+\\)")
+        (start-line "\\([0-9]+\\)")
+        (start-col  "\\([0-9]+\\)"))
+    (let ((re (concat warning file ":" start-line ":" start-col)))
+      (cons re '(1 2 3 1)))) ;; 1 for warning
+  "Create hyperlink in compilation buffers for rust warnings.")
 
 (defvar rustic-compilation-info
   (let ((file "\\([^\n]+\\)")
         (start-line "\\([0-9]+\\)")
         (start-col  "\\([0-9]+\\)"))
-    (let ((re (concat "^ *::: " file ":" start-line ":" start-col ; --> 1:2:3
-                      )))
+    (let ((re (concat "^ *::: " file ":" start-line ":" start-col)))
       (cons re '(1 2 3 0)))) ;; 0 for info type
   "Create hyperlink in compilation buffers for file paths containing ':::'.")
 
 (defvar rustic-compilation-panic
-  (let ((file "\\([^\n]+\\)")
+  (let ((panic "^thread '[^']+' panicked at '[^']+', ")
+        (file "\\([^\n]+\\)")
         (start-line "\\([0-9]+\\)")
         (start-col  "\\([0-9]+\\)"))
-    (let ((re (concat "^thread '[^']+' panicked at '[^']+', "
-                      file ":" start-line ":" start-col ; --> 1:2:3
-                      )))
+    (let ((re (concat panic file ":" start-line ":" start-col)))
       (cons re '(1 2 3))))
-  "Match panics during compilation.")
+  "Match thread panics.")
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
