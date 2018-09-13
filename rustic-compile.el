@@ -195,6 +195,19 @@ Set environment variables for rust process."
                   :filter (plist-get args :filter)
                   :sentinel (plist-get args :sentinel))))
 
+(defun rustic-compilation-setup-buffer (buf dir mode &optional no-mode-line)
+  "Prepare BUF for compilation process."
+  (let ((inhibit-read-only t))
+    (with-current-buffer buf
+      (erase-buffer)
+      (setq default-directory dir)
+      (funcall mode)
+      (unless no-mode-line
+        (setq mode-line-process
+              '((:propertize ":%s" face compilation-mode-line-run)
+                compilation-mode-line-errors))
+        (force-mode-line-update)))))
+
 (defun rustic-compilation-start (command &rest args)
   "Start a compilation process with COMMAND."
   (let ((buf (get-buffer-create
@@ -202,24 +215,16 @@ Set environment variables for rust process."
         (process (or (plist-get args :process) rustic-compilation-process-name))
         (mode (or (plist-get args :mode) 'rustic-compilation-mode))
         (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
-        (sentinel (or (plist-get args :sentinel) #'compilation-sentinel))
-        (inhibit-read-only t))
+        (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
     (setq next-error-last-buffer buf)
+    (rustic-compilation-setup-buffer buf directory mode)
+    (funcall rustic-compile-display-method buf)
     (with-current-buffer buf
-      (setq-local default-directory directory)
-      (erase-buffer)
-      (funcall mode)
-      (funcall rustic-compile-display-method buf)
-      (let ((proc (rustic-make-process :name process
-                                       :buffer buf
-                                       :command command
-                                       :filter #'rustic-compilation-filter
-                                       :sentinel sentinel)))
-        (setq mode-line-process
-              '((:propertize ":%s" face compilation-mode-line-run)
-                compilation-mode-line-errors))
-        (force-mode-line-update)
-        proc))))
+      (rustic-make-process :name process
+                           :buffer buf
+                           :command command
+                           :filter #'rustic-compilation-filter
+                           :sentinel sentinel))))
 
 (defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.

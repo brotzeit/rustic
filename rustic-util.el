@@ -2,6 +2,8 @@
 
 ;;; Code:
 
+(require 'rustic-compile)
+
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
 
@@ -53,10 +55,7 @@
          (command (plist-get args :command)))
     (setq next-error-last-buffer buffer)
     (setq rustic-save-pos (point))
-    (with-current-buffer err-buf
-      (setq default-directory dir)
-      (erase-buffer)
-      (rustic-format-mode))
+    (rustic-compilation-setup-buffer err-buf dir 'rustic-format-mode t)
     (when command
       (let ((file (nth 1 command)))
         (unless (file-exists-p file)
