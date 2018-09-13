@@ -124,7 +124,7 @@ execution with rustfmt."
                         (split-string
                          (buffer-substring-no-properties (point-min) (point-max)) "\n" )))))
         (rustic-babel-update-result-block result))
-      (with-rustic-spinner rustic-babel-spinner nil nil)
+      (rustic-with-spinner rustic-babel-spinner nil nil)
       (pop-to-buffer proc-buffer))))
 
 (defun rustic-babel-run-sentinel (proc _output)
@@ -136,7 +136,7 @@ execution with rustfmt."
           (with-current-buffer proc-buffer
             (setq result (buffer-string)))
           (rustic-babel-update-result-block result)
-          (with-rustic-spinner rustic-babel-spinner nil nil)
+          (rustic-with-spinner rustic-babel-spinner nil nil)
           (kill-buffer proc-buffer))
       (progn
         (with-current-buffer proc-buffer
@@ -144,7 +144,7 @@ execution with rustfmt."
                 (car (split-string
                       (buffer-substring-no-properties (point-min) (point-max)) "\n" ))))
         (rustic-babel-update-result-block result)
-        (with-rustic-spinner rustic-babel-spinner nil nil)  
+        (rustic-with-spinner rustic-babel-spinner nil nil)  
         (pop-to-buffer proc-buffer)))))
 
 (defun rustic-babel-update-result-block (result)
@@ -230,7 +230,7 @@ directory DIR."
     (setq rustic-info (org-babel-get-src-block-info))
     (setq rustic-babel-params params)
 
-    (with-rustic-spinner rustic-babel-spinner
+    (rustic-with-spinner rustic-babel-spinner
       (make-spinner rustic-spinner-type t 10)
       '(rustic-babel-spinner (":Executing " (:eval (spinner-print rustic-babel-spinner))))
       (spinner-start rustic-babel-spinner))

@@ -125,7 +125,7 @@ Execute process in PATH."
       (setq-local default-directory dir)
       (erase-buffer)
       (rustic-cargo-outdated-mode)            
-      (with-rustic-spinner rustic-outdated-spinner
+      (rustic-with-spinner rustic-outdated-spinner
         (make-spinner rustic-spinner-type t 10)
         '(rustic-outdated-spinner (":Executing " (:eval (spinner-print rustic-outdated-spinner))))
         (spinner-start rustic-outdated-spinner)))
@@ -161,7 +161,7 @@ Execute process in PATH."
           (if (= exit-status 101)
               (rustic-cargo-install-crate-p "outdated")
             (message out))))))
-  (with-rustic-spinner rustic-outdated-spinner nil nil))
+  (rustic-with-spinner rustic-outdated-spinner nil nil))
 
 (defun rustic-cargo-install-crate-p (crate)
   "Ask whether to install crate CRATE."
@@ -271,7 +271,7 @@ Takes a value accepted by `spinner-start'."
                          (repeat :inline t string)))
   :group 'rustic-babel)
 
-(defmacro with-rustic-spinner (spinner val mode-line &rest body)
+(defmacro rustic-with-spinner (spinner val mode-line &rest body)
   (declare (indent defun))
   `(when rustic-babel-display-spinner
      (when (spinner-p ,spinner)
