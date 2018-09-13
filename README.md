@@ -6,6 +6,7 @@ This package is a fork of [rust-mode](https://github.com/rust-lang/rust-mode)
 
 Differences with rust-mode:
 
+- multiline error parsing
 - translation of ANSI control sequences through [xterm-color](https://github.com/atomontage/xterm-color)
 - async org babel
 - custom compilation process
@@ -22,10 +23,15 @@ Differences with rust-mode:
 * rustic-format-buffer
 * rustic-racer-describe
 
-## Cargo popup
+## Popup
 
-You can execute cargo commands with `rustic-cargo-popup`. The list of commands can be customized
+You can execute commands with `rustic-cargo-popup`. The list of commands can be customized
 with `rustic-cargo-popup-commands`.
+
+## Cargo outdated
+
+Use `rustic-cargo-outdated` to get a list of dependencies that are out of date. The results 
+are displayed in `tabulated-list-mode`.
 
 ## Org-babel
 
@@ -39,7 +45,7 @@ fn main() {
 
 ## Rust Language Server
 
-The default package is lsp-mode. But you can also use eglot.
+The default package is `lsp-mode`. But you can also use `eglot` or no RLS client with `nil`.
 
 ``` emacs-lisp
 (setq rustic-rls-pkg 'eglot)
