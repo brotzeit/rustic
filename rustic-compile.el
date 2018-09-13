@@ -158,7 +158,7 @@ Error matching regexes from compile.el are removed."
         (start-col  "\\([0-9]+\\)"))
     (let ((re (concat "^ *::: " file ":" start-line ":" start-col)))
       (cons re '(1 2 3 0)))) ;; 0 for info type
-  "Create hyperlink in compilation buffers for file paths containing ':::'.")
+  "Create hyperlink in compilation buffers for file paths preceded by ':::'.")
 
 (defvar rustic-compilation-panic
   (let ((panic "^thread '[^']+' panicked at '[^']+', ")
