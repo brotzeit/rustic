@@ -122,7 +122,7 @@ Execute process in PATH."
                   :filter #'rustic-cargo-outdated-filter
                   :sentinel #'rustic-cargo-outdated-sentinel)
     (with-current-buffer buf
-      (setq-local default-directory dir)
+      (setq default-directory dir)
       (erase-buffer)
       (rustic-cargo-outdated-mode)            
       (rustic-with-spinner rustic-outdated-spinner

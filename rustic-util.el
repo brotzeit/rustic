@@ -54,7 +54,7 @@
     (setq next-error-last-buffer buffer)
     (setq rustic-save-pos (point))
     (with-current-buffer err-buf
-      (setq-local default-directory dir)
+      (setq default-directory dir)
       (erase-buffer)
       (rustic-format-mode))
     (when command

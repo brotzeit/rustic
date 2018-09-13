@@ -61,7 +61,7 @@
          (inhibit-read-only t))
     (with-current-buffer err-buff
       (erase-buffer)
-      (setq-local default-directory dir)
+      (setq default-directory dir)
       (rustic-compilation-mode))
     (when rustic-babel-display-compilation-buffer
       (display-buffer err-buff))
@@ -107,7 +107,7 @@ execution with rustfmt."
                  (inhibit-read-only t))
             (with-current-buffer err-buff
               (erase-buffer)
-              (setq-local default-directory dir)
+              (setq default-directory dir)
               (rustic-compilation-mode))
             (when rustic-babel-display-compilation-buffer
               (display-buffer err-buff))
