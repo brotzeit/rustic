@@ -80,9 +80,6 @@ execution with rustfmt."
         (inhibit-read-only t))
     (if (zerop (process-exit-status proc))
         (let* ((default-directory rustic-babel-dir))
-          (unless rustic-babel-display-compilation-buffer
-            (kill-buffer proc-buffer))
-
           ;; format babel block
           (when rustic-babel-format-src-block
             (let ((babel-body
@@ -106,7 +103,6 @@ execution with rustfmt."
                  (params '("cargo" "run" "--quiet"))
                  (inhibit-read-only t))
             (with-current-buffer err-buff
-              (erase-buffer)
               (setq default-directory dir)
               (rustic-compilation-mode))
             (when rustic-babel-display-compilation-buffer
@@ -137,7 +133,8 @@ execution with rustfmt."
             (setq result (buffer-string)))
           (rustic-babel-update-result-block result)
           (rustic-with-spinner rustic-babel-spinner nil nil)
-          (kill-buffer proc-buffer))
+          (unless rustic-babel-display-compilation-buffer
+            (kill-buffer proc-buffer)))
       (progn
         (with-current-buffer proc-buffer
           (setq result
