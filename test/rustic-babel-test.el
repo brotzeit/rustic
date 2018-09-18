@@ -28,15 +28,13 @@
     (unless nowait
       (rustic-test-babel-wait))))
 
-(defun rustic-test-babel-check-results (string buf)
-  "Returns t if babel result in BUF equals STRING."
-  (let (result)
+(defun rustic-test-babel-check-results (buf)
+  "Return babel result block contents in BUF."
     (with-current-buffer buf
       (goto-char (point-min))
       (when (search-forward "#+RESULTS:\n:\s" nil t)
         (goto-char (match-end 0))
-        (setq result (buffer-substring-no-properties (point) (point-max)))))
-    (string= string result)))
+        (buffer-substring-no-properties (point) (point-max)))))
 
 (ert-deftest rustic-test-babel-result ()
   (let* ((string "fn main() {
@@ -44,15 +42,34 @@
                   }")
          (buf (rustic-test-get-babel-block string)))
     (rustic-test-babel-execute-block buf)
-    (should (rustic-test-babel-check-results "foo\n" buf))
+    (should (string= (rustic-test-babel-check-results buf) "foo\n"))
     (should-not (buffer-live-p rustic-babel-compilation-buffer-name)))
   (let* ((string "fn main() {
-                    let foo = 1;
+                    let _foo = 1;
                   }")
          (buf (rustic-test-get-babel-block string)))
     (rustic-test-babel-execute-block buf)
-    (should (rustic-test-babel-check-results nil buf))
+    (should (eq (rustic-test-babel-check-results buf) nil))
     (should-not (buffer-live-p rustic-babel-compilation-buffer-name))))
+
+(ert-deftest rustic-test-babel-error-results ()
+    (let* ((string "fn main() {
+                     let v = vec![1, 2, 3];
+                     b[1];
+                   }")
+          (buf (rustic-test-get-babel-block string)))
+      (rustic-test-babel-execute-block buf)
+      (let ((re (format "error: Could not compile `%s`.\n"
+                        (car (reverse (split-string rustic-babel-dir "/"))))))
+        (should (string= re (rustic-test-babel-check-results buf)))))
+    (let* ((string "fn main() {
+                     let b = vec![1, 2, 3];
+                     b[99];
+                   }")
+          (buf (rustic-test-get-babel-block string)))
+      (rustic-test-babel-execute-block buf)
+      (let ((re "^thread '[^']+' panicked at '[^']+', "))
+        (should (string-match re (rustic-test-babel-check-results buf))))))
 
 (ert-deftest rustic-test-babel-spinner ()
   (let* ((string "fn main() {
@@ -108,4 +125,3 @@
     (with-current-buffer buf
       (rustic-test-babel-execute-block buf)
       (should (string= (org-element-property :value (org-element-at-point)) newstring)))))
-
