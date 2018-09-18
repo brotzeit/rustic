@@ -57,7 +57,7 @@
   "Start a rust babel compilation process in directory DIR."
   (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
          (default-directory dir)
-         (params '("cargo" "build"))
+         (params '("cargo" "build" "--quiet"))
          (inhibit-read-only t))
     (with-current-buffer err-buff
       (erase-buffer)
@@ -113,12 +113,8 @@ execution with rustfmt."
              :command params
              :filter #'rustic-compilation-filter
              :sentinel #'rustic-babel-run-sentinel)))
-      (let (result)
-        (with-current-buffer proc-buffer
-          (setq result
-                (nth 3 (reverse
-                        (split-string
-                         (buffer-substring-no-properties (point-min) (point-max)) "\n" )))))
+      (let* ((project (car (reverse (split-string rustic-babel-dir "/"))))
+             (result (format "error: Could not compile `%s`." project)))
         (rustic-babel-update-result-block result))
       (rustic-with-spinner rustic-babel-spinner nil nil)
       (pop-to-buffer proc-buffer))))
@@ -137,9 +133,12 @@ execution with rustfmt."
             (kill-buffer proc-buffer)))
       (progn
         (with-current-buffer proc-buffer
-          (setq result
-                (car (split-string
-                      (buffer-substring-no-properties (point-min) (point-max)) "\n" ))))
+          (save-excursion
+            (save-match-data
+              (goto-char (point-min))
+              (when (re-search-forward "^thread")
+                (goto-char (match-beginning 0))
+                (setq result (buffer-substring-no-properties (point) (line-end-position)))))))
         (rustic-babel-update-result-block result)
         (rustic-with-spinner rustic-babel-spinner nil nil)  
         (pop-to-buffer proc-buffer)))))
