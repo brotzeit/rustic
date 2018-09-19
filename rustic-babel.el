@@ -59,10 +59,7 @@
          (default-directory dir)
          (params '("cargo" "build" "--quiet"))
          (inhibit-read-only t))
-    (with-current-buffer err-buff
-      (erase-buffer)
-      (setq default-directory dir)
-      (rustic-compilation-mode))
+    (rustic-compilation-setup-buffer err-buff dir 'rustic-compilation-mode)
     (when rustic-babel-display-compilation-buffer
       (display-buffer err-buff))
     (rustic-make-process
@@ -99,14 +96,8 @@ execution with rustfmt."
 
           ;; run project
           (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
-                 (dir default-directory)
                  (params '("cargo" "run" "--quiet"))
                  (inhibit-read-only t))
-            (with-current-buffer err-buff
-              (setq default-directory dir)
-              (rustic-compilation-mode))
-            (when rustic-babel-display-compilation-buffer
-              (display-buffer err-buff))
             (rustic-make-process
              :name rustic-babel-process-name
              :buffer err-buff
