@@ -1,11 +1,5 @@
 ;;; rustic-babel.el --- Org babel facilities for cargo -*-lexical-binding: t-*-
 
-;;; Commentary:
-
-;; Async org-babel execution using cargo.  Building and running is seperated
-;; into two processes, as it's easier to get the output for the result of the
-;; current source block.
-
 ;;; Code:
 
 (require 'org)
