@@ -46,7 +46,9 @@
 (defvar rustic-save-pos nil)
 
 (defun rustic-format-start-process (sentinel &rest args)
-  "Start a new rustfmt process."
+  "Run rustfmt with ARGS.
+
+Use `:command' when formatting files and `:stdin' for strings."
   (let* ((err-buf (get-buffer-create rustic-format-buffer-name))
          (inhibit-read-only t)
          (dir (rustic-buffer-workspace))
@@ -59,8 +61,7 @@
     (when command
       (let ((file (nth 1 command)))
         (unless (file-exists-p file)
-          (error (format "File %s does not exist." file))))
-      (cl-assert (and (listp command) (= (length command) 2))))
+          (error (format "File %s does not exist." file)))))
     (let ((proc (rustic-make-process :name rustic-format-process-name
                                      :buffer err-buf
                                      :command (or command `(,rustic-rustfmt-bin))
