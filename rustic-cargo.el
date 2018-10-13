@@ -315,35 +315,39 @@ Takes a value accepted by `spinner-start'."
 ;;;;;;;;;;;;;;;;
 ;; Interactive
 
+(defun rustic-run-cargo-command (command)
+  (rustic-compilation-process-live)
+  (rustic-compilation-start (split-string command)))
+
 ;;;###autoload
 (defun rustic-cargo-build ()
   (interactive)
-  (call-interactively 'rustic-compile "cargo build"))
+  (rustic-run-cargo-command "cargo build"))
 
 ;;;###autoload
 (defun rustic-cargo-run ()
   (interactive)
-  (call-interactively 'rustic-compile "cargo run"))
+  (rustic-run-cargo-command "cargo run"))
 
 ;;;###autoload
 (defun rustic-cargo-clean ()
   (interactive)
-  (call-interactively 'rustic-compile "cargo clean"))
+  (rustic-run-cargo-command "cargo clean"))
 
 ;;;###autoload
 (defun rustic-cargo-check ()
   (interactive)
-  (call-interactively 'rustic-compile "cargo check"))
+  (rustic-run-cargo-command "cargo check"))
 
 ;;;###autoload
 (defun rustic-cargo-bench ()
   (interactive)
-  (call-interactively 'rustic-compile "cargo bench"))
+  (rustic-run-cargo-command "cargo bench"))
 
 ;;;###autoload
 (defun rustic-cargo-new ()
   (interactive)
-  (call-interactively 'rustic-compile "cargo new"))
+  (rustic-run-cargo-command "cargo new"))
 
 (provide 'rustic-cargo)
 ;;; rustic-cargo.el ends here
