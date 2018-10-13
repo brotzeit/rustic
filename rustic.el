@@ -40,6 +40,7 @@
 (require 'rustic-interaction)
 (require 'rustic-babel)
 (require 'rustic-racer)
+(require 'rustic-popup)
 
 (with-eval-after-load 'lsp-mode
   (require 'rustic-lsp))
@@ -146,7 +147,7 @@ function or trait.  When nil, where will be aligned with fn or trait."
 
 (defvar rustic-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-p") 'rustic-cargo-popup)
+    (define-key map (kbd "C-c C-p") 'rustic-popup)
 
     (define-key map (kbd "C-c C-c C-u") 'rustic-compile)
     (define-key map (kbd "C-c C-c C-i") 'rustic-recompile)

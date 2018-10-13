@@ -281,37 +281,6 @@ Takes a value accepted by `spinner-start'."
      ,@body))
 
 
-;;;;;;;;;;
-;; Popup
-
-(defcustom rustic-cargo-popup-commands
-  '((?b "Build"    rustic-cargo-build)
-    (?f "Fmt"      rustic-cargo-fmt)
-    (?r "Run"      rustic-cargo-run)
-    (?c "Clippy"   rustic-cargo-clippy)
-    (?t "Test"     rustic-cargo-test)
-    (?o "Outdated" rustic-cargo-outdated))
-  "Commands for `rustic-cargo-popup'."
-  :type 'list
-  :group 'rustic-cargo)
-
-(defcustom rustic-cargo-popup-default-action 'rustic-cargo-build
-  "Default action for `rustic-cargo-popup'."
-  :type 'function
-  :group 'rustic-cargo)
-
-(defcustom rustic-cargo-popup-max-columns 2
-  "Maximal number of columns in `rustic-cargo-popup'."
-  :type 'integer
-  :group 'rustic-cargo)
-
-(magit-define-popup rustic-cargo-popup
-  "Popup console for cargo commands."
-  :actions rustic-cargo-popup-commands
-  :default-action rustic-cargo-popup-default-action
-  :max-action-columns rustic-cargo-popup-max-columns)
-
-
 ;;;;;;;;;;;;;;;;
 ;; Interactive
 
