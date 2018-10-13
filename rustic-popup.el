@@ -32,7 +32,7 @@ The first element of each list contains a command's binding."
 ;;;;;;;;;;;;;;;
 ;; Popup Mode
 
-(defvar rustic-popup-mode-buffer-name "rustic-popup-buffer"
+(defvar rustic-popup-buffer-name "rustic-popup-buffer"
   "Buffer name for rustic popup buffers.")
 
 (defvar rustic-popup-mode-map
@@ -88,7 +88,7 @@ The first element of each list contains a command's binding."
 (defun rustic-popup ()
   "Setup popup."
   (interactive)
-  (let ((buf (get-buffer-create rustic-popup-mode-buffer-name))
+  (let ((buf (get-buffer-create rustic-popup-buffer-name))
         (win (split-window-below))
         (inhibit-read-only t))
     (rustic-popup-insert-contents buf)
