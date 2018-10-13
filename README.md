@@ -26,8 +26,8 @@ Differences with rust-mode:
 
 ## Popup
 
-You can execute commands with `rustic-cargo-popup`. The list of commands can be customized
-with `rustic-cargo-popup-commands`.
+You can execute commands with `rustic-popup`. The list of commands can be customized
+with `rustic-popup-commands`.
 
 ## Cargo outdated
 
