@@ -135,7 +135,7 @@ Error matching regexes from compile.el are removed."
   (add-hook 'compilation-filter-hook #'rustic-insert-errno-button nil t))
 
 (defvar rustic-compilation-error
-  (let ((err "^error[E[0-9]+]:[^\n]*\n\s*-->\s")
+  (let ((err "^error[^:]*:[^\n]*\n\s*-->\s")
         (file "\\([^\n]+\\)")
         (start-line "\\([0-9]+\\)")
         (start-col  "\\([0-9]+\\)"))
