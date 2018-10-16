@@ -3,7 +3,6 @@
 ;;; Code:
 
 (require 'tabulated-list)
-(require 'magit)
 
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
