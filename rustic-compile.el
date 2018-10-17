@@ -31,7 +31,7 @@
   :type 'function
   :group 'rustic-compilation)
 
-(defcustom rustic-compile-backtrace "1"
+(defcustom rustic-compile-backtrace "0"
   "Set environment variable `RUST_BACKTRACE'."
   :type '(choice (string :tag "0")
                  (string :tag "1")
