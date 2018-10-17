@@ -250,6 +250,7 @@ Translate STRING with `xterm-color-filter'."
               ;; now use window-point-insertion-type instead.
 
               (insert xterm-string)
+              (compilation--ensure-parse (point-max))
 
               (unless comint-inhibit-carriage-motion
                 (comint-carriage-motion (process-mark proc) (point)))
