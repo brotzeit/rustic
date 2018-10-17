@@ -12,5 +12,6 @@
 (depends-on "spinner" "1.7.3")
 
 (development
+ (depends-on "spinner")   
  (depends-on "ert-runner")
  (depends-on "f"))

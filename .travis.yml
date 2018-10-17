@@ -16,6 +16,7 @@ matrix:
   
 env:
   - EMACS_VERSION=26.1
+  - EMACS_VERSION=snapshot
 
 before_install:
   # Configure $PATH: Executables are installed to $HOME/bin
