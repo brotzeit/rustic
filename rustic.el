@@ -1,6 +1,6 @@
 ;;; rustic.el --- Rust development environment -*-lexical-binding: t-*-
 
-;; Version: 0.12
+;; Version: 0.13
 ;; Author: Mozilla
 ;; 
 ;; Keywords: languages
@@ -15,6 +15,7 @@
 ;;
 ;; Differences with rust-mode:
 ;;
+;; - compilation popup
 ;; - multiline error parsing
 ;; - translation of ANSI control sequences through xterm-color
 ;; - async org babel

@@ -1,5 +1,9 @@
 ;;; rustic-popup.el --- Cargo popup -*-lexical-binding: t-*-
 
+;;; Commentary:
+
+;; Provides magit like popup.
+
 ;;; Code:
 
 (require 'rustic-compile)

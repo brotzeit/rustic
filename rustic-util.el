@@ -1,5 +1,9 @@
 ;;; rustic-util.el --- Rust utility functions -*-lexical-binding: t-*-
 
+;;; Commentary:
+
+;; Contains functions for rust tools like rustfmt and RLS.
+
 ;;; Code:
 
 (require 'rustic-compile)
