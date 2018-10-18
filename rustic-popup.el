@@ -44,7 +44,7 @@ The first element of each list contains a command's binding."
     (define-key map [remap self-insert-command] 'rustic-popup-invoke-popup-action)
     (define-key map (kbd "g") 'rustic-recompile)
     (define-key map (kbd "RET") 'rustic-popup-default-action)
-    (define-key map (kbd "h") 'rustic-cargo-command-help)
+    (define-key map (kbd "h") 'rustic-popup-cargo-command-help)
     (define-key map (kbd "q") 'kill-buffer-and-window)
     map)
   "Keymap for rustic popup buffers.")
@@ -157,7 +157,7 @@ corresponding line."
 
 (defvar rustic-popup-help-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "q") 'rustic-help-kill-buffer-and-window)
+    (define-key map (kbd "q") 'rustic-popup-kill-help-buffer-and-window)
     map)
   "Keymap for rustic popup help buffers.")
 
@@ -167,7 +167,7 @@ corresponding line."
   (setq buffer-read-only t)
   (setq-local scroll-margin 0))
 
-(defun rustic-cargo-command-help ()
+(defun rustic-popup-cargo-command-help ()
   "Display help buffer for cargo command at point."
   (interactive)
   (let ((cur-buf (current-buffer))
@@ -199,7 +199,7 @@ corresponding line."
       (with-current-buffer cur-buf
         (fit-window-to-buffer)))))
 
-(defun rustic-help-kill-buffer-and-window ()
+(defun rustic-popup-kill-help-buffer-and-window ()
   "Close popup help buffer."
   (interactive)
   (kill-buffer-and-window)
