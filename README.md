@@ -17,23 +17,6 @@ Differences with rust-mode:
 - requires emacs 26
 - etc.
 
-## Some basic commands:
-
-* rustic-compile
-* rustic-recompile
-* rustic-format-buffer
-* rustic-racer-describe
-
-## Popup
-
-You can execute commands with `rustic-popup`. The list of commands can be customized
-with `rustic-popup-commands`.
-
-## Cargo outdated
-
-Use `rustic-cargo-outdated` to get a list of dependencies that are out of date. The results 
-are displayed in `tabulated-list-mode`.
-
 ## Org-babel
 
 ```
@@ -51,3 +34,17 @@ The default package is `lsp-mode`. But you can also use `eglot` or no RLS client
 ``` emacs-lisp
 (setq rustic-rls-pkg 'eglot)
 ```
+
+## Popup
+
+You can execute commands with `rustic-popup`. The list of commands can be customized
+with `rustic-popup-commands`.
+
+![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup.png)
+
+## Cargo outdated
+
+Use `rustic-cargo-outdated` to get a list of dependencies that are out of date. The results 
+are displayed in `tabulated-list-mode`.
+
+![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
