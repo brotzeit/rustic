@@ -44,6 +44,7 @@ The first element of each list contains a command's binding."
     (define-key map [remap self-insert-command] 'rustic-popup-invoke-popup-action)
     (define-key map (kbd "g") 'rustic-recompile)
     (define-key map (kbd "RET") 'rustic-popup-default-action)
+    (define-key map (kbd "h") 'rustic-popup-cargo-command-help)
     (define-key map (kbd "q") 'kill-buffer-and-window)
     map)
   "Keymap for rustic popup buffers.")
@@ -146,6 +147,69 @@ corresponding line."
         (rustic-popup-insert-contents (current-buffer)))
        (t
         (message "No default action for line."))))))
+
+
+;;;;;;;;;;;;;;;;
+;; Help Popup
+
+(defvar rustic-popup-help-buffer-name "rustic-popup-help-buffer"
+  "Buffer name for rustic popup help buffers.")
+
+(defvar rustic-popup-help-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "q") 'rustic-popup-kill-help-buffer-and-window)
+    map)
+  "Keymap for rustic popup help buffers.")
+
+(define-derived-mode rustic-popup-help-mode fundamental-mode "RusticHelpPopup"
+  "Mode for rustic popup help buffers."
+  (setq truncate-lines t)
+  (setq buffer-read-only t)
+  (setq-local scroll-margin 0))
+
+(defun rustic-popup-cargo-command-help ()
+  "Display help buffer for cargo command at point."
+  (interactive)
+  (let ((cur-buf (current-buffer))
+        command)
+    (save-excursion
+      (goto-char (line-beginning-position))
+      (setq command (cadr (split-string
+                           (buffer-substring-no-properties (line-beginning-position)
+                                                           (line-end-position))))))
+    (let* ((string (shell-command-to-string (format "cargo %s -h" command)))
+           (buf (get-buffer-create rustic-popup-help-buffer-name))
+           (inhibit-read-only t)
+           (l (length (split-string string "\n")))
+           start end newstring)
+      (with-current-buffer buf
+        (erase-buffer)
+        (rustic-popup-help-mode)
+        (dolist (s (split-string string "\n"))
+          (when (and (not (string-match "^\s+\-h" s))
+                     (string-match "^\s+\-" s))
+            (insert s)
+            (insert "\n")))
+        (enlarge-window (- l (/ l 3)))
+        (split-window-below)
+        (switch-to-buffer buf))
+      (with-current-buffer buf
+        (fit-window-to-buffer)
+        (goto-char (point-min)))
+      (with-current-buffer cur-buf
+        (fit-window-to-buffer)))))
+
+(defun rustic-popup-kill-help-buffer-and-window ()
+  "Close popup help buffer."
+  (interactive)
+  (kill-buffer-and-window)
+  (let ((win (get-buffer-window rustic-popup-buffer-name)))
+    (select-window win)
+    (fit-window-to-buffer)
+    (set-window-text-height win (+ (window-height) 1))
+    (save-excursion
+      (goto-char (point-min))
+      (recenter))))
 
 (provide 'rustic-popup)
 ;;; rustic-popup.el ends here
