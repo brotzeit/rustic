@@ -44,6 +44,7 @@ The first element of each list contains a command's binding."
     (define-key map [remap self-insert-command] 'rustic-popup-invoke-popup-action)
     (define-key map (kbd "g") 'rustic-recompile)
     (define-key map (kbd "RET") 'rustic-popup-default-action)
+    (define-key map (kbd "<tab>") 'rustic-popup-default-action)
     (define-key map (kbd "h") 'rustic-popup-cargo-command-help)
     (define-key map (kbd "q") 'kill-buffer-and-window)
     map)
