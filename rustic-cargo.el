@@ -4,6 +4,8 @@
 
 (require 'tabulated-list)
 
+(require 'rustic-compile)
+
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
 
