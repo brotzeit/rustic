@@ -119,10 +119,10 @@ The first element of each list contains a command's binding."
     (let* ((command (cadr (split-string
                            (buffer-substring-no-properties
                             (point) (line-end-position)))))
-           (c (concat "rustic-cargo-" command)))
+           (c (intern (concat "rustic-cargo-" command))))
       (if (commandp c)
-          (call-interactively (intern c))
-        (call-interactively 'rustic-compile (concat "cargo-" c))))))
+          (call-interactively c)
+        (call-interactively 'rustic-compile (concat "cargo " command))))))
 
 (defun rustic-popup-default-action ()
   "Change backtrace and `compilation-arguments' when executed on 
