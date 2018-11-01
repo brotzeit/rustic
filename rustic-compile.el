@@ -176,7 +176,7 @@ Error matching regexes from compile.el are removed."
 (defvar rustic-compilation-process-name "rustic-compilation-process"
   "Process name for rust compilation processes.")
 
-(defvar rustic-compilation-buffer-name "*rust-compilation*"
+(defvar rustic-compilation-buffer-name "*rustic-compilation*"
   "Buffer name for rust compilation process buffers.")
 
 (defun rustic-make-process (&rest args)
