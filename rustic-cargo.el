@@ -3,6 +3,7 @@
 ;;; Code:
 
 (require 'tabulated-list)
+(require 'spinner)
 
 (require 'rustic-compile)
 
@@ -256,7 +257,6 @@ Execute process in PATH."
 ;;;;;;;;;;;;
 ;; Spinner
 
-(eval-and-compile (require 'spinner))
 (defcustom rustic-spinner-type 'horizontal-moving
   "Holds the type of spinner to be used in the mode-line.
 Takes a value accepted by `spinner-start'."
