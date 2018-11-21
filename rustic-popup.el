@@ -18,7 +18,8 @@
     (?c "clippy"   clippy)
     (?t "test"     test)
     (?o "outdated" outdated)
-    (?e "clean"    clean))
+    (?e "clean"    clean)
+    (?k "check"    check))
   "List of commands that are displayed in the popup.
 The first element of each list contains a command's binding."
   :type 'list
@@ -103,14 +104,14 @@ If directory is not in a rust project call `read-directory-name'."
                   (set-window-buffer win buf)
                   (select-window win)
                   (fit-window-to-buffer)
-                  (set-window-text-height win (+ (window-height) 1)))))))
-  (if (rustic-buffer-workspace t)
-      (funcall func)
-    (let ((dir (read-directory-name "Rust project:")))
-      (let ((default-directory dir))
-        (if (rustic-buffer-workspace t)
-            (funcall func)
-          (message "Not a rust project."))))))
+                  (set-window-text-height win (+ (window-height) 1))))))
+    (if (rustic-buffer-workspace t)
+        (funcall func)
+      (let ((dir (read-directory-name "Rust project:")))
+        (let ((default-directory dir))
+          (if (rustic-buffer-workspace t)
+              (funcall func)
+            (message "Not a rust project.")))))))
 
 
 ;;;;;;;;;;;;;;;;
