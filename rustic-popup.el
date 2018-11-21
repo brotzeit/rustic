@@ -92,16 +92,25 @@ The first element of each list contains a command's binding."
       (goto-char (point-min)))))
 
 (defun rustic-popup ()
-  "Setup popup."
+  "Setup popup.
+If directory is not in a rust project call `read-directory-name'."
   (interactive)
-  (let ((buf (get-buffer-create rustic-popup-buffer-name))
-        (win (split-window-below))
-        (inhibit-read-only t))
-    (rustic-popup-insert-contents buf)
-    (set-window-buffer win buf)
-    (select-window win)
-    (fit-window-to-buffer)
-    (set-window-text-height win (+ (window-height) 1))))
+  (let ((func (lambda ()
+                (let ((buf (get-buffer-create rustic-popup-buffer-name))
+                      (win (split-window-below))
+                      (inhibit-read-only t))
+                  (rustic-popup-insert-contents buf)
+                  (set-window-buffer win buf)
+                  (select-window win)
+                  (fit-window-to-buffer)
+                  (set-window-text-height win (+ (window-height) 1)))))))
+  (if (rustic-buffer-workspace t)
+      (funcall func)
+    (let ((dir (read-directory-name "Rust project:")))
+      (let ((default-directory dir))
+        (if (rustic-buffer-workspace t)
+            (funcall func)
+          (message "Not a rust project."))))))
 
 
 ;;;;;;;;;;;;;;;;
