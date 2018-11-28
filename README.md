@@ -6,7 +6,7 @@ This package is a fork of [rust-mode](https://github.com/rust-lang/rust-mode)
 
 Differences with rust-mode:
 
-- compilation popup
+- cargo popup
 - multiline error parsing
 - translation of ANSI control sequences through [xterm-color](https://github.com/atomontage/xterm-color)
 - async org babel
@@ -38,13 +38,22 @@ The default package is `lsp-mode`. But you can also use `eglot` or no RLS client
 ## Popup
 
 You can execute commands with `rustic-popup`. The list of commands can be customized
-with `rustic-popup-commands`.
+with `rustic-popup-commands`. You can open a buffer that shows the command's flags with `h`.
+The command `rustic-popup-default-action` (`RET` or `<tab>`) allows you to:
+
+- change Backtrace variable `rustic-compile-backtrace`
+- modify `compilation-arguments` for `recompile`
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup.png)
 
 ## Cargo outdated
 
 Use `rustic-cargo-outdated` to get a list of dependencies that are out of date. The results 
-are displayed in `tabulated-list-mode`.
+are displayed in `tabulated-list-mode` and you can use most commands you know for example from
+the emacs package menu.
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
+
+## Contributing
+
+PRs, feature requests and bug reports are very welcome.
