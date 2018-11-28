@@ -201,14 +201,17 @@ corresponding line."
                      (string-match "^\s+\-" s))
             (insert s)
             (insert "\n")))
-        (enlarge-window (- l (/ l 3)))
-        (split-window-below)
-        (switch-to-buffer buf))
-      (with-current-buffer buf
-        (fit-window-to-buffer)
-        (goto-char (point-min)))
-      (with-current-buffer cur-buf
-        (fit-window-to-buffer)))))
+        (if (not (and (> (length (buffer-string)) 0)
+                      (> (length command) 0)))
+            (message "No help information for command at point.")
+          (enlarge-window (- l (/ l 3)))
+          (split-window-below)
+          (switch-to-buffer buf)
+          (with-current-buffer buf
+            (fit-window-to-buffer)
+            (goto-char (point-min)))
+          (with-current-buffer cur-buf
+            (fit-window-to-buffer)))))))
 
 (defun rustic-popup-kill-help-buffer-and-window ()
   "Close popup help buffer."
