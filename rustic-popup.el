@@ -181,37 +181,45 @@ corresponding line."
 (defun rustic-popup-cargo-command-help ()
   "Display help buffer for cargo command at point."
   (interactive)
-  (let ((cur-buf (current-buffer))
+  (let ((popup-buf (current-buffer))
         command)
     (save-excursion
       (goto-char (line-beginning-position))
       (setq command (cadr (split-string
                            (buffer-substring-no-properties (line-beginning-position)
                                                            (line-end-position))))))
-    (let* ((string (shell-command-to-string (format "cargo %s -h" command)))
-           (buf (get-buffer-create rustic-popup-help-buffer-name))
-           (inhibit-read-only t)
-           (l (length (split-string string "\n")))
-           start end newstring)
-      (with-current-buffer buf
-        (erase-buffer)
-        (rustic-popup-help-mode)
-        (dolist (s (split-string string "\n"))
-          (when (and (not (string-match "^\s+\-h" s))
-                     (string-match "^\s+\-" s))
-            (insert s)
-            (insert "\n")))
-        (if (not (and (> (length (buffer-string)) 0)
-                      (> (length command) 0)))
-            (message "No help information for command at point.")
-          (enlarge-window (- l (/ l 3)))
-          (split-window-below)
-          (switch-to-buffer buf)
-          (with-current-buffer buf
-            (fit-window-to-buffer)
-            (goto-char (point-min)))
-          (with-current-buffer cur-buf
-            (fit-window-to-buffer)))))))
+    (let* ((string (rustic-popup-help-flags command))
+           (help-buf (get-buffer-create rustic-popup-help-buffer-name))
+           (inhibit-read-only t))
+      (if (not (and (> (length (split-string string "\n")) 0)
+                    (> (length command) 0)))
+          (message "No help information for command at point.")
+        (rustic-popup-setup-help-popup popup-buf help-buf string)))))
+
+(defun rustic-popup-help-flags (command)
+  "Get flags of COMMAND."
+  (let ((string (shell-command-to-string (format "cargo %s -h" command)))
+        flags)
+    (dolist (s (split-string string "\n"))
+      (when (and (not (string-match "^\s+\-h" s))
+                 (string-match "^\s+\-" s))
+        (setq flags (concat flags s "\n"))))
+    flags))
+
+(defun rustic-popup-setup-help-popup (popup-buf help-buf string)
+  (let ((len (length (split-string string "\n"))))
+    (with-current-buffer help-buf
+      (erase-buffer)
+      (rustic-popup-help-mode)
+      (insert string)
+      (enlarge-window (- len (/ len 3)))
+      (split-window-below)
+      (switch-to-buffer help-buf)
+      (with-current-buffer help-buf
+        (fit-window-to-buffer)
+        (goto-char (point-min)))
+      (with-current-buffer popup-buf
+        (fit-window-to-buffer)))))
 
 (defun rustic-popup-kill-help-buffer-and-window ()
   "Close popup help buffer."
