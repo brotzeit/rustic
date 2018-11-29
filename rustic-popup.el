@@ -168,7 +168,7 @@ corresponding line."
 
 (defvar rustic-popup-help-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "q") 'rustic-popup-kill-help-buffer-and-window)
+    (define-key map (kbd "q") 'rustic-popup-kill-help-buffer)
     map)
   "Keymap for rustic popup help buffers.")
 
@@ -181,20 +181,18 @@ corresponding line."
 (defun rustic-popup-cargo-command-help ()
   "Display help buffer for cargo command at point."
   (interactive)
-  (let ((popup-buf (current-buffer))
-        command)
+  (let (command)
     (save-excursion
       (goto-char (line-beginning-position))
       (setq command (cadr (split-string
                            (buffer-substring-no-properties (line-beginning-position)
                                                            (line-end-position))))))
     (let* ((string (rustic-popup-help-flags command))
-           (help-buf (get-buffer-create rustic-popup-help-buffer-name))
            (inhibit-read-only t))
-      (if (not (and (> (length (split-string string "\n")) 0)
-                    (> (length command) 0)))
+      (if (not (and (> (length command) 0)
+                    (> (length (split-string string "\n")) 0)))
           (message "No help information for command at point.")
-        (rustic-popup-setup-help-popup popup-buf help-buf string)))))
+        (rustic-popup-setup-help-popup string)))))
 
 (defun rustic-popup-help-flags (command)
   "Get flags of COMMAND."
@@ -206,32 +204,24 @@ corresponding line."
         (setq flags (concat flags s "\n"))))
     flags))
 
-(defun rustic-popup-setup-help-popup (popup-buf help-buf string)
-  (let ((len (length (split-string string "\n"))))
-    (with-current-buffer help-buf
-      (erase-buffer)
-      (rustic-popup-help-mode)
-      (insert string)
-      (enlarge-window (- len (/ len 3)))
-      (split-window-below)
-      (switch-to-buffer help-buf)
-      (with-current-buffer help-buf
-        (fit-window-to-buffer)
-        (goto-char (point-min)))
-      (with-current-buffer popup-buf
-        (fit-window-to-buffer)))))
-
-(defun rustic-popup-kill-help-buffer-and-window ()
-  "Close popup help buffer."
-  (interactive)
-  (kill-buffer-and-window)
-  (let ((win (get-buffer-window rustic-popup-buffer-name)))
-    (select-window win)
+(defun rustic-popup-setup-help-popup (string)
+  "Switch to help buffer."
+  (let ((len (length (split-string string "\n")))
+        (buf (get-buffer-create rustic-popup-help-buffer-name)))
+    (switch-to-buffer buf)
+    (erase-buffer)
+    (rustic-popup-help-mode)
+    (insert string)
     (fit-window-to-buffer)
-    (set-window-text-height win (+ (window-height) 1))
-    (save-excursion
-      (goto-char (point-min))
-      (recenter))))
+    (set-window-text-height (selected-window) (+ (window-height) 1))
+    (goto-char (point-min))))
+
+(defun rustic-popup-kill-help-buffer ()
+  "Kill popup help buffer and switch to popup buffer."
+  (interactive)
+  (switch-to-buffer rustic-popup-buffer-name)
+  (fit-window-to-buffer)
+  (set-window-text-height (selected-window) (+ (window-height) 1)))
 
 (provide 'rustic-popup)
 ;;; rustic-popup.el ends here
