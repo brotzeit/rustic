@@ -9,10 +9,14 @@
 
 ;;; Code:
 
-(require 'compile)
+(eval-when-compile (require 'subr-x))
+
 (require 'xterm-color)
 (require 'projectile)
 (require 'markdown-mode)
+
+(require 'compile)
+
 
 ;;;;;;;;;;;;;;;;;;
 ;; Customization

@@ -4,7 +4,8 @@
 
 (eval-when-compile
   (require 'pcase)
-  (require 'let-alist))
+  (require 'let-alist)
+  (require 'subr-x))
 
 (require 'dash)
 (require 'flycheck)
