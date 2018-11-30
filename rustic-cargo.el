@@ -15,6 +15,38 @@
   :type 'string
   :group 'rustic-cargo)
 
+(defface rustic-cargo-outdated-upgrade-face
+  '((t (:foreground "LightSeaGreen")))
+  "Face used for crates marked for upgrade.")
+
+
+;;;;;;;;;;;;
+;; Spinner
+
+(defcustom rustic-spinner-type 'horizontal-moving
+  "Holds the type of spinner to be used in the mode-line.
+Takes a value accepted by `spinner-start'."
+  :type `(choice (choice :tag "Choose a spinner by name"
+                         ,@(mapcar (lambda (c) (list 'const (car c)))
+                                   spinner-types))
+                 (const :tag "A random spinner" random)
+                 (repeat :tag "A list of symbols from `spinner-types' to randomly choose from"
+                         (choice :tag "Choose a spinner by name"
+                                 ,@(mapcar (lambda (c) (list 'const (car c)))
+                                           spinner-types)))
+                 (vector :tag "A user defined vector"
+                         (repeat :inline t string)))
+  :group 'rustic-babel)
+
+(defmacro rustic-with-spinner (spinner val mode-line &rest body)
+  (declare (indent defun))
+  `(when rustic-babel-display-spinner
+     (when (spinner-p ,spinner)
+       (spinner-stop ,spinner))
+     (setq ,spinner ,val)
+     (setq mode-line-process ,mode-line)
+     ,@body))
+
 
 ;;;;;;;;;;;
 ;; Clippy
@@ -208,10 +240,23 @@ Execute process in PATH."
 (defun rustic-cargo-mark-upgrade ()
   "Mark an upgradable package."
   (interactive)
-  (let ((project (aref (tabulated-list-get-entry) 1))
-        (compat (aref (tabulated-list-get-entry) 2)))
-    (unless (or (string-match "^-" compat)
-                (not (version< project compat)))
+  (let* ((crate (tabulated-list-get-entry (point)))
+         (v (read-from-minibuffer "Update to version: "
+                                  (substring-no-properties (elt crate 2))))
+         (inhibit-read-only t))
+    (when v
+      (save-excursion
+        (goto-char (line-beginning-position))
+        (save-match-data
+          (when (search-forward (elt crate 0))
+            (replace-match (propertize (elt crate 0)
+                                       'font-lock-face
+                                       'rustic-cargo-outdated-upgrade-face)))
+          (goto-char (line-beginning-position))
+          (when (search-forward (elt crate 1))
+            (replace-match (propertize v
+                                       'font-lock-face
+                                       'rustic-cargo-outdated-upgrade-face)))))
       (tabulated-list-put-tag "U" t))))
 
 (defun rustic-cargo-mark-all-upgrades ()
@@ -239,57 +284,26 @@ Execute process in PATH."
     (save-excursion
       (goto-char (point-min))
       (while (not (eobp))
-        (let ((cmd (char-after))
-              (crate (tabulated-list-get-id)))
+        (let* ((cmd (char-after))
+              (crate (tabulated-list-get-entry (point))))
           (when (eq cmd ?U)
-            (push (substring-no-properties crate) crates)))
+            (push crate crates)))
         (forward-line)))
     (if crates
-        (let ((msg (format "Upgrade %s ?" (mapconcat 'identity crates " "))))
+        (let ((msg (format "Upgrade %s ?" (mapconcat #'(lambda (x) (elt x 0)) crates " "))))
           (when (yes-or-no-p msg)
             (rustic-cargo-upgrade-crates crates)))
       (user-error "No operations specified"))))
 
 (defun rustic-cargo-upgrade-crates (crates)
   "Upgrade crates CRATES."
-  (let (upgrade
-        update)
+  (let (upgrade)
     (dolist (crate crates)
-      (setq upgrade (concat upgrade (format " -d %s" crate)))
-      (setq update (concat update (format " -p %s" crate))))
+      (setq upgrade (concat upgrade (format "%s@%s " (elt crate 0) (elt crate 2)))))
     (let ((output (shell-command-to-string (format "cargo upgrade %s" upgrade))))
       (if (string-match "error: no such subcommand:" output)
-          (rustic-cargo-install-crate "edit")
-        (and (shell-command-to-string (format "cargo update %s" update))
-             (rustic-cargo-reload-outdated))))))
-
-
-;;;;;;;;;;;;
-;; Spinner
-
-(defcustom rustic-spinner-type 'horizontal-moving
-  "Holds the type of spinner to be used in the mode-line.
-Takes a value accepted by `spinner-start'."
-  :type `(choice (choice :tag "Choose a spinner by name"
-                         ,@(mapcar (lambda (c) (list 'const (car c)))
-                                   spinner-types))
-                 (const :tag "A random spinner" random)
-                 (repeat :tag "A list of symbols from `spinner-types' to randomly choose from"
-                         (choice :tag "Choose a spinner by name"
-                                 ,@(mapcar (lambda (c) (list 'const (car c)))
-                                           spinner-types)))
-                 (vector :tag "A user defined vector"
-                         (repeat :inline t string)))
-  :group 'rustic-babel)
-
-(defmacro rustic-with-spinner (spinner val mode-line &rest body)
-  (declare (indent defun))
-  `(when rustic-babel-display-spinner
-     (when (spinner-p ,spinner)
-       (spinner-stop ,spinner))
-     (setq ,spinner ,val)
-     (setq mode-line-process ,mode-line)
-     ,@body))
+          (rustic-cargo-install-crate-p "edit")
+        (rustic-cargo-reload-outdated)))))
 
 
 ;;;;;;;;;;;;;;;;

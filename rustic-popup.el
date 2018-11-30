@@ -25,8 +25,8 @@ The first element of each list contains a command's binding."
   :type 'list
   :group 'rustic-popup)
 
-(defface rustic-popup-key-face 
-  '((t (:foreground "DarkSeaGreen")))
+(defface rustic-popup-key-face
+  '((t (:foreground "DeepSkyBlue")))
   "Face used for command shortcuts.")
 
 (defface rustic-popup-section-face
