@@ -1,4 +1,5 @@
 [![MELPA](https://melpa.org/packages/rustic-badge.svg)](https://melpa.org/#/rustic)
+[![Build Status](https://travis-ci.com/brotzeit/rustic.svg?branch=master)](https://travis-ci.com/brotzeit/rustic)
 
 # Rustic
 
@@ -41,7 +42,7 @@ You can execute commands with `rustic-popup`. The list of commands can be custom
 with `rustic-popup-commands`. You can open a buffer that shows the command's flags with `h`.
 The command `rustic-popup-default-action` (`RET` or `<tab>`) allows you to:
 
-- change Backtrace variable `rustic-compile-backtrace`
+- change backtrace variable `rustic-compile-backtrace`
 - modify `compilation-arguments` for `recompile`
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup.png)
@@ -49,8 +50,8 @@ The command `rustic-popup-default-action` (`RET` or `<tab>`) allows you to:
 ## Cargo outdated
 
 Use `rustic-cargo-outdated` to get a list of dependencies that are out of date. The results 
-are displayed in `tabulated-list-mode` and you can use most commands you know for example from
-the emacs package menu.
+are displayed in `tabulated-list-mode` and you can use most commands you know from the emacs
+package menu.
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
 
