@@ -54,6 +54,13 @@ Use `rustic-cargo-outdated` to get a list of dependencies that are out of date. 
 are displayed in `tabulated-list-mode` and you can use most commands you know from the emacs
 package menu.
 
+- `u` mark single crate for upgrade
+- `U` mark all upgradable crates
+- `m` remove mark
+- `x` perform marked package menu actions
+- `r` refresh crate list
+- `q` quit window
+
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
 
 ## Contributing
