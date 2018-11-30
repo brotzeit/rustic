@@ -16,10 +16,10 @@
     (?f "fmt"      fmt)
     (?r "run"      run)
     (?c "clippy"   clippy)
-    (?t "test"     test)
     (?o "outdated" outdated)
     (?e "clean"    clean)
-    (?k "check"    check))
+    (?k "check"    check)
+    (?t "test"     test))
   "List of commands that are displayed in the popup.
 The first element of each list contains a command's binding."
   :type 'list
@@ -89,6 +89,9 @@ The first element of each list contains a command's binding."
         (insert (propertize (char-to-string (nth 0 command)) 'face 'rustic-popup-key-face))
         (insert "\s\s\s\s\s\s")
         (insert (nth 1 command))
+        (when (and (string= (nth 1 command) "test")
+                   (> (length rustic-test-arguments) 0))
+          (insert "        " "\"" rustic-test-arguments "\""))
         (insert "\n"))
       (goto-char (point-min)))))
 
@@ -155,6 +158,10 @@ corresponding line."
         (setq compilation-arguments
               (read-string "Compilation arguments: "
                            (or compilation-arguments rustic-compile-command)))
+        (rustic-popup-insert-contents (current-buffer)))
+       ((search-forward-regexp "\stest" (line-end-position) t)
+        (setq rustic-test-arguments
+              (read-string "Cargo test arguments: " rustic-test-arguments))
         (rustic-popup-insert-contents (current-buffer)))
        (t
         (message "No default action for line."))))))

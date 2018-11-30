@@ -40,10 +40,11 @@ The default package is `lsp-mode`. But you can also use `eglot` or no RLS client
 
 You can execute commands with `rustic-popup`. The list of commands can be customized
 with `rustic-popup-commands`. You can open a buffer that shows the command's flags with `h`.
-The command `rustic-popup-default-action` (`RET` or `<tab>`) allows you to:
+The command `rustic-popup-default-action` (`RET` or `<tab>`) allows you to change:
 
-- change backtrace variable `rustic-compile-backtrace`
-- modify `compilation-arguments` for `recompile`
+- BACKTRACE variable `rustic-compile-backtrace`
+- `compilation-arguments` for `recompile`
+- arguments for `cargo test`
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup.png)
 

@@ -52,19 +52,29 @@
 (defvar rustic-test-buffer-name "*cargo-test*"
   "Buffer name for test buffers.")
 
+(defvar rustic-test-arguments ""
+  "Holds arguments for 'cargo test', similiar to `compilation-arguments`.")
+
 (define-derived-mode rustic-cargo-test-mode rustic-compilation-mode "cargo-test"
   :group 'rustic)
 
 ;;;###autoload
-(defun rustic-cargo-test ()
-  "Run 'cargo test'."
-  (interactive)
-  (let ((command (list rustic-cargo-bin "test"))
-        (buf rustic-test-buffer-name)
-        (proc rustic-test-process-name)
-        (mode 'rustic-cargo-test-mode))
+(defun rustic-cargo-test (&optional arg)
+  "Run 'cargo test'.
+
+If ARG is not nil, use value as argument and store it in `rustic-test-arguments'"
+  (interactive "P")
+  (let* ((command (list rustic-cargo-bin "test"))
+         (c (if arg
+                (setq rustic-test-arguments
+                      (concat command " "
+                              (read-from-minibuffer "Cargo test arguments: ")))
+              command))
+         (buf rustic-test-buffer-name)
+         (proc rustic-test-process-name)
+         (mode 'rustic-cargo-test-mode))
     (rustic-compilation-process-live)
-    (rustic-compilation-start command
+    (rustic-compilation-start c
                               :buffer buf
                               :process proc
                               :mode mode)))
