@@ -1,7 +1,21 @@
+# Rustic
+
 [![MELPA](https://melpa.org/packages/rustic-badge.svg)](https://melpa.org/#/rustic)
 [![Build Status](https://travis-ci.com/brotzeit/rustic.svg?branch=master)](https://travis-ci.com/brotzeit/rustic)
 
-# Rustic
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [Intro](#intro)
+- [Org-babel](#org-babel)
+- [Rust Language Server](#rust-language-server)
+- [Popup](#popup)
+- [Cargo outdated](#cargo-outdated)
+- [Contributing](#contributing)
+
+<!-- markdown-toc end -->
+
+# Intro
 
 This package is a fork of [rust-mode](https://github.com/rust-lang/rust-mode)
 
@@ -18,7 +32,9 @@ Differences with rust-mode:
 - requires emacs 26
 - etc.
 
-## Org-babel
+Simply put `(use-package rustic)` in your config and most stuff gets configured automatically. 
+
+# Org-babel
 
 ```
 #+BEGIN_SRC rustic :crates '(("regex" . "0.2") ("darling" . "0.1"))
@@ -28,7 +44,7 @@ fn main() {
 #+END_SRC
 ```
 
-## Rust Language Server
+# Rust Language Server
 
 The default package is `lsp-mode`. But you can also use `eglot` or no RLS client with `nil`.
 
@@ -36,19 +52,19 @@ The default package is `lsp-mode`. But you can also use `eglot` or no RLS client
 (setq rustic-rls-pkg 'eglot)
 ```
 
-## Popup
+# Popup
 
 You can execute commands with `rustic-popup`. The list of commands can be customized
-with `rustic-popup-commands`. You can open a buffer that shows the command's flags with `h`.
-The command `rustic-popup-default-action` (`RET` or `<tab>`) allows you to change:
+with `rustic-popup-commands`. It's also possible to view the command's flags with `h`.
+The command `rustic-popup-default-action` (`RET` or `TAB`) allows you to change:
 
-- BACKTRACE variable `rustic-compile-backtrace`
+- `RUST_BACKTRACE` environment variable
 - `compilation-arguments` for `recompile`
 - arguments for `cargo test`
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup.png)
 
-## Cargo outdated
+# Cargo outdated
 
 Use `rustic-cargo-outdated` to get a list of dependencies that are out of date. The results 
 are displayed in `tabulated-list-mode` and you can use most commands you know from the emacs
@@ -63,6 +79,6 @@ package menu.
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
 
-## Contributing
+# Contributing
 
 PRs, feature requests and bug reports are very welcome.
