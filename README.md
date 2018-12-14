@@ -33,6 +33,8 @@ Differences with rust-mode:
 - etc.
 
 Simply put `(use-package rustic)` in your config and most stuff gets configured automatically. 
+If you have `rust-mode` installed, ensure it is required before rustic since it has to be removed
+from `auto-mode-alist`.
 
 # Org-babel
 

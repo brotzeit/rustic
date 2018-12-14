@@ -168,6 +168,11 @@ function or trait.  When nil, where will be aligned with fn or trait."
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
 
+;; remove rust-mode from `auto-mode-alist'
+(let ((mode '("\\.rs\\'" . rust-mode)))
+  (when (member mode auto-mode-alist)
+    (setq auto-mode-alist (remove mode auto-mode-alist))))
+
 ;;;###autoload
 (define-derived-mode rustic-mode prog-mode "Rust"
   "Major mode for Rust code.
@@ -225,10 +230,6 @@ function or trait.  When nil, where will be aligned with fn or trait."
 
   (when rustic-always-locate-project-on-open
     (rustic-update-buffer-workspace))
-
-  (let ((mode '("\\.rs\\'" . rust-mode)))
-    (when (member mode auto-mode-alist)
-      (setq auto-mode-alist (remove mode auto-mode-alist))))
 
   (rustic-setup-rls))
 
