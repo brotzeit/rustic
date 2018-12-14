@@ -197,7 +197,8 @@ Set environment variables for rust process."
                   :buffer (plist-get args :buffer)
                   :command (plist-get args :command)
                   :filter (plist-get args :filter)
-                  :sentinel (plist-get args :sentinel))))
+                  :sentinel (plist-get args :sentinel)
+                  :coding 'utf-8-emacs-unix)))
 
 (defun rustic-compilation-setup-buffer (buf dir mode &optional no-mode-line)
   "Prepare BUF for compilation process."
