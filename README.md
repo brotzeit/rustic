@@ -48,7 +48,7 @@ fn main() {
 
 # Rust Language Server
 
-The default package is `lsp-mode`. But you can also use `eglot` or no RLS client with `nil`.
+The default package is `eglot`. But you can also use `lsp-mode` or no RLS client with `nil`.
 
 ``` emacs-lisp
 (setq rustic-rls-pkg 'eglot)
