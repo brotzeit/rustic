@@ -180,31 +180,33 @@ Use `:command' when formatting files and `:stdin' for strings."
       (add-to-list 'eglot-ignored-server-capabilites feature))))
 
 (defun rustic-setup-rls ()
+  "Start the rls client's process.
+If client isn't installed, offer to install it."
   (unless noninteractive ;; TODO: fix tests to work with eglot/lsp-mode activated
-    (let ((rls-pkg rustic-rls-pkg))
-      (cond ((and (eq rls-pkg 'eglot)
-                  (featurep 'eglot))
-             (eglot-ensure))
-            ((and (eq rls-pkg 'lsp-mode)
-                  (featurep 'lsp-mode))
-             (lsp-rust-enable))
-            ((eq rls-pkg nil)
+    (let ((client-p (lambda (client)
+                      (if (package-installed-p client)
+                          (if (featurep client) t (require client))
+                        nil)))
+          (rls-pkg rustic-rls-pkg))
+      (cond ((eq rls-pkg nil)
              nil)
+            ((funcall client-p rls-pkg)
+             (if (eq rls-pkg 'eglot)
+                 (eglot-ensure)
+               (lsp-rust-enable)))
             (t
-             (rustic-setup-rls-1 rls-pkg))))))
+             (rustic-install-rls-client-p rls-pkg))))))
 
-(defun rustic-setup-rls-1 (rls-pkg)
+(defun rustic-install-rls-client-p (rls-pkg)
   (if (yes-or-no-p (format "%s not found. Install it ?" rls-pkg))
       (condition-case err
-          (and (package-install rls-pkg)
-               (require rls-pkg)
-               (if (eq rls-pkg 'eglot)
-                   (rustic-setup-eglot)
-                 (require 'rustic-lsp)))
+          (progn
+            (package-refresh-contents)
+            (package-install rls-pkg)
+            (require rls-pkg)
+            (rustic-setup-rls))
         (error err))
     (message "No RLS server running.")))
-
-(add-hook 'rustic-mode-hook 'rustic-setup-rls)
 
 
 ;;;;;;;;;;;;;;;;
