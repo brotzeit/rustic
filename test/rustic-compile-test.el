@@ -126,7 +126,7 @@
 (ert-deftest rustic-test-cargo-test ()
   ;; compilation-num-errors-found would be 8 with regular compilaton mode
   ;; due to parsing issues https://github.com/rust-lang/rust-mode/pull/254
-  (let ((rustic-compile-backtrace "1"))
+  (let ((rustic-compile-backtrace "0"))
     (let* ((string "#[cfg(test)]
                   mod tests {
                       #[test]
