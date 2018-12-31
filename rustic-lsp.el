@@ -138,10 +138,6 @@ The explaination comes from 'rustc --explain=ID'."
 	      rustic-lsp-handlers)
   (lsp-provide-marked-string-renderer client "rust" #'rustic-lsp-render-string))
 
-(lsp-define-stdio-client lsp-rust "rust" #'rustic-lsp-get-root nil
-			             :command-fn #'rustic-lsp-rls-command
-			             :initialize #'rustic-lsp-initialize-client)
-
 (defun rust-lsp-set-configuration ()
   (lsp--set-configuration `(:rust ,lsp-rust--config-options)))
 
