@@ -163,14 +163,6 @@ The explaination comes from 'rustc --explain=ID'."
   "Enable(t)/Disable(nil) goto-definition should use racer as fallback."
   (rustic-lsp-set-config "goto_def_racer_fallback" val))
 
-;; https://github.com/otavio/.emacs.d/blob/master/lisp/init-rust.el
-;; https://github.com/emacs-lsp/lsp-mode/pull/554
-(lsp-register-client
- (make-lsp-client :new-connection (lsp-stdio-connection '("rls"))
-                  :major-modes '(rust-mode rustic-mode)
-                  :server-id 'rls
-		          :notification-handlers (lsp-ht ("window/progress" 'lsp-clients--rust-window-progress))))
-
 
 ;;; https://github.com/emacs-lsp/lsp-mode/issues/555
 (defun lsp-describe-thing-at-point ()
