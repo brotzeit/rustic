@@ -163,23 +163,5 @@ The explaination comes from 'rustc --explain=ID'."
   "Enable(t)/Disable(nil) goto-definition should use racer as fallback."
   (rustic-lsp-set-config "goto_def_racer_fallback" val))
 
-
-;;; https://github.com/emacs-lsp/lsp-mode/issues/555
-(defun lsp-describe-thing-at-point ()
-  "Display the full documentation of the thing at point."
-  (interactive)
-  (let ((contents (->> (lsp--text-document-position-params)
-                       (lsp--make-request "textDocument/hover")
-                       (lsp--send-request)
-                       (gethash "contents"))))
-    (pop-to-buffer
-     (with-current-buffer (get-buffer-create "*lsp-help*")
-       (let ((inhibit-read-only t))
-         (erase-buffer)
-         (insert (lsp--render-on-hover-content contents t))
-         (goto-char (point-min))
-         (view-mode t)
-	 (current-buffer))))))
-
 (provide 'rustic-lsp)
 ;;; rustic-lsp.el ends here
