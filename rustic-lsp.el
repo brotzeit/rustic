@@ -138,10 +138,6 @@ The explaination comes from 'rustc --explain=ID'."
 	      rustic-lsp-handlers)
   (lsp-provide-marked-string-renderer client "rust" #'rustic-lsp-render-string))
 
-(lsp-define-stdio-client lsp-rust "rust" #'rustic-lsp-get-root nil
-			             :command-fn #'rustic-lsp-rls-command
-			             :initialize #'rustic-lsp-initialize-client)
-
 (defun rust-lsp-set-configuration ()
   (lsp--set-configuration `(:rust ,lsp-rust--config-options)))
 
@@ -166,32 +162,6 @@ The explaination comes from 'rustc --explain=ID'."
 (defun rustic-lsp-set-goto-def-racer-fallback (val)
   "Enable(t)/Disable(nil) goto-definition should use racer as fallback."
   (rustic-lsp-set-config "goto_def_racer_fallback" val))
-
-;; https://github.com/otavio/.emacs.d/blob/master/lisp/init-rust.el
-;; https://github.com/emacs-lsp/lsp-mode/pull/554
-(lsp-register-client
- (make-lsp-client :new-connection (lsp-stdio-connection '("rls"))
-                  :major-modes '(rust-mode rustic-mode)
-                  :server-id 'rls
-		          :notification-handlers (lsp-ht ("window/progress" 'lsp-clients--rust-window-progress))))
-
-
-;;; https://github.com/emacs-lsp/lsp-mode/issues/555
-(defun lsp-describe-thing-at-point ()
-  "Display the full documentation of the thing at point."
-  (interactive)
-  (let ((contents (->> (lsp--text-document-position-params)
-                       (lsp--make-request "textDocument/hover")
-                       (lsp--send-request)
-                       (gethash "contents"))))
-    (pop-to-buffer
-     (with-current-buffer (get-buffer-create "*lsp-help*")
-       (let ((inhibit-read-only t))
-         (erase-buffer)
-         (insert (lsp--render-on-hover-content contents t))
-         (goto-char (point-min))
-         (view-mode t)
-	 (current-buffer))))))
 
 (provide 'rustic-lsp)
 ;;; rustic-lsp.el ends here
