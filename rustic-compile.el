@@ -9,11 +9,11 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'subr-x))
-
 (require 'xterm-color)
 (require 'projectile)
 (require 'markdown-mode)
+
+(require 'subr-x)
 
 (require 'compile)
 
