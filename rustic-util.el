@@ -61,24 +61,25 @@ Use `:command' when formatting files and `:stdin' for strings."
          (buffer (plist-get args :buffer))
          (string (plist-get args :stdin))
          (command (plist-get args :command)))
-    (setq next-error-last-buffer buffer)
     (setq rustic-save-pos (point))
     (rustic-compilation-setup-buffer err-buf dir 'rustic-format-mode t)
     (when command
       (let ((file (nth 1 command)))
         (unless (file-exists-p file)
           (error (format "File %s does not exist." file)))))
-    (let ((proc (rustic-make-process :name rustic-format-process-name
-                                     :buffer err-buf
-                                     :command (or command `(,rustic-rustfmt-bin))
-                                     :filter #'rustic-compilation-filter
-                                     :sentinel sentinel)))
-      (when string
-        (while (not (process-live-p proc))
-          (sleep-for 0.01))
-        (process-send-string proc (concat string "\n"))
-        (process-send-eof proc))
-      proc)))
+    (with-current-buffer err-buf
+      (let ((proc (rustic-make-process :name rustic-format-process-name
+                                       :buffer err-buf
+                                       :command (or command `(,rustic-rustfmt-bin))
+                                       :filter #'rustic-compilation-filter
+                                       :sentinel sentinel)))
+        (setq next-error-last-buffer buffer)
+        (when string
+          (while (not (process-live-p proc))
+            (sleep-for 0.01))
+          (process-send-string proc (concat string "\n"))
+          (process-send-eof proc))
+        proc))))
 
 (defun rustic-format-sentinel (proc output)
   "Sentinel for rustfmt processes when using stdin."
