@@ -107,7 +107,9 @@ Use `:command' when formatting files and `:stdin' for strings."
   (let ((proc-buffer (process-buffer proc)))
     (with-current-buffer proc-buffer
       (if (string-match-p "^finished" output)
-          (kill-buffer proc-buffer)
+          (progn
+            (with-current-buffer next-error-last-buffer
+              (revert-buffer t t)))
         (goto-char (point-min))
         (funcall rustic-format-display-method proc-buffer)
         (message "Rustfmt error.")))))
