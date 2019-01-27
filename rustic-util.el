@@ -152,15 +152,28 @@ Use `:command' when formatting files and `:stdin' for strings."
                               :mode mode
                               :sentinel sentinel)))
 
-(defun rustic-format-buffer ()
-  "Format the current buffer using rustfmt."
+(defun rustic-format-buffer (&optional no-stdin)
+  "Format the current buffer using rustfmt.
+
+Provide optional argument NO-STDIN for `rustic-before-save-hook' since there
+were issues when using stdin for formatting."
   (interactive)
   (unless (eq major-mode 'rustic-mode)
     (error "Not a rustic-mode buffer."))
   (rustic-compilation-process-live t)
-  (let ((proc (rustic-format-start-process 'rustic-format-sentinel
-                                           :buffer (current-buffer)
-                                           :stdin (buffer-string))))
+  (let (proc)
+    (if (not no-stdin)
+        (setq proc (rustic-format-start-process 'rustic-format-sentinel
+                                                :buffer (current-buffer)
+                                                :stdin (buffer-string)))
+      (let* ((buf (current-buffer))
+             (file (buffer-file-name buf))
+             (string (buffer-string)))
+        (write-region string nil file nil 0)
+        (let ((command `(,rustic-rustfmt-bin ,file)))
+          (setq proc (rustic-format-start-process 'rustic-format-file-sentinel
+                                                  :buffer buf
+                                                  :command command)))))
     (while (eq (process-status proc) 'run)
       (sit-for 0.1))))
 
