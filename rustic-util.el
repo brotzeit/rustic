@@ -158,9 +158,11 @@ Use `:command' when formatting files and `:stdin' for strings."
   (unless (eq major-mode 'rustic-mode)
     (error "Not a rustic-mode buffer."))
   (rustic-compilation-process-live t)
-  (rustic-format-start-process 'rustic-format-sentinel
-                               :buffer (current-buffer)
-                               :stdin (buffer-string)))
+  (let ((proc (rustic-format-start-process 'rustic-format-sentinel
+                                           :buffer (current-buffer)
+                                           :stdin (buffer-string))))
+    (while (eq (process-status proc) 'run)
+      (sit-for 0.1))))
 
 
 ;;;;;;;;
