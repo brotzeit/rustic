@@ -23,11 +23,6 @@
   :type 'boolean
   :group 'rustic-babel)
 
-(defcustom rustic-babel-display-spinner t
-  "Display spinner, that indicates a babel process is running."
-  :type 'boolean
-  :group 'rustic-babel)
-
 (defvar rustic-babel-buffer-name '((:default . "*rust-babel*")))
 
 (defvar rustic-babel-process-name "rustic-babel-process"

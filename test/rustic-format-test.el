@@ -27,6 +27,7 @@
          (dir (rustic-babel-generate-project t))
          (main (expand-file-name "main.rs" (concat dir "/src")))
          (buf (get-buffer-create "test")))
+    (with-current-buffer buf (write-file main))
     (write-region string nil main nil 0)
     (let ((proc (rustic-format-start-process
                  'rustic-format-file-sentinel
@@ -45,7 +46,7 @@
 (ert-deftest rustic-test-format-buffer-before-save ()
   (let* ((string "fn main()      {}")
          (formatted-string "fn main() {}\n")
-         (buf (get-buffer-create "test"))
+         (buf (get-buffer-create "test-save"))
          (default-directory org-babel-temporary-directory)
          (file (progn (shell-command-to-string "touch test.rs")
                       (expand-file-name "test.rs")))
@@ -63,8 +64,12 @@
               (sit-for 0.01)))
         (should (string= (buffer-string) formatted-string))
         (should-not (= (point) (or (point-min) (point-max))))))
-    (let ((rustic-format-on-save nil))
+    (let ((buf (get-buffer-create "test-save-no-format"))
+          (file (progn (shell-command-to-string "touch test-no-format.rs")
+                       (expand-file-name "test-no-format.rs")))
+          (rustic-format-on-save nil))
       (with-current-buffer buf
+        (write-file file)
         (erase-buffer)
         (rustic-mode)
         (insert string)

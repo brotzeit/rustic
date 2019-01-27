@@ -328,8 +328,7 @@ buffers are formatted after saving if `rustic-format-on-save' is t."
                                                         :buffer buffer
                                                         :command `(,rustic-rustfmt-bin ,file))))
                 (while (eq (process-status proc) 'run)
-                  (sit-for 0.1)))
-              (revert-buffer t t))))))))
+                  (sit-for 0.1))))))))))
 
 ;; disable formatting for save-some-buffers
 (defun rustic-save-some-buffers-advice (orig-fun &rest args)

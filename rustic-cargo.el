@@ -40,7 +40,7 @@ Takes a value accepted by `spinner-start'."
 
 (defmacro rustic-with-spinner (spinner val mode-line &rest body)
   (declare (indent defun))
-  `(when rustic-babel-display-spinner
+  `(when rustic-display-spinner
      (when (spinner-p ,spinner)
        (spinner-stop ,spinner))
      (setq ,spinner ,val)
