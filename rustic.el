@@ -1106,7 +1106,9 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
   (when (and rustic-format-on-save
              (not (rustic-compilation-process-live t)))
     (condition-case ()
-        (rustic-format-buffer t)
+        (progn
+          (rustic-format-buffer t)
+          (sit-for 0.1))
       (error nil))))
 
 (defun rustic-after-save-hook ()
