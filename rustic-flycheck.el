@@ -70,14 +70,18 @@ more information on setting your PATH with Emacs."))
 
 (defun rustic-flycheck-find-cargo-target (file-name)
   "Return the Cargo build target associated with FILE-NAME.
+
 FILE-NAME is the path of the file that is matched against the
 `src_path' value in the list of `targets' returned by `cargo
 read-manifest'.
-Return a cons cell (KIND . NAME) where KIND is the target
-kind (lib, bin, test, example or bench), and NAME the target
-name (usually, the crate name).  If FILE-NAME exactly matches a
-target `src-path', this target is returned.  Otherwise, return
+
+Return an alist ((KIND . k) (NAME . n) (REQUIRED-FEATURES . rf))
+where KIND is the target kind (lib, bin, test, example or bench),
+NAME the target name (usually, the crate name), and REQUIRED-FEATURES is the
+optional list of features required to build the selected target.  If FILE-NAME
+exactly matches a target `src-path', this target is returned.  Otherwise, return
 the closest matching target, or nil if no targets could be found.
+
 See http://doc.crates.io/manifest.html#the-project-layout for a
 description of the conventional Cargo project layout."
   (-when-let* ((manifest (rustic-flycheck-find-manifest file-name))
@@ -102,7 +106,7 @@ description of the conventional Cargo project layout."
                   (-table-flat
                    'cons targets
                    (rustic-flycheck-dirs-list file-name
-                                              (file-name-directory manifest)))))
+                                            (file-name-directory manifest)))))
             ;; If all else fails, just pick the first target
             (car targets))))
       ;; If target is 'custom-build', we pick another target from the same package (see GH-62)
@@ -113,8 +117,10 @@ description of the conventional Cargo project layout."
                           (--find (not (equal target it))))))
       (when target
         (let-alist target
-          (cons (rustic-flycheck-normalize-target-kind .kind) .name))))))
-
+          (seq-filter (lambda (kv) (cdr kv))
+                     (list (cons 'kind (rustic-flycheck-normalize-target-kind .kind))
+                           (cons 'name .name)
+                           (cons 'required-features .required-features))))))))
 
 (defun rustic-flycheck-normalize-target-kind (kinds)
   "Return the normalized target name from KIND.
@@ -136,6 +142,7 @@ The normalization returns a valid cargo target based on KINDS."
 ;;;###autoload
 (defun rustic-flycheck-setup ()
   "Setup Rust in Flycheck.
+
 If the current file is part of a Cargo project, configure
 Flycheck according to the Cargo project layout."
   (interactive)
@@ -144,22 +151,21 @@ Flycheck according to the Cargo project layout."
   ;; https://github.com/flycheck/flycheck-rust/issues/40#issuecomment-253760883).
   (with-demoted-errors "Error in rustic-flycheck-setup: %S"
     (-when-let* ((file-name (buffer-file-name))
-                 ((kind . name) (rustic-flycheck-find-cargo-target file-name)))
-      (setq-local flycheck-rust-crate-type kind)
-      (setq-local flycheck-rust-binary-name name))))
+                 (target (rustic-flycheck-find-cargo-target file-name)))
+      (let-alist target
+        (setq-local flycheck-rust-features .required-features)
+        (setq-local flycheck-rust-crate-type .kind)
+        (setq-local flycheck-rust-binary-name .name)))))
 
 (flycheck-define-checker rustic-clippy
   "A Rust syntax checker using clippy.
 
-     See URL `https://github.com/rust-lang-nursery/rust-clippy'."
-  :command ("cargo" "+nightly" "clippy" "--message-format=json")
+  See URL `https://github.com/rust-lang-nursery/rust-clippy'."
+  :command ("cargo" "clippy" "--message-format=json")
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
-
-  ;; The reason I had to copy the checker from flycheck
   :modes rustic-mode
-
   :predicate flycheck-buffer-saved-p
   :enabled (lambda ()
              (and (flycheck-rust-cargo-has-command-p "clippy")
