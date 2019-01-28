@@ -7,8 +7,9 @@
 **Table of Contents**
 
 - [Intro](#intro)
-- [Org-babel](#org-babel)
+- [Rustfmt](#rustfmt)
 - [Rust Language Server](#rust-language-server)
+- [Org-babel](#org-babel)
 - [Popup](#popup)
 - [Cargo outdated](#cargo-outdated)
 - [Contributing](#contributing)
@@ -36,6 +37,21 @@ Simply put `(use-package rustic)` in your config and most stuff gets configured 
 If you have `rust-mode` installed, ensure it is required before rustic since it has to be removed
 from `auto-mode-alist`.
 
+# Rustfmt
+
+You can format your code with `rustic-format-buffer` or `rustic-cargo-fmt`.
+The variable `rustic-format-on-save` allows you to turn off auto-format on save.
+Rustic uses the function `rustic-save-some-buffers` for saving buffers before compilation. 
+If you want buffers to be saved automatically, you can change the value of `buffer-save-without-query`.
+
+# Rust Language Server
+
+The default package is `lsp-mode`. But you can also use `eglot` or no RLS client with `nil`.
+
+``` emacs-lisp
+(setq rustic-rls-pkg 'eglot)
+```
+
 # Org-babel
 
 ```
@@ -44,14 +60,6 @@ fn main() {
     println!("{}", "foo");
 }
 #+END_SRC
-```
-
-# Rust Language Server
-
-The default package is `lsp-mode`. But you can also use `eglot` or no RLS client with `nil`.
-
-``` emacs-lisp
-(setq rustic-rls-pkg 'eglot)
 ```
 
 # Popup
