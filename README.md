@@ -9,6 +9,7 @@
 - [Intro](#intro)
 - [Rustfmt](#rustfmt)
 - [Rust Language Server](#rust-language-server)
+- [Clippy](#clippy)
 - [Org-babel](#org-babel)
 - [Popup](#popup)
 - [Cargo outdated](#cargo-outdated)
@@ -51,6 +52,15 @@ The default package is `lsp-mode`. But you can also use `eglot` or no RLS client
 ``` emacs-lisp
 (setq rustic-rls-pkg 'eglot)
 ```
+
+# Clippy
+
+Rustic automatically configures a checker that runs clippy when `flycheck` is required.
+In case you use `flymake`, you have to take care of the configuration yourself.
+
+Currently cargo does not display the correct installation command for some toolchains when
+clippy isn't installed. 
+If you have problems try it with `rustup component add --toolchain nightly clippy`.
 
 # Org-babel
 
