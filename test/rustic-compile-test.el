@@ -124,59 +124,59 @@
 ;;       (should (= compilation-num-warnings-found 1)))))
 
 ;; TODO: This still doesn't work with BACKTRACE=full
-(ert-deftest rustic-test-cargo-test ()
-  ;; compilation-num-errors-found would be 8 with regular compilaton mode
-  ;; due to parsing issues https://github.com/rust-lang/rust-mode/pull/254
-  (let ((rustic-compile-backtrace "0"))
-    (let* ((string "#[cfg(test)]
-                  mod tests {
-                      #[test]
-                      fn it_works() {
-                          assert_eq!(2 + 2, 3);
-                      }
-                      #[test]
-                      fn it_works2() {
-                          assert_eq!(2 + 2, 3);
-                      }
-                      #[test]
-                      fn it_works3() {
-                          assert_eq!(2 + 2, 3);
-                      }
-                      #[test]
-                      fn it_works4() {
-                          assert_eq!(2 + 2, 3);
-                      }
-                      #[test]
-                      fn it_works5() {
-                          assert_eq!(2 + 2, 3);
-                      }
-                      #[test]
-                      fn it_works6() {
-                          assert_eq!(2 + 2, 3);
-                      }
-                      #[test]
-                      fn it_works7() {
-                          assert_eq!(2 + 2, 3);
-                      }
-                      #[test]
-                      fn it_works8() {
-                          assert_eq!(2 + 2, 3);
-                      }
+;; (ert-deftest rustic-test-cargo-test ()
+;;   ;; compilation-num-errors-found would be 8 with regular compilaton mode
+;;   ;; due to parsing issues https://github.com/rust-lang/rust-mode/pull/254
+;;   (let ((rustic-compile-backtrace "0"))
+;;     (let* ((string "#[cfg(test)]
+;;                   mod tests {
+;;                       #[test]
+;;                       fn it_works() {
+;;                           assert_eq!(2 + 2, 3);
+;;                       }
+;;                       #[test]
+;;                       fn it_works2() {
+;;                           assert_eq!(2 + 2, 3);
+;;                       }
+;;                       #[test]
+;;                       fn it_works3() {
+;;                           assert_eq!(2 + 2, 3);
+;;                       }
+;;                       #[test]
+;;                       fn it_works4() {
+;;                           assert_eq!(2 + 2, 3);
+;;                       }
+;;                       #[test]
+;;                       fn it_works5() {
+;;                           assert_eq!(2 + 2, 3);
+;;                       }
+;;                       #[test]
+;;                       fn it_works6() {
+;;                           assert_eq!(2 + 2, 3);
+;;                       }
+;;                       #[test]
+;;                       fn it_works7() {
+;;                           assert_eq!(2 + 2, 3);
+;;                       }
+;;                       #[test]
+;;                       fn it_works8() {
+;;                           assert_eq!(2 + 2, 3);
+;;                       }
 
-                      // compile.el stops parsing here
+;;                       // compile.el stops parsing here
 
-                      #[test]
-                      fn it_works9() {
-                          assert_eq!(2 + 2, 3);
-                      }
-                      #[test]
-                      fn it_works10() {
-                          assert_eq!(2 + 2, 3);
-                      }
-                  }")
-           (default-directory (rustic-test-count-error-helper string))
-           (proc (rustic-cargo-test)))
-      (while (eq (process-status proc) 'run)
-        (sit-for 0.1))
-      (with-current-buffer (get-buffer rustic-test-buffer-name)
-        (should (= compilation-num-errors-found 10))))))
+;;                       #[test]
+;;                       fn it_works9() {
+;;                           assert_eq!(2 + 2, 3);
+;;                       }
+;;                       #[test]
+;;                       fn it_works10() {
+;;                           assert_eq!(2 + 2, 3);
+;;                       }
+;;                   }")
+;;            (default-directory (rustic-test-count-error-helper string))
+;;            (proc (rustic-cargo-test)))
+;;       (while (eq (process-status proc) 'run)
+;;         (sit-for 0.1))
+;;       (with-current-buffer (get-buffer rustic-test-buffer-name)
+;;         (should (= compilation-num-errors-found 10))))))
