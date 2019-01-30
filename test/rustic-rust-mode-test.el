@@ -1504,6 +1504,19 @@ type Foo<T> where T: Copy = Box<T>;
                    (imenu--generic-function rustic-imenu-generic-expression))))
       (should (equal expected-items actual-items)))))
 
+(ert-deftest rust-test-imenu-impl-with-lifetime ()
+  (test-imenu
+   "
+impl<'a> One<'a> {
+    fn one() {}
+}
+impl Two<'a> {
+    fn two() {}
+}
+"
+   '(("Impl" "One" "Two")
+     ("Fn" "one" "two"))))
+
 (ert-deftest rustic-test-imenu-extern-unsafe-fn ()
   (test-imenu
    "

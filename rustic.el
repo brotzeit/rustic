@@ -144,6 +144,8 @@ function or trait.  When nil, where will be aligned with fn or trait."
 (defconst rustic-re-vis "pub")
 (defconst rustic-re-unsafe "unsafe")
 (defconst rustic-re-extern "extern")
+(defconst rustic-re-generic
+  (concat "<[[:space:]]*'" rustic-re-ident "[[:space:]]*>"))
 (defconst rustic-re-union
   (rx-to-string
    `(seq
@@ -326,9 +328,12 @@ function or trait.  When nil, where will be aligned with fn or trait."
   "\\(?:r#*\\)?\""
   "Regular expression to match the start of a Rust raw string.")
 
+(defun rustic-re-shy (inner) (concat "\\(?:" inner "\\)"))
 (defun rustic-re-grab (inner) (concat "\\(" inner "\\)"))
 (defun rustic-re-item-def (itype)
-  (concat (rustic-re-word itype) "[[:space:]]+" (rustic-re-grab rustic-re-ident)))
+    (concat (rustic-re-word itype)
+	  (rustic-re-shy rustic-re-generic) "?"
+	  "[[:space:]]+" (rustic-re-grab rustic-re-ident)))
 (defun rustic-re-word (inner) (concat "\\<" inner "\\>"))
 
 (defun rustic-path-font-lock-matcher (re-ident)
@@ -489,7 +494,6 @@ buffer."
       t)))
 
 (defconst rustic-re-pre-expression-operators "[-=!%&*/:<>[{(|.^;}]")
-(defun rustic-re-shy (inner) (concat "\\(?:" inner "\\)"))
 
 (defun rustic-re-item-def-imenu (itype)
   (concat "^[[:space:]]*"
