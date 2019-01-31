@@ -175,8 +175,10 @@
                        (back-to-indentation)
                        (current-column))))))
 
-              ;; A function return type is indented to the corresponding function arguments
-              ((looking-at "->")
+               ;; A function return type is indented to the corresponding
+	           ;; function arguments, if -to-arguments is selected.
+              ((and rust-indent-return-type-to-arguments
+		            (looking-at "->"))
                (save-excursion
                  (backward-list)
                  (or (rustic-align-to-expr-after-brace)

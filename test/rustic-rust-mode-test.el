@@ -1587,4 +1587,14 @@ extern \"rustic-intrinsic\" fn five() {
     (test-electric-pair-insert "fn foo() -> Box" 16 ?< ?>))
   )
 
-;;; rustic-mode-tests.el ends here
+(ert-deftest indent-return-type-non-visual ()
+  (let ((rust-indent-return-type-to-arguments nil))
+(test-indent
+   "
+fn imagine_long_enough_to_wrap_at_arrow(a:i32, b:char)
+    -> i32
+{
+    let body;
+}
+")))
+
