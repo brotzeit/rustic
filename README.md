@@ -72,18 +72,24 @@ Use `rustic-cargo-clippy` to view the results in a derived compilation mode.
 
 # Org-babel
 
-The executed blocks run asynchronously and a running babel process is indicated by a spinner in
-the mode line. It can be turned off with `rustic-display-spinner`.
+The executed blocks run asynchronously and a running babel process is indicated by a spinner in the 
+mode line. It can be turned off with `rustic-display-spinner`. If you prefer to see the output in a seperate buffer you can set `rustic-babel-display-compilation-buffer` to `t`.
 
-If you prefer to see the output in a seperate buffer you can set `rustic-babel-display-compilation-buffer` to `t`.
+After a successful build, source blocks get formatted by default. This can be changed with 
+`rustic-babel-format-src-block`.
 
-It's also possible to use crates in rust babel blocks:
+It's also possible to use crates in babel blocks.
 
 ```
-#+BEGIN_SRC rustic :crates '(("regex" . "0.2") ("darling" . "0.1"))
-fn main() {
-    println!("{}", "foo");
-}
+#+BEGIN_SRC rustic :crates '(("regex" . "0.2"))
+  extern crate regex;
+
+  use regex::Regex;
+
+  fn main() {
+      let re = Regex::new(r"^\d{4}-\d{2}-\d{2}$").unwrap();
+      assert!(re.is_match("2014-01-01"));
+  }
 #+END_SRC
 ```
 
