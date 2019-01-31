@@ -30,11 +30,11 @@
 
 (defun rustic-test-babel-check-results (buf)
   "Return babel result block contents in BUF."
-    (with-current-buffer buf
-      (goto-char (point-min))
-      (when (search-forward "#+RESULTS:\n:\s" nil t)
-        (goto-char (match-end 0))
-        (buffer-substring-no-properties (point) (point-max)))))
+  (with-current-buffer buf
+    (goto-char (point-min))
+    (when (search-forward "#+RESULTS:\n:\s" nil t)
+      (goto-char (match-end 0))
+      (buffer-substring-no-properties (point) (point-max)))))
 
 (ert-deftest rustic-test-babel-result ()
   (let* ((string "fn main() {
@@ -53,23 +53,23 @@
     (should-not (buffer-live-p rustic-babel-compilation-buffer-name))))
 
 (ert-deftest rustic-test-babel-error-results ()
-    (let* ((string "fn main() {
+  (let* ((string "fn main() {
                      let v = vec![1, 2, 3];
                      b[1];
                    }")
-          (buf (rustic-test-get-babel-block string)))
-      (rustic-test-babel-execute-block buf)
-      (let ((re (format "error: Could not compile `%s`.\n"
-                        (car (reverse (split-string rustic-babel-dir "/"))))))
-        (should (string= re (rustic-test-babel-check-results buf)))))
-    (let* ((string "fn main() {
+         (buf (rustic-test-get-babel-block string)))
+    (rustic-test-babel-execute-block buf)
+    (let ((re (format "error: Could not compile `%s`.\n"
+                      (car (reverse (split-string rustic-babel-dir "/"))))))
+      (should (string= re (rustic-test-babel-check-results buf)))))
+  (let* ((string "fn main() {
                      let b = vec![1, 2, 3];
                      b[99];
                    }")
-          (buf (rustic-test-get-babel-block string)))
-      (rustic-test-babel-execute-block buf)
-      (let ((re "^thread '[^']+' panicked at '[^']+', "))
-        (should (string-match re (rustic-test-babel-check-results buf))))))
+         (buf (rustic-test-get-babel-block string)))
+    (rustic-test-babel-execute-block buf)
+    (let ((re "^thread '[^']+' panicked at '[^']+', "))
+      (should (string-match re (rustic-test-babel-check-results buf))))))
 
 (ert-deftest rustic-test-babel-spinner ()
   (let* ((string "fn main() {

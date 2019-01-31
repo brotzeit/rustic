@@ -858,21 +858,21 @@ impl Foo for Bar {
                   ("print!\(\"{1} abcd {0} efgh\"\);" 9 27 ((9 12) (18 21)))
                   ("print!\(\"{{{1} abcd }} {0}}} {{efgh}}\"\);" 9 33 ((11 14) (23 26)))))
     (destructuring-bind (text cursor limit matches) test
-      (with-temp-buffer
-        ;; make sure we have a clean slate
-        (save-match-data
-          (set-match-data nil)
-          (insert text)
-          (goto-char cursor)
-          (if (null matches)
-              (should (equal (progn
-                               (rustic-string-interpolation-matcher limit)
-                               (match-data))
-                             nil))
-            (dolist (pair matches)
-              (rustic-string-interpolation-matcher limit)
-              (should (equal (match-beginning 0) (car pair)))
-              (should (equal (match-end 0) (cadr pair))))))))))
+                        (with-temp-buffer
+                          ;; make sure we have a clean slate
+                          (save-match-data
+                            (set-match-data nil)
+                            (insert text)
+                            (goto-char cursor)
+                            (if (null matches)
+                                (should (equal (progn
+                                                 (rustic-string-interpolation-matcher limit)
+                                                 (match-data))
+                                               nil))
+                              (dolist (pair matches)
+                                (rustic-string-interpolation-matcher limit)
+                                (should (equal (match-beginning 0) (car pair)))
+                                (should (equal (match-end 0) (cadr pair))))))))))
 
 (ert-deftest rustic-test-basic-paren-matching ()
   (rustic-test-matching-parens
@@ -1589,8 +1589,8 @@ extern \"rustic-intrinsic\" fn five() {
 
 (ert-deftest indent-return-type-non-visual ()
   (let ((rust-indent-return-type-to-arguments nil))
-(test-indent
-   "
+    (test-indent
+     "
 fn imagine_long_enough_to_wrap_at_arrow(a:i32, b:char)
     -> i32
 {
