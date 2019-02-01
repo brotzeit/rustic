@@ -183,16 +183,18 @@ Use org-babel parameter crates from PARAMS and add them to the project in
 directory DIR."
   (let ((crates (cdr (assq :crates params)))
         (toml (expand-file-name "Cargo.toml" dir))
-        (str ""))
+        (dependencies ""))
     (dolist (crate crates)
-      (setq str (concat str (car crate) " = " "\"" (cdr crate) "\"" "\n")))
-    (setq str (concat "[dependencies]\n" str) )
+      (let ((name (symbol-name (car crate)))
+            (version (number-to-string (cdr crate))))
+        (setq dependencies (concat dependencies name " = " "\"" version "\"" "\n"))))
+    (setq dependencies (concat "[dependencies]\n" dependencies) )
     (with-temp-file toml
       (insert-file-contents toml nil)
       (let ((s (nth 0 (split-string (buffer-string) "\\[dependencies]"))))
         (erase-buffer)
         (insert s)
-        (insert str)))))
+        (insert dependencies)))))
 
 (defun org-babel-execute:rustic (body params)
   "Execute a block of Rust code with org-babel."

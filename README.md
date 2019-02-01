@@ -81,7 +81,7 @@ After a successful build, source blocks get formatted by default. This can be ch
 It's also possible to use crates in babel blocks.
 
 ```
-#+BEGIN_SRC rustic :crates '(("regex" . "0.2"))
+#+BEGIN_SRC rustic :crates '((regex . 0.2))
   extern crate regex;
 
   use regex::Regex;
