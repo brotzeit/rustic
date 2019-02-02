@@ -1,5 +1,29 @@
 ;; -*- lexical-binding: t -*-
 
+;; (ert-deftest rustic-test-compile-next-error-last-buffer ()
+  
+
+;;   )
+
+(ert-deftest rustic-test-format-next-error-last-buffer ()
+  (let ((string "fn main()      {}")
+        (buf (get-buffer-create "test-next-error-last-buffer")))
+    (with-current-buffer buf
+      (erase-buffer)
+      (should-error (rustic-format-buffer))
+      (rustic-mode)
+      (insert string)
+      (backward-char 10)
+      (let ((proc (rustic-format-start-process
+                   'rustic-format-sentinel
+                   :buffer (current-buffer)
+                   :stdin (buffer-string))))
+        (with-current-buffer (process-buffer proc)
+          (should (eq next-error-last-buffer buf)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.1))
+        (sit-for 0.5)))))
+
 (ert-deftest rustic-test-save-some-buffers ()
   (let* ((buffer1 (get-buffer-create "b1"))
          (buffer2 (get-buffer-create "b2"))
