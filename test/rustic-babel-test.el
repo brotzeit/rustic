@@ -2,13 +2,13 @@
 
 (setq org-confirm-babel-evaluate nil)
 
-(defun rustic-test-get-babel-block (contents)
+(defun rustic-test-get-babel-block (contents &optional params)
   "Return buffer containing babel block with CONTENTS."
   (let ((buf (get-buffer-create "babel-test")))
     (with-current-buffer buf
       (erase-buffer)
       (org-mode)
-      (insert "#+BEGIN_SRC rustic\n")
+      (insert (format "#+BEGIN_SRC rustic %s\n" (or params "")))
       (insert contents)
       (insert "\n#+END_SRC")
       buf)))
@@ -125,3 +125,14 @@
     (with-current-buffer buf
       (rustic-test-babel-execute-block buf)
       (should (string= (org-element-property :value (org-element-at-point)) newstring)))))
+
+(ert-deftest rustic-test-babel-crate ()
+  (let* ((string "extern crate rand;
+                  fn main() {
+                      let _rng = rand::thread_rng();
+                  }")
+         (params ":crates '((rand . 0.4))")
+         (buf (rustic-test-get-babel-block string params)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (should (eq (rustic-test-babel-check-results buf) nil)))))
