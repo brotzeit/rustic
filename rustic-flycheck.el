@@ -45,17 +45,6 @@ Source: https://git.io/vQKzv"
                                     'face `(:foreground ,(cdr state))))
                    " ")))))
 
-(defun rustic-flycheck-find-manifest (file-name)
-  "Get the Cargo.toml manifest for FILE-NAME.
-FILE-NAME is the path of a file in a cargo project given as a
-string.
-See http://doc.crates.io/guide.html for an introduction to the
-Cargo.toml manifest.
-Return the path to the Cargo.toml manifest file, or nil if the
-manifest could not be located."
-  (-when-let (root-dir (locate-dominating-file file-name "Cargo.toml"))
-    (expand-file-name "Cargo.toml" root-dir)))
-
 (defun rustic-flycheck-dirs-list (start end)
   "Return a list of directories from START (inclusive) to END (exclusive).
 E.g., if START is '/a/b/c/d' and END is '/a', return the list
@@ -117,7 +106,7 @@ the closest matching target, or nil if no targets could be found.
 
 See http://doc.crates.io/manifest.html#the-project-layout for a
 description of the conventional Cargo project layout."
-  (-when-let* ((manifest (rustic-flycheck-find-manifest file-name))
+  (-when-let* ((manifest (concat (rustic-buffer-workspace) "Cargo.toml"))
                (packages (rustic-flycheck-get-cargo-targets manifest))
                (targets (-flatten-n 1 packages)))
     (let ((target
