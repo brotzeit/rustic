@@ -1,10 +1,5 @@
 ;; -*- lexical-binding: t -*-
 
-;; (ert-deftest rustic-test-compile-next-error-last-buffer ()
-  
-
-;;   )
-
 (ert-deftest rustic-test-format-next-error-last-buffer ()
   (let ((string "fn main()      {}")
         (buf (get-buffer-create "test-next-error-last-buffer")))

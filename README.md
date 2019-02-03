@@ -11,6 +11,7 @@
 - [Rustfmt](#rustfmt)
 - [Rust Language Server](#rust-language-server)
 - [Clippy](#clippy)
+- [Rustfix](#rustfix)
 - [Org-babel](#org-babel)
 - [Popup](#popup)
 - [Cargo outdated](#cargo-outdated)
@@ -69,6 +70,12 @@ clippy isn't installed.
 If you have problems try it with `rustup component add --toolchain nightly clippy`.
 
 Use `rustic-cargo-clippy` to view the results in a derived compilation mode.
+
+# Rustfix
+
+`rustic-cargo-rustfix` runs rustfix, but it seems it's not very mature at this point.
+It would be a lot more helpful if we had an indicator for fixable errors and if it would be
+possible to run rustfix on a single file.
 
 # Org-babel
 
