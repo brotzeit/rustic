@@ -221,7 +221,6 @@ Set environment variables for rust process."
         (mode (or (plist-get args :mode) 'rustic-compilation-mode))
         (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
         (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
-    (setq next-error-last-buffer buf)
     (rustic-compilation-setup-buffer buf directory mode)
     (funcall rustic-compile-display-method buf)
     (with-current-buffer buf
