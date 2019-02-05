@@ -10,8 +10,9 @@
 - [Installation](#installation)
 - [Rustfmt](#rustfmt)
 - [Rust Language Server](#rust-language-server)
-- [Clippy](#clippy)
 - [Rustfix](#rustfix)
+- [Clippy](#clippy)
+    - [Flycheck](#flycheck)
 - [Org-babel](#org-babel)
 - [Popup](#popup)
 - [Cargo outdated](#cargo-outdated)
@@ -60,6 +61,12 @@ The default package is `lsp-mode`. But you can also use `eglot` or no RLS client
 (setq rustic-rls-pkg 'eglot)
 ```
 
+# Rustfix
+
+`rustic-rustfix` runs rustfix, but it seems it's not very mature at this point.
+It would be a lot more helpful if we had an indicator for fixable errors and if it would be
+possible to run rustfix on a single file.
+
 # Clippy
 
 Rustic automatically configures a checker that runs clippy when `flycheck` is required.
@@ -71,11 +78,10 @@ If you have problems try it with `rustup component add --toolchain nightly clipp
 
 Use `rustic-cargo-clippy` to view the results in a derived compilation mode.
 
-# Rustfix
+## Flycheck
 
-`rustic-cargo-rustfix` runs rustfix, but it seems it's not very mature at this point.
-It would be a lot more helpful if we had an indicator for fixable errors and if it would be
-possible to run rustfix on a single file.
+By default, rustic displays the number of errors and warnings in the mode-line. The variable
+`rustic-flycheck-setup-mode-line-p` can be set to `nil` to turn off mode-line modification.
 
 # Org-babel
 
