@@ -26,6 +26,7 @@ This package is a fork of [rust-mode](https://github.com/rust-lang/rust-mode)
 
 Differences with rust-mode:
 
+- integrated flycheck support
 - cargo popup
 - multiline error parsing
 - translation of ANSI control sequences through [xterm-color](https://github.com/atomontage/xterm-color)

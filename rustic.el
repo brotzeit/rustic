@@ -15,6 +15,7 @@
 ;;
 ;; Differences with rust-mode:
 ;;
+;; - flycheck integration
 ;; - cargo popup
 ;; - multiline error parsing
 ;; - translation of ANSI control sequences through xterm-color
