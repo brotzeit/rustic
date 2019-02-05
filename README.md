@@ -12,7 +12,7 @@
 - [Rust Language Server](#rust-language-server)
 - [Rustfix](#rustfix)
 - [Clippy](#clippy)
-    - [Flycheck](#flycheck)
+- [Flycheck](#flycheck)
 - [Org-babel](#org-babel)
 - [Popup](#popup)
 - [Cargo outdated](#cargo-outdated)
@@ -26,7 +26,7 @@ This package is a fork of [rust-mode](https://github.com/rust-lang/rust-mode)
 
 Differences with rust-mode:
 
-- integrated flycheck support
+- flycheck integration
 - cargo popup
 - multiline error parsing
 - translation of ANSI control sequences through [xterm-color](https://github.com/atomontage/xterm-color)
@@ -79,7 +79,7 @@ If you have problems try it with `rustup component add --toolchain nightly clipp
 
 Use `rustic-cargo-clippy` to view the results in a derived compilation mode.
 
-## Flycheck
+# Flycheck
 
 By default, rustic displays the number of errors and warnings in the mode-line. The variable
 `rustic-flycheck-setup-mode-line-p` can be set to `nil` to turn off mode-line modification.

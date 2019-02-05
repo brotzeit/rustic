@@ -187,12 +187,12 @@ Error matching regexes from compile.el are removed."
   "Wrapper for `make-process'.
 
 Set environment variables for rust process."
-  (let* ((coding-system-for-read 'binary)
-         (process-environment (nconc
-	                           (list
-                                (format "TERM=%s" "ansi")
-                                (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
-                               process-environment)))
+  (let ((coding-system-for-read 'binary)
+        (process-environment (nconc
+	                          (list
+                               (format "TERM=%s" "ansi")
+                               (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
+                              process-environment)))
     (make-process :name (plist-get args :name)
                   :buffer (plist-get args :buffer)
                   :command (plist-get args :command)
