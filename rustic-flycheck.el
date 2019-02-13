@@ -75,7 +75,7 @@ targets could be found."
                (unless (equal code-or-signal 0)
                  ;; Prevent from displaying "JSON readtable error".
                  (let* ((args (combine-and-quote-strings (cons program args)))
-                        (error-message (if (typep code-or-signal 'string)
+                        (error-message (if (stringp code-or-signal)
                                            (format "%s terminated by %s." args code-or-signal)
                                          (format "%s exited with %s." args code-or-signal))))
                    (user-error error-message)))
