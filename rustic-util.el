@@ -213,6 +213,7 @@ If client isn't installed, offer to install it."
             ((funcall client-p rls-pkg)
              (if (eq rls-pkg 'eglot)
                  (eglot-ensure)
+               (lsp-workspace-folders-add (rustic-buffer-workspace))
                (lsp)))
             (t
              (rustic-install-rls-client-p rls-pkg))))))
