@@ -68,7 +68,21 @@ Calls `cargo metadata --no-deps --manifest-path MANIFEST
 --format-version 1', parses and collects the targets for the
 current workspace, and returns them in a list, or nil if no
 targets could be found."
-  (let ((cargo (funcall flycheck-executable-find "cargo")))
+  (let ((process-output-as-json
+         (lambda (program &rest args)
+           (with-temp-buffer
+             (let ((code-or-signal (apply 'call-process program nil '(t nil) nil args)))
+               (unless (equal code-or-signal 0)
+                 ;; Prevent from displaying "JSON readtable error".
+                 (let* ((args (combine-and-quote-strings (cons program args)))
+                        (error-message (if (typep code-or-signal 'string)
+                                           (format "%s terminated by %s." args code-or-signal)
+                                         (format "%s exited with %s." args code-or-signal))))
+                   (user-error error-message)))
+               (goto-char (point-min))
+               (let ((json-array-type 'list))
+                 (json-read))))))
+        (cargo (funcall flycheck-executable-find "cargo")))
     (unless cargo
       (user-error "flycheck-rust cannot find `cargo'.  Please \
 make sure that cargo is installed and on your PATH.  See \
@@ -77,14 +91,11 @@ more information on setting your PATH with Emacs."))
     ;; metadata contains a list of packages, and each package has a list of
     ;; targets.  We concatenate all targets, regardless of the package.
     (-when-let (packages (let-alist
-                             (with-temp-buffer
-                               (call-process cargo nil '(t nil) nil
-                                             "metadata" "--no-deps"
-                                             "--manifest-path" manifest
-                                             "--format-version" "1")
-                               (goto-char (point-min))
-                               (let ((json-array-type 'list))
-                                 (json-read)))
+                             (funcall process-output-as-json
+                                      cargo "metadata"
+                                      "--no-deps"
+                                      "--manifest-path" manifest
+                                      "--format-version" "1")
                            .packages))
       (seq-map (lambda (pkg)
                  (let-alist pkg .targets))
@@ -106,7 +117,8 @@ the closest matching target, or nil if no targets could be found.
 
 See http://doc.crates.io/manifest.html#the-project-layout for a
 description of the conventional Cargo project layout."
-  (-when-let* ((manifest (concat (rustic-buffer-workspace) "Cargo.toml"))
+  (-when-let* ((workspace (rustic-buffer-workspace t))
+               (manifest (concat workspace "Cargo.toml"))
                (packages (rustic-flycheck-get-cargo-targets manifest))
                (targets (-flatten-n 1 packages)))
     (let ((target
@@ -127,8 +139,7 @@ description of the conventional Cargo project layout."
                   ;; build a list of (target . dir) candidates
                   (-table-flat
                    'cons targets
-                   (rustic-flycheck-dirs-list file-name
-                                            (file-name-directory manifest)))))
+                   (rustic-flycheck-dirs-list file-name workspace))))
             ;; If all else fails, just pick the first target
             (car targets))))
       ;; If target is 'custom-build', we pick another target from the same package (see GH-62)

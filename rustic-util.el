@@ -204,15 +204,16 @@ were issues when using stdin for formatting."
 If client isn't installed, offer to install it."
   (unless noninteractive ;; TODO: fix tests to work with eglot/lsp-mode activated
     (let ((client-p (lambda (client)
-                      (if (package-installed-p client)
-                          (if (featurep client) t (require client))
-                        nil)))
+                      (or (package-installed-p client)
+                          (featurep client)
+                          (require client))))
           (rls-pkg rustic-rls-pkg))
       (cond ((eq rls-pkg nil)
              nil)
             ((funcall client-p rls-pkg)
              (if (eq rls-pkg 'eglot)
                  (eglot-ensure)
+               (lsp-workspace-folders-add (rustic-buffer-workspace))
                (lsp)))
             (t
              (rustic-install-rls-client-p rls-pkg))))))
