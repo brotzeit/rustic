@@ -410,9 +410,7 @@ Otherwise use provided argument ARG and store it in
 (defun rustic-recompile ()
   "Re-compile the program using `compilation-arguments'."
   (interactive)
-  (let* ((command (if (not compilation-arguments)
-                      rustic-compile-command
-                    compilation-arguments))
+  (let* ((command (or compilation-arguments rustic-compile-command))
          (dir compilation-directory))
     (rustic-compilation-process-live)
     (rustic-compilation-start (split-string command) :directory dir)))
