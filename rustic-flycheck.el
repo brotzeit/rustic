@@ -106,7 +106,8 @@ the closest matching target, or nil if no targets could be found.
 
 See http://doc.crates.io/manifest.html#the-project-layout for a
 description of the conventional Cargo project layout."
-  (-when-let* ((manifest (concat (rustic-buffer-workspace) "Cargo.toml"))
+  (-when-let* ((workspace (rustic-buffer-workspace t))
+               (manifest (concat workspace "Cargo.toml"))
                (packages (rustic-flycheck-get-cargo-targets manifest))
                (targets (-flatten-n 1 packages)))
     (let ((target
@@ -127,8 +128,7 @@ description of the conventional Cargo project layout."
                   ;; build a list of (target . dir) candidates
                   (-table-flat
                    'cons targets
-                   (rustic-flycheck-dirs-list file-name
-                                            (file-name-directory manifest)))))
+                   (rustic-flycheck-dirs-list file-name workspace))))
             ;; If all else fails, just pick the first target
             (car targets))))
       ;; If target is 'custom-build', we pick another target from the same package (see GH-62)
