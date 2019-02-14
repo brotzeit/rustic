@@ -296,7 +296,7 @@ Execute process in PATH."
       (user-error "No operations specified"))))
 
 (defun rustic-cargo-upgrade-crates (crates)
-  "Upgrade crates CRATES."
+  "Upgrade CRATES."
   (let (upgrade)
     (dolist (crate crates)
       (setq upgrade (concat upgrade (format "%s@%s " (elt crate 0) (elt crate 2)))))
