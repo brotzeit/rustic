@@ -305,6 +305,28 @@ Execute process in PATH."
           (rustic-cargo-install-crate-p "edit")
         (rustic-cargo-reload-outdated)))))
 
+;;;;;;;;;;;;;;;;
+;; New project
+
+;;;###autoload
+(defun rustic-cargo-new (project-path &optional bin)
+  "Run 'cargo new' to start a new package.
+If BIN is not nil, create a binary application, otherwise a library.
+"
+  (interactive "DProject path: ")
+  (let ((bin (if (or bin (y-or-n-p "Create new binary package? "))
+                 "--bin"
+                 "--lib"))
+        (new-sentinel (lambda (process signal)
+                    (when (equal signal "finished\n")
+                      (message (format "Created new package: %s"
+                                       (file-name-base project-path))))))
+        (proc "rustic-cargo-new-process")
+        (buf "*cargo-new*"))
+    (make-process :name proc
+                  :buffer buf
+                  :command (list rustic-cargo-bin "new" bin project-path)
+                  :sentinel new-sentinel)))
 
 ;;;;;;;;;;;;;;;;
 ;; Interactive
@@ -337,11 +359,6 @@ Execute process in PATH."
 (defun rustic-cargo-bench ()
   (interactive)
   (rustic-run-cargo-command "cargo bench"))
-
-;;;###autoload
-(defun rustic-cargo-new ()
-  (interactive)
-  (rustic-run-cargo-command "cargo new"))
 
 (provide 'rustic-cargo)
 ;;; rustic-cargo.el ends here
