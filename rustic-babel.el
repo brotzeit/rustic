@@ -197,30 +197,36 @@ directory DIR."
         (insert dependencies)))))
 
 (defun org-babel-execute:rustic (body params)
-  "Execute a block of Rust code with org-babel."
+  "Execute a block of Rust code with org-babel.
+
+If called while there's a live Rust babel process, ask user whether to 
+kill the running process."
   (let ((p (get-process rustic-babel-process-name)))
-    (when (process-live-p p)
-      (rustic-process-kill-p p)))
-  (let* ((default-directory org-babel-temporary-directory)
-         (project (rustic-babel-project))
-         (dir (setq rustic-babel-dir (expand-file-name project)))
-         (main (expand-file-name "main.rs" (concat dir "/src"))))
-    (rustic-babel-cargo-toml dir params)
-    (setq rustic-info (org-babel-get-src-block-info))
-    (setq rustic-babel-params params)
+    (if (process-live-p p)
+        (let ((buf (process-buffer p)))
+          (rustic-process-kill-p p)
+          (kill-buffer buf)
+          nil)
+      (let* ((default-directory org-babel-temporary-directory)
+             (project (rustic-babel-project))
+             (dir (setq rustic-babel-dir (expand-file-name project)))
+             (main (expand-file-name "main.rs" (concat dir "/src"))))
+        (rustic-babel-cargo-toml dir params)
+        (setq rustic-info (org-babel-get-src-block-info))
+        (setq rustic-babel-params params)
 
-    (rustic-with-spinner rustic-babel-spinner
-      (make-spinner rustic-spinner-type t 10)
-      '(rustic-babel-spinner (":Executing " (:eval (spinner-print rustic-babel-spinner))))
-      (spinner-start rustic-babel-spinner))
+        (rustic-with-spinner rustic-babel-spinner
+          (make-spinner rustic-spinner-type t 10)
+          '(rustic-babel-spinner (":Executing " (:eval (spinner-print rustic-babel-spinner))))
+          (spinner-start rustic-babel-spinner))
 
-    (let ((default-directory dir))
-      (write-region
-       (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
-      (rustic-babel-eval dir)
-      (setq rustic-babel-src-location
-            (set-marker (make-marker) (point) (current-buffer)))
-      project)))
+        (let ((default-directory dir))
+          (write-region
+           (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
+          (rustic-babel-eval dir)
+          (setq rustic-babel-src-location
+                (set-marker (make-marker) (point) (current-buffer)))
+          project)))))
 
 (provide 'rustic-babel)
 ;;; rustic-babel.el ends here
