@@ -93,11 +93,14 @@ execution with rustfmt."
              :command params
              :filter #'rustic-compilation-filter
              :sentinel #'rustic-babel-run-sentinel)))
+
       (let* ((project (car (reverse (split-string rustic-babel-dir "/"))))
              (result (format "error: Could not compile `%s`." project)))
         (rustic-babel-update-result-block result))
       (rustic-with-spinner rustic-babel-spinner nil nil)
-      (pop-to-buffer proc-buffer))))
+      (if (= (length (with-current-buffer proc-buffer (buffer-string))) 0)
+          (kill-buffer proc-buffer)
+        (pop-to-buffer proc-buffer)))))
 
 (defun rustic-babel-run-sentinel (proc _output)
   "Sentinel for babel project execution."
@@ -204,8 +207,7 @@ kill the running process."
   (let ((p (get-process rustic-babel-process-name)))
     (if (process-live-p p)
         (let ((buf (process-buffer p)))
-          (rustic-process-kill-p p)
-          (kill-buffer buf)
+          (rustic-process-kill-p p t)
           nil)
       (let* ((default-directory org-babel-temporary-directory)
              (project (rustic-babel-project))

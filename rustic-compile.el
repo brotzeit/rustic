@@ -283,8 +283,10 @@ Translate STRING with `xterm-color-filter'."
       (rustic-save-some-buffers))
     live))
 
-(defun rustic-process-kill-p (proc)
-  "Don't allow two rust processes at once."
+(defun rustic-process-kill-p (proc &optional no-error)
+  "Don't allow two rust processes at once.
+
+If NO-ERROR is t, don't throw error if user chooses not to kill running process."
   (if (yes-or-no-p
        (format "`%s' is running; kill it? " proc))
       (condition-case ()
@@ -293,7 +295,8 @@ Translate STRING with `xterm-color-filter'."
             (sit-for 0.5)
             (delete-process proc))
         (error nil))
-    (error "Cannot have two rust processes at once")))
+    (unless no-error
+      (error "Cannot have two rust processes at once"))))
 
 (defun rustic-save-some-buffers ()
   "Unlike `save-some-buffers', only consider project related files.
