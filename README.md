@@ -9,7 +9,9 @@
 - [Intro](#intro)
 - [Installation](#installation)
 - [Rustfmt](#rustfmt)
-- [Rust Language Server](#rust-language-server)
+- [LSP](#lsp)
+    - [Server](#server)
+    - [Client](#client)
 - [Rustfix](#rustfix)
 - [Clippy](#clippy)
 - [Flycheck](#flycheck)
@@ -26,6 +28,7 @@ This package is a fork of [rust-mode](https://github.com/rust-lang/rust-mode)
 
 Differences with rust-mode:
 
+- [rust analyzer](https://github.com/rust-analyzer/rust-analyzer) configuration
 - flycheck integration
 - cargo popup
 - multiline error parsing
@@ -54,9 +57,21 @@ If you want buffers to be saved automatically, you can change the value of `buff
 
 Note: Rust edition 2018 requires a `rustfmt.toml` file.
 
-# Rust Language Server
+# LSP
 
-The default package is `lsp-mode`. But you can also use `eglot` or no RLS client with `nil`.
+You can disable LSP support by setting `rustic-rls-pkg` to nil.
+
+## Server
+
+RLS is the default and can be changed to rust analyzer.
+
+``` emacs-lisp
+(setq rustic-lsp-server 'rust-analyzer)
+```
+
+## Client
+
+The default package is `lsp-mode`. But you can also use `eglot`.
 
 ``` emacs-lisp
 (setq rustic-rls-pkg 'eglot)

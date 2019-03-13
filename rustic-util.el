@@ -39,6 +39,19 @@
   :type 'string
   :group 'rustic)
 
+(defcustom rustic-lsp-server 'rls
+  "Choose your LSP server."
+  :type '(choice (symbol :tag 'rls "rls")
+                 (symbol :tag 'rust-analyzer "rust-analyzer"))
+  :group 'rustic)
+
+(defcustom rustic-rls-pkg 'lsp-mode
+  "Emacs package for interaction with rls."
+  :type '(choice (symbol :tag 'eglot "eglot")
+                 (symbol :tag 'lsp-mode "lsp-mode")
+                 (symbol :tag nil "No LSP client"))
+  :group 'rustic)
+
 
 ;;;;;;;;;;;;
 ;; Rustfmt 
@@ -181,7 +194,7 @@ were issues when using stdin for formatting."
 
 
 ;;;;;;;;
-;; RLS
+;; LSP
 
 (defun rustic-setup-eglot ()
   "Configure eglot for rustic."
@@ -214,6 +227,9 @@ If client isn't installed, offer to install it."
              (if (eq rls-pkg 'eglot)
                  (eglot-ensure)
                (lsp-workspace-folders-add (rustic-buffer-workspace))
+               (when (and (eq rustic-lsp-server 'rust-analyzer)
+                          (not (featurep 'rustic-lsp)))
+                 (require 'rustic-lsp))
                (lsp)))
             (t
              (rustic-install-rls-client-p rls-pkg))))))
