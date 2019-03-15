@@ -63,7 +63,7 @@ You can disable LSP support by setting `rustic-rls-pkg` to nil.
 
 ## Server
 
-RLS is the default and can be changed to rust analyzer.
+RLS is the default and can be changed to rust-analyzer.
 
 ``` emacs-lisp
 (setq rustic-lsp-server 'rust-analyzer)

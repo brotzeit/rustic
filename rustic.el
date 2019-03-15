@@ -15,6 +15,7 @@
 ;;
 ;; Differences with rust-mode:
 ;;
+;; - rust-analyzer configuration
 ;; - flycheck integration
 ;; - cargo popup
 ;; - multiline error parsing
