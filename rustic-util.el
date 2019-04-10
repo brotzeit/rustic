@@ -227,9 +227,15 @@ If client isn't installed, offer to install it."
              (if (eq rls-pkg 'eglot)
                  (eglot-ensure)
                (lsp-workspace-folders-add (rustic-buffer-workspace))
-               (when (and (eq rustic-lsp-server 'rust-analyzer)
-                          (not (featurep 'rustic-lsp)))
-                 (require 'rustic-lsp))
+               (cond ((eq rustic-lsp-server 'rls)
+                      (unless (featurep 'lsp-rust)
+                        (require 'lsp-rust)))
+                     ((eq rustic-lsp-server 'rust-analyzer)
+                      (unless (featurep 'rustic-lsp)
+                        (require 'rustic-lsp)))
+                     (t
+                      (user-error "`rustic-lsp-server` must be 'rls or 'rust-analyzer: %s"
+                                  rustic-lsp-server)))
                (lsp)))
             (t
              (rustic-install-rls-client-p rls-pkg))))))
