@@ -447,8 +447,9 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
     (looking-back rustic-re-ident beg-of-symbol)))
 
 (defun rustic-looking-back-macro ()
-  "Non-nil if looking back at an ident followed by a '!'."
-  (save-excursion (backward-char) (and (= ?! (char-after)) (rustic-looking-back-ident))))
+  "Non-nil if looking back at an ident followed by a !"
+  (if (> (- (point) (point-min)) 1)
+      (save-excursion (backward-char) (and (= ?! (char-after)) (rustic-looking-back-ident)))))
 
 (defun rustic-paren-level () (nth 0 (syntax-ppss)))
 (defun rustic-in-str () (nth 3 (syntax-ppss)))
