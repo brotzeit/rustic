@@ -7,6 +7,14 @@
     (font-lock-fontify-buffer)
     (buffer-string)))
 
+(ert-deftest rustic-test-font-lock-fontify-angle-brackets ()
+    "Test that angle bracket fontify."
+    (should (equal (rustic-test-fontify-string "<>") "<>"))
+    (should (equal (rustic-test-fontify-string "<foo>") "<foo>"))
+    (should (equal (rustic-test-fontify-string "<<>>") "<<>>"))
+    (should (equal (rustic-test-fontify-string "<>>") "<>>"))
+    (should (equal (rustic-test-fontify-string "<<>") "<<>")))
+
 (defun rustic-test-font-lock (source face-groups)
   "Test that `SOURCE' fontifies to the expected `FACE-GROUPS'"
   (should (equal (rustic-test-group-str-by-face source)
