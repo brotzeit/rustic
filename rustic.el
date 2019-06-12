@@ -162,6 +162,7 @@ to the function arguments.  When nil, `->' will be indented one level."
     (define-key map (kbd "C-c C-c C-r") 'rustic-cargo-run)
     (define-key map (kbd "C-c C-c C-f") 'rustic-cargo-fmt)
     (define-key map (kbd "C-c C-c C-t") 'rustic-cargo-test)
+    (define-key map (kbd "C-c C-c C-c") 'rustic-cargo-current-test)
     (define-key map (kbd "C-c C-c C-l") 'rustic-cargo-clippy)
     (define-key map (kbd "C-c C-c C-o") 'rustic-format-buffer)
 

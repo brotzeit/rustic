@@ -111,6 +111,47 @@ If ARG is not nil, use value as argument and store it in `rustic-test-arguments'
                               :process proc
                               :mode mode)))
 
+;;;###autoload
+(defun rustic-cargo-current-test ()
+  "Run 'cargo test' for the test near point."
+  (interactive)
+  (rustic-compilation-process-live)
+  (rustic-compilation-start (list rustic-cargo-bin "test" (rustic-cargo--get-current-fn-fullname))
+                            :buffer rustic-test-buffer-name
+                            :process rustic-test-process-name
+                            :mode 'rustic-cargo-test-mode))
+
+(defun rustic-cargo--get-current-fn-fullname()
+  "Return full name of the fn around point including module name if any."
+  (let ((mod (rustic-cargo--get-current-mod))
+        (fn (rustic-cargo--get-current-fn-name)))
+    (if mod
+        (concat mod "::" fn)
+      fn)))
+
+(defconst rustic-cargo-mod-regexp "^[[:space:]]*mod[[:space:]]+\\([[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*\\)[[:space:]]*{")
+(defconst rustic-cargo-fn-regexp "^[[:space:]]*fn[[:space:]]+\\([^(]+\\)[[:space:]]*(")
+
+(defun rustic-cargo--get-current-mod ()
+  "Return mod name around pount or nil."
+  (save-excursion
+    (when (search-backward-regexp rustic-cargo-mod-regexp nil t)
+      (match-string 1))))
+
+(defun rustic-cargo--get-current-line-fn-name()
+  "Return fn name from the current line or nil."
+  (save-excursion
+    (beginning-of-line)
+    (when (search-forward-regexp rustic-cargo-fn-regexp (line-end-position) t)
+      (match-string 1))))
+
+(defun rustic-cargo--get-current-fn-name()
+  "Return fn name around point or nil."
+  (save-excursion
+    (or (rustic-cargo--get-current-line-fn-name)
+        (progn
+          (rustic-beginning-of-defun)
+          (rustic-cargo--get-current-line-fn-name)))))
 
 ;;;;;;;;;;;;;
 ;; Outdated
@@ -168,7 +209,7 @@ Execute process in PATH."
     (with-current-buffer buf
       (setq default-directory dir)
       (erase-buffer)
-      (rustic-cargo-outdated-mode)            
+      (rustic-cargo-outdated-mode)
       (rustic-with-spinner rustic-outdated-spinner
         (make-spinner rustic-spinner-type t 10)
         '(rustic-outdated-spinner (":Executing " (:eval (spinner-print rustic-outdated-spinner))))
