@@ -142,7 +142,8 @@ The command `rustic-popup-default-action` (`RET` or `TAB`) allows you to change:
 
 Use `rustic-cargo-outdated` to get a list of dependencies that are out of date. The results 
 are displayed in `tabulated-list-mode` and you can use most commands you know from the emacs
-package menu.
+package menu. This option requires the rust package `cargo-outdated` to be
+installed before being used.
 
 - `u` mark single crate for upgrade
 - `U` mark all upgradable crates
