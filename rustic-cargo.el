@@ -413,16 +413,6 @@ If BIN is not nil, create a binary application, otherwise a library."
   (interactive)
   (rustic-run-cargo-command "cargo bench"))
 
-;;;###autoload
-(defun rustic-cargo-open-dependency-file ()
-  "Open the 'Cargo.toml' file at the project root."
-  (interactive)
-  (let ((workspace (rustic-buffer-workspace t)))
-    (if workspace
-        (find-file (concat workspace "/Cargo.toml"))
-      (message "The current buffer is not inside a rust project!"))
-    )
-  )
 
 (provide 'rustic-cargo)
 ;;; rustic-cargo.el ends here

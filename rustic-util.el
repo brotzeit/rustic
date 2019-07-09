@@ -309,5 +309,18 @@ src-block or buffer on the Rust playpen."
                               (let ((URL (read-from-minibuffer "Playpen URL: " last-line)))
                                 (browse-url URL)))))))))))
 
+
+;;;###autoload
+(defun rustic-open-dependency-file ()
+  "Open the 'Cargo.toml' file at the project root if the current buffer is 
+visiting a project."
+  (interactive)
+  (let ((workspace (rustic-buffer-workspace t)))
+    (if workspace
+        (find-file (concat workspace "/Cargo.toml"))
+      (message "The current buffer is not inside a rust project!"))
+    )
+  )
+
 (provide 'rustic-util)
 ;;; rustic-util.el ends here
