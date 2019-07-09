@@ -15,6 +15,12 @@
   :type 'string
   :group 'rustic-cargo)
 
+(defcustom rustic-cargo-open-new-project t
+  "If t then any project created with cargo-new will be opened automatically.
+If nil then the project is simply created."
+  :type 'boolean
+  :group 'rustic-cargo)
+
 (defface rustic-cargo-outdated-upgrade-face
   '((t (:foreground "LightSeaGreen")))
   "Face used for crates marked for upgrade.")
@@ -351,17 +357,18 @@ Execute process in PATH."
 
 ;;;###autoload
 (defun rustic-cargo-new (project-path &optional bin)
-  "Run 'cargo new' to start a new package.
-If BIN is not nil, create a binary application, otherwise a library.
-"
+  "Run 'cargo new' to start a new package in the path specified by PROJECT-PATH.
+If BIN is not nil, create a binary application, otherwise a library."
   (interactive "DProject path: ")
   (let ((bin (if (or bin (y-or-n-p "Create new binary package? "))
                  "--bin"
-                 "--lib"))
+               "--lib"))
         (new-sentinel (lambda (process signal)
-                    (when (equal signal "finished\n")
-                      (message (format "Created new package: %s"
-                                       (file-name-base project-path))))))
+                        (when (equal signal "finished\n")
+                          (message (format "Created new package: %s"
+                                           (file-name-base project-path)))
+                          (if rustic-cargo-open-new-project
+                              (find-file (concat project-path "/src/main.rs"))))))
         (proc "rustic-cargo-new-process")
         (buf "*cargo-new*"))
     (make-process :name proc
@@ -378,26 +385,31 @@ If BIN is not nil, create a binary application, otherwise a library.
 
 ;;;###autoload
 (defun rustic-cargo-build ()
+  "Run 'cargo build' for the current project."
   (interactive)
   (rustic-run-cargo-command "cargo build"))
 
 ;;;###autoload
 (defun rustic-cargo-run ()
+  "Run 'cargo run' for the current project."
   (interactive)
   (rustic-run-cargo-command "cargo run"))
 
 ;;;###autoload
 (defun rustic-cargo-clean ()
+  "Run 'cargo clean' for the current project."
   (interactive)
   (rustic-run-cargo-command "cargo clean"))
 
 ;;;###autoload
 (defun rustic-cargo-check ()
+  "Run 'cargo check' for the current project."
   (interactive)
   (rustic-run-cargo-command "cargo check"))
 
 ;;;###autoload
 (defun rustic-cargo-bench ()
+  "Run 'cargo bench' for the current project."
   (interactive)
   (rustic-run-cargo-command "cargo bench"))
 
