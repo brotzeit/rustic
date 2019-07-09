@@ -122,6 +122,10 @@ It's also possible to use crates in babel blocks.
 #+END_SRC
 ```
 
+Supported org babel parameters:
+
+Write to file `:results file :file ~/babel-file`
+
 # Popup
 
 You can execute commands with `rustic-popup`. The list of commands can be customized

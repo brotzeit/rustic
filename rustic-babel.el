@@ -96,7 +96,7 @@ execution with rustfmt."
 
       (let* ((project (car (reverse (split-string rustic-babel-dir "/"))))
              (result (format "error: Could not compile `%s`." project)))
-        (rustic-babel-update-result-block result))
+        (rustic-babel-build-update-result-block result))
       (rustic-with-spinner rustic-babel-spinner nil nil)
       (if (= (length (with-current-buffer proc-buffer (buffer-string))) 0)
           (kill-buffer proc-buffer)
@@ -110,7 +110,7 @@ execution with rustfmt."
         (progn
           (with-current-buffer proc-buffer
             (setq result (buffer-string)))
-          (rustic-babel-update-result-block result)
+          (rustic-babel-run-update-result-block result)
           (rustic-with-spinner rustic-babel-spinner nil nil)
           (unless rustic-babel-display-compilation-buffer
             (kill-buffer proc-buffer)))
@@ -122,18 +122,37 @@ execution with rustfmt."
               (when (re-search-forward "^thread '[^']+' panicked at '[^']+', ")
                 (goto-char (match-beginning 0))
                 (setq result (buffer-substring-no-properties (point) (line-end-position)))))))
-        (rustic-babel-update-result-block result)
+        (rustic-babel-run-update-result-block result)
         (rustic-with-spinner rustic-babel-spinner nil nil)  
         (pop-to-buffer proc-buffer)))))
 
-(defun rustic-babel-update-result-block (result)
+(defun rustic-babel-build-update-result-block (result)
   "Update result block with RESULT."
   (let ((marker rustic-babel-src-location)
         (result-params (list (cdr (assq :results rustic-babel-params)))))
     (with-current-buffer (marker-buffer marker)
       (goto-char marker)
-      (org-babel-remove-result rustic-info)
-      (org-babel-insert-result result result-params rustic-info))))
+      (org-babel-remove-result)
+      (org-babel-insert-result result))))
+
+(defun rustic-babel-run-update-result-block (result)
+  "Update result block with RESULT."
+  (let ((marker rustic-babel-src-location))
+    (with-current-buffer (marker-buffer marker)
+      (goto-char marker)
+
+      (let ((file (cdr (assq :file rustic-babel-params)))
+            (results-params (cdr (assq :result-params rustic-babel-params))))
+    	;; If non-empty result and :file then write to :file.
+	    (when (and file results-params)
+	      (when result
+	        (with-temp-file file
+	          (insert (org-babel-format-result
+	    	           result (cdr (assq :sep rustic-babel-params))))))
+	      (setq result file))
+
+        (org-babel-remove-result rustic-info)
+        (org-babel-insert-result result results-params rustic-info)))))
 
 (defun rustic-babel-format-sentinel (proc output)
   "This sentinel is used by the process `rustic-babel-format', that runs
