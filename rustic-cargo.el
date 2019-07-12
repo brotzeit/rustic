@@ -332,7 +332,7 @@ Execute process in PATH."
       (goto-char (point-min))
       (while (not (eobp))
         (let* ((cmd (char-after))
-              (crate (tabulated-list-get-entry (point))))
+               (crate (tabulated-list-get-entry (point))))
           (when (eq cmd ?U)
             (push crate crates)))
         (forward-line)))

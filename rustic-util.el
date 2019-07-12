@@ -318,9 +318,7 @@ visiting a project."
   (let ((workspace (rustic-buffer-workspace t)))
     (if workspace
         (find-file (concat workspace "/Cargo.toml"))
-      (message "The current buffer is not inside a rust project!"))
-    )
-  )
+      (message "The current buffer is not inside a rust project!"))))
 
 (provide 'rustic-util)
 ;;; rustic-util.el ends here

@@ -28,7 +28,7 @@ This package is a fork of [rust-mode](https://github.com/rust-lang/rust-mode)
 
 Differences with rust-mode:
 
-- [rust analyzer](https://github.com/rust-analyzer/rust-analyzer) configuration
+- [rust-analyzer](https://github.com/rust-analyzer/rust-analyzer) configuration
 - flycheck integration
 - cargo popup
 - multiline error parsing
