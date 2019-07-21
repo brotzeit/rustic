@@ -331,9 +331,9 @@ to the function arguments.  When nil, `->' will be indented one level."
 (defun rustic-re-shy (inner) (concat "\\(?:" inner "\\)"))
 (defun rustic-re-grab (inner) (concat "\\(" inner "\\)"))
 (defun rustic-re-item-def (itype)
-    (concat (rustic-re-word itype)
-	  (rustic-re-shy rustic-re-generic) "?"
-	  "[[:space:]]+" (rustic-re-grab rustic-re-ident)))
+  (concat (rustic-re-word itype)
+	      (rustic-re-shy rustic-re-generic) "?"
+	      "[[:space:]]+" (rustic-re-grab rustic-re-ident)))
 (defun rustic-re-word (inner) (concat "\\<" inner "\\>"))
 
 (defun rustic-path-font-lock-matcher (re-ident)
@@ -920,24 +920,24 @@ should be considered a paired angle bracket."
     "A regular expression matching a character literal."))
 
 (defun rustic--syntax-propertize-raw-string (str-start end)
-  "A helper for rust-syntax-propertize.
+  "A helper for rustic-syntax-propertize.
 
 This will apply the appropriate string syntax to the character
 from the STR-START up to the end of the raw string, or to END,
 whichever comes first."
   (when (save-excursion
-	  (goto-char str-start)
-	  (looking-at "r\\(#*\\)\\(\"\\)"))
+	      (goto-char str-start)
+	      (looking-at "r\\(#*\\)\\(\"\\)"))
     ;; In a raw string, so try to find the end.
     (let ((hashes (match-string 1)))
       ;; Match \ characters at the end of the string to suppress
       ;; their normal character-quote syntax.
       (when (re-search-forward (concat "\\(\\\\*\\)\\(\"" hashes "\\)") end t)
-	(put-text-property (match-beginning 1) (match-end 1)
-			   'syntax-table (string-to-syntax "_"))
-	(put-text-property (1- (match-end 2)) (match-end 2)
-			   'syntax-table (string-to-syntax "|"))
-	(goto-char (match-end 0))))))
+	    (put-text-property (match-beginning 1) (match-end 1)
+			               'syntax-table (string-to-syntax "_"))
+	    (put-text-property (1- (match-end 2)) (match-end 2)
+			               'syntax-table (string-to-syntax "|"))
+	    (goto-char (match-end 0))))))
 
 (defun rustic-syntax-propertize (start end)
   "A `syntax-propertize-function' to apply properties from START to END."
@@ -948,24 +948,24 @@ whichever comes first."
   (funcall
    (syntax-propertize-rules
     ;; Character literals.
-    (rust--char-literal-rx (1 "\"") (2 "\""))
+    (rustic--char-literal-rx (1 "\"") (2 "\""))
     ;; Raw strings.
     ("\\(r\\)#*\""
      (0 (ignore
-          (goto-char (match-end 0))
-          (unless (save-excursion (nth 8 (syntax-ppss (match-beginning 0))))
-            (put-text-property (match-beginning 1) (match-end 1)
-			       'syntax-table (string-to-syntax "|"))
-            (rustic--syntax-propertize-raw-string (match-beginning 0) end)))))
+         (goto-char (match-end 0))
+         (unless (save-excursion (nth 8 (syntax-ppss (match-beginning 0))))
+           (put-text-property (match-beginning 1) (match-end 1)
+			                  'syntax-table (string-to-syntax "|"))
+           (rustic--syntax-propertize-raw-string (match-beginning 0) end)))))
     ("[<>]"
      (0 (ignore
-	 (when (save-match-data
-		 (save-excursion
-		   (goto-char (match-beginning 0))
-		   (rustic-ordinary-lt-gt-p)))
-	   (put-text-property (match-beginning 0) (match-end 0)
-			      'syntax-table (string-to-syntax "."))
-	   (goto-char (match-end 0)))))))
+	     (when (save-match-data
+		         (save-excursion
+		           (goto-char (match-beginning 0))
+		           (rustic-ordinary-lt-gt-p)))
+	       (put-text-property (match-beginning 0) (match-end 0)
+			                  'syntax-table (string-to-syntax "."))
+	       (goto-char (match-end 0)))))))
    (point) end))
 
 (defun rustic-fill-prefix-for-comment-start (line-start)
