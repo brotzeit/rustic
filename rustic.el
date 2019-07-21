@@ -279,7 +279,7 @@ to the function arguments.  When nil, `->' will be indented one level."
       symbol-end))
 
 (defconst rustic-keywords
-  '("as" "async"
+  '("as" "async" "await"
     "box" "break"
     "const" "continue" "crate"
     "do"
