@@ -48,6 +48,14 @@ Simply put `(use-package rustic)` in your config and most stuff gets configured 
 If you have `rust-mode` installed, ensure it is required before rustic since it has to be removed
 from `auto-mode-alist`. However you only need `rust-mode` if you want to use `emacs-racer`. There's some stuff that isn't included in rustic.
 
+# Compilation
+
+Rustic doesn't use `compilation-start` yet, since there seems to be no way to set `coding-system-for-read` and `utf-8-emacs-unix`. 
+
+Supported compile.el variables:
+- compilation-arguments
+- compilation-scroll-output (but not `first-error` yet)
+
 # Rustfmt
 
 You can format your code with `rustic-format-buffer` or `rustic-cargo-fmt`.
@@ -153,6 +161,15 @@ installed before being used.
 - `q` quit window
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
+
+## Tests
+
+To run the tests, you will need [Cask](https://github.com/cask/cask).
+
+``` bash
+$ cask
+$ cask exec ert-runner
+```
 
 # Contributing
 
