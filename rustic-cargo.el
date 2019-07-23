@@ -167,6 +167,10 @@ If ARG is not nil, use value as argument and store it in `rustic-test-arguments'
   :type 'face
   :group 'rustic)
 
+(defconst rustic-cargo-outdated-not-installed-warning
+  "Rustic: The package cargo-outdated is not installed. Please install it with the command \"cargo install cargo-outdated\""
+  "Warning used to let the user know that cargo-outdated is not installed.")
+
 (defvar rustic-cargo-outdated-process-name "rustic-cargo-outdated-process")
 
 (defvar rustic-cargo-oudated-buffer-name "*cargo-outdated*")
@@ -203,24 +207,28 @@ If ARG is not nil, use value as argument and store it in `rustic-test-arguments'
   "Use 'cargo outdated' to list outdated packages in `tabulated-list-mode'.
 Execute process in PATH."
   (interactive)
-  (let* ((dir (or path (rustic-buffer-workspace)))
-         (buf (get-buffer-create rustic-cargo-oudated-buffer-name))
-         (default-directory dir)
-         (inhibit-read-only t))
-    (make-process :name rustic-cargo-outdated-process-name
-                  :buffer buf
-                  :command '("cargo" "outdated" "--depth" "1")
-                  :filter #'rustic-cargo-outdated-filter
-                  :sentinel #'rustic-cargo-outdated-sentinel)
-    (with-current-buffer buf
-      (setq default-directory dir)
-      (erase-buffer)
-      (rustic-cargo-outdated-mode)
-      (rustic-with-spinner rustic-outdated-spinner
-        (make-spinner rustic-spinner-type t 10)
-        '(rustic-outdated-spinner (":Executing " (:eval (spinner-print rustic-outdated-spinner))))
-        (spinner-start rustic-outdated-spinner)))
-    (display-buffer buf)))
+  (if (executable-find "cargo-outdated")
+      (progn
+        (message "Installed")
+        (let* ((dir (or path (rustic-buffer-workspace)))
+               (buf (get-buffer-create rustic-cargo-oudated-buffer-name))
+               (default-directory dir)
+               (inhibit-read-only t))
+          (make-process :name rustic-cargo-outdated-process-name
+                        :buffer buf
+                        :command '("cargo" "outdated" "--depth" "1")
+                        :filter #'rustic-cargo-outdated-filter
+                        :sentinel #'rustic-cargo-outdated-sentinel)
+          (with-current-buffer buf
+            (setq default-directory dir)
+            (erase-buffer)
+            (rustic-cargo-outdated-mode)
+            (rustic-with-spinner rustic-outdated-spinner
+              (make-spinner rustic-spinner-type t 10)
+              '(rustic-outdated-spinner (":Executing " (:eval (spinner-print rustic-outdated-spinner))))
+              (spinner-start rustic-outdated-spinner)))
+          (display-buffer buf)))
+    (message rustic-cargo-outdated-not-installed-warning)))
 
 (defun rustic-cargo-reload-outdated ()
   "Update list of outdated packages."
