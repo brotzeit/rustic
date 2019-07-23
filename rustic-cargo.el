@@ -419,13 +419,13 @@ If BIN is not nil, create a binary application, otherwise a library."
 (defun rustic-cargo-build-docs ()
   "Build the documentation for the current project."
   (interactive)
-  (rustic-run-cargo-command "cargo docs"))
+  (rustic-run-cargo-command "cargo doc"))
 
 ;;;###autoload
 (defun rustic-cargo-open-docs ()
   "Open the documentation for the current project in a browser."
   (interactive)
-  (rustic-run-cargo-command "cargo docs --open"))
+  (rustic-run-cargo-command "cargo doc --open"))
 
 (provide 'rustic-cargo)
 ;;; rustic-cargo.el ends here
