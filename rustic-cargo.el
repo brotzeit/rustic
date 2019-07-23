@@ -414,5 +414,22 @@ If BIN is not nil, create a binary application, otherwise a library."
   (rustic-run-cargo-command "cargo bench"))
 
 
+;;;###autoload
+(defun rustic-cargo-build-doc ()
+  "Build the documentation for the current project."
+  (interactive)
+  (if (y-or-n-p "Create documentation for dependencies?")
+      (rustic-run-cargo-command "cargo doc")
+    (rustic-run-cargo-command "cargo doc --no-deps")))
+
+;;;###autoload
+(defun rustic-cargo-doc ()
+  "Open the documentation for the current project in a browser.
+The documentation is built if necessary."
+  (interactive)
+  (if (y-or-n-p "Open docs for dependencies as well?")
+      (rustic-run-cargo-command "cargo doc --open")
+    (rustic-run-cargo-command "cargo doc --open --no-deps")))
+
 (provide 'rustic-cargo)
 ;;; rustic-cargo.el ends here
