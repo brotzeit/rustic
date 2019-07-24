@@ -380,6 +380,7 @@ If BIN is not nil, create a binary application, otherwise a library."
 ;; Interactive
 
 (defun rustic-run-cargo-command (command)
+  "Run the specified COMMAND with cargo."
   (rustic-compilation-process-live)
   (rustic-compilation-start (split-string command)))
 
