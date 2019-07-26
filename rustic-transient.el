@@ -66,6 +66,34 @@
   :argument "--package="
   )
 
+(define-infix-argument rustic--transient--new:-r ()
+  :description "Package to document"
+  :class 'transient-option
+  :shortarg "-r"
+  :argument "--registry= "
+  )
+
+(define-infix-argument rustic--transient--new:-e ()
+  :description "Edition of the package"
+  :class 'transient-switch
+  :shortarg "-e"
+  :argument "--edition= "
+  )
+
+(define-infix-argument rustic--transient--new:-n ()
+  :description "Name of the new package"
+  :class 'transient-switch
+  :shortarg "-n"
+  :argument "--name= "
+  )
+
+(define-infix-command rustic--transient--new:-v ()
+  :description "Version control system to be used"
+  :class 'transient-switch
+  :shortarg "-v"
+  :argument "--vcs="
+  :choices '("git" "hg" "pijul" "fossil" "none"))
+
 ;;;###autoload
 (define-transient-command rustic--transient-doc ()
   "Rustic Cargo Doc Commands"
@@ -88,8 +116,24 @@
     ("-O" "Run without accessing the network" ("-O" "--offline"))
     ]
    ["Make Docs"
-    ("b" "Build docs" rustic-cargo-build)
+    ("b" "Build docs" test-args)
     ("H" "Help" rustic--transient-doc-help)
+    ]
+   ])
+
+;;;###autoload
+(define-transient-command rustic--transient-test ()
+  "Rustic Cargo Test Menu"
+  [
+   ["Arguments"
+    ("-q" "Run quietly" ("-q" "--quiet"))
+    ("-V" "Verbose" ("-v" "--verbose"))
+    ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
+    ("-O" "Run without accessing the network" ("-O" "--offline"))
+    ("-b" "Document all binaries" ("-b" "--bins"))
+    ("-l" "Use a library template" ("-l" "--lib"))
+    ("-A" "All features" ("-A" "--all-features"))
+    ("-n" "No default features" ("-n" "--no-default-features"))
     ]
    ])
 
@@ -97,6 +141,10 @@
 (define-transient-command rustic--transient-new ()
   "Transient for cargo new command"
   [[ "Options"
+     (rustic--transient--new:-e)
+     (rustic--transient--new:-n)
+     (rustic--transient--new:-r)
+     (rustic--transient--new:-v)
      ("-b" "Use a binary template(DEFAULT)" ("-b" "--bin"))
      ("-l" "Use a library template" ("-l" "--lib"))
      ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
@@ -124,6 +172,7 @@
    ["Advanced Cargo Menus"
     ("D" "Doc" rustic--transient-doc)
     ("N" "New" rustic--transient-new)
+    ("T" "Test" rustic--transient-test)
     ]
    ])
 
@@ -144,6 +193,11 @@
 ;;;###autoload
 (defun rustic--transient-test-help ()
   (rustic--transient-help "test"))
+
+;;;###autoload
+(defun test-args (&optional args)
+  (interactive)
+  (message "%s" (rustic-transient--get-args 'rustic--transient-doc)))
 
 ;; (transient )
 (defun rustic--transient-popup ()
