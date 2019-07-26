@@ -4,16 +4,14 @@
 
 (require 'rustic-cargo)
 
-(defvar trace-me nil "Trace level")
-
+;;;###autoload
 (define-infix-command rustic-transient:-trace ()
   :description "Trace level"
   :class 'transient-switch
-  :key "-t"
   :shortarg "-t"
   :argument "--trace-level= "
-  ;; :variable 'trace-me
   :choices '("0" "1" "Full"))
+
 
 (defun rustic-transient--get-args (menu)
   "Retrieve the arguments provided to the transient called MENU."
@@ -24,7 +22,7 @@
   (shell-command (concat "cargo " command " --help") "*Help-Buffer-Rustic*"))
 
 
-;; Load the transient popup only if transient itself is instaled
+;;;###autoload
 (define-transient-command general-menu ()
   "Rustic Cargo Commands"
   [
@@ -39,11 +37,14 @@
     ("k" "Check" rustic-cargo-check)
     ("t" "Test" rustic-cargo-test)
     ]
-   ["Cargo Menus"
+   ["Advanced Cargo Menus"
+    ("D" "Doc" rustic--transient-doc-menu)
+    ("N" "New" rustic--transient-new-menu)
     ]
    ])
 
-(define-transient-command doc-menu
+;;;###autoload
+(define-transient-command rustic--transient-doc-menu
   "Rustic Cargo Doc Commands"
   [["Arguments"
     ("-q" "Run command without output buffer" ("-q" "--quiet"))
@@ -66,13 +67,16 @@
     ]
    ])
 
+;;;###autoload
 (define-transient-command rustic--transient-new ()
   "Transient for cargo new command"
   [[ "Options"
-     ("-q" "Run command without output buffer" ("-q" "--quiet"))
-     ("-V" "Verbose" ("-v" "--verbose"))
+     ("-b" "Use a binary template(DEFAULT)" ("-b" "--bin"))
+     ("-l" "Use a library template" ("-l" "--lib"))
      ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
      ("-O" "Run without accessing the network" ("-O" "--offline"))
+     ("-q" "Run command without output buffer" ("-q" "--quiet"))
+     ("-V" "Verbose" ("-v" "--verbose"))
      ]]
   )
 
@@ -93,7 +97,6 @@
 (defun rustic--transient-test-help ()
   (rustic--transient-help "test"))
 
-(doc-menu)
 ;; (transient )
 (defun rustic--transient-popup ()
   "Invoke the rustic transient popup."
@@ -102,4 +105,3 @@
 
 (provide 'rustic-transient)
 ;;; rustic-transient.el ends here
-
