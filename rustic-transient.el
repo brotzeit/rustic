@@ -22,32 +22,58 @@
   (shell-command (concat "cargo " command " --help") "*Help-Buffer-Rustic*"))
 
 
-;;;###autoload
-(define-transient-command general-menu ()
-  "Rustic Cargo Commands"
-  [
-   ["Quick Commands"
-    (rustic-transient:-trace)
-    ("b" "Build" rustic-cargo-build)
-    ("f" "Format" rustic-cargo-fmt)
-    ("r" "Run" rustic-cargo-run)
-    ("c" "Clippy" rustic-cargo-clippy)
-    ("o" "Outdated" rustic-cargo-outdated)
-    ("e" "Clean" rustic-cargo-clean)
-    ("k" "Check" rustic-cargo-check)
-    ("t" "Test" rustic-cargo-test)
-    ]
-   ["Advanced Cargo Menus"
-    ("D" "Doc" rustic--transient-doc-menu)
-    ("N" "New" rustic--transient-new-menu)
-    ]
-   ])
+(define-infix-argument rustic--transient--general:-j ()
+  :description "The number of processors to use"
+  :class 'transient-option
+  :shortarg "-j"
+  :argument "--jobs="
+  )
+
+
+(define-infix-argument rustic--transient--general:-e ()
+  :description "Packages to exclude"
+  :class 'transient-option
+  :shortarg "-e"
+  :argument "--exclude="
+  )
+
+(define-infix-argument rustic--transient--general:-D ()
+  :description "Packages to exclude"
+  :class 'transient-option
+  :shortarg "-D"
+  :argument "--target-dir="
+  )
+
+
+(define-infix-argument rustic--transient--general:-m ()
+  :description "Packages to exclude"
+  :class 'transient-option
+  :shortarg "-m"
+  :argument "--manifest-path="
+  )
+
+(define-infix-argument rustic--transient--doc:-b ()
+  :description "Packages to exclude"
+  :class 'transient-option
+  :shortarg "-B"
+  :argument "--bin="
+  )
+
+(define-infix-argument rustic--transient--doc:-p ()
+  :description "Package to document"
+  :class 'transient-option
+  :shortarg "-p"
+  :argument "--package="
+  )
 
 ;;;###autoload
-(define-transient-command rustic--transient-doc-menu
+(define-transient-command rustic--transient-doc ()
   "Rustic Cargo Doc Commands"
   [["Arguments"
-    ("-q" "Run command without output buffer" ("-q" "--quiet"))
+    (rustic--transient--general:-j)
+    (rustic--transient--doc:-p)
+    (rustic--transient--doc:-b)
+    ("-q" "Run quietly" ("-q" "--quiet"))
     ("-o" "Open doc" ("-o" "--open"))
     ("-a" "Build all docs" ("-a" "--all"))
     ("-d" "Document private items" ("-e" "--document-private-items"))
@@ -62,7 +88,7 @@
     ("-O" "Run without accessing the network" ("-O" "--offline"))
     ]
    ["Make Docs"
-    ("b" "Build docs" test-func-arg)
+    ("b" "Build docs" rustic-cargo-build)
     ("H" "Help" rustic--transient-doc-help)
     ]
    ])
@@ -79,6 +105,28 @@
      ("-V" "Verbose" ("-v" "--verbose"))
      ]]
   )
+
+;;;###autoload
+(define-transient-command rustic--transient-general-menu ()
+  "Rustic Cargo Commands"
+  [
+   ["Quick Commands"
+    (rustic-transient:-trace)
+    ("b" "Build" rustic-cargo-build)
+    ("f" "Format" rustic-cargo-fmt)
+    ("r" "Run" rustic-cargo-run)
+    ("c" "Clippy" rustic-cargo-clippy)
+    ("o" "Outdated" rustic-cargo-outdated)
+    ("e" "Clean" rustic-cargo-clean)
+    ("k" "Check" rustic-cargo-check)
+    ("t" "Test" rustic-cargo-test)
+    ]
+   ["Advanced Cargo Menus"
+    ("D" "Doc" rustic--transient-doc)
+    ("N" "New" rustic--transient-new)
+    ]
+   ])
+
 
 ;;;###autoload
 (defun rustic--transient-doc-help ()
@@ -101,7 +149,8 @@
 (defun rustic--transient-popup ()
   "Invoke the rustic transient popup."
   (interactive)
-  (rustic-mode--transient))
+  (rustic--transient-general-menu))
 
+(rustic--transient-general-menu)
 (provide 'rustic-transient)
 ;;; rustic-transient.el ends here
