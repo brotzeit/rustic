@@ -89,7 +89,6 @@ A new buffer is created which contains the command."
   (interactive)
   (rustic--transient-help "uninstall"))
 
-;;;###autoload
 (defun test-args (&optional args)
   (interactive)
   (message "%s" (rustic-transient--get-args 'rustic--transient-doc)))
@@ -131,18 +130,40 @@ A new buffer is created which contains the command."
   :argument "--target-dir="
   )
 
-(define-infix-argument rustic--transient--clean:-D ()
-  :description "Directory for all generated artifacts"
-  :class 'transient-option
-  :shortarg "-D"
-  :argument "--target-dir="
-  )
-
 (define-infix-argument rustic--transient--general:-m ()
   :description "Path to Cargo.toml"
   :class 'transient-option
   :shortarg "-m"
   :argument "--manifest-path="
+  )
+
+;;;###autoload
+(define-transient-command rustic--transient-general-menu ()
+  "Rustic Cargo Commands"
+  [
+   ["Quick Commands"
+    (rustic-transient:--trace)
+    ("b" "Build" rustic-cargo-build)
+    ("f" "Format" rustic-cargo-fmt)
+    ("r" "Run" rustic-cargo-run)
+    ("c" "Clippy" rustic-cargo-clippy)
+    ("o" "Outdated" rustic-cargo-outdated)
+    ("e" "Clean" rustic-cargo-clean)
+    ("k" "Check" rustic-cargo-check)
+    ("t" "Test" rustic-cargo-test)
+    ]
+   ["Advanced Cargo Menus"
+    ("D" "Doc" rustic--transient-doc)
+    ("N" "New" rustic--transient-new)
+    ("T" "Test" rustic--transient-test)
+    ]
+   ])
+
+(define-infix-argument rustic--transient--doc:-F ()
+  :description "Space separated list of features to activate"
+  :class 'transient-option
+  :shortarg "-F"
+  :argument "--features="
   )
 
 (define-infix-argument rustic--transient--doc:-b ()
@@ -158,56 +179,6 @@ A new buffer is created which contains the command."
   :shortarg "-p"
   :argument "--package="
   )
-
-(define-infix-argument rustic--transient--clean:-p ()
-  :description "Package to clean artifacts for"
-  :class 'transient-option
-  :shortarg "-p"
-  :argument "--package="
-  )
-
-(define-infix-argument rustic--transient--clean:-p ()
-  :description "Package to clean artifacts for"
-  :class 'transient-option
-  :shortarg "-p"
-  :argument "--package="
-  )
-
-(define-infix-argument rustic--transient--doc:-F ()
-  :description "Space separated list of features to activate"
-  :class 'transient-option
-  :shortarg "-F"
-  :argument "--features="
-  )
-
-
-(define-infix-argument rustic--transient--new:-r ()
-  :description "Package to document"
-  :class 'transient-option
-  :shortarg "-r"
-  :argument "--registry= "
-  )
-
-(define-infix-argument rustic--transient--new:-e ()
-  :description "Edition of the package"
-  :class 'transient-switch
-  :shortarg "-e"
-  :argument "--edition= "
-  )
-
-(define-infix-argument rustic--transient--new:-n ()
-  :description "Name of the new package"
-  :class 'transient-switch
-  :shortarg "-n"
-  :argument "--name= "
-  )
-
-(define-infix-command rustic--transient--new:-v ()
-  :description "Version control system to be used"
-  :class 'transient-switch
-  :shortarg "-v"
-  :argument "--vcs="
-  :choices '("git" "hg" "pijul" "fossil" "none"))
 
 ;;;###autoload
 (define-transient-command rustic--transient-doc ()
@@ -241,6 +212,20 @@ A new buffer is created which contains the command."
     ]
    ])
 
+(define-infix-argument rustic--transient--clean:-D ()
+  :description "Directory for all generated artifacts"
+  :class 'transient-option
+  :shortarg "-D"
+  :argument "--target-dir="
+  )
+
+(define-infix-argument rustic--transient--clean:-p ()
+  :description "Package to clean artifacts for"
+  :class 'transient-option
+  :shortarg "-p"
+  :argument "--package="
+  )
+
 ;;;###autoload
 (define-transient-command rustic--transient-clean ()
   "Rustic Cargo Clean Menu"
@@ -252,6 +237,74 @@ A new buffer is created which contains the command."
     (rustic--transient--clean:-D)
     ("-r" "Clean release artifacts" ("-r" "--release"))
     ("-d" "Clean just the documentation directory" ("-d" "--doc"))
+    ("-V" "Verbose" ("-v" "--verbose"))
+    ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
+    ("-P" "Require Cargo.lock to be up to date" ("-P" "--locked"))
+    ("-O" "Run without accessing the network" ("-O" "--offline"))
+    ]
+   ]
+  )
+
+(define-infix-argument rustic--transient--new:-r ()
+  :description "Package to document"
+  :class 'transient-option
+  :shortarg "-r"
+  :argument "--registry= "
+  )
+
+(define-infix-argument rustic--transient--new:-e ()
+  :description "Edition of the package"
+  :class 'transient-switch
+  :shortarg "-e"
+  :argument "--edition= "
+  )
+
+(define-infix-argument rustic--transient--new:-n ()
+  :description "Name of the new package"
+  :class 'transient-switch
+  :shortarg "-n"
+  :argument "--name= "
+  )
+
+(define-infix-command rustic--transient--new:-v ()
+  :description "Version control system to be used"
+  :class 'transient-switch
+  :shortarg "-v"
+  :argument "--vcs="
+  :choices '("git" "hg" "pijul" "fossil" "none"))
+
+;;;###autoload
+(define-transient-command rustic--transient-new ()
+  "Transient for cargo new command"
+  [[ "Options"
+     (rustic--transient--new:-e)
+     (rustic--transient--new:-n)
+     (rustic--transient--new:-r)
+     (rustic--transient--new:-v)
+     ("-b" "Use a binary template(DEFAULT)" ("-b" "--bin"))
+     ("-l" "Use a library template" ("-l" "--lib"))
+     ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
+     ("-O" "Run without accessing the network" ("-O" "--offline"))
+     ("-q" "Run command without output buffer" ("-q" "--quiet"))
+     ("-V" "Verbose" ("-v" "--verbose"))
+     ]
+   ["Commands"
+    ("H" "Help" rustic--transient-new-help)
+    ]
+   ]
+  )
+
+;;;###autoload
+(define-transient-command rustic--transient-run ()
+  "Rustic Cargo Run Menu"
+  ["Arguments"
+   [
+    ("-q" "Run quietly" ("-q" "--quiet"))
+    ("-r" "Clean release artifacts" ("-r" "--release"))
+    (rustic--transient--general:-m)
+    (rustic--transient--general:-j)
+    ("-A" "All features" ("-A" "--all-features"))
+    ("-n" "No default features" ("-n" "--no-default-features"))
     ("-V" "Verbose" ("-v" "--verbose"))
     ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
     ("-P" "Require Cargo.lock to be up to date" ("-P" "--locked"))
@@ -276,50 +329,7 @@ A new buffer is created which contains the command."
     ]
    ])
 
-;;;###autoload
-(define-transient-command rustic--transient-new ()
-  "Transient for cargo new command"
-  [[ "Options"
-     (rustic--transient--new:-e)
-     (rustic--transient--new:-n)
-     (rustic--transient--new:-r)
-     (rustic--transient--new:-v)
-     ("-b" "Use a binary template(DEFAULT)" ("-b" "--bin"))
-     ("-l" "Use a library template" ("-l" "--lib"))
-     ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
-     ("-O" "Run without accessing the network" ("-O" "--offline"))
-     ("-q" "Run command without output buffer" ("-q" "--quiet"))
-     ("-V" "Verbose" ("-v" "--verbose"))
-     ]
-   ["Commands"
-    ("H" "Help" rustic--transient-new-help)
-    ]
-   ]
-  )
-
-;;;###autoload
-(define-transient-command rustic--transient-general-menu ()
-  "Rustic Cargo Commands"
-  [
-   ["Quick Commands"
-    (rustic-transient:--trace)
-    ("b" "Build" rustic-cargo-build)
-    ("f" "Format" rustic-cargo-fmt)
-    ("r" "Run" rustic-cargo-run)
-    ("c" "Clippy" rustic-cargo-clippy)
-    ("o" "Outdated" rustic-cargo-outdated)
-    ("e" "Clean" rustic-cargo-clean)
-    ("k" "Check" rustic-cargo-check)
-    ("t" "Test" rustic-cargo-test)
-    ]
-   ["Advanced Cargo Menus"
-    ("D" "Doc" rustic--transient-doc)
-    ("N" "New" rustic--transient-new)
-    ("T" "Test" rustic--transient-test)
-    ]
-   ])
-
-(defun rustic--transient-popup ()
+(defun rustic-transient-popup ()
   "Invoke the rustic transient popup."
   (interactive)
   (rustic--transient-general-menu))
