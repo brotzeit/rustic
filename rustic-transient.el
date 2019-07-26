@@ -1,17 +1,8 @@
-;;; rustic-transient.el --- Transient based popup-*-lexical-binding: t-*-
+;;; rustic-transient.el --- Transient based popup -*-lexical-binding: t-*-
 
 ;;; Code:
 
 (require 'rustic-cargo)
-
-;;;###autoload
-(define-infix-command rustic-transient:-trace ()
-  :description "Trace level"
-  :class 'transient-switch
-  :shortarg "-t"
-  :argument "--trace-level= "
-  :choices '("0" "1" "Full"))
-
 
 (defun rustic-transient--get-args (menu)
   "Retrieve the arguments provided to the transient called MENU."
@@ -22,13 +13,28 @@
   (shell-command (concat "cargo " command " --help") "*Help-Buffer-Rustic*"))
 
 
+(define-infix-command rustic-transient:--trace ()
+  :description "Trace level"
+  :class 'transient-switches
+  :key "-t"
+  :argument-format "%s"
+  :argument-regexp "0\\|1\\|Full"
+  :choices '("0" "1" "Full"))
+
+(define-infix-command rustic--transient--new:-v ()
+  :description "Trace level"
+  :class 'transient-switches
+  :key "-t"
+  :argument-format "%s"
+  :argument-regexp "git\\|hg\\|pijul\\|fossil\\|none"
+  :choices '("git" "hg" "pijul" "fossil" "none"))
+
 (define-infix-argument rustic--transient--general:-j ()
   :description "The number of processors to use"
   :class 'transient-option
   :shortarg "-j"
   :argument "--jobs="
   )
-
 
 (define-infix-argument rustic--transient--general:-e ()
   :description "Packages to exclude"
@@ -43,7 +49,6 @@
   :shortarg "-D"
   :argument "--target-dir="
   )
-
 
 (define-infix-argument rustic--transient--general:-m ()
   :description "Packages to exclude"
@@ -193,6 +198,42 @@
 ;;;###autoload
 (defun rustic--transient-test-help ()
   (rustic--transient-help "test"))
+
+;;;###autoload
+(defun rustic--transient-check-help ()
+  (rustic--transient-help "check"))
+
+;;;###autoload
+(defun rustic--transient-clean-help ()
+  (rustic--transient-help "clean"))
+
+;;;###autoload
+(defun rustic--transient-clean-help ()
+  (rustic--transient-help "init"))
+
+;;;###autoload
+(defun rustic--transient-run-help ()
+  (rustic--transient-help "run"))
+
+;;;###autoload
+(defun rustic--transient-bench-help ()
+  (rustic--transient-help "bench"))
+
+;;;###autoload
+(defun rustic--transient-update-help ()
+  (rustic--transient-help "update"))
+
+;;;###autoload
+(defun rustic--transient-publish-help ()
+  (rustic--transient-help "publish"))
+
+;;;###autoload
+(defun rustic--transient-install-help ()
+  (rustic--transient-help "install"))
+
+;;;###autoload
+(defun rustic--transient-install-help ()
+  (rustic--transient-help "uninstall"))
 
 ;;;###autoload
 (defun test-args (&optional args)
