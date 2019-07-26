@@ -8,10 +8,91 @@
   "Retrieve the arguments provided to the transient called MENU."
   (transient-args menu))
 
+;;; Help commands
 (defun rustic--transient-help (command)
-  "Display the help menu for the cargo COMMAND from the Rustic-Transient menu."
-  (shell-command (concat "cargo " command " --help") "*Help-Buffer-Rustic*"))
+  "Display the help menu for the cargo COMMAND from the Rustic-Transient menu.
+A new buffer is created which contains the command."
+  (let ((help-buff "*Help-Buffer-Rustic*"))
+    ;; Kill help buffer if it exists
+    (if (get-buffer help-buff)
+        (kill-buffer help-buff))
+    (shell-command (concat "cargo " command " --help") help-buff)
+    (pop-to-buffer help-buff)
+    (read-only-mode)
+    (local-set-key (kbd "q") 'kill-buffer-and-window)
+    (if (package-installed-p 'evil)
+        (evil-local-set-key 'normal (kbd "q") 'kill-buffer-and-window))
+    (goto-line 1)))
 
+;;;###autoload
+(defun rustic--transient-doc-help ()
+  (interactive)
+  (rustic--transient-help "doc"))
+
+;;;###autoload
+(defun rustic--transient-build-help ()
+  (interactive)
+  (rustic--transient-help "build"))
+
+;;;###autoload
+(defun rustic--transient-new-help ()
+  (interactive)
+  (rustic--transient-help "new"))
+
+;;;###autoload
+(defun rustic--transient-test-help ()
+  (interactive)
+  (rustic--transient-help "test"))
+
+;;;###autoload
+(defun rustic--transient-check-help ()
+  (interactive)
+  (rustic--transient-help "check"))
+
+;;;###autoload
+(defun rustic--transient-clean-help ()
+  (interactive)
+  (rustic--transient-help "clean"))
+
+;;;###autoload
+(defun rustic--transient-clean-help ()
+  (interactive)
+  (rustic--transient-help "init"))
+
+;;;###autoload
+(defun rustic--transient-run-help ()
+  (interactive)
+  (rustic--transient-help "run"))
+
+;;;###autoload
+(defun rustic--transient-bench-help ()
+  (interactive)
+  (rustic--transient-help "bench"))
+
+;;;###autoload
+(defun rustic--transient-update-help ()
+  (interactive)
+  (rustic--transient-help "update"))
+
+;;;###autoload
+(defun rustic--transient-publish-help ()
+  (interactive)
+  (rustic--transient-help "publish"))
+
+;;;###autoload
+(defun rustic--transient-install-help ()
+  (interactive)
+  (rustic--transient-help "install"))
+
+;;;###autoload
+(defun rustic--transient-uninstall-help ()
+  (interactive)
+  (rustic--transient-help "uninstall"))
+
+;;;###autoload
+(defun test-args (&optional args)
+  (interactive)
+  (message "%s" (rustic-transient--get-args 'rustic--transient-doc)))
 
 (define-infix-command rustic-transient:--trace ()
   :description "Trace level"
@@ -156,7 +237,11 @@
      ("-O" "Run without accessing the network" ("-O" "--offline"))
      ("-q" "Run command without output buffer" ("-q" "--quiet"))
      ("-V" "Verbose" ("-v" "--verbose"))
-     ]]
+     ]
+   ["Commands"
+    ("H" "Help" rustic--transient-new-help)
+    ]
+   ]
   )
 
 ;;;###autoload
@@ -164,7 +249,7 @@
   "Rustic Cargo Commands"
   [
    ["Quick Commands"
-    (rustic-transient:-trace)
+    (rustic-transient:--trace)
     ("b" "Build" rustic-cargo-build)
     ("f" "Format" rustic-cargo-fmt)
     ("r" "Run" rustic-cargo-run)
@@ -181,71 +266,12 @@
     ]
    ])
 
-
-;;;###autoload
-(defun rustic--transient-doc-help ()
-  (interactive)
-  (rustic--transient-help "doc"))
-
-;;;###autoload
-(defun rustic--transient-build-help ()
-  (rustic--transient-help "build"))
-
-;;;###autoload
-(defun rustic--transient-new-help ()
-  (rustic--transient-help "new"))
-
-;;;###autoload
-(defun rustic--transient-test-help ()
-  (rustic--transient-help "test"))
-
-;;;###autoload
-(defun rustic--transient-check-help ()
-  (rustic--transient-help "check"))
-
-;;;###autoload
-(defun rustic--transient-clean-help ()
-  (rustic--transient-help "clean"))
-
-;;;###autoload
-(defun rustic--transient-clean-help ()
-  (rustic--transient-help "init"))
-
-;;;###autoload
-(defun rustic--transient-run-help ()
-  (rustic--transient-help "run"))
-
-;;;###autoload
-(defun rustic--transient-bench-help ()
-  (rustic--transient-help "bench"))
-
-;;;###autoload
-(defun rustic--transient-update-help ()
-  (rustic--transient-help "update"))
-
-;;;###autoload
-(defun rustic--transient-publish-help ()
-  (rustic--transient-help "publish"))
-
-;;;###autoload
-(defun rustic--transient-install-help ()
-  (rustic--transient-help "install"))
-
-;;;###autoload
-(defun rustic--transient-install-help ()
-  (rustic--transient-help "uninstall"))
-
-;;;###autoload
-(defun test-args (&optional args)
-  (interactive)
-  (message "%s" (rustic-transient--get-args 'rustic--transient-doc)))
-
-;; (transient )
 (defun rustic--transient-popup ()
   "Invoke the rustic transient popup."
   (interactive)
   (rustic--transient-general-menu))
 
 (rustic--transient-general-menu)
+
 (provide 'rustic-transient)
 ;;; rustic-transient.el ends here
