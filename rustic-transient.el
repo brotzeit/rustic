@@ -125,21 +125,28 @@ A new buffer is created which contains the command."
   )
 
 (define-infix-argument rustic--transient--general:-D ()
-  :description "Packages to exclude"
+  :description "Directory for all generated artifacts"
+  :class 'transient-option
+  :shortarg "-D"
+  :argument "--target-dir="
+  )
+
+(define-infix-argument rustic--transient--clean:-D ()
+  :description "Directory for all generated artifacts"
   :class 'transient-option
   :shortarg "-D"
   :argument "--target-dir="
   )
 
 (define-infix-argument rustic--transient--general:-m ()
-  :description "Packages to exclude"
+  :description "Path to Cargo.toml"
   :class 'transient-option
   :shortarg "-m"
   :argument "--manifest-path="
   )
 
 (define-infix-argument rustic--transient--doc:-b ()
-  :description "Packages to exclude"
+  :description "Document only the specified binary"
   :class 'transient-option
   :shortarg "-B"
   :argument "--bin="
@@ -151,6 +158,28 @@ A new buffer is created which contains the command."
   :shortarg "-p"
   :argument "--package="
   )
+
+(define-infix-argument rustic--transient--clean:-p ()
+  :description "Package to clean artifacts for"
+  :class 'transient-option
+  :shortarg "-p"
+  :argument "--package="
+  )
+
+(define-infix-argument rustic--transient--clean:-p ()
+  :description "Package to clean artifacts for"
+  :class 'transient-option
+  :shortarg "-p"
+  :argument "--package="
+  )
+
+(define-infix-argument rustic--transient--doc:-F ()
+  :description "Space separated list of features to activate"
+  :class 'transient-option
+  :shortarg "-F"
+  :argument "--features="
+  )
+
 
 (define-infix-argument rustic--transient--new:-r ()
   :description "Package to document"
@@ -184,12 +213,17 @@ A new buffer is created which contains the command."
 (define-transient-command rustic--transient-doc ()
   "Rustic Cargo Doc Commands"
   [["Arguments"
-    (rustic--transient--general:-j)
-    (rustic--transient--doc:-p)
     (rustic--transient--doc:-b)
+    (rustic--transient--doc:-p)
+    (rustic--transient--doc:-F)
+    (rustic--transient--general:-m)
+    (rustic--transient--general:-D)
+    (rustic--transient--general:-e)
+    (rustic--transient--general:-j)
     ("-q" "Run quietly" ("-q" "--quiet"))
     ("-o" "Open doc" ("-o" "--open"))
     ("-a" "Build all docs" ("-a" "--all"))
+    ("-N" "No dependiencies" ("-N" "--no-deps"))
     ("-d" "Document private items" ("-e" "--document-private-items"))
     ("-l" "Document Only this package's library" ("-l"
                                                   "--document-private-items"))
@@ -206,6 +240,25 @@ A new buffer is created which contains the command."
     ("H" "Help" rustic--transient-doc-help)
     ]
    ])
+
+;;;###autoload
+(define-transient-command rustic--transient-clean ()
+  "Rustic Cargo Clean Menu"
+  [
+   ["Arguments"
+    ("-q" "Run quietly" ("-q" "--quiet"))
+    (rustic--transient--clean:-p)
+    (rustic--transient--general:-m)
+    (rustic--transient--clean:-D)
+    ("-r" "Clean release artifacts" ("-r" "--release"))
+    ("-d" "Clean just the documentation directory" ("-d" "--doc"))
+    ("-V" "Verbose" ("-v" "--verbose"))
+    ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
+    ("-P" "Require Cargo.lock to be up to date" ("-P" "--locked"))
+    ("-O" "Run without accessing the network" ("-O" "--offline"))
+    ]
+   ]
+  )
 
 ;;;###autoload
 (define-transient-command rustic--transient-test ()
