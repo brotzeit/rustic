@@ -89,6 +89,11 @@ A new buffer is created which contains the command."
   (interactive)
   (rustic--transient-help "uninstall"))
 
+;;;###autoload
+(defun rustic--transient-cargo-help ()
+  (interactive)
+  (rustic--transient-help ""))
+
 (defun test-args (&optional args)
   (interactive)
   (message "%s" (rustic-transient--get-args 'rustic--transient-doc)))
@@ -101,8 +106,8 @@ A new buffer is created which contains the command."
   :argument-regexp "0\\|1\\|Full"
   :choices '("0" "1" "Full"))
 
-(define-infix-command rustic--transient--new:-v ()
-  :description "Trace level"
+(define-infix-command rustic--transient--general:-v ()
+  :description "Version control system to be used"
   :class 'transient-switches
   :key "-t"
   :argument-format "%s"
@@ -128,6 +133,13 @@ A new buffer is created which contains the command."
   :class 'transient-option
   :shortarg "-D"
   :argument "--target-dir="
+  )
+
+(define-infix-argument rustic--transient--general:-k ()
+  :description "Build for the target triple"
+  :class 'transient-option
+  :shortarg "-k"
+  :argument "--target="
   )
 
 (define-infix-argument rustic--transient--general:-m ()
@@ -184,25 +196,28 @@ A new buffer is created which contains the command."
 (define-transient-command rustic--transient-doc ()
   "Rustic Cargo Doc Commands"
   [["Arguments"
-    (rustic--transient--doc:-b)
-    (rustic--transient--doc:-p)
     (rustic--transient--doc:-F)
-    (rustic--transient--general:-m)
-    (rustic--transient--general:-D)
-    (rustic--transient--general:-e)
-    (rustic--transient--general:-j)
     ("-q" "Run quietly" ("-q" "--quiet"))
     ("-o" "Open doc" ("-o" "--open"))
+    (rustic--transient--doc:-p)
     ("-a" "Build all docs" ("-a" "--all"))
+    (rustic--transient--general:-e)
     ("-N" "No dependiencies" ("-N" "--no-deps"))
     ("-d" "Document private items" ("-e" "--document-private-items"))
-    ("-l" "Document Only this package's library" ("-l"
+    (rustic--transient--general:-j)
+    ("-L" "Document Only this package's library" ("-l"
                                                   "--document-private-items"))
+    ("-l" "Document only this package's library" ("-l" "--lib"))
+    (rustic--transient--doc:-b)
     ("-b" "Document all binaries" ("-b" "--bins"))
     ("-r" "Build artifacts in release mode" ("-r" "--release"))
     ("-A" "All features" ("-A" "--all-features"))
     ("-n" "No default features" ("-n" "--no-default-features"))
+    (rustic--transient--general:-m)
+    (rustic--transient--general:-D)
+    (rustic--transient--general:-k)
     ("-V" "Verbose" ("-v" "--verbose"))
+    ("-M" "Require Cargo.lock is up to date" ("-M" "--locked"))
     ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
     ("-O" "Run without accessing the network" ("-O" "--offline"))
     ]
