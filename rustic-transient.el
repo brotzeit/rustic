@@ -407,6 +407,62 @@ A new buffer is created which contains the command."
    ]
   )
 
+
+(define-infix-argument rustic--transient--bench:-D ()
+  :description "Directory for all generated artifacts"
+  :class 'transient-option
+  :shortarg "-D"
+  :argument "--target-dir="
+  )
+
+(define-infix-argument rustic--transient--bench:-k ()
+  :description "Build for the target triple"
+  :class 'transient-option
+  :shortarg "-k"
+  :argument "--target="
+  )
+
+(define-infix-argument rustic--transient--bench:-b ()
+  :description "Benchmark only the specified binary"
+  :class 'transient-option
+  :shortarg "-B"
+  :argument "--bin="
+  )
+
+(define-infix-argument rustic--transient--bench:-p ()
+  :description "Package to run benchmarks fro"
+  :class 'transient-option
+  :shortarg "-p"
+  :argument "--package="
+  )
+
+(define-infix-argument rustic--transient--bench:-e ()
+  :description "Benchmark only the specified example"
+  :class 'transient-option
+  :shortarg "-e"
+  :argument "--example="
+  )
+;;;###autoload
+(define-transient-command rustic--transient-bench ()
+  "Rustic Cargo Bench Menu"
+  [
+   ["Arguments"
+    (rustic--transient--bench:-D)
+    (rustic--transient--bench:-e)
+    (rustic--transient--bench:-k)
+    (rustic--transient--bench:-p)
+    (rustic--transient--bench:-b)
+    ("-q" "Run quietly" ("-q" "--quiet"))
+    ("-V" "Verbose" ("-v" "--verbose"))
+    ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
+    ("-O" "Run without accessing the network" ("-O" "--offline"))
+    ("-b" "Benchmark all binaries" ("-b" "--bins"))
+    ("-l" "Benchmark only this package's library" ("-l" "--lib"))
+    ("-A" "All features" ("-A" "--all-features"))
+    ("-n" "No default features" ("-n" "--no-default-features"))
+    ]
+   ])
+
 ;;;###autoload
 (define-transient-command rustic--transient-test ()
   "Rustic Cargo Test Menu"
