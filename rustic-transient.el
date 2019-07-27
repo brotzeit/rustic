@@ -4,9 +4,28 @@
 
 (require 'rustic-cargo)
 
+;; (defun rustic-transient--get-args (menu)
+;;   "Retrieve the arguments provided to the transient called MENU."
+;;   (let ((t-args (transient-args menu))
+;;         (split-args '())
+;;         (curr-split-arg ""))
+;;     (dolist (elem t-args)
+;;       (if (string-match "^--[[:alnum:]]+=" elem)
+;;           (setq split-args (push split-args))
+;;         (setq split-args (push elem split-args))
+;;         )
+;;       )
+;;     )
+;;   (transient-args menu))
+
 (defun rustic-transient--get-args (menu)
-  "Retrieve the arguments provided to the transient called MENU."
+  "Retrieve the arguments"
   (transient-args menu))
+
+;; (string-match "^--[[:alnum:]]+=" "--helloworld=abcfasfsa")
+;; (dolist (el
+;;          (split-string "--helloworld=onetwo" "="))
+;;   (message el))
 
 ;;; Help commands
 (defun rustic--transient-help (command)
@@ -149,6 +168,13 @@ A new buffer is created which contains the command."
   :argument "--manifest-path="
   )
 
+(define-infix-argument rustic--transient--general:-F ()
+  :description "Space separated list of features to activate"
+  :class 'transient-option
+  :shortarg "-F"
+  :argument "--features="
+  )
+
 ;;;###autoload
 (define-transient-command rustic--transient-general-menu ()
   "Rustic Cargo Commands"
@@ -241,6 +267,13 @@ A new buffer is created which contains the command."
   :argument "--package="
   )
 
+(define-infix-argument rustic--transient--clean:-k ()
+  :description "Target triple to clean output for"
+  :class 'transient-option
+  :shortarg "-k"
+  :argument "--target="
+  )
+
 ;;;###autoload
 (define-transient-command rustic--transient-clean ()
   "Rustic Cargo Clean Menu"
@@ -250,6 +283,7 @@ A new buffer is created which contains the command."
     (rustic--transient--clean:-p)
     (rustic--transient--general:-m)
     (rustic--transient--clean:-D)
+    (rustic--transient--clean:-k)
     ("-r" "Clean release artifacts" ("-r" "--release"))
     ("-d" "Clean just the documentation directory" ("-d" "--doc"))
     ("-V" "Verbose" ("-v" "--verbose"))
@@ -257,6 +291,9 @@ A new buffer is created which contains the command."
     ("-P" "Require Cargo.lock to be up to date" ("-P" "--locked"))
     ("-O" "Run without accessing the network" ("-O" "--offline"))
     ]
+   ]
+  ["Commands"
+   ("H" "Help" rustic--transient-clean-help)
    ]
   )
 
@@ -309,6 +346,42 @@ A new buffer is created which contains the command."
    ]
   )
 
+(define-infix-argument rustic--transient--run:-D ()
+  :description "Directory for all generated artifacts"
+  :class 'transient-option
+  :shortarg "-D"
+  :argument "--target-dir="
+  )
+
+(define-infix-argument rustic--transient--run:-k ()
+  :description "Build for the target triple"
+  :class 'transient-option
+  :shortarg "-k"
+  :argument "--target="
+  )
+
+(define-infix-argument rustic--transient--run:-b ()
+  :description "Name of the bin target to run"
+  :class 'transient-option
+  :shortarg "-B"
+  :argument "--bin="
+  )
+
+(define-infix-argument rustic--transient--run:-p ()
+  :description "Package with the target to run"
+  :class 'transient-option
+  :shortarg "-p"
+  :argument "--package="
+  )
+
+(define-infix-argument rustic--transient--run:-e ()
+  :description "Name of the example target to run"
+  :class 'transient-option
+  :shortarg "-e"
+  :argument "--example="
+  )
+
+
 ;;;###autoload
 (define-transient-command rustic--transient-run ()
   "Rustic Cargo Run Menu"
@@ -317,7 +390,13 @@ A new buffer is created which contains the command."
     ("-q" "Run quietly" ("-q" "--quiet"))
     ("-r" "Clean release artifacts" ("-r" "--release"))
     (rustic--transient--general:-m)
+    (rustic--transient--general:-F)
     (rustic--transient--general:-j)
+    (rustic--transient--run:-D)
+    (rustic--transient--run:-b)
+    (rustic--transient--run:-e)
+    (rustic--transient--run:-k)
+    (rustic--transient--run:-p)
     ("-A" "All features" ("-A" "--all-features"))
     ("-n" "No default features" ("-n" "--no-default-features"))
     ("-V" "Verbose" ("-v" "--verbose"))
