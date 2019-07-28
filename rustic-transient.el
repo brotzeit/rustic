@@ -10,7 +10,11 @@
   (transient-args menu))
 
 (defun rustic-transient--split-args (menu)
-  (let ((rustic-transient-args '("-abc" "--qeb=afs" "--anothertest=fasfsa fsa FASF"))
+  "Retrieve the arguments passed to MENU and split them.
+Return a single string with both single and double dash arguments(- --) joined
+together."
+  (interactive)
+  (let ((rustic-transient-args (transient-args menu))
         (single-dash '())
         (double-dash '())
         (current-split))
@@ -24,8 +28,8 @@
         (setq single-dash (push arg single-dash))
         )
       )
-    (message "Single %s" single-dash)
-    (message " Double %s" double-dash)
+    (message "Single %s Double %s" single-dash double-dash)
+    (concat (mapconcat 'identity single-dash " ")  " "(mapconcat 'identity double-dash " "))
     )
   )
 
@@ -231,6 +235,11 @@ A new buffer is created which contains the command."
   :argument "--package="
   )
 
+(defun rustic--transient-run-doc ()
+  (interactive)
+  (message "%s" (rustic-transient--split-args 'rustic--transient-doc))
+  )
+
 ;;;###autoload
 (define-transient-command rustic--transient-doc ()
   "Rustic Cargo Doc Commands"
@@ -269,8 +278,8 @@ A new buffer is created which contains the command."
     ]
    ]
   ["Make Docs"
-   ("b" "Build docs" test-args)
-   ("B" "Build docs default" test-args)
+   ("b" "Build docs" rustic--transient-run-doc)
+   ("B" "Build docs default" rustic--transient-run-doc)
    ("H" "Help" rustic--transient-doc-help)
    ]
   )
@@ -294,6 +303,11 @@ A new buffer is created which contains the command."
   :class 'transient-option
   :shortarg "-k"
   :argument "--target="
+  )
+
+(defun rustic--transient-run-clean ()
+  (interactive)
+  (message "%s" (rustic-transient--split-args 'rustic--transient-clean))
   )
 
 ;;;###autoload
@@ -321,6 +335,7 @@ A new buffer is created which contains the command."
    ("-V" "Verbose" ("-v" "--verbose"))
    ]
   ["Commands"
+   ("c" "Run clean with arguments" rustic--transient-run-clean)
    ("H" "Help" rustic--transient-clean-help)
    ]
   )
@@ -353,6 +368,12 @@ A new buffer is created which contains the command."
   :argument "--vcs="
   :choices '("git" "hg" "pijul" "fossil" "none"))
 
+
+(defun rustic--transient-run-new ()
+  (interactive)
+  (message "%s" (rustic-transient--split-args 'rustic--transient-new))
+  )
+
 ;;;###autoload
 (define-transient-command rustic--transient-new ()
   "Transient for cargo new command"
@@ -373,6 +394,8 @@ A new buffer is created which contains the command."
    ("-V" "Verbose" ("-v" "--verbose"))
    ]
   ["Commands"
+   ("n" "Create new project with arguments" rustic--transient-run-new)
+   ("N" "Create new project with defaults" rustic-cargo-new)
    ("H" "Help" rustic--transient-new-help)
    ]
   )
