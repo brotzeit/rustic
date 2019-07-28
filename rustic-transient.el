@@ -221,37 +221,46 @@ A new buffer is created which contains the command."
 ;;;###autoload
 (define-transient-command rustic--transient-doc ()
   "Rustic Cargo Doc Commands"
-  [["Arguments"
-    (rustic--transient--doc:-F)
-    ("-q" "Run quietly" ("-q" "--quiet"))
+  [
+   ["Documentation And Packages"
     ("-o" "Open doc" ("-o" "--open"))
+    ("-N" "No dependiencies" ("-N" "--no-deps"))
+    ("-d" "Document private items" ("-e" "--document-private-items"))
     (rustic--transient--doc:-p)
     ("-a" "Build all docs" ("-a" "--all"))
     (rustic--transient--general:-e)
-    ("-N" "No dependiencies" ("-N" "--no-deps"))
-    ("-d" "Document private items" ("-e" "--document-private-items"))
-    (rustic--transient--general:-j)
-    ("-L" "Document Only this package's library" ("-l"
-                                                  "--document-private-items"))
+    ]
+   ["Targets And Features"
     ("-l" "Document only this package's library" ("-l" "--lib"))
     (rustic--transient--doc:-b)
     ("-b" "Document all binaries" ("-b" "--bins"))
-    ("-r" "Build artifacts in release mode" ("-r" "--release"))
     ("-A" "All features" ("-A" "--all-features"))
     ("-n" "No default features" ("-n" "--no-default-features"))
-    (rustic--transient--general:-m)
+    (rustic--transient--doc:-F)
+    ]
+   ]
+  [
+   ["Display"
+    ("-q" "Run quietly" ("-q" "--quiet"))
+    ("-V" "Verbose" ("-v" "--verbose"))
+    (rustic--transient--general:-j)
     (rustic--transient--general:-D)
     (rustic--transient--general:-k)
-    ("-V" "Verbose" ("-v" "--verbose"))
+    ]
+   ["Compilation and Manifest"
+    ("-r" "Build artifacts in release mode" ("-r" "--release"))
+    (rustic--transient--general:-m)
     ("-M" "Require Cargo.lock is up to date" ("-M" "--locked"))
     ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
     ("-O" "Run without accessing the network" ("-O" "--offline"))
     ]
-   ["Make Docs"
-    ("b" "Build docs" test-args)
-    ("H" "Help" rustic--transient-doc-help)
-    ]
-   ])
+   ]
+  ["Make Docs"
+   ("b" "Build docs" test-args)
+   ("B" "Build docs default" test-args)
+   ("H" "Help" rustic--transient-doc-help)
+   ]
+  )
 
 (define-infix-argument rustic--transient--clean:-D ()
   :description "Directory for all generated artifacts"
