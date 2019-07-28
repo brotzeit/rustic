@@ -168,12 +168,14 @@ If ARG is not nil, use value as argument and store it in `rustic-test-arguments'
   :group 'rustic)
 
 (defconst rustic-cargo-outdated-not-installed-warning
-  "Rustic: The package cargo-outdated is not installed. Please install it with the command \"cargo install cargo-outdated\""
+  "Rustic: The package cargo-outdated needs to be installed. Please install it with the command \"cargo install cargo-outdated\""
   "Warning used to let the user know that cargo-outdated is not installed.")
+
+(defconst rustic-cargo-outdated-success-msg "After cargo-outdated is installed, please rerun 'rustic-cargo-outdated' again!")
 
 (defvar rustic-cargo-outdated-process-name "rustic-cargo-outdated-process")
 
-(defvar rustic-cargo-oudated-buffer-name "*cargo-outdated*")
+(defvar rustic-cargo-outdated-buffer-name "*cargo-outdated*")
 
 (defvar rustic-outdated-spinner nil)
 
@@ -207,28 +209,25 @@ If ARG is not nil, use value as argument and store it in `rustic-test-arguments'
   "Use 'cargo outdated' to list outdated packages in `tabulated-list-mode'.
 Execute process in PATH."
   (interactive)
-  (if (executable-find "cargo-outdated")
-      (progn
-        (message "Installed")
-        (let* ((dir (or path (rustic-buffer-workspace)))
-               (buf (get-buffer-create rustic-cargo-oudated-buffer-name))
-               (default-directory dir)
-               (inhibit-read-only t))
-          (make-process :name rustic-cargo-outdated-process-name
-                        :buffer buf
-                        :command '("cargo" "outdated" "--depth" "1")
-                        :filter #'rustic-cargo-outdated-filter
-                        :sentinel #'rustic-cargo-outdated-sentinel)
-          (with-current-buffer buf
-            (setq default-directory dir)
-            (erase-buffer)
-            (rustic-cargo-outdated-mode)
-            (rustic-with-spinner rustic-outdated-spinner
-              (make-spinner rustic-spinner-type t 10)
-              '(rustic-outdated-spinner (":Executing " (:eval (spinner-print rustic-outdated-spinner))))
-              (spinner-start rustic-outdated-spinner)))
-          (display-buffer buf)))
-    (message rustic-cargo-outdated-not-installed-warning)))
+  (progn
+    (let* ((dir (or path (rustic-buffer-workspace)))
+           (buf (get-buffer-create rustic-cargo-outdated-buffer-name))
+           (default-directory dir)
+           (inhibit-read-only t))
+      (make-process :name rustic-cargo-outdated-process-name
+                    :buffer buf
+                    :command '("cargo" "outdated" "--depth" "1")
+                    :filter #'rustic-cargo-outdated-filter
+                    :sentinel #'rustic-cargo-outdated-sentinel)
+      (with-current-buffer buf
+        (setq default-directory dir)
+        (erase-buffer)
+        (rustic-cargo-outdated-mode)
+        (rustic-with-spinner rustic-outdated-spinner
+          (make-spinner rustic-spinner-type t 10)
+          '(rustic-outdated-spinner (":Executing " (:eval (spinner-print rustic-outdated-spinner))))
+          (spinner-start rustic-outdated-spinner)))
+      (display-buffer buf))))
 
 (defun rustic-cargo-reload-outdated ()
   "Update list of outdated packages."
@@ -258,15 +257,23 @@ Execute process in PATH."
       (with-current-buffer buf
         (let ((out (buffer-string)))
           (if (= exit-status 101)
-              (rustic-cargo-install-crate-p "outdated")
+              (rustic-cargo-install-crate-p "outdated"
+                                            rustic-cargo-outdated-success-msg rustic-cargo-outdated-not-installed-warning)
             (message out))))))
   (rustic-with-spinner rustic-outdated-spinner nil nil))
 
-(defun rustic-cargo-install-crate-p (crate)
-  "Ask whether to install crate CRATE."
+(defun rustic-cargo-install-crate-p (crate &optional ymsg nmsg)
+  "Ask whether to install crate CRATE.
+If the user agrees, install crate and show YMSG if not nil. Otherwise, show NMSG if not nil."
   (let ((cmd (format "cargo install cargo-%s" crate)))
-    (when (yes-or-no-p (format "Cargo-%s missing. Install ? " crate))
-      (async-shell-command cmd "cargo" "cargo-error"))))
+    (if (yes-or-no-p (format "Cargo-%s missing. Install ? " crate))
+        (progn 
+          (async-shell-command cmd "cargo" "cargo-error")
+          (if ymsg
+              (message ymsg)))
+      (if nmsg
+          (message nmsg))
+      )))
 
 (defun rustic-cargo-outdated-generate-menu (packages)
   "Re-populate the `tabulated-list-entries' with PACKAGES."
