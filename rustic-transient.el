@@ -4,28 +4,31 @@
 
 (require 'rustic-cargo)
 
-;; (defun rustic-transient--get-args (menu)
-;;   "Retrieve the arguments provided to the transient called MENU."
-;;   (let ((t-args (transient-args menu))
-;;         (split-args '())
-;;         (curr-split-arg ""))
-;;     (dolist (elem t-args)
-;;       (if (string-match "^--[[:alnum:]]+=" elem)
-;;           (setq split-args (push split-args))
-;;         (setq split-args (push elem split-args))
-;;         )
-;;       )
-;;     )
-;;   (transient-args menu))
 
 (defun rustic-transient--get-args (menu)
   "Retrieve the arguments"
   (transient-args menu))
 
-;; (string-match "^--[[:alnum:]]+=" "--helloworld=abcfasfsa")
-;; (dolist (el
-;;          (split-string "--helloworld=onetwo" "="))
-;;   (message el))
+(defun rustic-transient--split-args (menu)
+  (let ((rustic-transient-args '("-abc" "--qeb=afs" "--anothertest=fasfsa fsa FASF"))
+        (single-dash '())
+        (double-dash '())
+        (current-split))
+    (dolist (arg rustic-transient-args)
+      (if (string-match "^--[[:alnum:]]+=" arg)
+          (progn
+            (setq current-split (split-string arg "="))
+            (setq double-dash (push (mapconcat 'identity (cdr current-split) " ") double-dash))
+            (setq double-dash (push (car current-split) double-dash))
+            )
+        (setq single-dash (push arg single-dash))
+        )
+      )
+    (message "Single %s" single-dash)
+    (message " Double %s" double-dash)
+    )
+  )
+
 
 ;;; Help commands
 (defun rustic--transient-help (command)
