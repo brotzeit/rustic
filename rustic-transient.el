@@ -43,6 +43,11 @@ A new buffer is created which contains the command."
         (evil-local-set-key 'normal (kbd "q") 'kill-buffer-and-window))
     (goto-line 1)))
 
+(defun rustic--transient-get-version ()
+  (interactive)
+  "Retrieve information about the version of cargo and display in minibuffer."
+  (message (shell-command-to-string "cargo --version")))
+
 ;;;###autoload
 (defun rustic--transient-doc-help ()
   (interactive)
@@ -195,8 +200,12 @@ A new buffer is created which contains the command."
     ("N" "New" rustic--transient-new)
     ("C" "Clean" rustic--transient-clean)
     ("T" "Test" rustic--transient-test)
+    ("B" "Bench" rustic--transient-bench)
     ]
-   ])
+   ["Misc"
+    ("V" "Version" rustic--transient-get-version)]
+   ]
+  )
 
 (define-infix-argument rustic--transient--doc:-F ()
   :description "Space separated list of features to activate"
@@ -344,21 +353,24 @@ A new buffer is created which contains the command."
 ;;;###autoload
 (define-transient-command rustic--transient-new ()
   "Transient for cargo new command"
-  [[ "Options"
-     (rustic--transient--new:-e)
-     (rustic--transient--new:-n)
-     (rustic--transient--new:-r)
-     (rustic--transient--new:-v)
-     ("-b" "Use a binary template(DEFAULT)" ("-b" "--bin"))
-     ("-l" "Use a library template" ("-l" "--lib"))
-     ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
-     ("-O" "Run without accessing the network" ("-O" "--offline"))
-     ("-q" "Run command without output buffer" ("-q" "--quiet"))
-     ("-V" "Verbose" ("-v" "--verbose"))
-     ]
-   ["Commands"
-    ("H" "Help" rustic--transient-new-help)
+  [ "New Options"
+    (rustic--transient--new:-e)
+    (rustic--transient--new:-n)
+    (rustic--transient--new:-r)
+    (rustic--transient--new:-v)
+    ("-b" "Use a binary template(DEFAULT)" ("-b" "--bin"))
+    ("-l" "Use a library template" ("-l" "--lib"))
     ]
+  ["Manifest"
+   ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
+   ("-O" "Run without accessing the network" ("-O" "--offline"))
+   ]
+  ["Display"
+   ("-q" "Run command without output buffer" ("-q" "--quiet"))
+   ("-V" "Verbose" ("-v" "--verbose"))
+   ]
+  ["Commands"
+   ("H" "Help" rustic--transient-new-help)
    ]
   )
 
@@ -402,24 +414,22 @@ A new buffer is created which contains the command."
 (define-transient-command rustic--transient-run ()
   "Rustic Cargo Run Menu"
   ["Arguments"
-   [
-    ("-q" "Run quietly" ("-q" "--quiet"))
-    ("-r" "Clean release artifacts" ("-r" "--release"))
-    (rustic--transient--general:-m)
-    (rustic--transient--general:-F)
-    (rustic--transient--general:-j)
-    (rustic--transient--run:-D)
-    (rustic--transient--run:-b)
-    (rustic--transient--run:-e)
-    (rustic--transient--run:-k)
-    (rustic--transient--run:-p)
-    ("-A" "All features" ("-A" "--all-features"))
-    ("-n" "No default features" ("-n" "--no-default-features"))
-    ("-V" "Verbose" ("-v" "--verbose"))
-    ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
-    ("-P" "Require Cargo.lock to be up to date" ("-P" "--locked"))
-    ("-O" "Run without accessing the network" ("-O" "--offline"))
-    ]
+   ("-q" "Run quietly" ("-q" "--quiet"))
+   ("-r" "Clean release artifacts" ("-r" "--release"))
+   (rustic--transient--general:-m)
+   (rustic--transient--general:-F)
+   (rustic--transient--general:-j)
+   (rustic--transient--run:-D)
+   (rustic--transient--run:-b)
+   (rustic--transient--run:-e)
+   (rustic--transient--run:-k)
+   (rustic--transient--run:-p)
+   ("-A" "All features" ("-A" "--all-features"))
+   ("-n" "No default features" ("-n" "--no-default-features"))
+   ("-V" "Verbose" ("-v" "--verbose"))
+   ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
+   ("-P" "Require Cargo.lock to be up to date" ("-P" "--locked"))
+   ("-O" "Run without accessing the network" ("-O" "--offline"))
    ]
   )
 
