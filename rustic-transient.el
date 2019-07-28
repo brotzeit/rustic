@@ -536,7 +536,5 @@ A new buffer is created which contains the command."
   (interactive)
   (rustic--transient-general-menu))
 
-(rustic--transient-general-menu)
-
 (provide 'rustic-transient)
 ;;; rustic-transient.el ends here
