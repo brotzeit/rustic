@@ -193,6 +193,7 @@ A new buffer is created which contains the command."
    ["Advanced Cargo Menus"
     ("D" "Doc" rustic--transient-doc)
     ("N" "New" rustic--transient-new)
+    ("C" "Clean" rustic--transient-clean)
     ("T" "Test" rustic--transient-test)
     ]
    ])
@@ -287,19 +288,25 @@ A new buffer is created which contains the command."
 (define-transient-command rustic--transient-clean ()
   "Rustic Cargo Clean Menu"
   [
-   ["Arguments"
-    ("-q" "Run quietly" ("-q" "--quiet"))
+   ["Package and Clean Options"
     (rustic--transient--clean:-p)
-    (rustic--transient--general:-m)
     (rustic--transient--clean:-D)
     (rustic--transient--clean:-k)
     ("-r" "Clean release artifacts" ("-r" "--release"))
     ("-d" "Clean just the documentation directory" ("-d" "--doc"))
-    ("-V" "Verbose" ("-v" "--verbose"))
+    ]
+   ]
+  [
+   ["Manifest"
+    (rustic--transient--general:-m)
     ("-f" "Require Cargo.lock and cache to be up to date" ("-f" "--frozen"))
     ("-P" "Require Cargo.lock to be up to date" ("-P" "--locked"))
     ("-O" "Run without accessing the network" ("-O" "--offline"))
     ]
+   ]
+  ["Display"
+   ("-q" "Run quietly" ("-q" "--quiet"))
+   ("-V" "Verbose" ("-v" "--verbose"))
    ]
   ["Commands"
    ("H" "Help" rustic--transient-clean-help)
