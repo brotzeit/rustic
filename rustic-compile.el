@@ -210,8 +210,9 @@ Set environment variables for rust process."
       (unless no-mode-line
         (setq mode-line-process
               '((:propertize ":%s" face compilation-mode-line-run)
-                compilation-mode-line-errors))
-        (force-mode-line-update)))))
+                compilation-mode-line-errors)))
+      (force-mode-line-update)
+      (sit-for 0))))
 
 (defun rustic-compilation-start (command &rest args)
   "Start a compilation process with COMMAND."
@@ -221,8 +222,11 @@ Set environment variables for rust process."
         (mode (or (plist-get args :mode) 'rustic-compilation-mode))
         (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
         (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
-    (rustic-compilation-setup-buffer buf directory mode)
+    (when compilation-scroll-output
+      (rustic-compilation-setup-buffer buf directory mode))
     (funcall rustic-compile-display-method buf)
+    (unless compilation-scroll-output
+      (rustic-compilation-setup-buffer buf directory mode))
     (with-current-buffer buf
       (rustic-make-process :name process
                            :buffer buf
