@@ -167,11 +167,18 @@ If ARG is not nil, use value as argument and store it in `rustic-test-arguments'
   :type 'face
   :group 'rustic)
 
+(defconst rustic-cargo-outdated-success-msg "After cargo-outdated is installed, please rerun 'rustic-cargo-outdated' again!"
+  "Message used to notify the user that they must rerun rustic-cargo-outdated after cargo-outdated has finished installing..")
+
 (defconst rustic-cargo-outdated-not-installed-warning
   "Rustic: The package cargo-outdated needs to be installed. Please install it with the command \"cargo install cargo-outdated\""
   "Warning used to let the user know that cargo-outdated is not installed.")
 
-(defconst rustic-cargo-outdated-success-msg "After cargo-outdated is installed, please rerun 'rustic-cargo-outdated' again!")
+(defconst rustic-cargo-edit-success-msg "Please run upgrade again after the cargo-edit cargo has finished installing!"
+  "Message used to notify the user know that they must rerun rustic-cargo-upgrade after cargo-edit has finished installing.")
+
+(defconst rustic-cargo-edit-not-installed-warning "The crate 'cargo-edit' is required to perform upgrades on outdated crates!"
+  "Warning used to let the user know that cargo-edit must be installed in order to upgrade crates.")
 
 (defvar rustic-cargo-outdated-process-name "rustic-cargo-outdated-process")
 
@@ -364,7 +371,9 @@ If the user agrees, install crate and show YMSG if not nil. Otherwise, show NMSG
       (setq upgrade (concat upgrade (format "%s@%s " (elt crate 0) (elt crate 2)))))
     (let ((output (shell-command-to-string (format "cargo upgrade %s" upgrade))))
       (if (string-match "error: no such subcommand:" output)
-          (rustic-cargo-install-crate-p "edit")
+          (rustic-cargo-install-crate-p "edit"
+                                        rustic-cargo-edit-success-msg
+                                        rustic-cargo-edit-not-installed-warning)
         (rustic-cargo-reload-outdated)))))
 
 ;;;;;;;;;;;;;;;;
