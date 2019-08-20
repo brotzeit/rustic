@@ -50,11 +50,11 @@ from `auto-mode-alist`. However you only need `rust-mode` if you want to use `em
 
 # Compilation
 
-Rustic doesn't use `compilation-start` yet, since there seems to be no way to set `coding-system-for-read` and `utf-8-emacs-unix`. 
+Rustic defines a derived compilation-mode. Colors can be customized with several variables and you can also change the backtrace verbosity by changing the value of `rustic-compile-backtrace`.
 
 Supported compile.el variables:
 - compilation-arguments
-- compilation-scroll-output (but not `first-error` yet)
+- compilation-scroll-output (not `first-error`)
 
 # Rustfmt
 
