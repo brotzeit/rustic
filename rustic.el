@@ -176,7 +176,7 @@ to the function arguments.  When nil, `->' will be indented one level."
 (define-derived-mode rustic-mode prog-mode "Rust"
   "Major mode for Rust code.
 
-\\{rustic-map}"
+\\{rustic-mode-map}"
   :group 'rustic
   :syntax-table rustic-syntax-table
 
