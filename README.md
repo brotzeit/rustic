@@ -43,7 +43,58 @@ Differences with rust-mode:
 
 # Installation
 
-Simply put `(use-package rustic)` in your config and most stuff gets configured automatically. 
+## From MELPA
+
+* Make sure you have [added MELPA repos](https://melpa.org/#/getting-started).
+* `M-x package-install RET rustic RET`.
+
+## From source
+
+* Clone this git repo somewhere (e.g. `~/prog/rustic`).
+* Add the path to Emacs `load-path` and associate .rs files with
+  rustic by adding this to your init file:
+
+```
+(add-to-list 'load-path "~/prog/rustic")
+(autoload 'rustic-mode "rustic")
+(add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
+```
+
+# Completion
+
+Auto-completion is optionnal and can work with multiple frontends and
+backends (see rest of document). To keep this simple, we will use the
+default basic setup here. You will need to:
+
+* Install additional Emacs packages: `lsp-mode` and `company`.
+* Install additionnal Rust components with `rustup component add rls rustfmt rust-src`.
+* Load and configure all of it:
+
+```
+(defun my-rust-hook ()
+  "This is run on every rust file open"
+  ;; enable company if it wasnt already
+  (require 'company)
+  (company-mode 1)
+
+  ;; bind "force completion request" to key
+  (local-set-key (kbd "<C-return>") 'company-complete))
+
+(eval-after-load 'rustic
+  '(progn
+     (require 'lsp) ;; error without this
+     (when (not (require 'yasnippet nil 'no-err))
+       (setq lsp-enable-snippet nil)) ;; silence warning
+     (add-hook 'rustic-mode-hook 'my-rust-hook)))
+```
+
+* Emacs should now show you an autocompletion menu while typing
+  identifiers (longer than 3 characters) or while idling in other
+  spots.
+
+* To force a request of completion (i.e. after `.` or `::`) you can
+  use the `company-complete` function which is bound to `C-return` in
+  the above snippet.
 
 If you have `rust-mode` installed, ensure it is required before rustic since it has to be removed
 from `auto-mode-alist`. However you only need `rust-mode` if you want to use `emacs-racer`. There's some stuff that isn't included in rustic.
