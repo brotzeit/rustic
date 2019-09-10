@@ -148,9 +148,9 @@ error."
   (let ((rust-src-path (or rustic-racer-rust-src-path (getenv "RUST_SRC_PATH")))
         (cargo-home (or rustic-racer-cargo-home (getenv "CARGO_HOME"))))
     (when (null rust-src-path)
-      (user-error "You need to set `racer-rust-src-path' or `RUST_SRC_PATH'"))
+      (user-error "You need to set `rustic-racer-rust-src-path' or `RUST_SRC_PATH'"))
     (unless (file-exists-p rust-src-path)
-      (user-error "No such directory: %s. Please set `racer-rust-src-path' or `RUST_SRC_PATH'"
+      (user-error "No such directory: %s. Please set `rustic-racer-rust-src-path' or `RUST_SRC_PATH'"
                   rust-src-path))
     (let ((default-directory (rustic-buffer-workspace))
           (process-environment (append (list
