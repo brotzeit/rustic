@@ -4,7 +4,7 @@
 
 ;; Unlike compile.el, rustic makes use of a non dumb terminal in order to receive
 ;; all ANSI control sequences, which get translated by xterm-color.
-;; This file also adds a dervied compilation mode. Error matching regexes from
+;; This file also adds a derived compilation mode. Error matching regexes from
 ;; compile.el are removed.
 
 ;;; Code:

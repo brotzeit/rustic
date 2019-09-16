@@ -176,7 +176,7 @@ to the function arguments.  When nil, `->' will be indented one level."
 (define-derived-mode rustic-mode prog-mode "Rust"
   "Major mode for Rust code.
 
-\\{rustic-map}"
+\\{rustic-mode-map}"
   :group 'rustic
   :syntax-table rustic-syntax-table
 
@@ -279,7 +279,7 @@ to the function arguments.  When nil, `->' will be indented one level."
       symbol-end))
 
 (defconst rustic-keywords
-  '("as" "async"
+  '("as" "async" "await"
     "box" "break"
     "const" "continue" "crate"
     "do"
@@ -331,9 +331,9 @@ to the function arguments.  When nil, `->' will be indented one level."
 (defun rustic-re-shy (inner) (concat "\\(?:" inner "\\)"))
 (defun rustic-re-grab (inner) (concat "\\(" inner "\\)"))
 (defun rustic-re-item-def (itype)
-    (concat (rustic-re-word itype)
-	  (rustic-re-shy rustic-re-generic) "?"
-	  "[[:space:]]+" (rustic-re-grab rustic-re-ident)))
+  (concat (rustic-re-word itype)
+	      (rustic-re-shy rustic-re-generic) "?"
+	      "[[:space:]]+" (rustic-re-grab rustic-re-ident)))
 (defun rustic-re-word (inner) (concat "\\<" inner "\\>"))
 
 (defun rustic-path-font-lock-matcher (re-ident)
@@ -919,41 +919,44 @@ should be considered a paired angle bracket."
 	     (group "'")))
     "A regular expression matching a character literal."))
 
-(defun rustic--syntax-propertize-raw-string (end)
+(defun rustic--syntax-propertize-raw-string (str-start end)
   "A helper for rustic-syntax-propertize.
 
-If point is already in a raw string, this will apply the
-appropriate string syntax to the character up to the end of the
-raw string, or to `end', whichever comes first."
-  (let ((str-start (nth 8 (syntax-ppss))))
-    (when str-start
-      (when (save-excursion
-	          (goto-char str-start)
-	          (looking-at "r\\(#*\\)\\(\"\\)"))
-	    ;; In a raw string, so try to find the end.
-	    (let ((hashes (match-string 1)))
-	      ;; Match \ characters at the end of the string to suppress
-	      ;; their normal character-quote syntax.
-	      (when (re-search-forward (concat "\\(\\\\*\\)\\(\"" hashes "\\)") end t)
-	        (put-text-property (match-beginning 1) (match-end 1)
-			                   'syntax-table (string-to-syntax "_"))
-	        (put-text-property (1- (match-end 2)) (match-end 2)
-			                   'syntax-table (string-to-syntax "|"))
-	        (goto-char (match-end 0))))))))
+This will apply the appropriate string syntax to the character
+from the STR-START up to the end of the raw string, or to END,
+whichever comes first."
+  (when (save-excursion
+	      (goto-char str-start)
+	      (looking-at "r\\(#*\\)\\(\"\\)"))
+    ;; In a raw string, so try to find the end.
+    (let ((hashes (match-string 1)))
+      ;; Match \ characters at the end of the string to suppress
+      ;; their normal character-quote syntax.
+      (when (re-search-forward (concat "\\(\\\\*\\)\\(\"" hashes "\\)") end t)
+	    (put-text-property (match-beginning 1) (match-end 1)
+			               'syntax-table (string-to-syntax "_"))
+	    (put-text-property (1- (match-end 2)) (match-end 2)
+			               'syntax-table (string-to-syntax "|"))
+	    (goto-char (match-end 0))))))
 
 (defun rustic-syntax-propertize (start end)
-  "A `syntax-propertize-function' for `rustic'."
+  "A `syntax-propertize-function' to apply properties from START to END."
   (goto-char start)
-  (rustic--syntax-propertize-raw-string end)
+  (let ((str-start (rustic-in-str-or-cmnt)))
+    (when str-start
+      (rustic--syntax-propertize-raw-string str-start end)))
   (funcall
    (syntax-propertize-rules
     ;; Character literals.
     (rustic--char-literal-rx (1 "\"") (2 "\""))
     ;; Raw strings.
     ("\\(r\\)#*\""
-     (1 (prog1 "|"
-	      (goto-char (match-end 0))
-	      (rustic--syntax-propertize-raw-string end))))
+     (0 (ignore
+         (goto-char (match-end 0))
+         (unless (save-excursion (nth 8 (syntax-ppss (match-beginning 0))))
+           (put-text-property (match-beginning 1) (match-end 1)
+			                  'syntax-table (string-to-syntax "|"))
+           (rustic--syntax-propertize-raw-string (match-beginning 0) end)))))
     ("[<>]"
      (0 (ignore
 	     (when (save-match-data
