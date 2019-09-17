@@ -8,6 +8,7 @@
 
 - [Intro](#intro)
 - [Installation](#installation)
+- [Compilation](#compilation)
 - [Rustfmt](#rustfmt)
 - [LSP](#lsp)
     - [Server](#server)
@@ -18,6 +19,7 @@
 - [Org-babel](#org-babel)
 - [Popup](#popup)
 - [Cargo outdated](#cargo-outdated)
+- [Tests](#tests)
 - [Contributing](#contributing)
 
 <!-- markdown-toc end -->
@@ -162,7 +164,7 @@ installed before being used.
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
 
-## Tests
+# Tests
 
 To run the tests, you will need [Cask](https://github.com/cask/cask).
 
