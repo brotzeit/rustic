@@ -52,6 +52,11 @@
                  (symbol :tag nil "No LSP client"))
   :group 'rustic)
 
+(defcustom rustic-lsp-server-format nil
+  "Allow formatting through lsp server."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'rustic)
 
 ;;;;;;;;;;;;
 ;; Rustfmt 
@@ -208,9 +213,10 @@ were issues when using stdin for formatting."
                                    (eq (car mode) 'rust-mode)))
                                eglot-server-programs)))))
   ;; don't allow formatting with rls
-  (let ((feature :documentFormattingProvider))
-    (unless (-contains? eglot-ignored-server-capabilites feature)
-      (add-to-list 'eglot-ignored-server-capabilites feature))))
+  (unless rustic-lsp-format
+    (let ((feature :documentFormattingProvider))
+      (unless (-contains? eglot-ignored-server-capabilites feature)
+        (add-to-list 'eglot-ignored-server-capabilites feature)))))
 
 (defun rustic-setup-rls ()
   "Start the rls client's process.
