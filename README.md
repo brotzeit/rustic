@@ -84,7 +84,7 @@ RLS is the default and can be changed to rust-analyzer.
 The default package is `lsp-mode`. But you can also use `eglot`.
 
 ``` emacs-lisp
-(setq rustic-rls-pkg 'eglot)
+(setq rustic-lsp-client 'eglot)
 ```
 
 # Rustfix

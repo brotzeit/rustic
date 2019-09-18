@@ -33,10 +33,6 @@
 ;; Also, there's a problem with company-lsp's caching being too eager, sometimes
 ;; resulting in outdated completions.
 
-(defcustom rustic-analyzer-command '("ra_lsp_server")
-  "Command for calling rust analyzer."
-  :type '(repeat (string)))
-
 (defconst rustic-analyzer--notification-handlers
   '(("rust-analyzer/publishDecorations" . (lambda (_w _p)))))
 

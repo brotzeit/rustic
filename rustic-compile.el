@@ -336,7 +336,7 @@ buffers are formatted after saving if `rustic-format-on-save' is t."
                 (while (eq (process-status proc) 'run)
                   (sit-for 0.1))))))))))
 
-;; disable formatting for save-some-buffers
+;; disable formatting for `save-some-buffers'
 (defun rustic-save-some-buffers-advice (orig-fun &rest args)
   (let ((rustic-format-on-save nil))
     (apply orig-fun args)))

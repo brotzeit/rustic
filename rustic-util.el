@@ -30,12 +30,12 @@
   :group 'rustic)
 
 (defcustom rustic-playpen-url-format "https://play.rust-lang.org/?code=%s"
-  "Format string to use when submitting code to the playpen"
+  "Format string to use when submitting code to the playpen."
   :type 'string
   :group 'rustic)
 
 (defcustom rustic-shortener-url-format "https://is.gd/create.php?format=simple&url=%s"
-  "Format string to use for creating the shortened link of a playpen submission"
+  "Format string to use for creating the shortened link of a playpen submission."
   :type 'string
   :group 'rustic)
 
@@ -45,18 +45,30 @@
                  (symbol :tag 'rust-analyzer "rust-analyzer"))
   :group 'rustic)
 
-(defcustom rustic-rls-pkg 'lsp-mode
-  "Emacs package for interaction with rls."
+(defcustom rustic-lsp-client 'lsp-mode
+  "Emacs package for interaction with the language server."
   :type '(choice (symbol :tag 'eglot "eglot")
                  (symbol :tag 'lsp-mode "lsp-mode")
                  (symbol :tag nil "No LSP client"))
   :group 'rustic)
 
-(defcustom rustic-lsp-server-format nil
+(defcustom rustic-rls-pkg nil
+  "Emacs package for interaction with rls."
+  :type '(choice (symbol :tag 'eglot "eglot")
+                 (symbol :tag 'lsp-mode "lsp-mode")
+                 (symbol :tag nil "No LSP client"))
+  :group 'rustic)
+(make-obsolete 'rustic-rls-pkg 'rustic-lsp-client "0.18")
+
+(defcustom rustic-lsp-format nil
   "Allow formatting through lsp server."
   :type 'boolean
   :safe #'booleanp
   :group 'rustic)
+
+(defcustom rustic-analyzer-command '("ra_lsp_server")
+  "Command for calling rust analyzer."
+  :type '(repeat (string)))
 
 ;;;;;;;;;;;;
 ;; Rustfmt 
@@ -203,15 +215,18 @@ were issues when using stdin for formatting."
 
 (defun rustic-setup-eglot ()
   "Configure eglot for rustic."
-  ;; replace rust-mode with rustic
-  (let ((rls '(rustic-mode . (eglot-rls "rls"))))
-    (unless (member rls eglot-server-programs)
-      (setq eglot-server-programs
-            `(,rls
-              ,@(-remove-first (lambda (mode)
-                                 (when (symbolp (car mode))
-                                   (eq (car mode) 'rust-mode)))
-                               eglot-server-programs)))))
+  (if (equal rustic-lsp-server 'rls)
+      ;; add rustic to `eglot-server-programs'
+      (let ((rls '(rustic-mode . (eglot-rls "rls"))))
+        (unless (member rls eglot-server-programs)
+          (setq eglot-server-programs
+                `(,rls
+                  ;; replace rust-mode with rustic
+                  ,@(-remove-first (lambda (mode)
+                                     (when (symbolp (car mode))
+                                       (eq (car mode) 'rust-mode)))
+                                   eglot-server-programs)))))
+    (add-to-list 'eglot-server-programs `(rustic-mode . ,rustic-analyzer-command)))
   ;; don't allow formatting with rls
   (unless rustic-lsp-format
     (let ((feature :documentFormattingProvider))
@@ -226,11 +241,11 @@ If client isn't installed, offer to install it."
                       (or (package-installed-p client)
                           (featurep client)
                           (require client))))
-          (rls-pkg rustic-rls-pkg))
-      (cond ((eq rls-pkg nil)
+          (client (or rustic-rls-pkg rustic-lsp-client)))
+      (cond ((eq client nil)
              nil)
-            ((funcall client-p rls-pkg)
-             (if (eq rls-pkg 'eglot)
+            ((funcall client-p client)
+             (if (eq client 'eglot)
                  (eglot-ensure)
                (lsp-workspace-folders-add (rustic-buffer-workspace))
                (when (and (eq rustic-lsp-server 'rust-analyzer)
@@ -238,7 +253,7 @@ If client isn't installed, offer to install it."
                  (require 'rustic-lsp))
                (lsp)))
             (t
-             (rustic-install-rls-client-p rls-pkg))))))
+             (rustic-install-rls-client-p client))))))
 
 (defun rustic-install-rls-client-p (rls-pkg)
   (if (yes-or-no-p (format "%s not found. Install it ?" rls-pkg))
