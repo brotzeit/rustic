@@ -50,6 +50,8 @@ Simply put `(use-package rustic)` in your config and most stuff gets configured 
 If you have `rust-mode` installed, ensure it is required before rustic since it has to be removed
 from `auto-mode-alist`. However you only need `rust-mode` if you want to use `emacs-racer`. There's some stuff that isn't included in rustic.
 
+Note: If you have any issues with rustic, please try running emacs without `rust-mode` loaded.
+
 # Compilation
 
 Rustic defines a derived compilation-mode. Colors can be customized with several variables and you can also change the backtrace verbosity by changing the value of `rustic-compile-backtrace`.
@@ -65,11 +67,11 @@ The variable `rustic-format-on-save` allows you to turn off auto-format on save.
 Rustic uses the function `rustic-save-some-buffers` for saving buffers before compilation. 
 If you want buffers to be saved automatically, you can change the value of `buffer-save-without-query`.
 
-Note: Rust edition 2018 requires a `rustfmt.toml` file.
+Rust edition 2018 requires a `rustfmt.toml` file.
 
 # LSP
 
-You can disable LSP support by setting `rustic-rls-pkg` to nil.
+Disable LSP support by setting `rustic-lsp-client` to nil. You have to restart emacs when you switch lsp clients.
 
 ## Server
 
