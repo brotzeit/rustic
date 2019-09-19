@@ -237,14 +237,14 @@ were issues when using stdin for formatting."
   "Start the rls client's process.
 If client isn't installed, offer to install it."
   (unless noninteractive ;; TODO: fix tests to work with eglot/lsp-mode activated
-    (let ((client-p (lambda (client)
-                      (or (package-installed-p client)
-                          (featurep client)
-                          (require client))))
+    (let ((client-p (lambda (c)
+                      (if (package-installed-p c)
+                          (or (featurep c) (require c))
+                        nil)))
           (client (or rustic-rls-pkg rustic-lsp-client)))
       (cond ((eq client nil)
              nil)
-            ((funcall client-p client)
+            ((not (eq (funcall client-p client) nil))
              (if (eq client 'eglot)
                  (eglot-ensure)
                (lsp-workspace-folders-add (rustic-buffer-workspace))
