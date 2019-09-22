@@ -54,7 +54,13 @@ Note: If you have any issues with rustic, please try running emacs without `rust
 
 # Compilation
 
-Rustic defines a derived compilation-mode. Colors can be customized with several variables and you can also change the backtrace verbosity by changing the value of `rustic-compile-backtrace`.
+Rustic defines a derived compilation-mode. Colors can be customized with several defcustoms.
+
+Customization:
+
+- `rustic-compile-display-method`: choose function that displays the compilation buffer
+- `rustic-compile-backtrace`: change backtrace verbosity
+- `rustic-compile-command`: default command for rust compilation
 
 Supported compile.el variables:
 - compilation-arguments
@@ -62,16 +68,19 @@ Supported compile.el variables:
 
 # Rustfmt
 
-You can format your code with `rustic-format-buffer` or `rustic-cargo-fmt`.
-The variable `rustic-format-on-save` allows you to turn off auto-format on save.
-Rustic uses the function `rustic-save-some-buffers` for saving buffers before compilation. 
-If you want buffers to be saved automatically, you can change the value of `buffer-save-without-query`.
+You can format your code with `rustic-format-buffer` or `rustic-cargo-fmt`. Rustic uses the function `rustic-save-some-buffers` for saving buffers before compilation. To save buffers automatically, you can change the value of `buffer-save-without-query`. In case you prefer using lsp for formatting, turn off `rustic-format-on-save` and set `rustic-lsp-format`to `t`.
 
 Rust edition 2018 requires a `rustfmt.toml` file.
 
+Customization:
+
+- `rustic-format-on-save`: turn off auto-format on save
+- `rustic-rustfmt-bin`: path to rustfmt executable
+- `rustic-format-display-method`: default function used for displaying rustfmt buffer (use the function `ignore`, if you don't want the buffer to be displayed)
+
 # LSP
 
-Disable LSP support by setting `rustic-lsp-client` to nil. You have to restart emacs when you switch lsp clients.
+Disable LSP support by setting `rustic-lsp-client` to nil. You have to restart emacs when you switch lsp clients. 
 
 ## Server
 
