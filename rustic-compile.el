@@ -306,7 +306,7 @@ If NO-ERROR is t, don't throw error if user chooses not to kill running process.
   "Unlike `save-some-buffers', only consider project related files.
 
 The variable `buffer-save-without-query' can be used for customization and
-buffers are formatted after saving if `rustic-format-on-save' is t."
+buffers are formatted after saving if turned on by `rustic-format-trigger'."
   (let ((buffers (condition-case ()
                      (projectile-buffers-with-file (projectile-project-buffers))
                    (buffer-list)))
@@ -318,7 +318,8 @@ buffers are formatted after saving if `rustic-format-on-save' is t."
     	         (buffer-modified-p buffer))
         (with-current-buffer buffer
           (let ((saved-p nil))
-            (let ((rustic-format-on-save nil))
+            (let ((rustic-format-trigger nil)
+                  (rustic-format-on-save nil))
               (setq saved-p
                     (if buffer-save-without-query
                         (progn (save-buffer) t)
@@ -326,9 +327,7 @@ buffers are formatted after saving if `rustic-format-on-save' is t."
                                                (buffer-file-name buffer)))
                           (progn (save-buffer) t)
                         nil))))
-            (when (and saved-p
-                       rustic-format-on-save
-                       (eq major-mode 'rustic-mode))
+            (when (and saved-p (rustic-format-p) (eq major-mode 'rustic-mode))
               (let* ((file (buffer-file-name buffer))
                      (proc (rustic-format-start-process 'rustic-format-file-sentinel
                                                         :buffer buffer
@@ -338,7 +337,8 @@ buffers are formatted after saving if `rustic-format-on-save' is t."
 
 ;; disable formatting for `save-some-buffers'
 (defun rustic-save-some-buffers-advice (orig-fun &rest args)
-  (let ((rustic-format-on-save nil))
+  (let ((rustic-format-trigger nil)
+        (rustic-format-on-save nil))
     (apply orig-fun args)))
 
 (advice-add 'save-some-buffers :around #'rustic-save-some-buffers-advice)

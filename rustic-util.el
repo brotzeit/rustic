@@ -13,11 +13,24 @@
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
 
-(defcustom rustic-format-on-save t
+(defcustom rustic-format-trigger 'on-save
   "Format future rust buffers before saving using rustfmt."
+  :type '(choice (symbol :tag 'on-save "Format buffer before saving.")
+                 (symbol :tag 'on-compile "Run 'cargo fmt' before compilation.")
+                 (symbol :tag nil "Don't format automatically."))
+  :group 'rustic)
+
+(defcustom rustic-format-on-save nil
+  "Format rust buffers before saving using rustfmt."
   :type 'boolean
   :safe #'booleanp
   :group 'rustic)
+(make-obsolete 'rustic-format-on-save 'rustic-format-trigger "0.19")
+
+(defun rustic-format-p ()
+  "Checks if either deprecated `rustic-format-on-save' or `rustic-format-trigger' is set
+to format buffer when saving."
+  (or rustic-format-on-save (eq rustic-format-trigger 'on-save)))
 
 (defcustom rustic-rustfmt-bin "rustfmt"
   "Path to rustfmt executable."
@@ -149,18 +162,6 @@ Use `:command' when formatting files and `:stdin' for strings."
 
 (define-derived-mode rustic-cargo-fmt-mode rustic-compilation-mode "cargo-fmt"
   :group 'rustic)
-
-;;;###autoload
-(defun rustic-format--enable-format-on-save ()
-  "Enable formatting using rustfmt when saving buffer."
-  (interactive)
-  (setq-local rustic-format-on-save t))
-
-;;;###autoload
-(defun rustic-format--disable-format-on-save ()
-  "Disable formatting using rustfmt when saving buffer."
-  (interactive)
-  (setq-local rustic-format-on-save nil))
 
 ;;;###autoload
 (defun rustic-cargo-fmt ()

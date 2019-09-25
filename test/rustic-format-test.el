@@ -51,7 +51,8 @@
          (file (progn (shell-command-to-string "touch test.rs")
                       (expand-file-name "test.rs")))
          (buffer-read-only nil))
-    (let ((rustic-format-on-save t))
+    (let ((rustic-format-trigger 'on-save)
+          (rustic-format-on-save t))
       (with-current-buffer buf
         (write-file file)
         (erase-buffer)
@@ -67,7 +68,8 @@
     (let ((buf (get-buffer-create "test-save-no-format"))
           (file (progn (shell-command-to-string "touch test-no-format.rs")
                        (expand-file-name "test-no-format.rs")))
-          (rustic-format-on-save nil))
+          (rustic-format-on-save nil)
+          (rustic-format-trigger nil))
       (with-current-buffer buf
         (write-file file)
         (erase-buffer)
