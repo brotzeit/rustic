@@ -45,7 +45,14 @@ Differences with rust-mode:
 
 # Installation
 
-Simply put `(use-package rustic)` in your config and most stuff gets configured automatically. 
+Simply put `(use-package rustic)` in your config and most stuff gets configured automatically.
+
+It's necessary to include the gnu archive for a package dependency:
+
+```elisp
+(setq package-archives '(("melpa" . "http://melpa.org/packages/")
+                         ("gnu" . "http://elpa.gnu.org/packages/")))
+```
 
 If you have `rust-mode` installed, ensure it is required before rustic since it has to be removed
 from `auto-mode-alist`. However you only need `rust-mode` if you want to use `emacs-racer`. There's some stuff that isn't included in rustic.
