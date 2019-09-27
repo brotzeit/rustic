@@ -170,20 +170,23 @@ Use `:command' when formatting files and `:stdin' for strings."
   (let ((command (list rustic-cargo-bin "fmt"))
         (buffer rustic-format-buffer-name)
         (proc rustic-format-process-name)
-        (mode 'rustic-cargo-fmt-mode)
-        (sentinel #'(lambda (proc output)
-                      (let ((proc-buffer (process-buffer proc))
-                            (inhibit-read-only t))
-                        (with-current-buffer proc-buffer
-                          (when (string-match-p "^finished" output)
-                            (kill-buffer proc-buffer)
-                            (message "Workspace formatted with cargo-fmt.")))))))
+        (mode 'rustic-cargo-fmt-mode))
     (rustic-compilation-process-live)
     (rustic-compilation-start command
                               :buffer buffer
                               :process proc
                               :mode mode
-                              :sentinel sentinel)))
+                              :sentinel #'rustic-cargo-fmt-sentinel)))
+
+(defun rustic-cargo-fmt-sentinel (proc output)
+  "Sentinel for formatting with `rustic-cargo-fmt'."
+  (let ((proc-buffer (process-buffer proc))
+        (inhibit-read-only t))
+    (with-current-buffer proc-buffer
+      (if (not (string-match-p "^finished" output))
+          (funcall rustic-compile-display-method proc-buffer)
+        (kill-buffer proc-buffer)
+        (message "Workspace formatted with cargo-fmt.")))))
 
 (defun rustic-format-buffer (&optional no-stdin)
   "Format the current buffer using rustfmt.
