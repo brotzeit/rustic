@@ -164,7 +164,7 @@ Use `:command' when formatting files and `:stdin' for strings."
   :group 'rustic)
 
 ;;;###autoload
-(defun rustic-cargo-fmt ()
+(defun rustic-cargo-fmt (&optional no-fmt)
   "Use rustfmt via cargo."
   (interactive)
   (let ((command (list rustic-cargo-bin "fmt"))
@@ -173,6 +173,8 @@ Use `:command' when formatting files and `:stdin' for strings."
         (mode 'rustic-cargo-fmt-mode))
     (rustic-compilation-process-live)
     (rustic-compilation-start command
+                              :no-display t
+                              :no-fmt no-fmt
                               :buffer buffer
                               :process proc
                               :mode mode
