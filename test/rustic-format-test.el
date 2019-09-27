@@ -76,3 +76,27 @@
         (save-buffer)
         (should (string= (buffer-string) (concat string "\n")))))
     (kill-buffer buf)))
+
+(ert-deftest rustic-test-cargo-format ()
+  (let* ((buffer1 (get-buffer-create "b1"))
+         (string "fn main()      {}")
+         (formatted-string "fn main() {}\n")
+         (dir (rustic-babel-generate-project t)))
+    (let* ((default-directory dir)
+           (src (concat dir "/src"))
+           (file1 (expand-file-name "main.rs" src))
+           (rustic-format-trigger nil))
+      (with-current-buffer buffer1
+        (insert string)
+        (write-file file1))
+
+      ;; run 'cargo fmt'
+      (call-interactively 'rustic-cargo-fmt)
+      (if-let ((proc (get-process rustic-format-process-name)))
+          (while (eq (process-status proc) 'run)
+            (sit-for 0.01)))
+      (with-current-buffer buffer1
+        (revert-buffer t t)
+        (should (string= (buffer-string) formatted-string))))
+    (kill-buffer buffer1)))
+
