@@ -87,7 +87,7 @@
          (src (concat dir "/src"))
          (file (expand-file-name "main.rs" src))
          (buffer-save-without-query t)
-         (rustic-format-on-save nil))
+         (rustic-format-trigger nil))
     (with-current-buffer buffer
       (write-file file)
       (insert string)
