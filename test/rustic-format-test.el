@@ -100,3 +100,25 @@
         (should (string= (buffer-string) formatted-string))))
     (kill-buffer buffer1)))
 
+;; when rustic-format-trigger is 'on-compile
+(ert-deftest rustic-test-trigger-format-on-compile ()
+  (let* ((buffer1 (get-buffer-create "b1"))
+         (string "fn main()      {}")
+         (formatted-string "fn main() {}\n")
+         (dir (rustic-babel-generate-project t)))
+    (let* ((default-directory dir)
+           (src (concat dir "/src"))
+           (file1 (expand-file-name "main.rs" src))
+           (rustic-format-trigger 'on-compile))
+      (with-current-buffer buffer1
+        (insert string)
+        (write-file file1))
+
+      (call-interactively 'rustic-compile)
+      (if-let ((proc (get-process rustic-format-process-name)))
+          (while (eq (process-status proc) 'run)
+            (sit-for 0.01)))
+      (with-current-buffer buffer1
+        (revert-buffer t t)
+        (should (string= (buffer-string) formatted-string)))
+      (kill-buffer buffer1))))
