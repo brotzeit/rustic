@@ -215,24 +215,49 @@ Set environment variables for rust process."
       (sit-for 0))))
 
 (defun rustic-compilation-start (command &rest args)
-  "Start a compilation process with COMMAND."
-  (let ((buf (get-buffer-create
-              (or (plist-get args :buffer) rustic-compilation-buffer-name)))
-        (process (or (plist-get args :process) rustic-compilation-process-name))
-        (mode (or (plist-get args :mode) 'rustic-compilation-mode))
-        (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
-        (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
-    (when compilation-scroll-output
-      (rustic-compilation-setup-buffer buf directory mode))
-    (funcall rustic-compile-display-method buf)
-    (unless compilation-scroll-output
-      (rustic-compilation-setup-buffer buf directory mode))
-    (with-current-buffer buf
-      (rustic-make-process :name process
-                           :buffer buf
-                           :command command
-                           :filter #'rustic-compilation-filter
-                           :sentinel sentinel))))
+  "Start a compilation process with COMMAND.
+
+:no-display - don't display buffer when starting compilation process
+:no-fmt - don't format with 'cargo fmt' before running compilation
+:buffer - name for process buffer
+:process - name for compilation process
+:mode - mode for process buffer
+:directory - set `default-directory'
+:sentinel - process sentinel
+"
+  ;; TODO: find a better solution for formatting with `rustic-cargo-fmt'
+  ;;       before compilation
+
+  ;; format crate before running actual compile command when `rustic-format-trigger'
+  ;; is set to 'on-compile
+  (catch 'fmt-error
+    (when (and (eq rustic-format-trigger 'on-compile) (not (plist-get args :no-fmt)))
+      (let ((proc (rustic-cargo-fmt t)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.1))
+        (when (not (zerop (process-exit-status proc)))
+          (funcall rustic-compile-display-method (process-buffer proc))
+          (throw 'fmt-error "cargo-fmt failed"))))
+
+    ;; compile with given parameters
+    (let ((buf (get-buffer-create
+                (or (plist-get args :buffer) rustic-compilation-buffer-name)))
+          (process (or (plist-get args :process) rustic-compilation-process-name))
+          (mode (or (plist-get args :mode) 'rustic-compilation-mode))
+          (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
+          (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
+      (when compilation-scroll-output
+        (rustic-compilation-setup-buffer buf directory mode))
+      (unless (plist-get args :no-display)
+        (funcall rustic-compile-display-method buf))
+      (unless compilation-scroll-output
+        (rustic-compilation-setup-buffer buf directory mode))
+      (with-current-buffer buf
+        (rustic-make-process :name process
+                             :buffer buf
+                             :command command
+                             :filter #'rustic-compilation-filter
+                             :sentinel sentinel)))))
 
 (defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.
@@ -318,6 +343,7 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
     	         (buffer-modified-p buffer))
         (with-current-buffer buffer
           (let ((saved-p nil))
+            ;; also set rustic-format-on-save for backwards compatibility
             (let ((rustic-format-trigger nil)
                   (rustic-format-on-save nil))
               (setq saved-p
