@@ -100,7 +100,7 @@
         (should (string= (buffer-string) formatted-string))))
     (kill-buffer buffer1)))
 
-;; when rustic-format-trigger is 'on-compile
+;; `rustic-format-trigger' is set to 'on-compile
 (ert-deftest rustic-test-trigger-format-on-compile ()
   (let* ((buffer1 (get-buffer-create "b1"))
          (string "fn main()      {}")
@@ -114,8 +114,8 @@
         (insert string)
         (write-file file1))
 
-      (call-interactively 'rustic-compile)
-      (if-let ((proc (get-process rustic-format-process-name)))
+      ;; run `rustic-compile'
+      (if-let ((proc (call-interactively 'rustic-compile)))
           (while (eq (process-status proc) 'run)
             (sit-for 0.01)))
       (with-current-buffer buffer1
