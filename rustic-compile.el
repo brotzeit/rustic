@@ -215,32 +215,29 @@ Set environment variables for rust process."
       (sit-for 0))))
 
 (defun rustic-compilation-start (command &rest args)
-  "Start a compilation process with COMMAND.
-
-:no-display - don't display buffer when starting compilation process
-:no-fmt - don't format with 'cargo fmt' before running compilation
-:buffer - name for process buffer
-:process - name for compilation process
-:mode - mode for process buffer
-:directory - set `default-directory'
-:sentinel - process sentinel
-"
-  ;; TODO: find a better solution for formatting with `rustic-cargo-fmt'
-  ;;       before compilation
-
-  ;; format crate before running actual compile command when `rustic-format-trigger'
-  ;; is set to 'on-compile
+  "Format crate before running actual compile command when `rustic-format-trigger'
+is set to 'on-compile."
   (catch 'fmt-error
-    (when (and (eq rustic-format-trigger 'on-compile) (not (plist-get args :no-fmt)))
+    (when (and (eq rustic-format-trigger 'on-compile))
       (let ((proc (rustic-cargo-fmt t)))
         (while (eq (process-status proc) 'run)
           (sit-for 0.1))
         (when (not (zerop (process-exit-status proc)))
           (funcall rustic-compile-display-method (process-buffer proc))
           (throw 'fmt-error "cargo-fmt failed"))))
+  (rustic-compilation command args)))
 
-    ;; compile with given parameters
-    (let ((buf (get-buffer-create
+(defun rustic-compilation (command &rest args)
+  "Start a compilation process with COMMAND.
+
+:no-display - don't display buffer when starting compilation process
+:buffer - name for process buffer
+:process - name for compilation process
+:mode - mode for process buffer
+:directory - set `default-directory'
+:sentinel - process sentinel
+"
+  (let ((buf (get-buffer-create
                 (or (plist-get args :buffer) rustic-compilation-buffer-name)))
           (process (or (plist-get args :process) rustic-compilation-process-name))
           (mode (or (plist-get args :mode) 'rustic-compilation-mode))
@@ -257,7 +254,7 @@ Set environment variables for rust process."
                              :buffer buf
                              :command command
                              :filter #'rustic-compilation-filter
-                             :sentinel sentinel)))))
+                             :sentinel sentinel))))
 
 (defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.
@@ -446,7 +443,7 @@ Otherwise use provided argument ARG and store it in
   (let* ((command (or compilation-arguments rustic-compile-command))
          (dir compilation-directory))
     (rustic-compilation-process-live)
-    (rustic-compilation-start (split-string command) :directory dir)))
+    (rustic-compilation (split-string command) :directory dir)))
 
 (provide 'rustic-compile)
 ;;; rustic-compile.el ends here
