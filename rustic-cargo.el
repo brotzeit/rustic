@@ -414,7 +414,6 @@ If BIN is not nil, create a binary application, otherwise a library."
   (interactive)
   (rustic-run-cargo-command "cargo bench"))
 
-
 ;;;###autoload
 (defun rustic-cargo-build-doc ()
   "Build the documentation for the current project."
@@ -423,14 +422,16 @@ If BIN is not nil, create a binary application, otherwise a library."
       (rustic-run-cargo-command "cargo doc")
     (rustic-run-cargo-command "cargo doc --no-deps")))
 
+;; TODO: buffer with cargo output should be in rustic-compilation-mode
 ;;;###autoload
 (defun rustic-cargo-doc ()
   "Open the documentation for the current project in a browser.
 The documentation is built if necessary."
   (interactive)
   (if (y-or-n-p "Open docs for dependencies as well?")
-      (rustic-run-cargo-command "cargo doc --open")
-    (rustic-run-cargo-command "cargo doc --open --no-deps")))
+      ;; open docs only works with synchronous process
+      (shell-command "cargo doc --open")
+    (shell-command "cargo doc --open --no-deps")))
 
 (provide 'rustic-cargo)
 ;;; rustic-cargo.el ends here
