@@ -74,9 +74,12 @@ Rust edition 2018 requires a `rustfmt.toml` file.
 
 Customization:
 
-- `rustic-format-on-save`: turn off auto-format on save
 - `rustic-rustfmt-bin`: path to rustfmt executable
 - `rustic-format-display-method`: default function used for displaying rustfmt buffer (use the function `ignore`, if you don't want the buffer to be displayed)
+- `rustic-format-trigger`:
+    'on-save : format buffer before saving
+    'on-compile : run 'cargo fmt' before compilation
+    nil : don't format automatically
 
 # LSP
 

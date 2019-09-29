@@ -13,7 +13,7 @@
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
 
-(defcustom rustic-format-trigger 'on-save
+(defcustom rustic-format-trigger nil
   "Format future rust buffers before saving using rustfmt."
   :type '(choice (symbol :tag 'on-save "Format buffer before saving.")
                  (symbol :tag 'on-compile "Run 'cargo fmt' before compilation.")
@@ -27,7 +27,7 @@
   :group 'rustic)
 (make-obsolete 'rustic-format-on-save 'rustic-format-trigger "0.19")
 
-(defun rustic-format-p ()
+(defun rustic-format-on-save-p ()
   "Checks if either deprecated `rustic-format-on-save' or `rustic-format-trigger' is set
 to format buffer when saving."
   (or rustic-format-on-save (eq rustic-format-trigger 'on-save)))

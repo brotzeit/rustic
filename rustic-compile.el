@@ -350,7 +350,7 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
                                                (buffer-file-name buffer)))
                           (progn (save-buffer) t)
                         nil))))
-            (when (and saved-p (rustic-format-p) (eq major-mode 'rustic-mode))
+            (when (and saved-p (rustic-format-on-save-p) (eq major-mode 'rustic-mode))
               (let* ((file (buffer-file-name buffer))
                      (proc (rustic-format-start-process 'rustic-format-file-sentinel
                                                         :buffer buffer
