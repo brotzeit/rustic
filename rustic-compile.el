@@ -215,24 +215,47 @@ Set environment variables for rust process."
       (sit-for 0))))
 
 (defun rustic-compilation-start (command &rest args)
-  "Start a compilation process with COMMAND."
+  "Format crate before running actual compile command when `rustic-format-trigger'
+is set to 'on-compile. If rustfmt fails, don't start compilation."
+  (let ((compile-p t))
+    (when (and (eq rustic-format-trigger 'on-compile))
+      (let ((proc (rustic-cargo-fmt)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.1))
+        (when (not (zerop (process-exit-status proc)))
+          (funcall rustic-compile-display-method (process-buffer proc))
+          (setq compile-p nil))))
+    (when compile-p
+      (rustic-compilation command args))))
+
+(defun rustic-compilation (command &rest args)
+  "Start a compilation process with COMMAND.
+
+:no-display - don't display buffer when starting compilation process
+:buffer - name for process buffer
+:process - name for compilation process
+:mode - mode for process buffer
+:directory - set `default-directory'
+:sentinel - process sentinel
+"
   (let ((buf (get-buffer-create
-              (or (plist-get args :buffer) rustic-compilation-buffer-name)))
-        (process (or (plist-get args :process) rustic-compilation-process-name))
-        (mode (or (plist-get args :mode) 'rustic-compilation-mode))
-        (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
-        (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
-    (when compilation-scroll-output
-      (rustic-compilation-setup-buffer buf directory mode))
-    (funcall rustic-compile-display-method buf)
-    (unless compilation-scroll-output
-      (rustic-compilation-setup-buffer buf directory mode))
-    (with-current-buffer buf
-      (rustic-make-process :name process
-                           :buffer buf
-                           :command command
-                           :filter #'rustic-compilation-filter
-                           :sentinel sentinel))))
+                (or (plist-get args :buffer) rustic-compilation-buffer-name)))
+          (process (or (plist-get args :process) rustic-compilation-process-name))
+          (mode (or (plist-get args :mode) 'rustic-compilation-mode))
+          (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
+          (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
+      (when compilation-scroll-output
+        (rustic-compilation-setup-buffer buf directory mode))
+      (unless (plist-get args :no-display)
+        (funcall rustic-compile-display-method buf))
+      (unless compilation-scroll-output
+        (rustic-compilation-setup-buffer buf directory mode))
+      (with-current-buffer buf
+        (rustic-make-process :name process
+                             :buffer buf
+                             :command command
+                             :filter #'rustic-compilation-filter
+                             :sentinel sentinel))))
 
 (defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.
@@ -306,7 +329,7 @@ If NO-ERROR is t, don't throw error if user chooses not to kill running process.
   "Unlike `save-some-buffers', only consider project related files.
 
 The variable `buffer-save-without-query' can be used for customization and
-buffers are formatted after saving if `rustic-format-on-save' is t."
+buffers are formatted after saving if turned on by `rustic-format-trigger'."
   (let ((buffers (condition-case ()
                      (projectile-buffers-with-file (projectile-project-buffers))
                    (buffer-list)))
@@ -318,7 +341,9 @@ buffers are formatted after saving if `rustic-format-on-save' is t."
     	         (buffer-modified-p buffer))
         (with-current-buffer buffer
           (let ((saved-p nil))
-            (let ((rustic-format-on-save nil))
+            ;; also set rustic-format-on-save for backwards compatibility
+            (let ((rustic-format-trigger nil)
+                  (rustic-format-on-save nil))
               (setq saved-p
                     (if buffer-save-without-query
                         (progn (save-buffer) t)
@@ -326,9 +351,7 @@ buffers are formatted after saving if `rustic-format-on-save' is t."
                                                (buffer-file-name buffer)))
                           (progn (save-buffer) t)
                         nil))))
-            (when (and saved-p
-                       rustic-format-on-save
-                       (eq major-mode 'rustic-mode))
+            (when (and saved-p (rustic-format-on-save-p) (eq major-mode 'rustic-mode))
               (let* ((file (buffer-file-name buffer))
                      (proc (rustic-format-start-process 'rustic-format-file-sentinel
                                                         :buffer buffer
@@ -338,7 +361,8 @@ buffers are formatted after saving if `rustic-format-on-save' is t."
 
 ;; disable formatting for `save-some-buffers'
 (defun rustic-save-some-buffers-advice (orig-fun &rest args)
-  (let ((rustic-format-on-save nil))
+  (let ((rustic-format-trigger nil)
+        (rustic-format-on-save nil))
     (apply orig-fun args)))
 
 (advice-add 'save-some-buffers :around #'rustic-save-some-buffers-advice)
@@ -420,7 +444,7 @@ Otherwise use provided argument ARG and store it in
   (let* ((command (or compilation-arguments rustic-compile-command))
          (dir compilation-directory))
     (rustic-compilation-process-live)
-    (rustic-compilation-start (split-string command) :directory dir)))
+    (rustic-compilation (split-string command) :directory dir)))
 
 (provide 'rustic-compile)
 ;;; rustic-compile.el ends here

@@ -51,7 +51,7 @@
          (file (progn (shell-command-to-string "touch test.rs")
                       (expand-file-name "test.rs")))
          (buffer-read-only nil))
-    (let ((rustic-format-on-save t))
+    (let ((rustic-format-trigger 'on-save))
       (with-current-buffer buf
         (write-file file)
         (erase-buffer)
@@ -67,7 +67,7 @@
     (let ((buf (get-buffer-create "test-save-no-format"))
           (file (progn (shell-command-to-string "touch test-no-format.rs")
                        (expand-file-name "test-no-format.rs")))
-          (rustic-format-on-save nil))
+          (rustic-format-trigger nil))
       (with-current-buffer buf
         (write-file file)
         (erase-buffer)
@@ -76,3 +76,49 @@
         (save-buffer)
         (should (string= (buffer-string) (concat string "\n")))))
     (kill-buffer buf)))
+
+(ert-deftest rustic-test-cargo-format ()
+  (let* ((buffer1 (get-buffer-create "b1"))
+         (string "fn main()      {}")
+         (formatted-string "fn main() {}\n")
+         (dir (rustic-babel-generate-project t)))
+    (let* ((default-directory dir)
+           (src (concat dir "/src"))
+           (file1 (expand-file-name "main.rs" src))
+           (rustic-format-trigger nil))
+      (with-current-buffer buffer1
+        (insert string)
+        (write-file file1))
+
+      ;; run 'cargo fmt'
+      (call-interactively 'rustic-cargo-fmt)
+      (if-let ((proc (get-process rustic-format-process-name)))
+          (while (eq (process-status proc) 'run)
+            (sit-for 0.01)))
+      (with-current-buffer buffer1
+        (revert-buffer t t)
+        (should (string= (buffer-string) formatted-string))))
+    (kill-buffer buffer1)))
+
+;; `rustic-format-trigger' is set to 'on-compile
+(ert-deftest rustic-test-trigger-format-on-compile ()
+  (let* ((buffer1 (get-buffer-create "b1"))
+         (string "fn main()      {}")
+         (formatted-string "fn main() {}\n")
+         (dir (rustic-babel-generate-project t)))
+    (let* ((default-directory dir)
+           (src (concat dir "/src"))
+           (file1 (expand-file-name "main.rs" src))
+           (rustic-format-trigger 'on-compile))
+      (with-current-buffer buffer1
+        (insert string)
+        (write-file file1))
+
+      ;; run `rustic-compile'
+      (if-let ((proc (call-interactively 'rustic-compile)))
+          (while (eq (process-status proc) 'run)
+            (sit-for 0.01)))
+      (with-current-buffer buffer1
+        (revert-buffer t t)
+        (should (string= (buffer-string) formatted-string)))
+      (kill-buffer buffer1))))
