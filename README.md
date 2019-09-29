@@ -58,11 +58,12 @@ Rustic defines a derived compilation-mode. Colors can be customized with several
 
 Customization:
 
-- `rustic-compile-display-method`: choose function that displays the compilation buffer
-- `rustic-compile-backtrace`: change backtrace verbosity
-- `rustic-compile-command`: default command for rust compilation
+- `rustic-compile-display-method` choose function that displays the compilation buffer
+- `rustic-compile-backtrace`      change backtrace verbosity
+- `rustic-compile-command`        default command for rust compilation
 
 Supported compile.el variables:
+
 - compilation-arguments
 - compilation-scroll-output (not `first-error`)
 
@@ -74,16 +75,20 @@ Rust edition 2018 requires a `rustfmt.toml` file.
 
 Customization:
 
-- `rustic-rustfmt-bin`: path to rustfmt executable
-- `rustic-format-display-method`: default function used for displaying rustfmt buffer (use the function `ignore`, if you don't want the buffer to be displayed)
-- `rustic-format-trigger`:
-    'on-save : format buffer before saving
-    'on-compile : run 'cargo fmt' before compilation
-    nil : don't format automatically
+- `rustic-rustfmt-bin`           path to rustfmt executable
+- `rustic-format-display-method` default function used for displaying rustfmt buffer (use the function `ignore`, if you don't want the buffer to be displayed)
+- `rustic-format-trigger` 
+  * `'on-save`    format buffer before saving
+  * `'on-compile` run 'cargo fmt' before compilation
+  * `nil`         don't format automatically
 
 # LSP
 
-Disable LSP support by setting `rustic-lsp-client` to nil. You have to restart emacs when you switch lsp clients. 
+Disable LSP support by setting `rustic-lsp-client` to nil. You have to restart emacs when you switch lsp clients.
+
+LSP commands:
+
+`xref-find-definitions` find definition
 
 ## Server
 
@@ -125,13 +130,8 @@ By default, rustic displays the number of errors and warnings in the mode-line. 
 
 # Org-babel
 
-The executed blocks run asynchronously and a running babel process is indicated by a spinner in the 
-mode line. It can be turned off with `rustic-display-spinner`. If you prefer to see the output in a seperate buffer you can set `rustic-babel-display-compilation-buffer` to `t`.
-
-After a successful build, source blocks get formatted by default. This can be changed with 
-`rustic-babel-format-src-block`.
-
-It's also possible to use crates in babel blocks.
+Blocks run asynchronously and a running babel process is indicated by a spinner
+in the mode-line. It's possible to use crates in babel blocks.
 
 ```
 #+BEGIN_SRC rustic :crates '((regex . 0.2))
@@ -149,6 +149,12 @@ It's also possible to use crates in babel blocks.
 Supported org babel parameters:
 
 Write to file `:results file :file ~/babel-file`
+
+Customization:
+
+- `rustic-babel-format-src-block` format block after successful build
+- `rustic-babel-display-compilation-buffer` display compilation buffer of babel process
+- `rustic-display-spinner` turn off spinner in the mode-line
 
 # Popup
 
