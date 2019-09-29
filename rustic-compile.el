@@ -216,16 +216,17 @@ Set environment variables for rust process."
 
 (defun rustic-compilation-start (command &rest args)
   "Format crate before running actual compile command when `rustic-format-trigger'
-is set to 'on-compile."
-  (catch 'fmt-error
+is set to 'on-compile. If rustfmt fails, don't start compilation."
+  (let ((compile-p t))
     (when (and (eq rustic-format-trigger 'on-compile))
-      (let ((proc (rustic-cargo-fmt t)))
+      (let ((proc (rustic-cargo-fmt)))
         (while (eq (process-status proc) 'run)
           (sit-for 0.1))
         (when (not (zerop (process-exit-status proc)))
           (funcall rustic-compile-display-method (process-buffer proc))
-          (throw 'fmt-error "cargo-fmt failed"))))
-  (rustic-compilation command args)))
+          (setq compile-p nil))))
+    (when compile-p
+      (rustic-compilation command args))))
 
 (defun rustic-compilation (command &rest args)
   "Start a compilation process with COMMAND.
