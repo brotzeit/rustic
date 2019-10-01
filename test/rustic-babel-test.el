@@ -115,8 +115,15 @@
          (buf (rustic-test-get-babel-block string)))
     (with-current-buffer buf
       (rustic-test-babel-execute-block buf)
-      (sit-for 1)
-      (should (string= (org-element-property :value (org-element-at-point)) formatted-string))))
+      (cl-loop with result
+               repeat 3
+               until (setq result
+                           (string=
+                            (org-element-property :value (org-element-at-point))
+                            formatted-string))
+               do (sleep-for 0 1000)
+               do (message (buffer-string))
+               finally (should result))))
   ;; turn off rustic-babel-format-src-block
   (let* ((string "fn main()      {}")
          (newstring (concat string "\n"))
@@ -124,7 +131,14 @@
          (rustic-babel-format-src-block nil))
     (with-current-buffer buf
       (rustic-test-babel-execute-block buf)
-      (should (string= (org-element-property :value (org-element-at-point)) newstring)))))
+      (cl-loop with result
+               repeat 3
+               until (setq result
+                           (string=
+                            (org-element-property :value (org-element-at-point))
+                            newstring))
+               do (sleep-for 0 1000)
+               finally (should result)))))
 
 (ert-deftest rustic-test-babel-crate ()
   (let* ((string "extern crate rand;

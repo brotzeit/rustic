@@ -123,7 +123,7 @@ execution with rustfmt."
                 (goto-char (match-beginning 0))
                 (setq result (buffer-substring-no-properties (point) (line-end-position)))))))
         (rustic-babel-run-update-result-block result)
-        (rustic-with-spinner rustic-babel-spinner nil nil)  
+        (rustic-with-spinner rustic-babel-spinner nil nil)
         (pop-to-buffer proc-buffer)))))
 
 (defun rustic-babel-build-update-result-block (result)
@@ -211,8 +211,11 @@ directory DIR."
             (version (number-to-string (cdr crate))))
         (setq dependencies (concat dependencies name " = " "\"" version "\"" "\n"))))
     (setq dependencies (concat "[dependencies]\n" dependencies) )
+    (make-directory (file-name-directory toml) t)
     (with-temp-file toml
-      (insert-file-contents toml nil)
+      (condition-case nil
+          (insert-file-contents toml)
+        (file-missing))
       (let ((s (nth 0 (split-string (buffer-string) "\\[dependencies]"))))
         (erase-buffer)
         (insert s)
@@ -221,7 +224,7 @@ directory DIR."
 (defun org-babel-execute:rustic (body params)
   "Execute a block of Rust code with org-babel.
 
-If called while there's a live Rust babel process, ask user whether to 
+If called while there's a live Rust babel process, ask user whether to
 kill the running process."
   (let ((p (get-process rustic-babel-process-name)))
     (if (process-live-p p)
@@ -232,6 +235,7 @@ kill the running process."
              (project (rustic-babel-project))
              (dir (setq rustic-babel-dir (expand-file-name project)))
              (main (expand-file-name "main.rs" (concat dir "/src"))))
+        (make-directory (file-name-directory main) t)
         (rustic-babel-cargo-toml dir params)
         (setq rustic-info (org-babel-get-src-block-info))
         (setq rustic-babel-params params)
