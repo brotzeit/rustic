@@ -84,7 +84,7 @@ to format buffer when saving."
   :type '(repeat (string)))
 
 ;;;;;;;;;;;;
-;; Rustfmt 
+;; Rustfmt
 
 (defvar rustic-format-process-name "rustic-rustfmt-process"
   "Process name for rustfmt processes.")
@@ -126,36 +126,38 @@ Use `:command' when formatting files and `:stdin' for strings."
 
 (defun rustic-format-sentinel (proc output)
   "Sentinel for rustfmt processes when using stdin."
-  (let ((proc-buffer (process-buffer proc))
-        (inhibit-read-only t))
-    (with-current-buffer proc-buffer
-      (if (string-match-p "^finished" output)
-          (let ((file-buffer next-error-last-buffer))
-            (copy-to-buffer file-buffer (point-min) (point-max))
-            (with-current-buffer file-buffer
-              (goto-char rustic-save-pos))
-            (kill-buffer proc-buffer)
-            (message "Formatted buffer with rustfmt."))
-        (goto-char (point-min))
-        (when-let ((file (buffer-file-name next-error-last-buffer)))
-          (save-excursion
-            (save-match-data
-              (when (search-forward "<stdin>" nil t)
-                (replace-match file)))))
-        (funcall rustic-format-display-method proc-buffer)
-        (message "Rustfmt error.")))))
+  (ignore-errors
+    (let ((proc-buffer (process-buffer proc))
+          (inhibit-read-only t))
+      (with-current-buffer proc-buffer
+        (if (string-match-p "^finished" output)
+            (let ((file-buffer next-error-last-buffer))
+              (copy-to-buffer file-buffer (point-min) (point-max))
+              (with-current-buffer file-buffer
+                (goto-char rustic-save-pos))
+              (kill-buffer proc-buffer)
+              (message "Formatted buffer with rustfmt."))
+          (goto-char (point-min))
+          (when-let ((file (buffer-file-name next-error-last-buffer)))
+            (save-excursion
+              (save-match-data
+                (when (search-forward "<stdin>" nil t)
+                  (replace-match file)))))
+          (funcall rustic-format-display-method proc-buffer)
+          (message "Rustfmt error."))))))
 
 (defun rustic-format-file-sentinel (proc output)
   "Sentinel for rustfmt processes when formatting a file."
-  (let ((proc-buffer (process-buffer proc)))
-    (with-current-buffer proc-buffer
-      (if (string-match-p "^finished" output)
-          (progn
-            (with-current-buffer next-error-last-buffer
-              (revert-buffer t t)))
-        (goto-char (point-min))
-        (funcall rustic-format-display-method proc-buffer)
-        (message "Rustfmt error.")))))
+  (ignore-errors
+    (let ((proc-buffer (process-buffer proc)))
+      (with-current-buffer proc-buffer
+        (if (string-match-p "^finished" output)
+            (progn
+              (with-current-buffer next-error-last-buffer
+                (revert-buffer t t)))
+          (goto-char (point-min))
+          (funcall rustic-format-display-method proc-buffer)
+          (message "Rustfmt error."))))))
 
 (define-derived-mode rustic-format-mode rustic-compilation-mode "rustfmt"
   :group 'rustic)
@@ -302,11 +304,11 @@ If client isn't installed, offer to install it."
 
 ;;;###autoload
 (defun rustic-playpen (begin end)
-  "Create a shareable URL for the contents of the current region, 
+  "Create a shareable URL for the contents of the current region,
 src-block or buffer on the Rust playpen."
   (interactive "r")
   (let (data)
-    (cond 
+    (cond
      ((region-active-p)
       (setq data (buffer-substring begin end)))
      ((org-in-src-block-p)
@@ -338,7 +340,7 @@ src-block or buffer on the Rust playpen."
 
 ;;;###autoload
 (defun rustic-open-dependency-file ()
-  "Open the 'Cargo.toml' file at the project root if the current buffer is 
+  "Open the 'Cargo.toml' file at the project root if the current buffer is
 visiting a project."
   (interactive)
   (let ((workspace (rustic-buffer-workspace t)))
