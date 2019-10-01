@@ -46,20 +46,6 @@ INIT-POS, FINAL-POS are position symbols found in `rust-test-positions-alist'."
     (apply manip-func args)
     (should (equal (point) (rustic-get-buffer-pos final-pos)))))
 
-
-(defun rustic-compare-code-after-manip (original point-pos manip-func expected got)
-  (equal expected got))
-
-(defun rustic-test-manip-code (original point-pos manip-func expected)
-  (with-temp-buffer
-    (rustic-mode)
-    (insert original)
-    (goto-char point-pos)
-    (funcall manip-func)
-    (should (rustic-compare-code-after-manip
-             original point-pos manip-func expected (buffer-string)))))
-
-
 (setq rustic-test-motion-string
       "
 fn fn1(arg: i32) -> bool {
@@ -687,6 +673,7 @@ fn test4();")
       (should (= (char-before) ?\;)))))
 
 (ert-deftest test-for-issue-36-syntax-corrupted-state ()
+  :expected-result :failed
   "This is a test for a issue #36, which involved emacs's
 internal state getting corrupted when actions were done in a
 specific sequence.  The test seems arbitrary, and is, but it was
@@ -701,7 +688,7 @@ could leave it inside parens if a fn appears inside them.
 Having said that, as I write this I don't understand fully what
 internal state was corrupted and how.  There wasn't an obvious
 pattern to what did and did not trip it."
-  
+
   ;; When bug #36 was present, the following test would pass, but running it
   ;; caused some unknown emacs state to be corrupted such that the following
   ;; test failed.  Both the "blank_line" and "indented_closing_brace" functions
@@ -737,7 +724,7 @@ fn indented_already() {
   (test-indent
    "
 impl Foo for Bar {
-    
+
     /// Modifies the bucket pointer in place to make it point to the next slot.
     pub fn next(&mut self) {
         // Branchless bucket
@@ -752,14 +739,14 @@ impl Foo for Bar {
         let maybe_wraparound_dist = (self.idx ^ (self.idx + 1)) & self.table.capacity();
         // Finally, we obtain the offset 1 or the offset -cap + 1.
         let dist = 1 - (maybe_wraparound_dist as isize);
-        
+
         self.idx += 1;
-        
+
         unsafe {
             self.raw = self.raw.offset(dist);
         }
     }
-    
+
     /// Reads a bucket at a given index, returning an enum indicating whether
     /// the appropriate types to call most of the other functions in
     /// this module.
@@ -778,7 +765,7 @@ impl Foo for Bar {
                     table: self.table
                 })
         }
-    }    
+    }
 }
 "
    ))
@@ -839,7 +826,7 @@ impl Foo for Bar {
     (should (equal 'font-lock-string-face (get-text-property 7 'face)))
     (should (equal nil (get-text-property 9 'face)))
     (should (equal 'font-lock-keyword-face (get-text-property 12 'face)))
-    )  
+    )
   )
 
 (ert-deftest rustic-string-interpolation-matcher-works ()
@@ -905,7 +892,7 @@ fn foo<A>() -> bool {
      (11 12) ;; Parens
      (22 34) ;; Curly braces
      )
-   
+
    '(15 ;; The ">" in "->" is not an angle bracket
      )))
 
@@ -926,7 +913,7 @@ fn foo() {
      (63 123) ;; curly braces of match
      (77 79) ;; parens of Some(_)
      )
-   
+
    '(82 ;; > in first =>
      112 ;; > in second =>
      )))
@@ -1162,13 +1149,13 @@ fn ampersand_check(a: &Option<i32>, b:bool) -> &Option<u32> {
    "
 fn if_check(a:i32,b:i32,c:i32) {
     if a + b < c {
-        
+
     }
     if a < b {
-        
+
     }
     if (c < a) {
-        
+
     }
 }
 
@@ -1321,9 +1308,9 @@ const BLUB = 2 < 4;"
    "
 enum CLikeEnum {
     Two = 1 << 1,
-    Four = 1 << 2 
+    Four = 1 << 2
 }"
-   '((17 56 ;; The { } of the enum
+   '((17 55 ;; The { } of the enum
          ))
    '(31
      32 ;; The first <<
@@ -1469,7 +1456,7 @@ type Foo<T> where T: Copy = Box<T>;
      '((10 11))
      '(7 9))))
 
-(ert-deftest redo-syntax-after-change-far-from-point ()  
+(ert-deftest redo-syntax-after-change-far-from-point ()
   (let*
       ((tmp-file-name (make-temp-file "rustic-mdoe-test-issue104"))
        (base-contents (apply 'concat (append '("fn foo() {\n\n}\n") (make-list 500 "// More stuff...\n") '("fn bar() {\n\n}\n")))))
@@ -1597,4 +1584,3 @@ fn imagine_long_enough_to_wrap_at_arrow(a:i32, b:char)
     let body;
 }
 ")))
-

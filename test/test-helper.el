@@ -6,6 +6,7 @@
 (let ((rustic-dir (f-parent (f-dirname (f-this-file)))))
   (add-to-list 'load-path rustic-dir))
 (require 'rustic)
+(custom-set-variables '(indent-tabs-mode nil))
 
 ;; variable doesn't exist in noninteractive emacs sessions
 (when noninteractive
@@ -24,3 +25,15 @@ Emacs shutdown.")
       (delete-directory org-babel-temporary-directory t)))
 
   (add-hook 'kill-emacs-hook 'remove-temporary-babel-directory))
+
+(defsubst rustic-compare-code-after-manip (original point-pos manip-func expected got)
+  (equal expected got))
+
+(defun rustic-test-manip-code (original point-pos manip-func expected)
+  (with-temp-buffer
+    (rustic-mode)
+    (insert original)
+    (goto-char point-pos)
+    (funcall manip-func)
+    (should (rustic-compare-code-after-manip
+             original point-pos manip-func expected (buffer-string)))))
