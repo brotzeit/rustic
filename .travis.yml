@@ -36,6 +36,8 @@ before_install:
   - sudo apt install -y texinfo libgif-dev libxpm-dev
   - curl -sSf https://build.travis-ci.com/files/rustup-init.sh | sh -s -- --default-toolchain=nightly -y
   - source $HOME/.cargo/env
+  - rustup component add rustfmt-preview
+  - rustfmt --version
 
 install:
   - mkdir -p $HOME/.emacs.d/elpa/gnupg || true
