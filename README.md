@@ -46,6 +46,7 @@ Differences with rust-mode:
 # Installation
 
 Simply put `(use-package rustic)` in your config and most stuff gets configured automatically.
+([use-package](https://github.com/jwiegley/use-package))
 
 It's necessary to include the gnu archive for a package dependency:
 

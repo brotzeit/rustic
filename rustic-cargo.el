@@ -112,10 +112,7 @@ If ARG is not nil, use value as argument and store it in `rustic-test-arguments'
          (proc rustic-test-process-name)
          (mode 'rustic-cargo-test-mode))
     (rustic-compilation-process-live)
-    (rustic-compilation-start c
-                              :buffer buf
-                              :process proc
-                              :mode mode)))
+    (rustic-compilation-start c :buffer buf :process proc :mode mode)))
 
 ;;;###autoload
 (defun rustic-cargo-current-test ()
