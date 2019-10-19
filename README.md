@@ -48,12 +48,15 @@ Differences with rust-mode:
 Simply put `(use-package rustic)` in your config and most stuff gets configured automatically.
 ([use-package](https://github.com/jwiegley/use-package))
 
-It's necessary to include the gnu archive for a package dependency:
+It's necessary to include elpa for a package dependency:
 
 ```elisp
 (setq package-archives '(("melpa" . "http://melpa.org/packages/")
                          ("gnu" . "http://elpa.gnu.org/packages/")))
 ```
+
+If ‘spinner-1.7.3’ is unavailable” when trying to install rustic, you need to update GPG keys
+used by the ELPA package manager. Try installing [gnu-elpa-keyring-update](https://elpa.gnu.org/packages/gnu-elpa-keyring-update.html).
 
 If you have `rust-mode` installed, ensure it is required before rustic since it has to be removed
 from `auto-mode-alist`. However you only need `rust-mode` if you want to use `emacs-racer`. There's some stuff that isn't included in rustic.
