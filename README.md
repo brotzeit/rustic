@@ -100,7 +100,8 @@ LSP commands:
 
 ## Server
 
-RLS is the default and can be changed to rust-analyzer.
+RLS is the default and can be changed to rust-analyzer. lsp-mode related code was moved to the lsp-mode repo.
+`rustic-lsp-server` sets the value of `lsp-rust-server`.
 
 ``` emacs-lisp
 (setq rustic-lsp-server 'rust-analyzer)

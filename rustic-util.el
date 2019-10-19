@@ -255,9 +255,7 @@ If client isn't installed, offer to install it."
              (if (eq client 'eglot)
                  (eglot-ensure)
                (lsp-workspace-folders-add (rustic-buffer-workspace))
-               (when (and (eq rustic-lsp-server 'rust-analyzer)
-                          (not (featurep 'rustic-lsp)))
-                 (require 'rustic-lsp))
+               (setq lsp-rust-server rustic-lsp-server)
                (lsp)))
             (t
              (rustic-install-rls-client-p client))))))
