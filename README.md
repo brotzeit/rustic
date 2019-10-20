@@ -13,6 +13,7 @@
 - [LSP](#lsp)
     - [Server](#server)
     - [Client](#client)
+        - [lsp-mode](#lsp-mode)
 - [Rustfix](#rustfix)
 - [Clippy](#clippy)
 - [Flycheck](#flycheck)
@@ -117,6 +118,12 @@ The default package is `lsp-mode`. But you can also use `eglot`.
 ``` emacs-lisp
 (setq rustic-lsp-client 'eglot)
 ```
+
+### lsp-mode
+
+- `lsp-find-definition` makes use of xref
+- `lsp-rust-switch-server` switch server priorities of rls and rust-analyzer
+- `lsp-describe-thing-at-point` display documentation
 
 # Rustfix
 
