@@ -98,10 +98,6 @@ Customization:
 
 Disable LSP support by setting `rustic-lsp-client` to nil. You have to restart emacs when you switch lsp clients.
 
-LSP commands:
-
-`xref-find-definitions` find definition
-
 ## Server
 
 RLS is the default and can be changed to rust-analyzer. lsp-mode related code was moved to the lsp-mode repo.
@@ -119,11 +115,16 @@ The default package is `lsp-mode`. But you can also use `eglot`.
 (setq rustic-lsp-client 'eglot)
 ```
 
+LSP commands:
+
+`xref-find-definitions` find definition
+
 ### lsp-mode
 
-- `lsp-find-definition` makes use of xref
-- `lsp-rust-switch-server` switch server priorities of rls and rust-analyzer
 - `lsp-describe-thing-at-point` display documentation
+- `lsp-find-definition` makes use of xref
+
+[Wiki](https://github.com/emacs-lsp/lsp-mode/wiki/Rust)
 
 # Rustfix
 
