@@ -7,6 +7,7 @@
 ;;; Code:
 
 (require 'subr-x)
+(require 'package)
 
 (require 'rustic-compile)
 
