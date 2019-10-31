@@ -367,6 +367,15 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
 
 (advice-add 'save-some-buffers :around #'rustic-save-some-buffers-advice)
 
+(defun rustic-compile-next-error-hook (orig-fun &rest args)
+  "When the project's workspace isn't the same path as the root directory,
+`compilation-next-error-function' doesn't get the correct path since cargo emits
+the file path relative to the root and not to the workspace.
+This hook temporarily sets `default-directory' to the project's root."
+  (let ((default-directory (projectile-project-root default-directory)))
+    (apply orig-fun args)))
+
+(advice-add 'compilation-next-error-function :around #'rustic-compile-next-error-hook)
 
 ;;;;;;;;;;
 ;; Rustc
