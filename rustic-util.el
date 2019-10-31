@@ -261,16 +261,16 @@ If client isn't installed, offer to install it."
             (t
              (rustic-install-rls-client-p client))))))
 
-(defun rustic-install-rls-client-p (rls-pkg)
-  (if (yes-or-no-p (format "%s not found. Install it ?" rls-pkg))
+(defun rustic-install-rls-client-p (lsp-client)
+  (if (yes-or-no-p (format "%s not found. Install it ?" lsp-client))
       (condition-case err
           (progn
             (package-refresh-contents)
-            (package-install rls-pkg)
-            (require rls-pkg)
+            (package-install lsp-client)
+            (require lsp-client)
             (rustic-setup-rls))
         (error err))
-    (message "No RLS server running.")))
+    (message "No LSP server running.")))
 
 
 ;;;;;;;;;;;
