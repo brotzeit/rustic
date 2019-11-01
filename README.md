@@ -8,6 +8,7 @@
 
 - [Intro](#intro)
 - [Installation](#installation)
+    - [straight](#straight)
 - [Compilation](#compilation)
 - [Rustfmt](#rustfmt)
 - [LSP](#lsp)
@@ -63,6 +64,10 @@ If you have `rust-mode` installed, ensure it is required before rustic since it 
 from `auto-mode-alist`. However you only need `rust-mode` if you want to use `emacs-racer`. There's some stuff that isn't included in rustic.
 
 Note: If you have any issues with rustic, please try running emacs without `rust-mode` loaded.
+
+## straight
+
+[straight.el](https://github.com/raxod502/straight.el#install-packages) clones each of your packages directly from its source. There are good additional [installation instructions](https://github.crookster.org/switching-to-straight.el-from-emacs-26-builtin-package.el/) for moving your package management from package.el to straight.
 
 # Compilation
 
@@ -124,7 +129,7 @@ LSP commands:
 - `lsp-describe-thing-at-point` display documentation
 - `lsp-find-definition` makes use of xref
 
-[Wiki](https://github.com/emacs-lsp/lsp-mode/wiki/Rust)
+You can find more information in the [lsp-mode wiki](https://github.com/emacs-lsp/lsp-mode/wiki/Rust).
 
 # Rustfix
 
