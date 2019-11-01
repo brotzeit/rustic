@@ -8,6 +8,7 @@
 
 - [Intro](#intro)
 - [Installation](#installation)
+    - [straight](#straight)
 - [Compilation](#compilation)
 - [Rustfmt](#rustfmt)
 - [LSP](#lsp)
@@ -63,6 +64,28 @@ If you have `rust-mode` installed, ensure it is required before rustic since it 
 from `auto-mode-alist`. However you only need `rust-mode` if you want to use `emacs-racer`. There's some stuff that isn't included in rustic.
 
 Note: If you have any issues with rustic, please try running emacs without `rust-mode` loaded.
+
+## straight
+
+I recommend to use [straight](https://github.com/raxod502/straight.el). But you should switch to straight
+for all your packages and not just for rustic.
+
+```elisp
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "~/tmp/git/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+(use-package rustic)
+```
 
 # Compilation
 
@@ -124,7 +147,7 @@ LSP commands:
 - `lsp-describe-thing-at-point` display documentation
 - `lsp-find-definition` makes use of xref
 
-[Wiki](https://github.com/emacs-lsp/lsp-mode/wiki/Rust)
+You can find more information in the [lsp-mode wiki](https://github.com/emacs-lsp/lsp-mode/wiki/Rust).
 
 # Rustfix
 
