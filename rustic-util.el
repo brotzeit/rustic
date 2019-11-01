@@ -246,9 +246,10 @@ were issues when using stdin for formatting."
 If client isn't installed, offer to install it."
   (unless noninteractive ;; TODO: fix tests to work with eglot/lsp-mode activated
     (let ((client-p (lambda (c)
-                      (if (package-installed-p c)
-                          (or (featurep c) (require c))
-                        nil)))
+                      (or (featurep 'straight)
+                          (if (package-installed-p c)
+                              (or (featurep c) (require c))
+                            nil))))
           (client (or rustic-rls-pkg rustic-lsp-client)))
       (cond ((eq client nil)
              nil)
