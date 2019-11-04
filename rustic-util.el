@@ -84,6 +84,13 @@ to format buffer when saving."
   "Command for calling rust analyzer."
   :type '(repeat (string)))
 
+(defcustom rustic-lsp-setup-p t
+  "Setup LSP related stuff automatically."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'rustic)
+
+
 ;;;;;;;;;;;;
 ;; Rustfmt
 
@@ -241,7 +248,7 @@ were issues when using stdin for formatting."
       (unless (-contains? eglot-ignored-server-capabilites feature)
         (add-to-list 'eglot-ignored-server-capabilites feature)))))
 
-(defun rustic-setup-rls ()
+(defun rustic-setup-lsp ()
   "Start the rls client's process.
 If client isn't installed, offer to install it."
   (unless noninteractive ;; TODO: fix tests to work with eglot/lsp-mode activated
@@ -260,16 +267,16 @@ If client isn't installed, offer to install it."
                (setq lsp-rust-server rustic-lsp-server)
                (lsp)))
             (t
-             (rustic-install-rls-client-p client))))))
+             (rustic-install-lsp-client-p client))))))
 
-(defun rustic-install-rls-client-p (lsp-client)
+(defun rustic-install-lsp-client-p (lsp-client)
   (if (yes-or-no-p (format "%s not found. Install it ?" lsp-client))
       (condition-case err
           (progn
             (package-refresh-contents)
             (package-install lsp-client)
             (require lsp-client)
-            (rustic-setup-rls))
+            (rustic-setup-lsp))
         (error err))
     (message "No LSP server running.")))
 

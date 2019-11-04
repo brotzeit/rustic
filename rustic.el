@@ -228,8 +228,8 @@ to the function arguments.  When nil, `->' will be indented one level."
 
   (when rustic-always-locate-project-on-open
     (rustic-update-buffer-workspace))
-
-  (rustic-setup-rls))
+  (when rustic-lsp-setup-p
+   (rustic-setup-lsp)))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
