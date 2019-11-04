@@ -67,25 +67,7 @@ Note: If you have any issues with rustic, please try running emacs without `rust
 
 ## straight
 
-I recommend to use [straight](https://github.com/raxod502/straight.el). But you should switch to straight
-for all your packages and not just for rustic.
-
-```elisp
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "~/tmp/git/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-
-(use-package rustic)
-```
+[straight.el](https://github.com/raxod502/straight.el#install-packages) clones each of your packages directly from its source. There are good additional [installation instructions](https://github.crookster.org/switching-to-straight.el-from-emacs-26-builtin-package.el/) for moving your package management from package.el to straight.
 
 # Compilation
 
