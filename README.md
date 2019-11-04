@@ -32,7 +32,6 @@ This package is a fork of [rust-mode](https://github.com/rust-lang/rust-mode)
 
 Differences with rust-mode:
 
-- [rust-analyzer](https://github.com/rust-analyzer/rust-analyzer) configuration
 - flycheck integration
 - cargo popup
 - multiline error parsing
@@ -40,7 +39,7 @@ Differences with rust-mode:
 - async org babel
 - custom compilation process
 - rustfmt errors in a rust compilation mode
-- automatic RLS configuration with [eglot](https://github.com/joaotavora/eglot) or [lsp-mode](https://github.com/emacs-lsp/lsp-mode)
+- automatic LSP configuration with [eglot](https://github.com/joaotavora/eglot) or [lsp-mode](https://github.com/emacs-lsp/lsp-mode)
 - cask for testing
 - requires emacs 26
 - etc.
