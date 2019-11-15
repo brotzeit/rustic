@@ -164,9 +164,22 @@ If ARG is not nil, use value as argument and store it in `rustic-test-arguments'
   :type 'face
   :group 'rustic)
 
+(defconst rustic-cargo-outdated-success-msg "After cargo-outdated is installed, please rerun 'rustic-cargo-outdated' again!"
+  "Message used to notify the user that they must rerun rustic-cargo-outdated after cargo-outdated has finished installing..")
+
+(defconst rustic-cargo-outdated-not-installed-warning
+  "Rustic: The package cargo-outdated needs to be installed. Please install it with the command \"cargo install cargo-outdated\""
+  "Warning used to let the user know that cargo-outdated is not installed.")
+
+(defconst rustic-cargo-edit-success-msg "Please run upgrade again after the cargo-edit cargo has finished installing!"
+  "Message used to notify the user know that they must rerun rustic-cargo-upgrade after cargo-edit has finished installing.")
+
+(defconst rustic-cargo-edit-not-installed-warning "The crate 'cargo-edit' is required to perform upgrades on outdated crates!"
+  "Warning used to let the user know that cargo-edit must be installed in order to upgrade crates.")
+
 (defvar rustic-cargo-outdated-process-name "rustic-cargo-outdated-process")
 
-(defvar rustic-cargo-oudated-buffer-name "*cargo-outdated*")
+(defvar rustic-cargo-outdated-buffer-name "*cargo-outdated*")
 
 (defvar rustic-outdated-spinner nil)
 
@@ -200,24 +213,25 @@ If ARG is not nil, use value as argument and store it in `rustic-test-arguments'
   "Use 'cargo outdated' to list outdated packages in `tabulated-list-mode'.
 Execute process in PATH."
   (interactive)
-  (let* ((dir (or path (rustic-buffer-workspace)))
-         (buf (get-buffer-create rustic-cargo-oudated-buffer-name))
-         (default-directory dir)
-         (inhibit-read-only t))
-    (make-process :name rustic-cargo-outdated-process-name
-                  :buffer buf
-                  :command '("cargo" "outdated" "--depth" "1")
-                  :filter #'rustic-cargo-outdated-filter
-                  :sentinel #'rustic-cargo-outdated-sentinel)
-    (with-current-buffer buf
-      (setq default-directory dir)
-      (erase-buffer)
-      (rustic-cargo-outdated-mode)
-      (rustic-with-spinner rustic-outdated-spinner
-        (make-spinner rustic-spinner-type t 10)
-        '(rustic-outdated-spinner (":Executing " (:eval (spinner-print rustic-outdated-spinner))))
-        (spinner-start rustic-outdated-spinner)))
-    (display-buffer buf)))
+  (progn
+    (let* ((dir (or path (rustic-buffer-workspace)))
+           (buf (get-buffer-create rustic-cargo-outdated-buffer-name))
+           (default-directory dir)
+           (inhibit-read-only t))
+      (make-process :name rustic-cargo-outdated-process-name
+                    :buffer buf
+                    :command '("cargo" "outdated" "--depth" "1")
+                    :filter #'rustic-cargo-outdated-filter
+                    :sentinel #'rustic-cargo-outdated-sentinel)
+      (with-current-buffer buf
+        (setq default-directory dir)
+        (erase-buffer)
+        (rustic-cargo-outdated-mode)
+        (rustic-with-spinner rustic-outdated-spinner
+          (make-spinner rustic-spinner-type t 10)
+          '(rustic-outdated-spinner (":Executing " (:eval (spinner-print rustic-outdated-spinner))))
+          (spinner-start rustic-outdated-spinner)))
+      (display-buffer buf))))
 
 (defun rustic-cargo-reload-outdated ()
   "Update list of outdated packages."
@@ -247,15 +261,23 @@ Execute process in PATH."
       (with-current-buffer buf
         (let ((out (buffer-string)))
           (if (= exit-status 101)
-              (rustic-cargo-install-crate-p "outdated")
+              (rustic-cargo-install-crate-p "outdated"
+                                            rustic-cargo-outdated-success-msg rustic-cargo-outdated-not-installed-warning)
             (message out))))))
   (rustic-with-spinner rustic-outdated-spinner nil nil))
 
-(defun rustic-cargo-install-crate-p (crate)
-  "Ask whether to install crate CRATE."
+(defun rustic-cargo-install-crate-p (crate &optional ymsg nmsg)
+  "Ask whether to install crate CRATE.
+If the user agrees, install crate and show YMSG if not nil. Otherwise, show NMSG if not nil."
   (let ((cmd (format "cargo install cargo-%s" crate)))
-    (when (yes-or-no-p (format "Cargo-%s missing. Install ? " crate))
-      (async-shell-command cmd "cargo" "cargo-error"))))
+    (if (yes-or-no-p (format "Cargo-%s missing. Install ? " crate))
+        (progn 
+          (async-shell-command cmd "cargo" "cargo-error")
+          (if ymsg
+              (message ymsg)))
+      (if nmsg
+          (message nmsg))
+      )))
 
 (defun rustic-cargo-outdated-generate-menu (packages)
   "Re-populate the `tabulated-list-entries' with PACKAGES."
@@ -346,7 +368,9 @@ Execute process in PATH."
       (setq upgrade (concat upgrade (format "%s@%s " (elt crate 0) (elt crate 2)))))
     (let ((output (shell-command-to-string (format "cargo upgrade %s" upgrade))))
       (if (string-match "error: no such subcommand:" output)
-          (rustic-cargo-install-crate-p "edit")
+          (rustic-cargo-install-crate-p "edit"
+                                        rustic-cargo-edit-success-msg
+                                        rustic-cargo-edit-not-installed-warning)
         (rustic-cargo-reload-outdated)))))
 
 ;;;;;;;;;;;;;;;;
@@ -429,6 +453,25 @@ The documentation is built if necessary."
       ;; open docs only works with synchronous process
       (shell-command "cargo doc --open")
     (shell-command "cargo doc --open --no-deps")))
+
+;;;###autoload
+(defun rustic-cargo-build-doc ()
+  "Build the documentation for the current project."
+  (interactive)
+  (if (y-or-n-p "Create documentation for dependencies?")
+      (rustic-run-cargo-command "cargo doc")
+    (rustic-run-cargo-command "cargo doc --no-deps"))
+  )
+
+;;;###autoload
+(defun rustic-cargo-doc ()
+  "Open the documentation for the current project in a browser.
+The documentation is built if necessary."
+  (interactive)
+  (if (y-or-n-p "Open docs for dependencies as well?")
+      (rustic-run-cargo-command "cargo doc --open")
+    (rustic-run-cargo-command "cargo doc --open --no-deps"))
+  )
 
 (provide 'rustic-cargo)
 ;;; rustic-cargo.el ends here
