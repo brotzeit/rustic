@@ -439,7 +439,7 @@ Otherwise use provided argument ARG and store it in
 `compilation-arguments'."
   (interactive "P")
   (let* ((command (setq compilation-arguments
-                        (if arg
+                        (if (not arg)
                             (read-from-minibuffer "Compile command: ")
                           rustic-compile-command)))
          (dir (setq compilation-directory (rustic-buffer-workspace))))
