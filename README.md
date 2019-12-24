@@ -111,6 +111,14 @@ RLS is the default and can be changed to rust-analyzer. lsp-mode related code wa
 (setq rustic-lsp-server 'rust-analyzer)
 ```
 
+In case you [can't run rust-analyzer](https://github.com/brotzeit/rustic/issues/79) try to set the absolute path of ra_lsp_server or use something like [exec-path-from-shell](https://melpa.org/#/exec-path-from-shell).
+
+
+``` emacs-lisp
+(setq lsp-rust-analyzer-server-command '("~/.cargo/bin/ra_lsp_server"))
+
+```
+
 ## Client
 
 The default package is `lsp-mode`. But you can also use `eglot`.
