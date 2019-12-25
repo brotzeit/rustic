@@ -103,10 +103,9 @@ Takes a value accepted by `spinner-start'."
 If ARG is not nil, use value as argument and store it in `rustic-test-arguments'"
   (interactive "P")
   (let* ((command (list rustic-cargo-bin "test"))
-         (c (if arg
-                (setq rustic-test-arguments
-                      (concat command " "
-                              (read-from-minibuffer "Cargo test arguments: ")))
+         (input (if arg (setq rustic-test-arguments (read-from-minibuffer "Cargo test arguments: ")) nil))
+         (c (if input
+                (append command (split-string input))
               command))
          (buf rustic-test-buffer-name)
          (proc rustic-test-process-name)
