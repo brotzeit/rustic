@@ -75,10 +75,10 @@ Takes a value accepted by `spinner-start'."
         (proc rustic-clippy-process-name)
         (mode 'rustic-cargo-clippy-mode))
     (rustic-compilation-process-live)
-    (rustic-compilation-start command
-                              :buffer buf
-                              :process proc
-                              :mode mode)))
+    (rustic-compilation command
+                        :buffer buf
+                        :process proc
+                        :mode mode)))
 
 
 ;;;;;;;;;
@@ -111,7 +111,7 @@ If ARG is not nil, use value as argument and store it in `rustic-test-arguments'
          (proc rustic-test-process-name)
          (mode 'rustic-cargo-test-mode))
     (rustic-compilation-process-live)
-    (rustic-compilation-start c :buffer buf :process proc :mode mode)))
+    (rustic-compilation c :buffer buf :process proc :mode mode)))
 
 ;;;###autoload
 (defun rustic-cargo-current-test ()
