@@ -7,7 +7,6 @@
         (buffer-read-only nil))
     (with-current-buffer buf
       (erase-buffer)
-      (should-error (rustic-format-buffer))
       (rustic-mode)
       (insert string)
       (backward-char 10)
@@ -19,6 +18,32 @@
           (sit-for 0.1)))
       (should (string= (buffer-string) formatted-string))
       (should-not (= (point) (or (point-min) (point-max)))))
+    (kill-buffer buf)))
+
+(ert-deftest rustic-test-format-buffer-failure ()
+  (let ((string "fn main()      {}")
+        (string-dummy "can't format this string")
+        (buf (get-buffer-create "test"))
+        (buffer-read-only nil))
+    (kill-buffer rustic-format-buffer-name)
+    (with-current-buffer buf
+      (erase-buffer)
+      (insert string)
+      ;; no rustic-mode buffer
+      (should-error (rustic-format-buffer))
+      (should-not (get-buffer rustic-format-buffer-name))
+      (erase-buffer)
+      (rustic-mode)
+      (insert string-dummy)
+      (let* ((proc (rustic-format-start-process
+                    'rustic-format-sentinel
+                    :buffer (current-buffer)
+                    :stdin (buffer-string)))
+             (buf (process-buffer proc)))
+        (with-current-buffer buf
+          ;; check if buffer has correct name and correct major mode
+          (should (string= (buffer-name buf) rustic-format-buffer-name))
+          (should (eq major-mode 'rustic-format-mode)))))
     (kill-buffer buf)))
 
 (ert-deftest rustic-test-format-file ()
