@@ -84,19 +84,6 @@
       (print (process-exit-status proc))
       (should (= 0 (process-exit-status proc))))))
 
-(defun rustic-test-count-error-helper (string)
-  (let* ((buffer (get-buffer-create "b"))
-         (dir (rustic-babel-generate-project t))
-         (src (concat dir "/src"))
-         (file (expand-file-name "main.rs" src))
-         (buffer-save-without-query t)
-         (rustic-format-trigger nil))
-    (with-current-buffer buffer
-      (write-file file)
-      (insert string)
-      (save-buffer))
-    dir))
-
 (ert-deftest rustic-test-backtrace ()
   (let* ((string "fn main() {
                        let v = vec![1, 2, 3];

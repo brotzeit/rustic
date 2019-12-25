@@ -37,3 +37,16 @@ Emacs shutdown.")
     (funcall manip-func)
     (should (rustic-compare-code-after-manip
              original point-pos manip-func expected (buffer-string)))))
+
+(defun rustic-test-count-error-helper (string)
+  (let* ((buffer (get-buffer-create "b"))
+         (dir (rustic-babel-generate-project t))
+         (src (concat dir "/src"))
+         (file (expand-file-name "main.rs" src))
+         (buffer-save-without-query t)
+         (rustic-format-trigger nil))
+    (with-current-buffer buffer
+      (write-file file)
+      (insert string)
+      (save-buffer))
+    dir))
