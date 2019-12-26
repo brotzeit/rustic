@@ -107,7 +107,7 @@ If ARG is not nil, use value as argument and store it in `rustic-test-arguments'
                               (if noninteractive
                                   rustic-test-arguments
                                 (read-from-minibuffer "Cargo test arguments: ")))
-                  nil))
+                  ""))
          (c (append command (split-string input)))
          (buf rustic-test-buffer-name)
          (proc rustic-test-process-name)
