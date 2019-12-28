@@ -20,7 +20,7 @@
     (?e "clean"    clean)
     (?k "check"    check)
     (?t "test"     test)
-    (?d "doc" doc))
+    (?d "doc"      doc))
   "List of commands that are displayed in the popup.
 The first element of each list contains a command's binding."
   :type 'list

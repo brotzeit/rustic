@@ -97,23 +97,35 @@ Takes a value accepted by `spinner-start'."
   :group 'rustic)
 
 ;;;###autoload
-(defun rustic-cargo-test (&optional arg)
-  "Run 'cargo test'.
-
-If ARG is not nil, use value as argument and store it in `rustic-test-arguments'"
-  (interactive "P")
+(defun rustic-cargo-test-run (&optional test-args)
+  "Start compilation process for 'cargo test' with optional TEST-ARGS."
+  (interactive)
   (let* ((command (list rustic-cargo-bin "test"))
-         (input (if arg (setq rustic-test-arguments
-                              (if noninteractive
-                                  rustic-test-arguments
-                                (read-from-minibuffer "Cargo test arguments: ")))
-                  ""))
-         (c (append command (split-string input)))
+         (c (append command (split-string (if test-args test-args ""))))
          (buf rustic-test-buffer-name)
          (proc rustic-test-process-name)
          (mode 'rustic-cargo-test-mode))
     (rustic-compilation-process-live)
     (rustic-compilation c :buffer buf :process proc :mode mode)))
+
+(defun rustic-cargo-test (&optional arg)
+  "Run 'cargo test'.
+
+If ARG is not nil, use value as argument and store it in `rustic-test-arguments'.
+When calling this function from `rustic-popup-mode', always use the value of 
+`rustic-test-arguments'."
+  (interactive "P")
+  (rustic-cargo-test-run
+   (cond (arg
+          (setq rustic-test-arguments (read-from-minibuffer "Cargo test arguments: ")))
+         ((eq major-mode 'rustic-popup-mode)
+          rustic-test-arguments)
+         (t ""))))
+
+(defun rustic-cargo-test-rerun ()
+  "Run 'cargo test' with `rustic-test-arguments'."
+  (interactive)
+  (rustic-cargo-test-run rustic-test-arguments))
 
 ;;;###autoload
 (defun rustic-cargo-current-test ()
