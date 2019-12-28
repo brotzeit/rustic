@@ -205,7 +205,8 @@ Use `:command' when formatting files and `:stdin' for strings."
 Provide optional argument NO-STDIN for `rustic-before-save-hook' since there
 were issues when using stdin for formatting."
   (interactive)
-  (unless (eq major-mode 'rustic-mode)
+  (unless (or (eq major-mode 'rustic-mode)
+              (eq major-mode 'rustic-macro-expansion-mode))
     (error "Not a rustic-mode buffer."))
   (rustic-compilation-process-live t)
   (let (proc)
@@ -227,26 +228,6 @@ were issues when using stdin for formatting."
 
 ;;;;;;;;
 ;; LSP
-
-(defun rustic-setup-eglot ()
-  "Configure eglot for rustic."
-  (if (equal rustic-lsp-server 'rls)
-      ;; add rustic to `eglot-server-programs'
-      (let ((rls '(rustic-mode . (eglot-rls "rls"))))
-        (unless (member rls eglot-server-programs)
-          (setq eglot-server-programs
-                `(,rls
-                  ;; replace rust-mode with rustic
-                  ,@(-remove-first (lambda (mode)
-                                     (when (symbolp (car mode))
-                                       (eq (car mode) 'rust-mode)))
-                                   eglot-server-programs)))))
-    (add-to-list 'eglot-server-programs `(rustic-mode . ,rustic-analyzer-command)))
-  ;; don't allow formatting with rls
-  (unless rustic-lsp-format
-    (let ((feature :documentFormattingProvider))
-      (unless (-contains? eglot-ignored-server-capabilites feature)
-        (add-to-list 'eglot-ignored-server-capabilites feature)))))
 
 (defun rustic-setup-lsp ()
   "Start the rls client's process.
@@ -279,6 +260,66 @@ If client isn't installed, offer to install it."
             (rustic-setup-lsp))
         (error err))
     (message "No LSP server running.")))
+
+;; eglot
+
+(defun rustic-setup-eglot ()
+  "Configure eglot for rustic."
+  (if (equal rustic-lsp-server 'rls)
+      ;; add rustic to `eglot-server-programs'
+      (let ((rls '(rustic-mode . (eglot-rls "rls"))))
+        (unless (member rls eglot-server-programs)
+          (setq eglot-server-programs
+                `(,rls
+                  ;; replace rust-mode with rustic
+                  ,@(-remove-first (lambda (mode)
+                                     (when (symbolp (car mode))
+                                       (eq (car mode) 'rust-mode)))
+                                   eglot-server-programs)))))
+    (add-to-list 'eglot-server-programs `(rustic-mode . ,rustic-analyzer-command)))
+  ;; don't allow formatting with rls
+  (unless rustic-lsp-format
+    (let ((feature :documentFormattingProvider))
+      (unless (-contains? eglot-ignored-server-capabilites feature)
+        (add-to-list 'eglot-ignored-server-capabilites feature)))))
+
+;; lsp-mode
+;; rust-analyzer
+
+;; macro expansion
+
+(setq lsp-rust-analyzer-macro-expansion-method 'rustic-analyzer-macro-expand)
+
+(define-derived-mode rustic-macro-expansion-mode special-mode "Rust"
+  :group 'rustic
+  :syntax-table rustic-syntax-table
+  ;; Fonts
+  (setq-local font-lock-defaults '(rustic-font-lock-keywords
+                                   nil nil nil nil
+                                   (font-lock-syntactic-face-function . rustic-syntactic-face-function))))
+
+(defun rustic-analyzer-macro-expand (result)
+  "Default method for displaying macro expansion results."
+  (interactive)
+  (let* ((root (lsp-workspace-root default-directory))
+         (buf (get-buffer-create (get-buffer-create (format "*rust-analyzer macro expansion %s*" root)))))
+    (with-current-buffer buf
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        ;; wrap expanded macro in a main function so we can run rustfmt
+        (insert "fn main()")
+        ;; rustfmt complains about $s
+        (insert (replace-regexp-in-string "\\$" "" result))
+        (rustic-macro-expansion-mode)
+        (rustic-format-buffer)
+        (with-current-buffer buf
+          (save-excursion
+            (goto-char (point-min))
+            (delete-region (point-min) (line-end-position))
+            (goto-char (point-max))
+            (forward-line -1)
+            (delete-region (line-beginning-position) (point-max))))))
+    (display-buffer buf)))
 
 
 ;;;;;;;;;;;

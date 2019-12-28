@@ -189,8 +189,7 @@ to the function arguments.  When nil, `->' will be indented one level."
   ;; Fonts
   (setq-local font-lock-defaults '(rustic-font-lock-keywords
                                    nil nil nil nil
-                                   (font-lock-syntactic-face-function . rustic-syntactic-face-function)
-                                   ))
+                                   (font-lock-syntactic-face-function . rustic-syntactic-face-function)))
 
   ;; Misc
   (setq-local comment-start "// ")

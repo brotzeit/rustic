@@ -15,13 +15,16 @@
     - [Server](#server)
     - [Client](#client)
         - [lsp-mode](#lsp-mode)
+            - [Macro expansion](#macro-expansion)
+- [Cargo](#cargo)
+    - [Tests](#tests)
+    - [Outdated](#outdated)
 - [Rustfix](#rustfix)
 - [Clippy](#clippy)
 - [Flycheck](#flycheck)
 - [Org-babel](#org-babel)
 - [Popup](#popup)
-- [Cargo outdated](#cargo-outdated)
-- [Tests](#tests)
+- [elisp tests](#elisp-tests)
 - [Contributing](#contributing)
 
 <!-- markdown-toc end -->
@@ -116,7 +119,6 @@ In case you [can't run rust-analyzer](https://github.com/brotzeit/rustic/issues/
 
 ``` emacs-lisp
 (setq lsp-rust-analyzer-server-command '("~/.cargo/bin/ra_lsp_server"))
-
 ```
 
 ## Client
@@ -137,6 +139,40 @@ LSP commands:
 - `lsp-find-definition` makes use of xref
 
 You can find more information in the [lsp-mode wiki](https://github.com/emacs-lsp/lsp-mode/wiki/Rust).
+
+#### Macro expansion
+
+`lsp-rust-analyzer-expand-macro` expand macro call at point recursively
+
+The results are formatted and highlighted by default, but you can use your own function by customizing `lsp-rust-analyzer-macro-expansion-method`.
+
+![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/macro_expansion.png)
+
+# Cargo
+
+## Tests
+
+`rustic-cargo-test` run 'cargo test', when called with `C-u` store arguments in `rustic-test-arguments`
+
+`rustic-cargo-test-rerun` rerun 'cargo test' with arguments stored in `rustic-test-arguments`
+
+`rustic-cargo-current-test` run test at point
+
+## Outdated
+
+Use `rustic-cargo-outdated` to get a list of dependencies that are out of date. The results 
+are displayed in `tabulated-list-mode` and you can use most commands you know from the emacs
+package menu. This option requires the rust package `cargo-outdated` to be
+installed before being used.
+
+- `u` mark single crate for upgrade
+- `U` mark all upgradable crates
+- `m` remove mark
+- `x` perform marked package menu actions
+- `r` refresh crate list
+- `q` quit window
+
+![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
 
 # Rustfix
 
@@ -200,23 +236,7 @@ The command `rustic-popup-default-action` (`RET` or `TAB`) allows you to change:
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup.png)
 
-# Cargo outdated
-
-Use `rustic-cargo-outdated` to get a list of dependencies that are out of date. The results 
-are displayed in `tabulated-list-mode` and you can use most commands you know from the emacs
-package menu. This option requires the rust package `cargo-outdated` to be
-installed before being used.
-
-- `u` mark single crate for upgrade
-- `U` mark all upgradable crates
-- `m` remove mark
-- `x` perform marked package menu actions
-- `r` refresh crate list
-- `q` quit window
-
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
-
-# Tests
+# elisp tests
 
 To run the tests, you will need [Cask](https://github.com/cask/cask).
 
