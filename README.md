@@ -14,10 +14,11 @@
 - [LSP](#lsp)
     - [Server](#server)
     - [Client](#client)
+        - [eglot](#eglot)
         - [lsp-mode](#lsp-mode)
             - [Macro expansion](#macro-expansion)
 - [Cargo](#cargo)
-    - [Tests](#tests)
+    - [Test](#test)
     - [Outdated](#outdated)
 - [Rustfix](#rustfix)
 - [Clippy](#clippy)
@@ -133,6 +134,14 @@ LSP commands:
 
 `xref-find-definitions` find definition
 
+### eglot
+
+Turn off flymake.
+
+``` emacs-lisp
+(add-hook 'eglot--managed-mode-hook (lambda () (flymake-mode -1)))
+```
+
 ### lsp-mode
 
 - `lsp-describe-thing-at-point` display documentation
@@ -195,6 +204,12 @@ Use `rustic-cargo-clippy` to view the results in a derived compilation mode.
 
 By default, rustic displays the number of errors and warnings in the mode-line. The variable
 `rustic-flycheck-setup-mode-line-p` can be set to `nil` to turn off mode-line modification.
+
+Turn off flycheck.
+
+```elisp
+(remove-hook 'rustic-mode-hook 'flycheck-mode)
+```
 
 # Org-babel
 
