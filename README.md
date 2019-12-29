@@ -150,7 +150,7 @@ The results are formatted and highlighted by default, but you can use your own f
 
 # Cargo
 
-## Tests
+## Test
 
 `rustic-cargo-test` run 'cargo test', when called with `C-u` store arguments in `rustic-test-arguments`
 
