@@ -16,9 +16,9 @@
 
 (defcustom rustic-format-trigger nil
   "Format future rust buffers before saving using rustfmt."
-  :type '(choice (symbol :tag 'on-save "Format buffer before saving.")
-                 (symbol :tag 'on-compile "Run 'cargo fmt' before compilation.")
-                 (symbol :tag nil "Don't format automatically."))
+  :type '(choice (const :tag "Format buffer before saving." on-save)
+                 (const :tag "Run 'cargo fmt' before compilation." on-compile)
+                 (const :tag "Don't format automatically." nil))
   :group 'rustic)
 
 (defcustom rustic-format-on-save nil
@@ -55,22 +55,22 @@ to format buffer when saving."
 
 (defcustom rustic-lsp-server 'rls
   "Choose your LSP server."
-  :type '(choice (symbol :tag 'rls "rls")
-                 (symbol :tag 'rust-analyzer "rust-analyzer"))
+  :type '(choice (const :tag "rls" rls)
+                 (const :tag "rust-analyzer" rust-analyzer))
   :group 'rustic)
 
 (defcustom rustic-lsp-client 'lsp-mode
   "Emacs package for interaction with the language server."
-  :type '(choice (symbol :tag 'eglot "eglot")
-                 (symbol :tag 'lsp-mode "lsp-mode")
-                 (symbol :tag nil "No LSP client"))
+  :type '(choice (const :tag "eglot" eglot)
+                 (const :tag "lsp-mode" lsp-mode)
+                 (const :tag "No LSP client" nil))
   :group 'rustic)
 
 (defcustom rustic-rls-pkg nil
   "Emacs package for interaction with rls."
-  :type '(choice (symbol :tag 'eglot "eglot")
-                 (symbol :tag 'lsp-mode "lsp-mode")
-                 (symbol :tag nil "No LSP client"))
+  :type '(choice (const :tag "eglot" eglot)
+                 (const :tag "lsp-mode" lsp-mode)
+                 (const :tag "No LSP client" nil))
   :group 'rustic)
 (make-obsolete 'rustic-rls-pkg 'rustic-lsp-client "0.18")
 
