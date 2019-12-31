@@ -1091,7 +1091,7 @@ on each line."
 (defvar rustic-imenu-generic-expression
   (append (mapcar #'(lambda (x)
                       (list (capitalize x) (rustic-re-item-def-imenu x) 1))
-                  '("enum" "struct" "union" "type" "mod" "fn" "trait" "impl"))
+                  '("async fn" "enum" "struct" "union" "type" "mod" "fn" "trait" "impl"))
           `(("Macro" ,(rustic-re-item-def-imenu "macro_rules!") 1)))
   "Value for `imenu-generic-expression' in Rust mode.
 
