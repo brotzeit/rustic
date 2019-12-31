@@ -377,6 +377,23 @@ This hook temporarily sets `default-directory' to the project's root."
 
 (advice-add 'compilation-next-error-function :around #'rustic-compile-next-error-hook)
 
+(defun rustic-compile-goto-error-hook (orig-fun &rest args)
+  "Provide possibility use `compile-goto-error' on line numbers in compilation buffers.
+This hook checks if there's a line number at the beginning of the current line in an error section."
+  (-if-let* ((line-contents (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
+             (line-number-p (string-match "^[0-9]+\s+\|" line-contents))
+             (line-number (car (split-string line-contents))))
+      (save-excursion
+        ;; find compilation message in error
+        (while (not (or (get-text-property (point) 'compilation-message)
+                        (bobp)))
+          (forward-line -1))
+        (compile-goto-error))
+    (let ((default-directory (projectile-project-root default-directory)))
+      (apply orig-fun args))))
+
+(advice-add 'compile-goto-error :around #'rustic-compile-goto-error-hook)
+
 ;;;;;;;;;;
 ;; Rustc
 

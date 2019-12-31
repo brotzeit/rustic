@@ -75,6 +75,12 @@ Note: If you have any issues with rustic, please try running emacs without `rust
 # Compilation
 
 Rustic defines a derived compilation-mode. Colors can be customized with several defcustoms.
+You can use `next-error` and `compilation-next-error` as for any other compilation buffer.
+
+However it's possible to also jump to line numbers that are displayed at the beginning of a line. 
+This feature is provided by a hook around `compile-goto-error`(`RET`).
+
+![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/compilation_buffer.png)
 
 Customization:
 
