@@ -80,7 +80,7 @@ to format buffer when saving."
   :safe #'booleanp
   :group 'rustic)
 
-(defcustom rustic-analyzer-command '("ra_lsp_server")
+(defcustom rustic-analyzer-command '("~/.cargo/bin/ra_lsp_server")
   "Command for calling rust analyzer."
   :type '(repeat (string)))
 
