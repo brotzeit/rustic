@@ -388,7 +388,13 @@ This hook checks if there's a line number at the beginning of the current line i
         (while (not (or (get-text-property (point) 'compilation-message)
                         (bobp)))
           (forward-line -1))
-        (compile-goto-error))
+        ;; get file of text property
+        (let* ((msg (get-text-property (point) 'compilation-message))
+               (loc (compilation--message->loc msg))
+               (file (caar (compilation--loc->file-struct loc))))
+          ;; open file of error and goto line number that we parsed from the line we are on
+          (with-current-buffer (find-file-other-window file)
+            (goto-line (string-to-number line-number)))))
     (let ((default-directory (projectile-project-root default-directory)))
       (apply orig-fun args))))
 
