@@ -246,6 +246,7 @@ If client isn't installed, offer to install it."
                  (eglot-ensure)
                (lsp-workspace-folders-add (rustic-buffer-workspace))
                (setq lsp-rust-server rustic-lsp-server)
+               (setq lsp-rust-analyzer-server-command rustic-analyzer-command)
                (lsp)))
             (t
              (rustic-install-lsp-client-p client))))))
