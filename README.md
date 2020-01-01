@@ -10,6 +10,7 @@
 - [Installation](#installation)
     - [straight](#straight)
 - [Compilation](#compilation)
+    - [rustc errors](#rustc-errors)
 - [Rustfmt](#rustfmt)
 - [LSP](#lsp)
     - [Server](#server)
@@ -92,6 +93,10 @@ Supported compile.el variables:
 
 - compilation-arguments
 - compilation-scroll-output (not `first-error`)
+
+## rustc errors
+
+![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/rustc_errno.png)
 
 # Rustfmt
 
