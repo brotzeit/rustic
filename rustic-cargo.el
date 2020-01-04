@@ -6,6 +6,7 @@
 (require 'spinner)
 
 (require 'rustic-compile)
+(require 'rustic-interaction)
 
 ;;;;;;;;;;;;;;;;;;
 ;; Customization
@@ -149,7 +150,7 @@ When calling this function from `rustic-popup-mode', always use the value of
 (defconst rustic-cargo-fn-regexp "^[[:space:]]*fn[[:space:]]+\\([^(]+\\)[[:space:]]*(")
 
 (defun rustic-cargo--get-current-mod ()
-  "Return mod name around pount or nil."
+  "Return mod name around point or nil."
   (save-excursion
     (when (search-backward-regexp rustic-cargo-mod-regexp nil t)
       (match-string 1))))
