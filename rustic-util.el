@@ -230,8 +230,7 @@ were issues when using stdin for formatting."
 ;; LSP
 
 (defun rustic-setup-lsp ()
-  "Start the rls client's process.
-If client isn't installed, offer to install it."
+  "Setup LSP client. If client isn't installed, offer to install it."
   (unless noninteractive ;; TODO: fix tests to work with eglot/lsp-mode activated
     (let ((client-p (lambda (c)
                       (or (featurep 'straight)
@@ -252,6 +251,7 @@ If client isn't installed, offer to install it."
              (rustic-install-lsp-client-p client))))))
 
 (defun rustic-install-lsp-client-p (lsp-client)
+  "Ask user whether to install missing LSP-CLIENT."
   (if (yes-or-no-p (format "%s not found. Install it ?" lsp-client))
       (condition-case err
           (progn
