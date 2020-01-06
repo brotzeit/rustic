@@ -52,6 +52,7 @@
     (should-not compilation-arguments)
     (setq compilation-arguments "cargo fmt")
     (let* ((default-directory dir)
+           (compilation-read-command nil)
            (proc (rustic-compile)))
       (should (process-live-p proc))
       (while (eq (process-status proc) 'run)
@@ -66,7 +67,8 @@
   (setq compilation-arguments nil))
 
 (ert-deftest rustic-test-recompile ()
-  (let ((rustic-format-trigger nil))
+  (let ((rustic-format-trigger nil)
+        (compilation-read-command nil))
     (let ((proc (rustic-compile)))
       (while (eq (process-status proc) 'run)
         (sit-for 0.1))
