@@ -101,12 +101,12 @@ Takes a value accepted by `spinner-start'."
 (defun rustic-cargo-test-run (&optional test-args)
   "Start compilation process for 'cargo test' with optional TEST-ARGS."
   (interactive)
+  (rustic-compilation-process-live)
   (let* ((command (list rustic-cargo-bin "test"))
          (c (append command (split-string (if test-args test-args ""))))
          (buf rustic-test-buffer-name)
          (proc rustic-test-process-name)
          (mode 'rustic-cargo-test-mode))
-    (rustic-compilation-process-live)
     (rustic-compilation c :buffer buf :process proc :mode mode)))
 
 (defun rustic-cargo-test (&optional arg)
@@ -133,10 +133,16 @@ When calling this function from `rustic-popup-mode', always use the value of
   "Run 'cargo test' for the test near point."
   (interactive)
   (rustic-compilation-process-live)
-  (rustic-compilation-start (list rustic-cargo-bin "test" (rustic-cargo--get-current-fn-fullname))
-                            :buffer rustic-test-buffer-name
-                            :process rustic-test-process-name
-                            :mode 'rustic-cargo-test-mode))
+  (-if-let (func-name (rustic-cargo--get-current-fn-fullname))
+      (let* ((command (list rustic-cargo-bin "test" func-name))
+             (buf rustic-test-buffer-name)
+             (proc rustic-test-process-name)
+             (mode 'rustic-cargo-test-mode))
+        (rustic-compilation command :buffer buf :process proc :mode mode))
+    (message "Could not find test at point.")))
+
+(defconst rustic-cargo-mod-regexp "^\s*mod\s+\\([[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*\\)\s*{")
+(defconst rustic-cargo-fn-regexp "^\s*fn\s+\\([^(]+\\)\s*(")
 
 (defun rustic-cargo--get-current-fn-fullname()
   "Return full name of the fn around point including module name if any."
@@ -145,9 +151,6 @@ When calling this function from `rustic-popup-mode', always use the value of
     (if mod
         (concat mod "::" fn)
       fn)))
-
-(defconst rustic-cargo-mod-regexp "^[[:space:]]*mod[[:space:]]+\\([[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*\\)[[:space:]]*{")
-(defconst rustic-cargo-fn-regexp "^[[:space:]]*fn[[:space:]]+\\([^(]+\\)[[:space:]]*(")
 
 (defun rustic-cargo--get-current-mod ()
   "Return mod name around point or nil."
@@ -158,7 +161,7 @@ When calling this function from `rustic-popup-mode', always use the value of
 (defun rustic-cargo--get-current-line-fn-name()
   "Return fn name from the current line or nil."
   (save-excursion
-    (beginning-of-line)
+    (goto-char (line-beginning-position))
     (when (search-forward-regexp rustic-cargo-fn-regexp (line-end-position) t)
       (match-string 1))))
 
@@ -167,7 +170,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   (save-excursion
     (or (rustic-cargo--get-current-line-fn-name)
         (progn
-          (rustic-beginning-of-defun)
+          (rustic-beginning-of-function)
           (rustic-cargo--get-current-line-fn-name)))))
 
 ;;;;;;;;;;;;;

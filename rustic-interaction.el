@@ -322,7 +322,19 @@ visit the new file."
 
 ;;; Defun Motions
 
-(defun rustic-beginning-of-defun (&optional arg)
+(defvar rustic-func-item-beg-re
+  (concat "\\s-*\\(?:priv\\|pub\\)?\\s-*"
+          (regexp-opt '("fn")))
+  "Start of a rust function.")
+
+(defun rustic-beginning-of-function ()
+  "Move to beginning of rust function at point."
+  (rustic-beginning-of-defun nil rustic-func-item-beg-re))
+
+;; TODO: since we are using `rustic-top-item-beg-re' this function actually sets
+;;       the point where it finds the first item of the list
+;;       this function should be renamed or documented correctly
+(defun rustic-beginning-of-defun (&optional arg regex)
   "Move backward to the beginning of the current defun.
 
 With ARG, move backward multiple defuns.  Negative ARG means
@@ -342,7 +354,7 @@ which calls this, does that afterwards."
     (catch 'done
       (dotimes (_ magnitude)
 	    ;; Search until we find a match that is not in a string or comment.
-	    (while (if (re-search-backward (concat "^\\(" rustic-top-item-beg-re "\\)")
+	    (while (if (re-search-backward (concat "^\\(" (or regex rustic-top-item-beg-re) "\\)")
 				                       nil 'move sign)
 		           (rustic-in-str-or-cmnt)
 		         ;; Did not find it.
