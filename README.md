@@ -212,6 +212,14 @@ Use `rustic-cargo-clippy` to view the results in a derived compilation mode.
 
 ## Flycheck
 
+If you are running `lsp-mode`, you can view errors through your lsp client with `lsp-ui-flycheck-list`.
+
+In case you want to see clippy lints with flycheck, you can activate this checker.
+
+```elisp
+(push 'rustic-clippy flycheck-checkers)
+```
+
 By default, rustic displays the number of errors and warnings in the mode-line. The variable
 `rustic-flycheck-setup-mode-line-p` can be set to `nil` to turn off mode-line modification.
 

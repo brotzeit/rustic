@@ -220,9 +220,6 @@ Flycheck according to the Cargo project layout."
              :message (if has-toml "Found" "Missing")
              :face (if has-toml 'success '(bold warning))))))))
 
-;; activate checker
-(push 'rustic-clippy flycheck-checkers)
-
 (add-hook 'rustic-mode-hook 'flycheck-mode)
 (add-hook 'flycheck-mode-hook #'rustic-flycheck-setup)
 
