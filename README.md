@@ -21,9 +21,10 @@
 - [Cargo](#cargo)
     - [Test](#test)
     - [Outdated](#outdated)
+- [Lints](#lints)
+    - [Clippy](#clippy)
+    - [Flycheck](#flycheck)
 - [Rustfix](#rustfix)
-- [Clippy](#clippy)
-- [Flycheck](#flycheck)
 - [Org-babel](#org-babel)
 - [Popup](#popup)
 - [elisp tests](#elisp-tests)
@@ -196,13 +197,9 @@ installed before being used.
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
 
-# Rustfix
+# Lints
 
-`rustic-rustfix` runs rustfix, but it seems it's not very mature at this point.
-It would be a lot more helpful if we had an indicator for fixable errors and if it would be
-possible to run rustfix on a single file.
-
-# Clippy
+## Clippy
 
 Rustic automatically configures a checker that runs clippy when `flycheck` is required.
 In case you use `flymake`, you have to take care of the configuration yourself.
@@ -213,7 +210,7 @@ If you have problems try it with `rustup component add --toolchain nightly clipp
 
 Use `rustic-cargo-clippy` to view the results in a derived compilation mode.
 
-# Flycheck
+## Flycheck
 
 By default, rustic displays the number of errors and warnings in the mode-line. The variable
 `rustic-flycheck-setup-mode-line-p` can be set to `nil` to turn off mode-line modification.
@@ -223,6 +220,12 @@ Turn off flycheck.
 ```elisp
 (remove-hook 'rustic-mode-hook 'flycheck-mode)
 ```
+
+# Rustfix
+
+`rustic-rustfix` runs rustfix, but it seems it's not very mature at this point.
+It would be a lot more helpful if we had an indicator for fixable errors and if it would be
+possible to run rustfix on a single file.
 
 # Org-babel
 
