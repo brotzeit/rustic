@@ -178,6 +178,8 @@ The results are formatted and highlighted by default, but you can use your own f
 
 `rustic-cargo-current-test` run test at point
 
+![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/cargo_current_test.png)
+
 ## Outdated
 
 Use `rustic-cargo-outdated` to get a list of dependencies that are out of date. The results 
