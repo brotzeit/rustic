@@ -220,9 +220,6 @@ In case you want to see clippy lints with flycheck, you can activate this checke
 (push 'rustic-clippy flycheck-checkers)
 ```
 
-By default, rustic displays the number of errors and warnings in the mode-line. The variable
-`rustic-flycheck-setup-mode-line-p` can be set to `nil` to turn off mode-line modification.
-
 Turn off flycheck.
 
 ```elisp

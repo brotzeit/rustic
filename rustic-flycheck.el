@@ -12,39 +12,6 @@
 (require 'seq)
 (require 'json)
 
-(defcustom rustic-flycheck-setup-mode-line-p t
-  "Whether to display errors in the mode-line."
-  :type 'boolean
-  :group 'rustic-flycheck)
-
-(defun rustic-flycheck-lighter (state)
-  "Return flycheck information for the given error type STATE.
-
-Source: https://git.io/vQKzv"
-  (let* ((counts (flycheck-count-errors flycheck-current-errors))
-         (errorp (flycheck-has-current-errors-p state))
-         (err (or (cdr (assq state counts)) "?"))
-         (running (eq 'running flycheck-last-status-change)))
-    (if (or errorp running) (format "•%s" err))))
-
-(when rustic-flycheck-setup-mode-line-p
- (add-to-list 'mode-line-misc-info
-              '(:eval
-                (when (and (bound-and-true-p flycheck-mode)
-                           (or flycheck-current-errors
-                               (eq 'running flycheck-last-status-change)))
-                  (concat
-                   (cl-loop for state in '((error . "#FB4933")
-                                           (warning . "#FABD2F")
-                                           ;; (info . "#83A598")
-                                           )
-                            as lighter = (rustic-flycheck-lighter (car state))
-                            when lighter
-                            concat (propertize
-                                    lighter
-                                    'face `(:foreground ,(cdr state))))
-                   " ")))))
-
 (defun rustic-flycheck-dirs-list (start end)
   "Return a list of directories from START (inclusive) to END (exclusive).
 E.g., if START is '/a/b/c/d' and END is '/a', return the list
