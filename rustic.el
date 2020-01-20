@@ -89,7 +89,8 @@ function or trait.  When nil, where will be aligned with fn or trait."
   :group 'rustic
   :safe #'booleanp)
 
-(defcustom rustic-match-angle-brackets t
+;; TODO: this option seems to cause signifcant slowdowns when set to t
+(defcustom rustic-match-angle-brackets nil
   "Enable angle bracket matching.  Attempt to match `<' and `>' where
   appropriate."
   :type 'boolean
