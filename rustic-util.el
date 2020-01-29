@@ -243,7 +243,7 @@ were issues when using stdin for formatting."
                (setq lsp-rust-analyzer-server-command rustic-analyzer-command)
                (lsp)))
             (t
-             (rustic-install-lsp-client-p client))))))
+             (rustic-install-lsp-client-p client)))))
 
 (defun rustic-install-lsp-client-p (lsp-client)
   "Ask user whether to install missing LSP-CLIENT."
