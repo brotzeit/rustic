@@ -235,7 +235,7 @@ were issues when using stdin for formatting."
     (let ((client (or rustic-rls-pkg rustic-lsp-client)))
       (cond ((eq client nil)
              nil)
-            ((require client nil t))
+            ((require client nil t)
              (if (eq client 'eglot)
                  (eglot-ensure)
                (lsp-workspace-folders-add (rustic-buffer-workspace))
@@ -243,7 +243,7 @@ were issues when using stdin for formatting."
                (setq lsp-rust-analyzer-server-command rustic-analyzer-command)
                (lsp)))
             (t
-             (rustic-install-lsp-client-p client)))))
+             (rustic-install-lsp-client-p client))))))
 
 (defun rustic-install-lsp-client-p (lsp-client)
   "Ask user whether to install missing LSP-CLIENT."
