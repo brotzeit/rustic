@@ -232,15 +232,10 @@ were issues when using stdin for formatting."
 (defun rustic-setup-lsp ()
   "Setup LSP client. If client isn't installed, offer to install it."
   (unless noninteractive ;; TODO: fix tests to work with eglot/lsp-mode activated
-    (let ((client-p (lambda (c)
-                      (or (featurep 'straight)
-                          (if (package-installed-p c)
-                              (or (featurep c) (require c))
-                            nil))))
-          (client (or rustic-rls-pkg rustic-lsp-client)))
+    (let ((client (or rustic-rls-pkg rustic-lsp-client)))
       (cond ((eq client nil)
              nil)
-            ((not (eq (funcall client-p client) nil))
+            ((require client nil t))
              (if (eq client 'eglot)
                  (eglot-ensure)
                (lsp-workspace-folders-add (rustic-buffer-workspace))
@@ -248,7 +243,7 @@ were issues when using stdin for formatting."
                (setq lsp-rust-analyzer-server-command rustic-analyzer-command)
                (lsp)))
             (t
-             (rustic-install-lsp-client-p client))))))
+             (rustic-install-lsp-client-p client)))))
 
 (defun rustic-install-lsp-client-p (lsp-client)
   "Ask user whether to install missing LSP-CLIENT."
