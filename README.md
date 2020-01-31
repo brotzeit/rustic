@@ -201,9 +201,6 @@ installed before being used.
 
 ## Clippy
 
-Rustic automatically configures a checker that runs clippy when `flycheck` is required.
-In case you use `flymake`, you have to take care of the configuration yourself.
-
 Currently cargo does not display the correct installation command for some toolchains when
 clippy isn't installed. 
 If you have problems try it with `rustup component add --toolchain nightly clippy`.
@@ -214,7 +211,8 @@ Use `rustic-cargo-clippy` to view the results in a derived compilation mode.
 
 If you are running `lsp-mode`, you can view errors through your lsp client with `lsp-ui-flycheck-list`.
 
-In case you want to see clippy lints with flycheck, you can activate this checker.
+In case you want to see clippy lints with flycheck, you can activate this checker and use the command
+`flycheck-list-errors`
 
 ```elisp
 (push 'rustic-clippy flycheck-checkers)
@@ -237,6 +235,8 @@ possible to run rustfix on a single file.
 Blocks run asynchronously and a running babel process is indicated by a spinner
 in the mode-line. It's possible to use crates in babel blocks.
 
+Execute babel block with `org-babel-execute-src-block`
+
 ```
 #+BEGIN_SRC rustic :crates '((regex . 0.2))
   extern crate regex;
@@ -252,7 +252,7 @@ in the mode-line. It's possible to use crates in babel blocks.
 
 Supported org babel parameters:
 
-Write to file `:results file :file ~/babel-file`
+Write to file `:results file :file ~/babel-output`
 
 Customization:
 
