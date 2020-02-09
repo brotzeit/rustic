@@ -8,6 +8,9 @@
 (require 'rustic)
 (custom-set-variables '(indent-tabs-mode nil))
 
+;; don't start LSP server for every test
+(setq rustic-lsp-setup-p nil)
+
 ;; variable doesn't exist in noninteractive emacs sessions
 (when noninteractive
   (defvar org-babel-temporary-directory
@@ -38,6 +41,7 @@ Emacs shutdown.")
     (should (rustic-compare-code-after-manip
              original point-pos manip-func expected (buffer-string)))))
 
+;; TODO: rename
 (defun rustic-test-count-error-helper (string)
   (let* ((buffer (get-buffer-create "b"))
          (dir (rustic-babel-generate-project t))
@@ -47,6 +51,7 @@ Emacs shutdown.")
          (rustic-format-trigger nil))
     (with-current-buffer buffer
       (write-file file)
+      (insert "#[allow(non_snake_case)]")
       (insert string)
       (save-buffer))
     dir))

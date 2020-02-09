@@ -39,6 +39,7 @@
         (insert string))
       (let ((buffer-save-without-query t))
         (rustic-save-some-buffers))
+      (sit-for 1)
       (with-current-buffer buffer1
         (should (string= (buffer-string) formatted-string)))
       (with-current-buffer buffer2

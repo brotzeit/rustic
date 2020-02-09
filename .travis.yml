@@ -37,7 +37,12 @@ before_install:
   - curl -sSf https://build.travis-ci.com/files/rustup-init.sh | sh -s -- --default-toolchain=stable -y
   - source $HOME/.cargo/env
   - rustup component add rustfmt-preview
-  - rustfmt --version
+
+  # install RLS
+  - rustup component add rls rust-analysis rust-src
+  # install rust-analyzer
+  - git clone https://github.com/rust-analyzer/rust-analyzer && cd rust-analyzer
+  - cargo xtask install --server && cd ..
 
 install:
   - mkdir -p $HOME/.emacs.d/elpa/gnupg || true
