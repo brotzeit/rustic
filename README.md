@@ -277,8 +277,7 @@ The command `rustic-popup-default-action` (`RET` or `TAB`) allows you to change:
 To run the tests, you will need [Cask](https://github.com/cask/cask).
 
 ``` bash
-$ cask
-$ cask exec ert-runner
+make test
 ```
 
 # Contributing
