@@ -237,18 +237,20 @@ were issues when using stdin for formatting."
           ((require client nil t)
            (if (eq client 'eglot)
                (eglot-ensure)
-             (lsp-workspace-folders-add (rustic-buffer-workspace))
-             (rustic-lsp-set-server rustic-lsp-server)
-             (setq lsp-rust-analyzer-server-command rustic-analyzer-command)
+             (rustic-lsp-mode-setup)
              (lsp)))
           (t
            (rustic-install-lsp-client-p client)))))
 
-(defun rustic-lsp-set-server (server)
+(defun rustic-lsp-mode-setup ()
   "When changing the `lsp-rust-server', it's also necessary to update the priorities
 with `lsp-rust-switch-server'."
-  (setq lsp-rust-server server)
-  (let ((priority (lsp--client-priority (gethash server lsp-clients))))
+  ;; we need to require lsp-clients for the call to `lsp--client-priority'
+  (require 'lsp-clients)
+  (lsp-workspace-folders-add (rustic-buffer-workspace))
+  (setq lsp-rust-server rustic-lsp-server)
+  (setq lsp-rust-analyzer-server-command rustic-analyzer-command)
+  (let ((priority (lsp--client-priority (gethash rustic-lsp-server lsp-clients))))
     (when (< priority 0)
       (lsp-rust-switch-server))))
 
