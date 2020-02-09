@@ -231,19 +231,26 @@ were issues when using stdin for formatting."
 
 (defun rustic-setup-lsp ()
   "Setup LSP client. If client isn't installed, offer to install it."
-  (unless noninteractive ;; TODO: fix tests to work with eglot/lsp-mode activated
-    (let ((client (or rustic-rls-pkg rustic-lsp-client)))
-      (cond ((eq client nil)
-             nil)
-            ((require client nil t)
-             (if (eq client 'eglot)
-                 (eglot-ensure)
-               (lsp-workspace-folders-add (rustic-buffer-workspace))
-               (setq lsp-rust-server rustic-lsp-server)
-               (setq lsp-rust-analyzer-server-command rustic-analyzer-command)
-               (lsp)))
-            (t
-             (rustic-install-lsp-client-p client))))))
+  (let ((client (or rustic-rls-pkg rustic-lsp-client)))
+    (cond ((eq client nil)
+           nil)
+          ((require client nil t)
+           (if (eq client 'eglot)
+               (eglot-ensure)
+             (lsp-workspace-folders-add (rustic-buffer-workspace))
+             (rustic-lsp-set-server rustic-lsp-server)
+             (setq lsp-rust-analyzer-server-command rustic-analyzer-command)
+             (lsp)))
+          (t
+           (rustic-install-lsp-client-p client)))))
+
+(defun rustic-lsp-set-server (server)
+  "When changing the `lsp-rust-server', it's also necessary to update the priorities
+with `lsp-rust-switch-server'."
+  (setq lsp-rust-server server)
+  (let ((priority (lsp--client-priority (gethash server lsp-clients))))
+    (when (< priority 0)
+      (lsp-rust-switch-server))))
 
 (defun rustic-install-lsp-client-p (lsp-client)
   "Ask user whether to install missing LSP-CLIENT."
