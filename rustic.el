@@ -1154,4 +1154,7 @@ not in a rust project."
   (rustic-mode))
 
 (provide 'rustic)
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
 ;;; rustic.el ends here
