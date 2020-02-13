@@ -228,7 +228,7 @@ to the function arguments.  When nil, `->' will be indented one level."
   (when rustic-always-locate-project-on-open
     (rustic-update-buffer-workspace))
   (when rustic-lsp-setup-p
-   (rustic-setup-lsp)))
+    (rustic-setup-lsp)))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
@@ -268,7 +268,7 @@ to the function arguments.  When nil, `->' will be indented one level."
           (regexp-opt
            '("enum" "struct" "union" "type" "mod" "use" "fn" "static" "impl"
              "extern" "trait"))
-	      "\\_>")
+          "\\_>")
   "Start of a Rust item.")
 
 (defconst rustic-re-type-or-constructor
@@ -330,8 +330,8 @@ to the function arguments.  When nil, `->' will be indented one level."
 (defun rustic-re-grab (inner) (concat "\\(" inner "\\)"))
 (defun rustic-re-item-def (itype)
   (concat (rustic-re-word itype)
-	      (rustic-re-shy rustic-re-generic) "?"
-	      "[[:space:]]+" (rustic-re-grab rustic-re-ident)))
+          (rustic-re-shy rustic-re-generic) "?"
+          "[[:space:]]+" (rustic-re-grab rustic-re-ident)))
 (defun rustic-re-word (inner) (concat "\\<" inner "\\>"))
 
 (defun rustic-path-font-lock-matcher (re-ident)
@@ -349,7 +349,7 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
             ;; If this isn't a type annotation foo::<, we've found a
             ;; match, so a return it!
             ((not (looking-at (rx (0+ space) "<")))
-	         (throw 'rustic-path-font-lock-matcher match))))))))
+             (throw 'rustic-path-font-lock-matcher match))))))))
 
 (defvar rustic-font-lock-keywords
   (append
@@ -747,7 +747,7 @@ match data if found. Returns nil if not within a Rust string."
            ;; Otherwise, if the ident: appeared with anything other than , or {
            ;; before it, it can't be part of a struct initializer and therefore
            ;; must be denoting a type.
-	       (t nil)
+           (t nil)
            ))
          ))
 
@@ -774,11 +774,11 @@ match data if found. Returns nil if not within a Rust string."
        ((or
          (equal 4 (rustic-syntax-class-before-point))
          (rustic-looking-back-str ","))
-	    (condition-case nil
-	        (progn
-	          (backward-up-list)
-	          (rustic-is-in-expression-context 'open-brace))
-	      (scan-error nil)))
+        (condition-case nil
+            (progn
+              (backward-up-list)
+              (rustic-is-in-expression-context 'open-brace))
+          (scan-error nil)))
 
        ;; A => introduces an expression
        ((rustic-looking-back-str "=>") t)
@@ -829,7 +829,7 @@ match data if found. Returns nil if not within a Rust string."
         (rustic-looking-back-symbols '("self" "true" "false")))
 
        ((rustic-looking-back-str "?")
-	    (rustic-is-in-expression-context 'ambiguous-operator))
+        (rustic-is-in-expression-context 'ambiguous-operator))
 
        ;; If we're looking back at an identifier, this depends on whether
        ;; the identifier is part of an expression or a type
@@ -890,8 +890,8 @@ should be considered a paired angle bracket."
      ;; Otherwise, treat the > as a closing angle bracket if it would
      ;; match an opening one
      ((save-excursion
-	    (backward-up-list)
-	    (not (looking-at "<"))))))))
+        (backward-up-list)
+        (not (looking-at "<"))))))))
 
 (defun rustic-syntactic-face-function (state)
   "Syntactic face function to distinguish doc comments from other comments."
@@ -905,16 +905,16 @@ should be considered a paired angle bracket."
 (eval-and-compile
   (defconst rustic--char-literal-rx
     (rx (seq
-	     (group "'")
-	     (or
-	      (seq
-	       "\\"
-	       (or
-	        (: "u{" (** 1 6 xdigit) "}")
-	        (: "x" (= 2 xdigit))
-	        (any "'nrt0\"\\")))
-	      (not (any "'\\")))
-	     (group "'")))
+         (group "'")
+         (or
+          (seq
+           "\\"
+           (or
+            (: "u{" (** 1 6 xdigit) "}")
+            (: "x" (= 2 xdigit))
+            (any "'nrt0\"\\")))
+          (not (any "'\\")))
+         (group "'")))
     "A regular expression matching a character literal."))
 
 (defun rustic--syntax-propertize-raw-string (str-start end)
@@ -924,18 +924,18 @@ This will apply the appropriate string syntax to the character
 from the STR-START up to the end of the raw string, or to END,
 whichever comes first."
   (when (save-excursion
-	      (goto-char str-start)
-	      (looking-at "r\\(#*\\)\\(\"\\)"))
+          (goto-char str-start)
+          (looking-at "r\\(#*\\)\\(\"\\)"))
     ;; In a raw string, so try to find the end.
     (let ((hashes (match-string 1)))
       ;; Match \ characters at the end of the string to suppress
       ;; their normal character-quote syntax.
       (when (re-search-forward (concat "\\(\\\\*\\)\\(\"" hashes "\\)") end t)
-	    (put-text-property (match-beginning 1) (match-end 1)
-			               'syntax-table (string-to-syntax "_"))
-	    (put-text-property (1- (match-end 2)) (match-end 2)
-			               'syntax-table (string-to-syntax "|"))
-	    (goto-char (match-end 0))))))
+        (put-text-property (match-beginning 1) (match-end 1)
+                           'syntax-table (string-to-syntax "_"))
+        (put-text-property (1- (match-end 2)) (match-end 2)
+                           'syntax-table (string-to-syntax "|"))
+        (goto-char (match-end 0))))))
 
 (defun rustic-syntax-propertize (start end)
   "A `syntax-propertize-function' to apply properties from START to END."
@@ -953,17 +953,17 @@ whichever comes first."
          (goto-char (match-end 0))
          (unless (save-excursion (nth 8 (syntax-ppss (match-beginning 0))))
            (put-text-property (match-beginning 1) (match-end 1)
-			                  'syntax-table (string-to-syntax "|"))
+                              'syntax-table (string-to-syntax "|"))
            (rustic--syntax-propertize-raw-string (match-beginning 0) end)))))
     ("[<>]"
      (0 (ignore
-	     (when (save-match-data
-		         (save-excursion
-		           (goto-char (match-beginning 0))
-		           (rustic-ordinary-lt-gt-p)))
-	       (put-text-property (match-beginning 0) (match-end 0)
-			                  'syntax-table (string-to-syntax "."))
-	       (goto-char (match-end 0)))))))
+         (when (save-match-data
+                 (save-excursion
+                   (goto-char (match-beginning 0))
+                   (rustic-ordinary-lt-gt-p)))
+           (put-text-property (match-beginning 0) (match-end 0)
+                              'syntax-table (string-to-syntax "."))
+           (goto-char (match-end 0)))))))
    (point) end))
 
 (defun rustic-fill-prefix-for-comment-start (line-start)
