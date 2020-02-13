@@ -2,6 +2,8 @@
 
 ;;; Code:
 
+;;; Indent Line
+
 (defun rustic-rewind-to-beginning-of-current-level-expr ()
   (let ((current-level (rustic-paren-level)))
     (back-to-indentation)
@@ -102,10 +104,6 @@
 
          ;; foo.bar
          (t (funcall skip-dot-identifier)))))))
-
-
-;;;;;;;;;;;;;;;;
-;; Interactive
 
 (defun rustic-indent-line ()
   (interactive)
@@ -307,6 +305,8 @@
           (indent-line-to indent)
         (save-excursion (indent-line-to indent))))))
 
+;;; Miscellaneous
+
 (defun rustic-promote-module-into-dir ()
   "Promote the module file visited by the current buffer into its own directory.
 
@@ -396,6 +396,6 @@ This is written mainly to be used as `end-of-defun-function' for Rust."
     ;; There is no opening brace, so consider the whole buffer to be one "defun"
     (goto-char (point-max))))
 
-
+;;; _
 (provide 'rustic-interaction)
 ;;; rustic-interaction.el ends here

@@ -62,8 +62,7 @@
   :link '(url-link "https://www.rustic-lang.org/")
   :group 'languages)
 
-;;;;;;;;;;;;;;;;;;
-;; Customization
+;;; Customization
 
 (defcustom rustic-display-spinner t
   "Display spinner."
@@ -109,8 +108,7 @@ to the function arguments.  When nil, `->' will be indented one level."
   :group 'rust-mode
   :safe #'booleanp)
 
-;;;;;;;;;;;;;;;;;;
-;; Faces
+;;; Faces
 
 (defface rustic-unsafe-face
   '((t :inherit font-lock-warning-face))
@@ -132,9 +130,7 @@ to the function arguments.  When nil, `->' will be indented one level."
   "Face for interpolating braces in builtin formatting macro strings."
   :group 'rustic)
 
-
-;;;;;;;;;;;;;;
-;; Rust-mode
+;;; Rust-mode
 
 (defconst rustic-re-ident "[[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*")
 (defconst rustic-re-lc-ident "[[:lower:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*")
@@ -767,7 +763,6 @@ match data if found. Returns nil if not within a Rust string."
                 (rustic-rewind-qualified-ident)
                 (rustic-is-in-expression-context 'ident))))
 
-
            ;; Otherwise, if the ident: appeared with anything other than , or {
            ;; before it, it can't be part of a struct initializer and therefore
            ;; must be denoting a type.
@@ -1112,6 +1107,7 @@ This handles multi-line comments with a * prefix on each line."
    (lambda () (comment-indent-new-line arg))))
 
 ;;; Imenu support
+
 (defvar rustic-imenu-generic-expression
   (append (mapcar #'(lambda (x)
                       (list (capitalize x) (rustic-re-item-def-imenu x) 1))
@@ -1161,8 +1157,7 @@ not in a rust project."
   "Update current workspace."
   (setq-local rustic-buffer-workspace-dir (rustic-buffer-workspace)))
 
-;;;;;;;;;;;;;;;;
-;; Interactive
+;;; Interactive
 
 (defun rustic-docstring-dwim ()
   "Use `comment-dwim' to make a docstring."
@@ -1177,5 +1172,6 @@ not in a rust project."
   (require 'rustic)
   (rustic-mode))
 
+;;; _
 (provide 'rustic)
 ;;; rustic.el ends here

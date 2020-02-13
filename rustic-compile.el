@@ -18,8 +18,7 @@
 (require 'compile)
 
 
-;;;;;;;;;;;;;;;;;;
-;; Customization
+;;; Customization
 
 (defgroup rustic-compilation nil
   "Rust Compilation."
@@ -42,8 +41,7 @@
                  (string :tag "full"))
   :group 'rustic-compilation)
 
-
-;; Faces
+;;; Faces
 
 (defcustom rustic-message-face
   '((t :inherit default))
@@ -93,9 +91,7 @@
   :type '(vector string string string string string string string string)
   :group 'rustic-compilation)
 
-
-;;;;;;;;;;;;;;;;;;;;;
-;; Compilation-mode
+;;; Compilation-mode
 
 (defvar rustic-compilation-mode-map
   (let ((map (make-sparse-keymap)))
@@ -173,9 +169,7 @@ Error matching regexes from compile.el are removed."
       (cons re '(1 2 3))))
   "Match thread panics.")
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;
-;; Compilation Process
+;;; Compilation Process
 
 (defvar rustic-compilation-process-name "rustic-compilation-process"
   "Process name for rust compilation processes.")
@@ -404,8 +398,7 @@ current line in an error section."
 
 (advice-add 'compile-goto-error :around #'rustic-compile-goto-error-hook)
 
-;;;;;;;;;;
-;; Rustc
+;;; Rustc
 
 (defface rustic-errno-face
   '((t :foreground "red3"))
@@ -453,9 +446,7 @@ current line in an error section."
   'face 'rustic-errno-face
   'help-echo "mouse-1, RET: Explain errno")
 
-
-;;;;;;;;;;;;;;;;
-;; Interactive
+;;; Interactive
 
 ;;;###autoload
 (defun rustic-compile (&optional arg)
@@ -482,5 +473,6 @@ Otherwise use provided argument ARG and store it in
     (rustic-compilation-process-live)
     (rustic-compilation (split-string command) :directory dir)))
 
+;;; _
 (provide 'rustic-compile)
 ;;; rustic-compile.el ends here

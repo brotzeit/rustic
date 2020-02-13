@@ -8,8 +8,7 @@
 (require 'rustic-compile)
 (require 'rustic-interaction)
 
-;;;;;;;;;;;;;;;;;;
-;; Customization
+;;; Customization
 
 (defcustom rustic-cargo-bin "cargo"
   "Path to cargo executable."
@@ -26,9 +25,7 @@ If nil then the project is simply created."
   '((t (:foreground "LightSeaGreen")))
   "Face used for crates marked for upgrade.")
 
-
-;;;;;;;;;;;;
-;; Spinner
+;;; Spinner
 
 (defcustom rustic-spinner-type 'horizontal-moving
   "Holds the type of spinner to be used in the mode-line.
@@ -54,9 +51,7 @@ Takes a value accepted by `spinner-start'."
      (setq mode-line-process ,mode-line)
      ,@body))
 
-
-;;;;;;;;;;;
-;; Clippy
+;;; Clippy
 
 (defvar rustic-clippy-process-name "rustic-cargo-clippy-process"
   "Process name for clippy processes.")
@@ -81,9 +76,7 @@ Takes a value accepted by `spinner-start'."
                         :process proc
                         :mode mode)))
 
-
-;;;;;;;;;
-;; Test
+;;; Test
 
 (defvar rustic-test-process-name "rustic-cargo-test-process"
   "Process name for test processes.")
@@ -175,8 +168,7 @@ When calling this function from `rustic-popup-mode', always use the value of
           (rustic-beginning-of-function)
           (rustic-cargo--get-current-line-fn-name)))))
 
-;;;;;;;;;;;;;
-;; Outdated
+;;; Outdated
 
 (defcustom rustic-cargo-outdated-face "red"
   "Face for upgradeable crates."
@@ -368,8 +360,7 @@ Execute process in PATH."
           (rustic-cargo-install-crate-p "edit")
         (rustic-cargo-reload-outdated)))))
 
-;;;;;;;;;;;;;;;;
-;; New project
+;;; New project
 
 ;;;###autoload
 (defun rustic-cargo-new (project-path &optional bin)
@@ -392,8 +383,7 @@ If BIN is not nil, create a binary application, otherwise a library."
                   :command (list rustic-cargo-bin "new" bin project-path)
                   :sentinel new-sentinel)))
 
-;;;;;;;;;;;;;;;;
-;; Interactive
+;;; Interactive
 
 (defun rustic-run-cargo-command (command)
   "Run the specified COMMAND with cargo."

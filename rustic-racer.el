@@ -1,5 +1,7 @@
 ;;; rustic-racer.el --- Racer support -*-lexical-binding: t-*-
 
+;;; Code:
+
 (require 'dash)
 (require 'etags)
 (require 's)
@@ -13,8 +15,7 @@
   :link '(url-link "https://github.com/racer-rust/emacs-racer/")
   :group 'rustic-mode)
 
-;;;;;;;;;;;;;;;;;;
-;; Customization
+;;; Customization
 
 (defcustom rustic-racer-cmd
   (or (executable-find "racer")
@@ -52,7 +53,7 @@ If nil, we will query $CARGO_HOME at runtime."
   :type 'file
   :group 'racer)
 
-;; Faces
+;;; Faces
 
 (defface rustic-racer-help-heading-face
   '((t :weight bold))
@@ -65,9 +66,7 @@ If nil, we will query $CARGO_HOME at runtime."
      :background "black" :foreground "white"))
   "Face used for the tooltip with `racer-describe-tooltip'")
 
-
-;;;;;;;;;;;;;;
-;; Help-mode
+;;; Help-mode
 
 (defvar rustic-racer-help-mode-map
   (let ((map (make-sparse-keymap)))
@@ -136,8 +135,7 @@ COLUMN number."
       (rustic-racer-help-mode))
     buf))
 
-;;;;;;;;;;
-;; Racer
+;;; Racer
 
 (defvar rustic-racer-prev-state nil)
 
@@ -261,9 +259,7 @@ Return a list (exit-code stdout stderr)."
              :process-environment process-environment))
       (list exit-code stdout stderr))))
 
-
-;;;;;;;;;;;;;;;;;;;;;;
-;; Utility Functions
+;;; Utility Functions
 
 (defun rustic-racer-slurp (file)
   "Return the contents of FILE as a string."
@@ -495,9 +491,7 @@ split it into its constituent parts."
             :signature (nth 6 match-parts)
             :docstring (if (> (length docstring) 0) docstring nil)))))
 
-
-;;;;;;;;;;;;;;;;
-;; Interactive
+;;; Interactive
 
 (defun rustic-racer-describe ()
   "Show a *Racer Help* buffer for the function or type at point."
@@ -507,5 +501,6 @@ split it into its constituent parts."
         (pop-to-buffer buf)
       (user-error "No function or type found at point"))))
 
+;;; _
 (provide 'rustic-racer)
 ;;; rustic-racer.el ends here

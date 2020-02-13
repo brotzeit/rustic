@@ -11,8 +11,7 @@
 
 (require 'rustic-compile)
 
-;;;;;;;;;;;;;;;;;;
-;; Customization
+;;; Customization
 
 (defcustom rustic-format-trigger nil
   "Format future rust buffers before saving using rustfmt."
@@ -90,9 +89,7 @@ to format buffer when saving."
   :safe #'booleanp
   :group 'rustic)
 
-
-;;;;;;;;;;;;
-;; Rustfmt
+;;; Rustfmt
 
 (defvar rustic-format-process-name "rustic-rustfmt-process"
   "Process name for rustfmt processes.")
@@ -225,9 +222,7 @@ were issues when using stdin for formatting."
     (while (eq (process-status proc) 'run)
       (sit-for 0.1))))
 
-
-;;;;;;;;
-;; LSP
+;;; LSP
 
 (defun rustic-setup-lsp ()
   "Setup LSP client. If client isn't installed, offer to install it."
@@ -267,7 +262,7 @@ with `lsp-rust-switch-server'."
         (error err))
     (message "No LSP server running.")))
 
-;; eglot
+;;;; eglot
 
 (defun rustic-setup-eglot ()
   "Configure eglot for rustic."
@@ -289,10 +284,7 @@ with `lsp-rust-switch-server'."
       (unless (-contains? eglot-ignored-server-capabilites feature)
         (add-to-list 'eglot-ignored-server-capabilites feature)))))
 
-;; lsp-mode
-;; rust-analyzer
-
-;; macro expansion
+;;;; lsp-mode
 
 (setq lsp-rust-analyzer-macro-expansion-method 'rustic-analyzer-macro-expand)
 
@@ -329,9 +321,7 @@ with `lsp-rust-switch-server'."
             (delete-region (line-beginning-position) (point-max))))))
     (display-buffer buf)))
 
-
-;;;;;;;;;;;
-;; Rustix
+;;; Rustix
 
 (defvar rustic-rustfix-process-name "rustic-rustfix-process"
   "Process name for rustfix processes.")
@@ -354,9 +344,7 @@ with `lsp-rust-switch-server'."
     (rustic-compilation-process-live)
     (rustic-compilation-start command :buffer err-buf :process proc :mode mode)))
 
-
-;;;;;;;;;;;;;;;;
-;; Interactive
+;;; Interactive
 
 ;;;###autoload
 (defun rustic-playpen (begin end)
@@ -395,7 +383,6 @@ src-block or buffer on the Rust playpen."
                               (let ((URL (read-from-minibuffer "Playpen URL: " last-line)))
                                 (browse-url URL)))))))))))
 
-
 ;;;###autoload
 (defun rustic-open-dependency-file ()
   "Open the 'Cargo.toml' file at the project root if the current buffer is
@@ -406,5 +393,6 @@ visiting a project."
         (find-file (concat workspace "/Cargo.toml"))
       (message "The current buffer is not inside a rust project!"))))
 
+;;; _
 (provide 'rustic-util)
 ;;; rustic-util.el ends here

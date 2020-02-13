@@ -193,5 +193,6 @@ See URL `https://github.com/rust-lang-nursery/rust-clippy'."
 ;; turn off flymake
 (add-hook 'rustic-mode-hook '(lambda () (flymake-mode-off)))
 
+;;; _
 (provide 'rustic-flycheck)
 ;;; rustic-flycheck.el ends here

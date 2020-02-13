@@ -8,8 +8,7 @@
 
 (require 'rustic-compile)
 
-;;;;;;;;;;;;;;;;;;
-;; Customization
+;;; Customization
 
 (defcustom rustic-popup-commands
   '((?b "build"    build)
@@ -34,9 +33,7 @@ The first element of each list contains a command's binding."
   '((t (:foreground "#f74c00")))
   "Face used for popup section description.")
 
-
-;;;;;;;;;;;;;;;
-;; Popup Mode
+;;; Popup Mode
 
 (defvar rustic-popup-buffer-name "rustic-popup-buffer"
   "Buffer name for rustic popup buffers.")
@@ -117,9 +114,7 @@ If directory is not in a rust project call `read-directory-name'."
               (funcall func)
             (message "Not a rust project.")))))))
 
-
-;;;;;;;;;;;;;;;;
-;; Interactive
+;;; Interactive
 
 (defun rustic-popup-invoke-popup-action (event)
   "Execute commands which are listed in `rustic-popup-commands'."
@@ -167,9 +162,7 @@ corresponding line."
        (t
         (message "No default action for line."))))))
 
-
-;;;;;;;;;;;;;;;;
-;; Help Popup
+;;; Help Popup
 
 (defvar rustic-popup-help-buffer-name "rustic-popup-help-buffer"
   "Buffer name for rustic popup help buffers.")
@@ -231,5 +224,6 @@ corresponding line."
   (fit-window-to-buffer)
   (set-window-text-height (selected-window) (+ (window-height) 1)))
 
+;;; _
 (provide 'rustic-popup)
 ;;; rustic-popup.el ends here
