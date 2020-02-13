@@ -2,7 +2,7 @@
 
 ;; Version: 0.21
 ;; Author: Mozilla
-;; 
+;;
 ;; Keywords: languages
 ;; Package-Requires: ((emacs "26.1") (xterm-color "1.6") (dash "2.13.0") (s "1.10.0") (f "0.18.2") (projectile "0.14.0") (markdown-mode "2.3") (spinner "1.7.3") (let-alist "1.0.4") (seq "2.3") (ht "2.0"))
 
@@ -1056,7 +1056,7 @@ whichever comes first."
    (lambda () (rustic-with-comment-fill-prefix (lambda () fill-prefix)))))
 
 (defun rustic-fill-paragraph (&rest args)
-  "Special wrapping for `fill-paragraph' to handle multi-line comments with a * prefix 
+  "Special wrapping for `fill-paragraph' to handle multi-line comments with a * prefix
 on each line."
   (rustic-in-comment-paragraph
    (lambda ()
@@ -1071,7 +1071,7 @@ on each line."
           t))))))
 
 (defun rustic-do-auto-fill (&rest args)
-  "Special wrapping for `do-auto-fill' to handle multi-line comments with a * prefix 
+  "Special wrapping for `do-auto-fill' to handle multi-line comments with a * prefix
 on each line."
   (rustic-with-comment-fill-prefix
    (lambda ()
@@ -1123,7 +1123,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
       (error "Could not locate executable \"%s\"" rustic-rustfmt-bin))))
 
 (defun rustic-buffer-workspace (&optional nodefault)
-  "Get the workspace root. 
+  "Get the workspace root.
 If NODEFAULT is t, return nil instead of `default-directory' if directory is
 not in a rust project."
   (let ((dir (locate-dominating-file
