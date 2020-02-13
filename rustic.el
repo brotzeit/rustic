@@ -189,7 +189,8 @@ to the function arguments.  When nil, `->' will be indented one level."
   ;; Fonts
   (setq-local font-lock-defaults '(rustic-font-lock-keywords
                                    nil nil nil nil
-                                   (font-lock-syntactic-face-function . rustic-syntactic-face-function)))
+                                   (font-lock-syntactic-face-function
+				    . rustic-syntactic-face-function)))
 
   ;; Misc
   (setq-local comment-start "// ")
@@ -335,8 +336,9 @@ to the function arguments.  When nil, `->' will be indented one level."
 (defun rustic-re-word (inner) (concat "\\<" inner "\\>"))
 
 (defun rustic-path-font-lock-matcher (re-ident)
-  "Matches names like \"foo::\" or \"Foo::\" (depending on RE-IDENT, which should match
-the desired identifiers), but does not match type annotations \"foo::<\"."
+  "Matches names like \"foo::\" or \"Foo::\" (depending on
+RE-IDENT, which should match the desired identifiers), but does
+not match type annotations \"foo::<\"."
   `(lambda (limit)
      (catch 'rustic-path-font-lock-matcher
        (while t
@@ -372,7 +374,9 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
       1 font-lock-preprocessor-face keep)
 
      ;; Builtin formatting macros
-     (,(concat (rustic-re-grab (concat (regexp-opt rustic-builtin-formatting-macros) "!")) (concat rustic-formatting-macro-opening-re rustic-start-of-string-re))
+     (,(concat (rustic-re-grab (concat (regexp-opt rustic-builtin-formatting-macros) "!"))
+	       rustic-formatting-macro-opening-re
+	       rustic-start-of-string-re)
       (1 'rustic-builtin-formatting-macro-face)
       (rustic-string-interpolation-matcher
        (rustic-end-of-string)
@@ -380,7 +384,10 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
        (0 'rustic-string-interpolation-face t nil)))
 
      ;; write! macro
-     (,(concat (rustic-re-grab "write\\(ln\\)?!") (concat rustic-formatting-macro-opening-re "[[:space:]]*[^\"]+,[[:space:]]*" rustic-start-of-string-re))
+     (,(concat (rustic-re-grab "write\\(ln\\)?!")
+	       rustic-formatting-macro-opening-re
+	       "[[:space:]]*[^\"]+,[[:space:]]*"
+	       rustic-start-of-string-re)
       (1 'rustic-builtin-formatting-macro-face)
       (rustic-string-interpolation-matcher
        (rustic-end-of-string)
@@ -398,7 +405,10 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
      (,rustic-re-type-or-constructor 1 font-lock-type-face)
 
      ;; Type-inferred binding
-     (,(concat "\\_<\\(?:let\\s-+ref\\|let\\|ref\\)\\s-+\\(?:mut\\s-+\\)?" (rustic-re-grab rustic-re-ident) "\\_>") 1 font-lock-variable-name-face)
+     (,(concat "\\_<\\(?:let\\s-+ref\\|let\\|ref\\)\\s-+\\(?:mut\\s-+\\)?"
+	       (rustic-re-grab rustic-re-ident)
+	       "\\_>")
+      1 font-lock-variable-name-face)
 
      ;; Type names like `Foo::`, highlight excluding the ::
      (,(rustic-path-font-lock-matcher rustic-re-uc-ident) 1 font-lock-type-face)
@@ -426,20 +436,25 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
              ("fn" . font-lock-function-name-face)))))
 
 (defun rustic-looking-back-str (str)
-  "Like `looking-back' but for fixed strings rather than regexps (so that it's not so slow)."
+  "Return non-nil if there's a match on the text before point and STR.
+Like `looking-back' but for fixed strings rather than regexps (so
+that it's not so slow)."
   (let ((len (length str)))
     (and (> (point) len)
          (equal str (buffer-substring-no-properties (- (point) len) (point))))))
 
-(defun rustic-looking-back-symbols (SYMS)
-  "Return non-nil if the point is just after a complete symbol that is a member of the list of strings SYMS."
+(defun rustic-looking-back-symbols (symbols)
+  "Return non-nil if the point is after a member of SYMBOLS.
+SYMBOLS is a list of strings that represent the respective
+symbols."
   (save-excursion
     (let* ((pt-orig (point))
            (beg-of-symbol (progn (forward-thing 'symbol -1) (point)))
            (end-of-symbol (progn (forward-thing 'symbol 1) (point))))
       (and
        (= end-of-symbol pt-orig)
-       (member (buffer-substring-no-properties beg-of-symbol pt-orig) SYMS)))))
+       (member (buffer-substring-no-properties beg-of-symbol pt-orig)
+	       symbols)))))
 
 (defun rustic-looking-back-ident ()
   "Non-nil if we are looking backwards at a valid rust identifier."
@@ -449,7 +464,10 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
 (defun rustic-looking-back-macro ()
   "Non-nil if looking back at an ident followed by a !"
   (if (> (- (point) (point-min)) 1)
-      (save-excursion (backward-char) (and (= ?! (char-after)) (rustic-looking-back-ident)))))
+      (save-excursion
+	(backward-char)
+	(and (= ?! (char-after))
+	     (rustic-looking-back-ident)))))
 
 (defun rustic-paren-level () (nth 0 (syntax-ppss)))
 (defun rustic-in-str () (nth 3 (syntax-ppss)))
@@ -474,7 +492,11 @@ the desired identifiers), but does not match type annotations \"foo::<\"."
       (backward-up-list)
       (rustic-rewind-irrelevant)
       (or (rustic-looking-back-macro)
-          (and (rustic-looking-back-ident) (save-excursion (backward-sexp) (rustic-rewind-irrelevant) (rustic-looking-back-str "macro_rules!")))
+          (and (rustic-looking-back-ident)
+	       (save-excursion
+		 (backward-sexp)
+		 (rustic-rewind-irrelevant)
+		 (rustic-looking-back-str "macro_rules!")))
           (rustic-in-macro)))))
 
 (defun rustic-looking-at-where ()
@@ -583,7 +605,8 @@ match data if found. Returns nil if not within a Rust string."
                    (rustic-rewind-irrelevant)
                    (rustic-rewind-type-param-list)
                    (cond
-                    ((rustic-looking-back-symbols '("fn" "trait" "enum" "struct" "union" "impl" "type"))
+                    ((rustic-looking-back-symbols
+		      '("fn" "trait" "enum" "struct" "union" "impl" "type"))
                      ident-pos)
 
                     ((equal 5 (rustic-syntax-class-before-point))
@@ -674,17 +697,18 @@ match data if found. Returns nil if not within a Rust string."
             (not (and (rustic-rewind-to-decl-name)
                       (progn
                         (rustic-rewind-irrelevant)
-                        (rustic-looking-back-symbols '("enum" "struct" "union" "trait" "type"))))))
-           ))
+                        (rustic-looking-back-symbols
+			 '("enum" "struct" "union" "trait" "type"))))))))
 
          ((equal token 'ambiguous-operator)
           (cond
-           ;; An ampersand after an ident has to be an operator rather than a & at the beginning of
-           ;; a ref type
+           ;; An ampersand after an ident has to be an operator rather
+           ;; than a & at the beginning of a ref type
            ((equal postchar ?&) t)
 
-           ;; A : followed by a type then an = introduces an expression (unless it is part of a where
-           ;; clause of a "type" declaration)
+           ;; A : followed by a type then an = introduces an
+           ;; expression (unless it is part of a where clause of a
+           ;; "type" declaration)
            ((and (equal postchar ?=)
                  (looking-back "[^:]:" (- (point) 2))
                  (not (save-excursion
@@ -1056,8 +1080,8 @@ whichever comes first."
    (lambda () (rustic-with-comment-fill-prefix (lambda () fill-prefix)))))
 
 (defun rustic-fill-paragraph (&rest args)
-  "Special wrapping for `fill-paragraph' to handle multi-line comments with a * prefix
-on each line."
+  "Special wrapping for `fill-paragraph'.
+This handles multi-line comments with a * prefix on each line."
   (rustic-in-comment-paragraph
    (lambda ()
      (rustic-with-comment-fill-prefix
@@ -1071,8 +1095,8 @@ on each line."
           t))))))
 
 (defun rustic-do-auto-fill (&rest args)
-  "Special wrapping for `do-auto-fill' to handle multi-line comments with a * prefix
-on each line."
+  "Special wrapping for `do-auto-fill'.
+This handles multi-line comments with a * prefix on each line."
   (rustic-with-comment-fill-prefix
    (lambda ()
      (apply 'do-auto-fill args)
