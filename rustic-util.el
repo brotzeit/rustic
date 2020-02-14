@@ -230,6 +230,18 @@ were issues when using stdin for formatting."
           (t
            (rustic-install-lsp-client-p client)))))
 
+;;;; lsp
+
+(defvar lsp-clients)
+(defvar lsp-rust-analyzer-macro-expansion-method)
+(defvar lsp-rust-analyzer-server-command)
+(defvar lsp-rust-server)
+(declare-function lsp "lsp-mode" (&optional arg))
+(declare-function lsp--client-priority "lsp-mode" (cl-x))
+(declare-function lsp-rust-switch-server "lsp-rust" ())
+(declare-function lsp-workspace-folders-add "lsp-rust" (project-root))
+(declare-function lsp-workspace-root "lsp-mode" (&optional path))
+
 (defun rustic-lsp-mode-setup ()
   "When changing the `lsp-rust-server', it's also necessary to update the priorities
 with `lsp-rust-switch-server'."
@@ -257,8 +269,15 @@ with `lsp-rust-switch-server'."
 
 ;;;; eglot
 
+(defvar eglot-ignored-server-capabilites)
+(defvar eglot-ignored-server-capabilites)
+(defvar eglot-server-programs)
+(defvar eglot-server-programs)
+(declare-function eglot-ensure "eglot" ())
+
 (defun rustic-setup-eglot ()
   "Configure eglot for rustic."
+  (require 'eglot)
   (if (equal rustic-lsp-server 'rls)
       ;; add rustic to `eglot-server-programs'
       (let ((rls '(rustic-mode . (eglot-rls "rls"))))
