@@ -20,16 +20,15 @@
                  (const :tag "Don't format automatically." nil))
   :group 'rustic)
 
-(defcustom rustic-format-on-save nil
-  "Format rust buffers before saving using rustfmt."
-  :type 'boolean
-  :safe #'booleanp
-  :group 'rustic)
-(make-obsolete 'rustic-format-on-save 'rustic-format-trigger "0.19")
+(defvar rustic-format-on-save nil
+  "Format rust buffers before saving using rustfmt.")
+(make-obsolete 'rustic-format-on-save 'rustic-format-trigger "Rustic 0.19")
 
 (defun rustic-format-on-save-p ()
-  "Checks if either deprecated `rustic-format-on-save' or `rustic-format-trigger' is set
-to format buffer when saving."
+  "Return non-nil if formatting should happen when saving.
+See option `rustic-format-trigger'.  For backward compatibility,
+if obsolete `rustic-format-on-save' is non-nil, then also return
+non-nil."
   (or rustic-format-on-save (eq rustic-format-trigger 'on-save)))
 
 (defcustom rustic-rustfmt-bin "rustfmt"
