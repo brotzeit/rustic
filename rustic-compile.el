@@ -116,7 +116,7 @@ Error matching regexes from compile.el are removed."
   (setq-local compilation-info-face rustic-compilation-info-face)
   (setq-local compilation-column-face rustic-compilation-line-face)
   (setq-local compilation-line-face rustic-compilation-column-face)
-  
+
   (setq-local xterm-color-names-bright rustic-ansi-faces)
   (setq-local xterm-color-names rustic-ansi-faces)
 

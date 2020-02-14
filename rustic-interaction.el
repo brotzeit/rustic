@@ -388,4 +388,3 @@ This is written mainly to be used as `end-of-defun-function' for Rust."
 
 (provide 'rustic-interaction)
 ;;; rustic-interaction.el ends here
-

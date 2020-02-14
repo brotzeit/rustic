@@ -139,7 +139,7 @@ If directory is not in a rust project call `read-directory-name'."
         (call-interactively 'rustic-compile (concat "cargo " command))))))
 
 (defun rustic-popup-default-action ()
-  "Change backtrace and `compilation-arguments' when executed on 
+  "Change backtrace and `compilation-arguments' when executed on
 corresponding line."
   (interactive)
   (let ((inhibit-read-only t))

@@ -113,7 +113,7 @@ Takes a value accepted by `spinner-start'."
   "Run 'cargo test'.
 
 If ARG is not nil, use value as argument and store it in `rustic-test-arguments'.
-When calling this function from `rustic-popup-mode', always use the value of 
+When calling this function from `rustic-popup-mode', always use the value of
 `rustic-test-arguments'."
   (interactive "P")
   (rustic-cargo-test-run
