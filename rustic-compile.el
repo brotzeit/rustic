@@ -392,7 +392,10 @@ current line in an error section."
                (file (caar (compilation--loc->file-struct loc))))
           ;; open file of error and goto line number that we parsed from the line we are on
           (with-current-buffer (find-file-other-window file)
-            (goto-line (string-to-number line-number)))))
+	    (save-restriction
+	      (widen)
+	      (goto-char (point-min))
+              (forward-line (1- (string-to-number line-number)))))))
     (let ((default-directory (projectile-project-root default-directory)))
       (apply orig-fun args))))
 
