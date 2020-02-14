@@ -353,9 +353,10 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
                         nil))))
             (when (and saved-p (rustic-format-on-save-p) (eq major-mode 'rustic-mode))
               (let* ((file (buffer-file-name buffer))
-                     (proc (rustic-format-start-process 'rustic-format-file-sentinel
-                                                        :buffer buffer
-                                                        :command `(,rustic-rustfmt-bin ,file))))
+                     (proc (rustic-format-start-process
+			    'rustic-format-file-sentinel
+                            :buffer buffer
+                            :command `(,rustic-rustfmt-bin ,file))))
                 (while (eq (process-status proc) 'run)
                   (sit-for 0.1))))))))))
 
@@ -379,8 +380,11 @@ This hook temporarily sets `default-directory' to the project's root."
 
 (defun rustic-compile-goto-error-hook (orig-fun &rest args)
   "Provide possibility use `compile-goto-error' on line numbers in compilation buffers.
-This hook checks if there's a line number at the beginning of the current line in an error section."
-  (-if-let* ((line-contents (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
+This hook checks if there's a line number at the beginning of the
+current line in an error section."
+  (-if-let* ((line-contents (buffer-substring-no-properties
+			     (line-beginning-position)
+			     (line-end-position)))
              (line-number-p (string-match "^[0-9]+\s+\|" line-contents))
              (line-number (car (split-string line-contents))))
       (save-excursion

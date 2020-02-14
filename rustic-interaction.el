@@ -87,7 +87,10 @@
           ;;
           ((skip-dot-identifier
             (lambda ()
-              (when (and (rustic-looking-back-ident) (save-excursion (forward-thing 'symbol -1) (= ?. (char-before))))
+              (when (and (rustic-looking-back-ident)
+                         (save-excursion
+                           (forward-thing 'symbol -1)
+                           (= ?. (char-before))))
                 (forward-thing 'symbol -1)
                 (backward-char)
                 (- (current-column) rustic-indent-offset)))))
@@ -157,7 +160,8 @@
 
                    ;; Indent to the same level as the previous line, or the
                    ;; start of the string if the previous line starts the string
-                   (if (= (line-number-at-pos end-of-prev-line-pos) (line-number-at-pos string-begin-pos))
+                   (if (= (line-number-at-pos end-of-prev-line-pos)
+                          (line-number-at-pos string-begin-pos))
                        ;; The previous line is the start of the string.
                        ;; If the backslash is the only character after the
                        ;; string beginning, indent to the next indent
@@ -279,14 +283,19 @@
                           (= (point) 1)
                           ;; ..or if the previous line ends with any of these:
                           ;;     { ? : ( , ; [ }
-                          ;; then we are at the beginning of an expression, so stay on the baseline...
+                          ;; then we are at the beginning of an
+                          ;; expression, so stay on the baseline...
                           (looking-back "[(,:;?[{}]\\|[^|]|" (- (point) 2))
-                          ;; or if the previous line is the end of an attribute, stay at the baseline...
-                          (progn (rustic-rewind-to-beginning-of-current-level-expr) (looking-at "#")))))
+                          ;; or if the previous line is the end of an
+                          ;; attribute, stay at the baseline...
+                          (progn
+                            (rustic-rewind-to-beginning-of-current-level-expr)
+                            (looking-at "#")))))
                       baseline
 
-                    ;; Otherwise, we are continuing the same expression from the previous line,
-                    ;; so add one additional indent level
+                    ;; Otherwise, we are continuing the same
+                    ;; expression from the previous line, so add one
+                    ;; additional indent level
                     (+ baseline rustic-indent-offset))))))))))
 
     (when indent
@@ -354,8 +363,9 @@ which calls this, does that afterwards."
     (catch 'done
       (dotimes (_ magnitude)
         ;; Search until we find a match that is not in a string or comment.
-        (while (if (re-search-backward (concat "^\\(" (or regex rustic-top-item-beg-re) "\\)")
-                                       nil 'move sign)
+        (while (if (re-search-backward
+                    (concat "^\\(" (or regex rustic-top-item-beg-re) "\\)")
+                    nil 'move sign)
                    (rustic-in-str-or-cmnt)
                  ;; Did not find it.
                  (throw 'done nil)))))
@@ -380,7 +390,8 @@ This is written mainly to be used as `end-of-defun-function' for Rust."
         (condition-case nil
             (forward-sexp)
           (scan-error
-           ;; The parentheses are unbalanced; instead of being unable to fontify, just jump to the end of the buffer
+           ;; The parentheses are unbalanced; instead of being unable
+           ;; to fontify, just jump to the end of the buffer
            (goto-char (point-max)))))
     ;; There is no opening brace, so consider the whole buffer to be one "defun"
     (goto-char (point-max))))

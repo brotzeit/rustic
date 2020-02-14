@@ -302,13 +302,15 @@ with `lsp-rust-switch-server'."
   ;; Fonts
   (setq-local font-lock-defaults '(rustic-font-lock-keywords
                                    nil nil nil nil
-                                   (font-lock-syntactic-face-function . rustic-syntactic-face-function))))
+                                   (font-lock-syntactic-face-function
+                                    . rustic-syntactic-face-function))))
 
 (defun rustic-analyzer-macro-expand (result)
   "Default method for displaying macro expansion results."
   (interactive)
   (let* ((root (lsp-workspace-root default-directory))
-         (buf (get-buffer-create (get-buffer-create (format "*rust-analyzer macro expansion %s*" root)))))
+         (buf (get-buffer-create
+               (format "*rust-analyzer macro expansion %s*" root))))
     (with-current-buffer buf
       (let ((inhibit-read-only t))
         (erase-buffer)
@@ -370,7 +372,9 @@ src-block or buffer on the Rust playpen."
      (t
       (setq data (buffer-substring (point-min) (point-max)))))
     (let* ((escaped-data (url-hexify-string data))
-           (escaped-playpen-url (url-hexify-string (format rustic-playpen-url-format escaped-data))))
+           (escaped-playpen-url (url-hexify-string
+                                 (format rustic-playpen-url-format
+                                         escaped-data))))
       (if (> (length escaped-playpen-url) 5000)
           (error "encoded playpen data exceeds 5000 character limit (length %s)"
                  (length escaped-playpen-url))

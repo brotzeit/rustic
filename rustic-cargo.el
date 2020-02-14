@@ -141,8 +141,10 @@ When calling this function from `rustic-popup-mode', always use the value of
         (rustic-compilation command :buffer buf :process proc :mode mode))
     (message "Could not find test at point.")))
 
-(defconst rustic-cargo-mod-regexp "^\s*mod\s+\\([[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*\\)\s*{")
-(defconst rustic-cargo-fn-regexp "^\s*fn\s+\\([^(]+\\)\s*(")
+(defconst rustic-cargo-mod-regexp
+  "^\s*mod\s+\\([[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*\\)\s*{")
+(defconst rustic-cargo-fn-regexp
+  "^\s*fn\s+\\([^(]+\\)\s*(")
 
 (defun rustic-cargo--get-current-fn-fullname()
   "Return full name of the fn around point including module name if any."
