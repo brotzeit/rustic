@@ -215,6 +215,15 @@ the user to choose."
           (--first (equal (plist-get it :signature) signature) relevant-matches))
       (-first-item relevant-matches))))
 
+(defmacro rustic-racer-with-temporary-file (path-sym &rest body)
+  "Create a temporary file, and bind its path to PATH-SYM.
+Evaluate BODY, then delete the temporary file."
+  (declare (indent 1) (debug (symbolp body)))
+  `(let ((,path-sym (make-temp-file "racer")))
+     (unwind-protect
+         (progn ,@body)
+       (delete-file ,path-sym))))
+
 (defun rustic-racer-call-at-point (command)
   "Call racer command COMMAND at point of current buffer.
 Return a list of all the lines returned by the command."
@@ -446,15 +455,6 @@ For example, 'EnumKind' -> 'an enum kind'."
            (string-match-p (rx bos (+ (any lower "_")) eos) str))
       (setq result (propertize str 'face 'font-lock-variable-name-face)))
     result))
-
-(defmacro rustic-racer-with-temporary-file (path-sym &rest body)
-  "Create a temporary file, and bind its path to PATH-SYM.
-Evaluate BODY, then delete the temporary file."
-  (declare (indent 1) (debug (symbolp body)))
-  `(let ((,path-sym (make-temp-file "racer")))
-     (unwind-protect
-         (progn ,@body)
-       (delete-file ,path-sym))))
 
 (defun rustic-racer-split-parts (raw-output)
   "Given RAW-OUTPUT from racer, split on semicolons and doublequotes.
