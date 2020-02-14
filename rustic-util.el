@@ -58,20 +58,13 @@ to format buffer when saving."
                  (const :tag "rust-analyzer" rust-analyzer))
   :group 'rustic)
 
+(define-obsolete-variable-alias 'rustic-rls-pkg 'rustic-lsp-client "Rustic 0.18")
 (defcustom rustic-lsp-client 'lsp-mode
   "Emacs package for interaction with the language server."
   :type '(choice (const :tag "eglot" eglot)
                  (const :tag "lsp-mode" lsp-mode)
                  (const :tag "No LSP client" nil))
   :group 'rustic)
-
-(defcustom rustic-rls-pkg nil
-  "Emacs package for interaction with rls."
-  :type '(choice (const :tag "eglot" eglot)
-                 (const :tag "lsp-mode" lsp-mode)
-                 (const :tag "No LSP client" nil))
-  :group 'rustic)
-(make-obsolete 'rustic-rls-pkg 'rustic-lsp-client "0.18")
 
 (defcustom rustic-lsp-format nil
   "Allow formatting through lsp server."
@@ -226,7 +219,7 @@ were issues when using stdin for formatting."
 
 (defun rustic-setup-lsp ()
   "Setup LSP client. If client isn't installed, offer to install it."
-  (let ((client (or rustic-rls-pkg rustic-lsp-client)))
+  (let ((client rustic-lsp-client))
     (cond ((eq client nil)
            nil)
           ((require client nil t)
