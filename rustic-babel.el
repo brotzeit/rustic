@@ -15,6 +15,8 @@
 ;; which probably means that it is internal and we shouldn't use it.
 (defvar org-babel-temporary-directory)
 
+(defvar rustic-info nil)
+
 (add-to-list 'org-babel-tangle-lang-exts '("rustic" . "rs"))
 
 (defcustom rustic-babel-display-compilation-buffer nil
