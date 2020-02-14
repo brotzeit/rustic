@@ -11,6 +11,10 @@
 (require 'rustic-cargo)
 (require 'rustic-compile)
 
+;; FIXME This variable doesn't exist in noninteractive emacs sessions,
+;; which probably means that it is internal and we shouldn't use it.
+(defvar org-babel-temporary-directory)
+
 (add-to-list 'org-babel-tangle-lang-exts '("rustic" . "rs"))
 
 (defcustom rustic-babel-display-compilation-buffer nil
