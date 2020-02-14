@@ -180,7 +180,7 @@ When calling this function from `rustic-popup-mode', always use the value of
 
 (defvar rustic-cargo-oudated-buffer-name "*cargo-outdated*")
 
-(defvar rustic-outdated-spinner nil)
+(defvar rustic-cargo-outdated-spinner nil)
 
 (defvar rustic-cargo-outdated-mode-map
   (let ((map (make-sparse-keymap)))
@@ -225,10 +225,11 @@ Execute process in PATH."
       (setq default-directory dir)
       (erase-buffer)
       (rustic-cargo-outdated-mode)
-      (rustic-with-spinner rustic-outdated-spinner
+      (rustic-with-spinner rustic-cargo-outdated-spinner
         (make-spinner rustic-spinner-type t 10)
-        '(rustic-outdated-spinner (":Executing " (:eval (spinner-print rustic-outdated-spinner))))
-        (spinner-start rustic-outdated-spinner)))
+        '(rustic-cargo-outdated-spinner
+          (":Executing " (:eval (spinner-print rustic-cargo-outdated-spinner))))
+        (spinner-start rustic-cargo-outdated-spinner)))
     (display-buffer buf)))
 
 (defun rustic-cargo-reload-outdated ()
@@ -261,7 +262,7 @@ Execute process in PATH."
           (if (= exit-status 101)
               (rustic-cargo-install-crate-p "outdated")
             (message out))))))
-  (rustic-with-spinner rustic-outdated-spinner nil nil))
+  (rustic-with-spinner rustic-cargo-outdated-spinner nil nil))
 
 (defun rustic-cargo-install-crate-p (crate)
   "Ask whether to install crate CRATE."
