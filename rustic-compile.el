@@ -17,6 +17,7 @@
 
 (require 'compile)
 
+(require 'rustic-util)
 
 ;;; Customization
 

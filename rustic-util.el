@@ -9,8 +9,6 @@
 (require 'subr-x)
 (require 'package)
 
-(require 'rustic-compile)
-
 ;;; Customization
 
 (defcustom rustic-format-trigger nil
