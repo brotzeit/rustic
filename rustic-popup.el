@@ -27,11 +27,13 @@ The first element of each list contains a command's binding."
 
 (defface rustic-popup-key-face
   '((t (:foreground "DeepSkyBlue")))
-  "Face used for command shortcuts.")
+  "Face used for command shortcuts."
+  :group 'rustic)
 
 (defface rustic-popup-section-face
   '((t (:foreground "#f74c00")))
-  "Face used for popup section description.")
+  "Face used for popup section description."
+  :group 'rustic)
 
 ;;; Popup Mode
 

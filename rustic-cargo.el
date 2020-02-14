@@ -23,7 +23,8 @@ If nil then the project is simply created."
 
 (defface rustic-cargo-outdated-upgrade-face
   '((t (:foreground "LightSeaGreen")))
-  "Face used for crates marked for upgrade.")
+  "Face used for crates marked for upgrade."
+  :group 'rustic)
 
 ;;; Spinner
 
