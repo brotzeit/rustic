@@ -144,6 +144,35 @@ to the function arguments.  When nil, `->' will be indented one level."
      (group symbol-start "union" symbol-end)
      (+ space) (regexp ,rustic-re-ident))))
 
+(defun rustic-re-shy (inner) (concat "\\(?:" inner "\\)"))
+(defun rustic-re-grab (inner) (concat "\\(" inner "\\)"))
+(defun rustic-re-item-def (itype)
+  (concat (rustic-re-word itype)
+          (rustic-re-shy rustic-re-generic) "?"
+          "[[:space:]]+" (rustic-re-grab rustic-re-ident)))
+(defun rustic-re-word (inner) (concat "\\<" inner "\\>"))
+
+(defun rustic-re-item-def-imenu (itype)
+  (concat "^[[:space:]]*"
+          (rustic-re-shy (concat (rustic-re-word rustic-re-vis) "[[:space:]]+")) "?"
+          (rustic-re-shy (concat (rustic-re-word "default") "[[:space:]]+")) "?"
+          (rustic-re-shy (concat (rustic-re-word rustic-re-unsafe) "[[:space:]]+")) "?"
+          (rustic-re-shy (concat (rustic-re-word rustic-re-extern) "[[:space:]]+"
+                                 (rustic-re-shy "\"[^\"]+\"[[:space:]]+") "?")) "?"
+          (rustic-re-item-def itype)))
+
+(defvar rustic-imenu-generic-expression
+  (append (mapcar #'(lambda (x)
+                      (list (capitalize x) (rustic-re-item-def-imenu x) 1))
+                  '("async fn" "enum" "struct" "union" "type" "mod" "fn" "trait" "impl"))
+          `(("Macro" ,(rustic-re-item-def-imenu "macro_rules!") 1)))
+  "Value for `imenu-generic-expression' in Rust mode.
+
+Create a hierarchical index of the item definitions in a Rust file.
+
+Imenu will show all the enums, structs, etc. in their own subheading.
+Use idomenu (imenu with `ido-mode') for best mileage.")
+
 (defvar rustic-mode-syntax-table
   (let ((table (make-syntax-table)))
 
@@ -319,14 +348,6 @@ This is used by `rust-font-lock-keywords'.
 (defvar rustic-start-of-string-re
   "\\(?:r#*\\)?\""
   "Regular expression to match the start of a Rust raw string.")
-
-(defun rustic-re-shy (inner) (concat "\\(?:" inner "\\)"))
-(defun rustic-re-grab (inner) (concat "\\(" inner "\\)"))
-(defun rustic-re-item-def (itype)
-  (concat (rustic-re-word itype)
-          (rustic-re-shy rustic-re-generic) "?"
-          "[[:space:]]+" (rustic-re-grab rustic-re-ident)))
-(defun rustic-re-word (inner) (concat "\\<" inner "\\>"))
 
 (defun rustic-path-font-lock-matcher (re-ident)
   "Match occurrences of RE-IDENT followed by a double-colon.
@@ -508,15 +529,6 @@ buffer."
       t)))
 
 (defconst rustic-re-pre-expression-operators "[-=!%&*/:<>[{(|.^;}]")
-
-(defun rustic-re-item-def-imenu (itype)
-  (concat "^[[:space:]]*"
-          (rustic-re-shy (concat (rustic-re-word rustic-re-vis) "[[:space:]]+")) "?"
-          (rustic-re-shy (concat (rustic-re-word "default") "[[:space:]]+")) "?"
-          (rustic-re-shy (concat (rustic-re-word rustic-re-unsafe) "[[:space:]]+")) "?"
-          (rustic-re-shy (concat (rustic-re-word rustic-re-extern) "[[:space:]]+"
-                                 (rustic-re-shy "\"[^\"]+\"[[:space:]]+") "?")) "?"
-          (rustic-re-item-def itype)))
 
 (defconst rustic-re-special-types (regexp-opt rustic-special-types 'symbols))
 
@@ -1101,20 +1113,6 @@ This handles multi-line comments with a * prefix on each line."
 (defun rustic-comment-indent-new-line (&optional arg)
   (rustic-with-comment-fill-prefix
    (lambda () (comment-indent-new-line arg))))
-
-;;; Imenu support
-
-(defvar rustic-imenu-generic-expression
-  (append (mapcar #'(lambda (x)
-                      (list (capitalize x) (rustic-re-item-def-imenu x) 1))
-                  '("async fn" "enum" "struct" "union" "type" "mod" "fn" "trait" "impl"))
-          `(("Macro" ,(rustic-re-item-def-imenu "macro_rules!") 1)))
-  "Value for `imenu-generic-expression' in Rust mode.
-
-Create a hierarchical index of the item definitions in a Rust file.
-
-Imenu will show all the enums, structs, etc. in their own subheading.
-Use idomenu (imenu with `ido-mode') for best mileage.")
 
 (defun rustic-end-of-string ()
   "Skip to the end of the current string."
