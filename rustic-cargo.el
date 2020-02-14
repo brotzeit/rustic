@@ -371,7 +371,7 @@ If BIN is not nil, create a binary application, otherwise a library."
   (let ((bin (if (or bin (y-or-n-p "Create new binary package? "))
                  "--bin"
                "--lib"))
-        (new-sentinel (lambda (process signal)
+        (new-sentinel (lambda (_process signal)
                         (when (equal signal "finished\n")
                           (message (format "Created new package: %s"
                                            (file-name-base project-path)))

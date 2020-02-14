@@ -128,8 +128,7 @@ execution with rustfmt."
 
 (defun rustic-babel-build-update-result-block (result)
   "Update result block with RESULT."
-  (let ((marker rustic-babel-src-location)
-        (result-params (list (cdr (assq :results rustic-babel-params)))))
+  (let ((marker rustic-babel-src-location))
     (with-current-buffer (marker-buffer marker)
       (goto-char marker)
       (org-babel-remove-result)
@@ -228,7 +227,7 @@ If called while there's a live Rust babel process, ask user whether to
 kill the running process."
   (let ((p (get-process rustic-babel-process-name)))
     (if (process-live-p p)
-        (let ((buf (process-buffer p)))
+        (progn
           (rustic-process-kill-p p t)
           nil)
       (let* ((default-directory org-babel-temporary-directory)

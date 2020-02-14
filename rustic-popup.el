@@ -209,8 +209,7 @@ corresponding line."
 
 (defun rustic-popup-setup-help-popup (string)
   "Switch to help buffer."
-  (let ((len (length (split-string string "\n")))
-        (buf (get-buffer-create rustic-popup-help-buffer-name)))
+  (let ((buf (get-buffer-create rustic-popup-help-buffer-name)))
     (switch-to-buffer buf)
     (erase-buffer)
     (rustic-popup-help-mode)

@@ -331,7 +331,6 @@ with `lsp-rust-switch-server'."
   (interactive)
   (let* ((command (list rustic-cargo-bin "fix" "--allow-dirty"))
          (err-buf rustic-rustfix-buffer-name)
-         (buf (current-buffer))
          (proc rustic-rustfix-process-name)
          (mode 'rustic-rustfix-mode))
     (rustic-compilation-process-live)
