@@ -10,6 +10,8 @@
 (require 'button)
 (require 'help-mode)
 
+(defvar rustic-racer-args nil)
+
 (defgroup racer nil
   "Docs browsing for Rust via racer."
   :link '(url-link "https://github.com/racer-rust/emacs-racer/")
