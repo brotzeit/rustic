@@ -143,13 +143,13 @@ execution with rustfmt."
 
       (let ((file (cdr (assq :file rustic-babel-params)))
             (results-params (cdr (assq :result-params rustic-babel-params))))
-    	;; If non-empty result and :file then write to :file.
-	    (when (and file results-params)
-	      (when result
-	        (with-temp-file file
-	          (insert (org-babel-format-result
-	    	           result (cdr (assq :sep rustic-babel-params))))))
-	      (setq result file))
+        ;; If non-empty result and :file then write to :file.
+        (when (and file results-params)
+          (when result
+            (with-temp-file file
+              (insert (org-babel-format-result
+                       result (cdr (assq :sep rustic-babel-params))))))
+          (setq result file))
 
         (org-babel-remove-result rustic-info)
         (org-babel-insert-result result results-params rustic-info)))))

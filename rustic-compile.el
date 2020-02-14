@@ -189,7 +189,7 @@ Error matching regexes from compile.el are removed."
 Set environment variables for rust process."
   (let ((coding-system-for-read 'binary)
         (process-environment (nconc
-	                          (list
+                              (list
                                (format "TERM=%s" "ansi")
                                (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
                               process-environment)))
@@ -239,23 +239,23 @@ is set to 'on-compile. If rustfmt fails, don't start compilation."
 :sentinel - process sentinel
 "
   (let ((buf (get-buffer-create
-                (or (plist-get args :buffer) rustic-compilation-buffer-name)))
-          (process (or (plist-get args :process) rustic-compilation-process-name))
-          (mode (or (plist-get args :mode) 'rustic-compilation-mode))
-          (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
-          (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
-      (when compilation-scroll-output
-        (rustic-compilation-setup-buffer buf directory mode))
-      (unless (plist-get args :no-display)
-        (funcall rustic-compile-display-method buf))
-      (unless compilation-scroll-output
-        (rustic-compilation-setup-buffer buf directory mode))
-      (with-current-buffer buf
-        (rustic-make-process :name process
-                             :buffer buf
-                             :command command
-                             :filter #'rustic-compilation-filter
-                             :sentinel sentinel))))
+              (or (plist-get args :buffer) rustic-compilation-buffer-name)))
+        (process (or (plist-get args :process) rustic-compilation-process-name))
+        (mode (or (plist-get args :mode) 'rustic-compilation-mode))
+        (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
+        (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
+    (when compilation-scroll-output
+      (rustic-compilation-setup-buffer buf directory mode))
+    (unless (plist-get args :no-display)
+      (funcall rustic-compile-display-method buf))
+    (unless compilation-scroll-output
+      (rustic-compilation-setup-buffer buf directory mode))
+    (with-current-buffer buf
+      (rustic-make-process :name process
+                           :buffer buf
+                           :command command
+                           :filter #'rustic-compilation-filter
+                           :sentinel sentinel))))
 
 (defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.
@@ -268,14 +268,14 @@ Translate STRING with `xterm-color-filter'."
             ;; `save-restriction' doesn't use the right insertion type either:
             ;; If we are inserting at the end of the accessible part of the
             ;; buffer, keep the inserted text visible.
-	        (min (point-min-marker))
-	        (max (copy-marker (point-max) t))
-	        (compilation-filter-start (marker-position (process-mark proc)))
+            (min (point-min-marker))
+            (max (copy-marker (point-max) t))
+            (compilation-filter-start (marker-position (process-mark proc)))
             (xterm-string (xterm-color-filter string)))
         (unwind-protect
             (progn
-	          (widen)
-	          (goto-char compilation-filter-start)
+              (widen)
+              (goto-char compilation-filter-start)
               ;; We used to use `insert-before-markers', so that windows with
               ;; point at `process-mark' scroll along with the output, but we
               ;; now use window-point-insertion-type instead.
@@ -287,11 +287,11 @@ Translate STRING with `xterm-color-filter'."
                 (comint-carriage-motion (process-mark proc) (point)))
               (set-marker (process-mark proc) (point))
               (run-hooks 'compilation-filter-hook))
-	      (goto-char pos)
+          (goto-char pos)
           (narrow-to-region min max)
-	      (set-marker pos nil)
-	      (set-marker min nil)
-	      (set-marker max nil))))))
+          (set-marker pos nil)
+          (set-marker min nil)
+          (set-marker max nil))))))
 
 (defun rustic-compilation-process-live (&optional nosave)
   "List live rustic processes."
@@ -338,7 +338,7 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
       (kill-buffer b))
     (dolist (buffer buffers)
       (when (and (buffer-live-p buffer)
-    	         (buffer-modified-p buffer))
+                 (buffer-modified-p buffer))
         (with-current-buffer buffer
           (let ((saved-p nil))
             ;; also set rustic-format-on-save for backwards compatibility

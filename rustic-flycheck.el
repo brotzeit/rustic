@@ -118,9 +118,9 @@ description of the conventional Cargo project layout."
       (when target
         (let-alist target
           (seq-filter (lambda (kv) (cdr kv))
-                     (list (cons 'kind (rustic-flycheck-normalize-target-kind .kind))
-                           (cons 'name .name)
-                           (cons 'required-features .required-features))))))))
+                      (list (cons 'kind (rustic-flycheck-normalize-target-kind .kind))
+                            (cons 'name .name)
+                            (cons 'required-features .required-features))))))))
 
 (defun rustic-flycheck-normalize-target-kind (kinds)
   "Return the normalized target name from KIND.
@@ -160,7 +160,7 @@ Flycheck according to the Cargo project layout."
 (flycheck-define-checker rustic-clippy
   "A Rust syntax checker using clippy.
 
-  See URL `https://github.com/rust-lang-nursery/rust-clippy'."
+See URL `https://github.com/rust-lang-nursery/rust-clippy'."
   :command ("cargo" "clippy" "--message-format=json")
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter

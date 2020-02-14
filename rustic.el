@@ -190,7 +190,7 @@ to the function arguments.  When nil, `->' will be indented one level."
   (setq-local font-lock-defaults '(rustic-font-lock-keywords
                                    nil nil nil nil
                                    (font-lock-syntactic-face-function
-				    . rustic-syntactic-face-function)))
+                                    . rustic-syntactic-face-function)))
 
   ;; Misc
   (setq-local comment-start "// ")
@@ -375,8 +375,8 @@ not match type annotations \"foo::<\"."
 
      ;; Builtin formatting macros
      (,(concat (rustic-re-grab (concat (regexp-opt rustic-builtin-formatting-macros) "!"))
-	       rustic-formatting-macro-opening-re
-	       rustic-start-of-string-re)
+               rustic-formatting-macro-opening-re
+               rustic-start-of-string-re)
       (1 'rustic-builtin-formatting-macro-face)
       (rustic-string-interpolation-matcher
        (rustic-end-of-string)
@@ -385,9 +385,9 @@ not match type annotations \"foo::<\"."
 
      ;; write! macro
      (,(concat (rustic-re-grab "write\\(ln\\)?!")
-	       rustic-formatting-macro-opening-re
-	       "[[:space:]]*[^\"]+,[[:space:]]*"
-	       rustic-start-of-string-re)
+               rustic-formatting-macro-opening-re
+               "[[:space:]]*[^\"]+,[[:space:]]*"
+               rustic-start-of-string-re)
       (1 'rustic-builtin-formatting-macro-face)
       (rustic-string-interpolation-matcher
        (rustic-end-of-string)
@@ -406,8 +406,8 @@ not match type annotations \"foo::<\"."
 
      ;; Type-inferred binding
      (,(concat "\\_<\\(?:let\\s-+ref\\|let\\|ref\\)\\s-+\\(?:mut\\s-+\\)?"
-	       (rustic-re-grab rustic-re-ident)
-	       "\\_>")
+               (rustic-re-grab rustic-re-ident)
+               "\\_>")
       1 font-lock-variable-name-face)
 
      ;; Type names like `Foo::`, highlight excluding the ::
@@ -454,7 +454,7 @@ symbols."
       (and
        (= end-of-symbol pt-orig)
        (member (buffer-substring-no-properties beg-of-symbol pt-orig)
-	       symbols)))))
+               symbols)))))
 
 (defun rustic-looking-back-ident ()
   "Non-nil if we are looking backwards at a valid rust identifier."
@@ -465,9 +465,9 @@ symbols."
   "Non-nil if looking back at an ident followed by a !"
   (if (> (- (point) (point-min)) 1)
       (save-excursion
-	(backward-char)
-	(and (= ?! (char-after))
-	     (rustic-looking-back-ident)))))
+        (backward-char)
+        (and (= ?! (char-after))
+             (rustic-looking-back-ident)))))
 
 (defun rustic-paren-level () (nth 0 (syntax-ppss)))
 (defun rustic-in-str () (nth 3 (syntax-ppss)))
@@ -493,10 +493,10 @@ symbols."
       (rustic-rewind-irrelevant)
       (or (rustic-looking-back-macro)
           (and (rustic-looking-back-ident)
-	       (save-excursion
-		 (backward-sexp)
-		 (rustic-rewind-irrelevant)
-		 (rustic-looking-back-str "macro_rules!")))
+               (save-excursion
+                 (backward-sexp)
+                 (rustic-rewind-irrelevant)
+                 (rustic-looking-back-str "macro_rules!")))
           (rustic-in-macro)))))
 
 (defun rustic-looking-at-where ()
@@ -606,7 +606,7 @@ match data if found. Returns nil if not within a Rust string."
                    (rustic-rewind-type-param-list)
                    (cond
                     ((rustic-looking-back-symbols
-		      '("fn" "trait" "enum" "struct" "union" "impl" "type"))
+                      '("fn" "trait" "enum" "struct" "union" "impl" "type"))
                      ident-pos)
 
                     ((equal 5 (rustic-syntax-class-before-point))
@@ -698,7 +698,7 @@ match data if found. Returns nil if not within a Rust string."
                       (progn
                         (rustic-rewind-irrelevant)
                         (rustic-looking-back-symbols
-			 '("enum" "struct" "union" "trait" "type"))))))))
+                         '("enum" "struct" "union" "trait" "type"))))))))
 
          ((equal token 'ambiguous-operator)
           (cond
