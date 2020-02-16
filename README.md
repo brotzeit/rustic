@@ -50,6 +50,8 @@ Differences with rust-mode:
 - requires emacs 26
 - etc.
 
+[Why fork](https://github.com/brotzeit/rustic/issues/92) ?
+
 # Installation
 
 Simply put `(use-package rustic)` in your config and most stuff gets configured automatically.
