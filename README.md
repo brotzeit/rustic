@@ -68,7 +68,10 @@ used by the ELPA package manager. Try installing [gnu-elpa-keyring-update](https
 If you have `rust-mode` installed, ensure it is required before rustic since it has to be removed
 from `auto-mode-alist`. However you only need `rust-mode` if you want to use `emacs-racer`. There's some stuff that isn't included in rustic.
 
-Note: If you have any issues with rustic, please try running emacs without `rust-mode` loaded.
+If you have any issues with rustic, please try running emacs without `rust-mode` loaded.
+
+If you can't run rust-analyzer or cargo can't be found, your environment variables probably don't work in emacs.
+Try [exec-path-from-shell](https://github.com/purcell/exec-path-from-shell/tree/81125c5adbc903943c016c2984906dc089372a41#usage) to fix this.
 
 ## straight
 
@@ -127,8 +130,7 @@ RLS is the default and can be changed to rust-analyzer. lsp-mode related code wa
 (setq rustic-lsp-server 'rust-analyzer)
 ```
 
-In case you [can't run rust-analyzer](https://github.com/brotzeit/rustic/issues/79) try to set the absolute path of ra_lsp_server or use something like [exec-path-from-shell](https://melpa.org/#/exec-path-from-shell).
-
+Change rust-analyzer path.
 
 ``` emacs-lisp
 (setq lsp-rust-analyzer-server-command '("~/.cargo/bin/ra_lsp_server"))
