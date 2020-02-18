@@ -53,7 +53,7 @@
 (defvar electric-pair-inhibit-predicate)
 (defvar electric-indent-chars)
 
-(defvar rustic-buffer-workspace-dir)
+(defvar rustic-buffer-workspace-dir nil)
 (make-variable-buffer-local 'rustic-buffer-workspace-dir)
 
 (defgroup rustic nil
