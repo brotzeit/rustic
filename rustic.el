@@ -76,28 +76,26 @@
   :safe #'integerp)
 
 (defcustom rustic-indent-method-chain nil
-  "Indent Rust method chains, aligned by the '.' operators."
+  "Indent Rust method chains, aligned by the `.' operators."
   :type 'boolean
   :group 'rustic
   :safe #'booleanp)
 
 (defcustom rustic-indent-where-clause nil
-  "Indent the line starting with the where keyword following a
-function or trait.  When nil, where will be aligned with fn or trait."
+  "Indent lines starting with the `where' keyword following a function or trait.
+When nil, `where' will be aligned with `fn' or `trait'."
   :type 'boolean
   :group 'rustic
   :safe #'booleanp)
 
 (defcustom rustic-match-angle-brackets t
-  "Enable angle bracket matching.  Attempt to match `<' and `>' where
-  appropriate."
+  "Whether to enable angle bracket (`<' and `>') matching where appropriate."
   :type 'boolean
   :safe #'booleanp
   :group 'rustic)
 
 (defcustom rustic-always-locate-project-on-open nil
-  "Whether to run `cargo locate-project' every time `rustic'
-  is activated."
+  "Whether to run `cargo locate-project' every time `rustic-mode' is activated."
   :type 'boolean
   :group 'rustic)
 
@@ -311,9 +309,9 @@ to the function arguments.  When nil, `->' will be indented one level."
     "format"
     "print"
     "println")
-  "List of builtin Rust macros for string formatting used by
-`rustic-font-lock-keywords'.
-\\(`write!' is handled separately.)")
+  "List of builtin Rust macros for string formatting.
+This is used by `rust-font-lock-keywords'.
+\(`write!' is handled separately).")
 
 (defvar rustic-formatting-macro-opening-re
   "[[:space:]]*[({[][[:space:]]*"
@@ -332,9 +330,9 @@ to the function arguments.  When nil, `->' will be indented one level."
 (defun rustic-re-word (inner) (concat "\\<" inner "\\>"))
 
 (defun rustic-path-font-lock-matcher (re-ident)
-  "Matches names like \"foo::\" or \"Foo::\" (depending on
-RE-IDENT, which should match the desired identifiers), but does
-not match type annotations \"foo::<\"."
+  "Match occurrences of RE-IDENT followed by a double-colon.
+Examples include to match names like \"foo::\" or \"Foo::\".
+Does not match type annotations of the form \"foo::<\"."
   `(lambda (limit)
      (catch 'rustic-path-font-lock-matcher
        (while t
@@ -524,8 +522,7 @@ buffer."
 (defconst rustic-re-special-types (regexp-opt rustic-special-types 'symbols))
 
 (defun rustic-next-string-interpolation (limit)
-  "Search forward from point for next Rust interpolation marker
-before LIMIT.
+  "Search forward from point for next Rust interpolation marker before LIMIT.
 Set point to the end of the occurrence found, and return match beginning
 and end."
   (catch 'match
@@ -546,8 +543,8 @@ and end."
                 (throw 'match (list start (point)))))))))))
 
 (defun rustic-string-interpolation-matcher (limit)
-  "Match next Rust interpolation marker before LIMIT and set
-match data if found. Returns nil if not within a Rust string."
+  "Match next Rust interpolation marker before LIMIT and set match data if found.
+Returns nil if not within a Rust string."
   (when (rustic-in-str)
     (let ((match (rustic-next-string-interpolation limit)))
       (when match
@@ -592,10 +589,11 @@ match data if found. Returns nil if not within a Rust string."
         (goto-char dest))))))
 
 (defun rustic-rewind-to-decl-name ()
-  "If we are before an ident that is part of a declaration that
-  can have a where clause, rewind back to just before the name of
-  the subject of that where clause and return the new point.
-  Otherwise return nil"
+  "Return the point at the beginning of the name in a declaration.
+I.e. if we are before an ident that is part of a declaration that
+can have a where clause, rewind back to just before the name of
+the subject of that where clause and return the new point.
+Otherwise return nil."
   (let* ((ident-pos (point))
          (newpos (save-excursion
                    (rustic-rewind-irrelevant)
@@ -625,13 +623,13 @@ match data if found. Returns nil if not within a Rust string."
 
 (defun rustic-is-in-expression-context (token)
   "Return t if what comes right after the point is part of an
-  expression (as opposed to starting a type) by looking at what
-  comes before.  Takes a symbol that roughly indicates what is
-  after the point.
+expression (as opposed to starting a type) by looking at what
+comes before.  Takes a symbol that roughly indicates what is
+after the point.
 
-  This function is used as part of `rustic-is-lt-char-operator' as
-  part of angle bracket matching, and is not intended to be used
-  outside of this context."
+This function is used as part of `rustic-is-lt-char-operator' as
+part of angle bracket matching, and is not intended to be used
+outside of this context."
   (save-excursion
     (let ((postchar (char-after)))
       (rustic-rewind-irrelevant)
@@ -816,9 +814,8 @@ match data if found. Returns nil if not within a Rust string."
        ((looking-back rustic-re-pre-expression-operators (1- (point))) t)))))
 
 (defun rustic-is-lt-char-operator ()
-  "Return t if the < sign just after point is an operator rather
-  than an opening angle bracket, otherwise nil."
-
+  "Return non-nil if the `<' sign just after point is an operator.
+Otherwise, if it is an opening angle bracket, then return nil."
   (let ((case-fold-search nil))
     (save-excursion
       (rustic-rewind-irrelevant)
@@ -865,9 +862,8 @@ match data if found. Returns nil if not within a Rust string."
        ))))
 
 (defun rustic-electric-pair-inhibit-predicate-wrap (char)
-  "Wraps the default `electric-pair-inhibit-predicate' to prevent
-  inserting a \"matching\" > after a < that would be treated as a
-  less than sign rather than as an opening angle bracket."
+  "Prevent \"matching\" with a `>' when CHAR is the less-than operator.
+This wraps the default defined by `electric-pair-inhibit-predicate'."
   (or
    (when (= ?< char)
      (save-excursion
@@ -913,7 +909,7 @@ should be considered a paired angle bracket."
         (not (looking-at "<"))))))))
 
 (defun rustic-syntactic-face-function (state)
-  "Syntactic face function to distinguish doc comments from other comments."
+  "Return face that distinguishes doc and normal comments in given syntax STATE."
   (if (nth 3 state) 'font-lock-string-face
     (save-excursion
       (goto-char (nth 8 state))
@@ -986,7 +982,7 @@ whichever comes first."
    (point) end))
 
 (defun rustic-fill-prefix-for-comment-start (line-start)
-  "Determine what to use for `fill-prefix' based on what is at the beginning of a line."
+  "Determine what to use for `fill-prefix' based on the text at LINE-START."
   (let ((result
          ;; Replace /* with same number of spaces
          (replace-regexp-in-string
