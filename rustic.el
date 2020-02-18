@@ -145,7 +145,7 @@ to the function arguments.  When nil, `->' will be indented one level."
      (group symbol-start "union" symbol-end)
      (+ space) (regexp ,rustic-re-ident))))
 
-(defvar rustic-syntax-table
+(defvar rustic-mode-syntax-table
   (let ((table (make-syntax-table)))
 
     ;; Operators
@@ -197,7 +197,7 @@ to the function arguments.  When nil, `->' will be indented one level."
 
 \\{rustic-mode-map}"
   :group 'rustic
-  :syntax-table rustic-syntax-table
+  :syntax-table rustic-mode-syntax-table
 
   ;; Syntax.
   (setq-local syntax-propertize-function #'rustic-syntax-propertize)

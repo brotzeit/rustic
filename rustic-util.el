@@ -300,7 +300,7 @@ with `lsp-rust-switch-server'."
 
 (define-derived-mode rustic-macro-expansion-mode special-mode "Rust"
   :group 'rustic
-  :syntax-table rustic-syntax-table
+  :syntax-table rustic-mode-syntax-table
   ;; Fonts
   (setq-local font-lock-defaults '(rustic-font-lock-keywords
                                    nil nil nil nil
