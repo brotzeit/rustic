@@ -633,11 +633,9 @@ outside of this context."
   (save-excursion
     (let ((postchar (char-after)))
       (rustic-rewind-irrelevant)
-
       ;; A type alias or ascription could have a type param list.  Skip backwards past it.
       (when (member token '(ambiguous-operator open-brace))
         (rustic-rewind-type-param-list))
-
       (cond
 
        ;; Certain keywords always introduce expressions
@@ -677,10 +675,11 @@ outside of this context."
          ((equal token 'open-brace)
           ;; We now know we have:
           ;;   ident <maybe type params> [{([]
-          ;; where [{([] denotes either a {, ( or [.  This character is bound as postchar.
+          ;; where [{([] denotes either a {, ( or [.
+          ;; This character is bound as postchar.
           (cond
-           ;; If postchar is a paren or square bracket, then if the brace is a type if the
-           ;; identifier is one
+           ;; If postchar is a paren or square bracket, then if the
+           ;; brace is a type if the identifier is one
            ((member postchar '(?\( ?\[ )) (rustic-is-in-expression-context 'ident))
 
            ;; If postchar is a curly brace, the brace can only be a type if
@@ -764,9 +763,7 @@ outside of this context."
            ;; Otherwise, if the ident: appeared with anything other than , or {
            ;; before it, it can't be part of a struct initializer and therefore
            ;; must be denoting a type.
-           (t nil)
-           ))
-         ))
+           (t nil)))))
 
        ;; An operator-like character after a string is indeed an operator
        ((and (equal token 'ambiguous-operator)
@@ -910,7 +907,8 @@ should be considered a paired angle bracket."
 
 (defun rustic-syntactic-face-function (state)
   "Return face that distinguishes doc and normal comments in given syntax STATE."
-  (if (nth 3 state) 'font-lock-string-face
+  (if (nth 3 state)
+      'font-lock-string-face
     (save-excursion
       (goto-char (nth 8 state))
       (if (looking-at "/\\([*][*!][^*!]\\|/[/!][^/!]\\)")
@@ -1068,7 +1066,10 @@ whichever comes first."
 
 (defun rustic-find-fill-prefix ()
   (rustic-in-comment-paragraph
-   (lambda () (rustic-with-comment-fill-prefix (lambda () fill-prefix)))))
+   (lambda ()
+     (rustic-with-comment-fill-prefix
+      (lambda ()
+        fill-prefix)))))
 
 (defun rustic-fill-paragraph (&rest args)
   "Special wrapping for `fill-paragraph'.
