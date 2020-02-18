@@ -245,7 +245,7 @@ to the function arguments.  When nil, `->' will be indented one level."
   (setq-local rustic-buffer-workspace-dir nil)
 
   (when rustic-always-locate-project-on-open
-    (rustic-update-buffer-workspace))
+    (setq-local rustic-buffer-workspace-dir (rustic-buffer-workspace)))
   (when rustic-lsp-setup-p
     (rustic-setup-lsp)))
 
@@ -1148,10 +1148,6 @@ not in a rust project."
         (expand-file-name dir)
       (if nodefault
           nil default-directory))))
-
-(defun rustic-update-buffer-workspace ()
-  "Update current workspace."
-  (setq-local rustic-buffer-workspace-dir (rustic-buffer-workspace)))
 
 ;;; _
 
