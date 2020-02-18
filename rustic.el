@@ -35,7 +35,6 @@
                    (require 'url-vars))
 
 (require 'json)
-(require 'newcomment)
 
 (require 'rustic-compile)
 (require 'rustic-cargo)
@@ -1154,13 +1153,7 @@ not in a rust project."
   "Update current workspace."
   (setq-local rustic-buffer-workspace-dir (rustic-buffer-workspace)))
 
-;;; Interactive
-
-(defun rustic-docstring-dwim ()
-  "Use `comment-dwim' to make a docstring."
-  (interactive)
-  (let ((comment-start "/// "))
-    (call-interactively 'comment-dwim)))
+;;; _
 
 (defun rustic-reload ()
   "Reload rustic package."
@@ -1169,6 +1162,5 @@ not in a rust project."
   (require 'rustic)
   (rustic-mode))
 
-;;; _
 (provide 'rustic)
 ;;; rustic.el ends here

@@ -2,6 +2,8 @@
 
 ;;; Code:
 
+(require 'newcomment)
+
 ;;; Indent Line
 
 (defun rustic-rewind-to-beginning-of-current-level-expr ()
@@ -328,6 +330,12 @@ visit the new file."
           (mkdir mod-dir t)
           (rename-file filename new-name 1)
           (set-visited-file-name new-name))))))
+
+(defun rustic-docstring-dwim ()
+  "Use `comment-dwim' to make a docstring."
+  (interactive)
+  (let ((comment-start "/// "))
+    (call-interactively 'comment-dwim)))
 
 ;;; Defun Motions
 
