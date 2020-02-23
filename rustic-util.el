@@ -247,6 +247,7 @@ were issues when using stdin for formatting."
 with `lsp-rust-switch-server'."
   ;; we need to require lsp-clients for the call to `lsp--client-priority'
   (require 'lsp-clients)
+  (require 'lsp-rust)
   (lsp-workspace-folders-add (rustic-buffer-workspace))
   (setq lsp-rust-server rustic-lsp-server)
   (setq lsp-rust-analyzer-server-command rustic-analyzer-command)
