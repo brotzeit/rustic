@@ -13,6 +13,26 @@
   :link '(url-link "https://www.rustic-lang.org/")
   :group 'languages)
 
+(defcustom rustic-format-trigger nil
+  "Format future rust buffers before saving using rustfmt."
+  :type '(choice (const :tag "Format buffer before saving." on-save)
+                 (const :tag "Run 'cargo fmt' before compilation." on-compile)
+                 (const :tag "Don't format automatically." nil))
+  :group 'rustic)
+
+;;; Obsolete
+
+(defvar rustic-format-on-save nil
+  "Format rust buffers before saving using rustfmt.")
+(make-obsolete 'rustic-format-on-save 'rustic-format-trigger "Rustic 0.19")
+
+(defun rustic-format-on-save-p ()
+  "Return non-nil if formatting should happen when saving.
+See option `rustic-format-trigger'.  For backward compatibility,
+if obsolete `rustic-format-on-save' is non-nil, then also return
+non-nil."
+  (or rustic-format-on-save (eq rustic-format-trigger 'on-save)))
+
 ;;; Essentials
 
 (defun rustic-buffer-workspace (&optional nodefault)

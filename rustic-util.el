@@ -14,24 +14,6 @@
 
 ;;; Customization
 
-(defcustom rustic-format-trigger nil
-  "Format future rust buffers before saving using rustfmt."
-  :type '(choice (const :tag "Format buffer before saving." on-save)
-                 (const :tag "Run 'cargo fmt' before compilation." on-compile)
-                 (const :tag "Don't format automatically." nil))
-  :group 'rustic)
-
-(defvar rustic-format-on-save nil
-  "Format rust buffers before saving using rustfmt.")
-(make-obsolete 'rustic-format-on-save 'rustic-format-trigger "Rustic 0.19")
-
-(defun rustic-format-on-save-p ()
-  "Return non-nil if formatting should happen when saving.
-See option `rustic-format-trigger'.  For backward compatibility,
-if obsolete `rustic-format-on-save' is non-nil, then also return
-non-nil."
-  (or rustic-format-on-save (eq rustic-format-trigger 'on-save)))
-
 (defcustom rustic-rustfmt-bin "rustfmt"
   "Path to rustfmt executable."
   :type 'string
