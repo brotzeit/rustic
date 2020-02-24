@@ -107,6 +107,7 @@
          ;; foo.bar
          (t (funcall skip-dot-identifier)))))))
 
+;;;###autoload
 (defun rustic-indent-line ()
   (interactive)
   (let ((indent
@@ -309,6 +310,7 @@
 
 ;;; Miscellaneous
 
+;;;###autoload
 (defun rustic-promote-module-into-dir ()
   "Promote the module file visited by the current buffer into its own directory.
 
@@ -351,6 +353,7 @@ visit the new file."
 ;; TODO: since we are using `rustic-top-item-beg-re' this function actually sets
 ;;       the point where it finds the first item of the list
 ;;       this function should be renamed or documented correctly
+;;;###autoload
 (defun rustic-beginning-of-defun (&optional arg regex)
   "Move backward to the beginning of the current defun.
 
@@ -379,6 +382,7 @@ which calls this, does that afterwards."
                  (throw 'done nil)))))
     t))
 
+;;;###autoload
 (defun rustic-end-of-defun ()
   "Move forward to the next end of defun.
 

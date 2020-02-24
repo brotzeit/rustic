@@ -161,6 +161,7 @@ Use `:command' when formatting files and `:stdin' for strings."
         (kill-buffer proc-buffer)
         (message "Workspace formatted with cargo-fmt.")))))
 
+;;;###autoload
 (defun rustic-format-buffer (&optional no-stdin)
   "Format the current buffer using rustfmt.
 
@@ -281,6 +282,7 @@ with `lsp-rust-switch-server'."
                                    (font-lock-syntactic-face-function
                                     . rustic-syntactic-face-function))))
 
+;;;###autoload
 (defun rustic-analyzer-macro-expand (result)
   "Default method for displaying macro expansion results."
   (interactive)

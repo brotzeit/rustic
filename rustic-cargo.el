@@ -77,6 +77,7 @@ If nil then the project is simply created."
          (mode 'rustic-cargo-test-mode))
     (rustic-compilation c :buffer buf :process proc :mode mode)))
 
+;;;###autoload
 (defun rustic-cargo-test (&optional arg)
   "Run 'cargo test'.
 
@@ -91,6 +92,7 @@ When calling this function from `rustic-popup-mode', always use the value of
           rustic-test-arguments)
          (t ""))))
 
+;;;###autoload
 (defun rustic-cargo-test-rerun ()
   "Run 'cargo test' with `rustic-test-arguments'."
   (interactive)
@@ -182,6 +184,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   (setq tabulated-list-padding 2)
   (tabulated-list-init-header))
 
+;;;###autoload
 (defun rustic-cargo-outdated (&optional path)
   "Use 'cargo outdated' to list outdated packages in `tabulated-list-mode'.
 Execute process in PATH."
@@ -206,6 +209,7 @@ Execute process in PATH."
         (spinner-start rustic-cargo-outdated-spinner)))
     (display-buffer buf)))
 
+;;;###autoload
 (defun rustic-cargo-reload-outdated ()
   "Update list of outdated packages."
   (interactive)
@@ -268,6 +272,7 @@ Execute process in PATH."
                  ,(nth 4 fields)
                  ,(nth 5 fields)])))
 
+;;;###autoload
 (defun rustic-cargo-mark-upgrade ()
   "Mark an upgradable package."
   (interactive)
@@ -290,6 +295,7 @@ Execute process in PATH."
                                        'rustic-cargo-outdated-upgrade-face)))))
       (tabulated-list-put-tag "U" t))))
 
+;;;###autoload
 (defun rustic-cargo-mark-all-upgrades ()
   "Mark all upgradable packages in the Package Menu."
   (interactive)
@@ -303,11 +309,13 @@ Execute process in PATH."
             (forward-line)
           (tabulated-list-put-tag "U" t))))))
 
+;;;###autoload
 (defun rustic-cargo-menu-mark-unmark ()
   "Clear any marks on a package."
   (interactive)
   (tabulated-list-put-tag " " t))
 
+;;;###autoload
 (defun rustic-cargo-upgrade-execute ()
   "Perform marked menu actions."
   (interactive)

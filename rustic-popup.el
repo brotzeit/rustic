@@ -96,6 +96,7 @@ The first element of each list contains a command's binding."
         (insert "\n"))
       (goto-char (point-min)))))
 
+;;;###autoload
 (defun rustic-popup ()
   "Setup popup.
 If directory is not in a rust project call `read-directory-name'."
@@ -119,6 +120,7 @@ If directory is not in a rust project call `read-directory-name'."
 
 ;;; Interactive
 
+;;;###autoload
 (defun rustic-popup-invoke-popup-action (event)
   "Execute commands which are listed in `rustic-popup-commands'."
   (interactive (list last-command-event))
@@ -136,6 +138,7 @@ If directory is not in a rust project call `read-directory-name'."
           (call-interactively c)
         (call-interactively 'rustic-compile (concat "cargo " command))))))
 
+;;;###autoload
 (defun rustic-popup-default-action ()
   "Change backtrace and `compilation-arguments' when executed on
 corresponding line."
@@ -182,6 +185,7 @@ corresponding line."
   (setq buffer-read-only t)
   (setq-local scroll-margin 0))
 
+;;;###autoload
 (defun rustic-popup-cargo-command-help ()
   "Display help buffer for cargo command at point."
   (interactive)
@@ -219,6 +223,7 @@ corresponding line."
     (set-window-text-height (selected-window) (+ (window-height) 1))
     (goto-char (point-min))))
 
+;;;###autoload
 (defun rustic-popup-kill-help-buffer ()
   "Kill popup help buffer and switch to popup buffer."
   (interactive)

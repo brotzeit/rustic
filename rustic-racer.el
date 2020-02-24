@@ -497,6 +497,7 @@ split it into its constituent parts."
 
 ;;; Interactive
 
+;;;###autoload
 (defun rustic-racer-describe ()
   "Show a *Racer Help* buffer for the function or type at point."
   (interactive)
