@@ -1,13 +1,24 @@
-EMACS ?= emacs
 SHELL := /bin/bash
+export CASK := $(shell which cask)
+ifeq ($(CASK),)
+$(error Please install CASK at https://cask.readthedocs.io/en/latest/guide/installation.html)
+endif
+CASK_DIR := $(shell $(CASK) package-directory || exit 1)
 
-all:
-	EMACS=$(EMACS) cask install
-	EMACS=$(EMACS) cask build
-	EMACS=$(EMACS) cask clean-elc
+all: cask
+	$(CASK) build
 
-test: all
+cask: $(CASK_DIR)
+
+clean:
+	$(CASK) clean-elc
+
+$(CASK_DIR): Cask
+	$(CASK) install
+	touch $(CASK_DIR)
+
+test: cask
 	if [ -f "$(HOME)/.cargo/env" ] ; then source "$(HOME)/.cargo/env" ; fi ; \
-	EMACS=$(EMACS) cask exec ert-runner
+	$(CASK) exec ert-runner
 
-.PHONY: all test
+.PHONY: all test cask clean
