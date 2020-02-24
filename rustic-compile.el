@@ -19,6 +19,7 @@
 
 (require 'rustic-common)
 (require 'rustic-util)
+(require 'rustic-cargo)
 
 ;;; Customization
 
