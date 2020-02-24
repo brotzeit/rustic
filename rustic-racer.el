@@ -10,6 +10,8 @@
 (require 'button)
 (require 'help-mode)
 
+(require 'rustic-common)
+
 (defvar rustic-racer-args nil)
 
 (defgroup racer nil

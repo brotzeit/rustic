@@ -36,6 +36,7 @@
 
 (require 'json)
 
+(require 'rustic-common)
 (require 'rustic-compile)
 (require 'rustic-cargo)
 (require 'rustic-util)
@@ -55,11 +56,6 @@
 
 (defvar rustic-buffer-workspace-dir nil)
 (make-variable-buffer-local 'rustic-buffer-workspace-dir)
-
-(defgroup rustic nil
-  "Support for Rust code."
-  :link '(url-link "https://www.rustic-lang.org/")
-  :group 'languages)
 
 ;;; Customization
 

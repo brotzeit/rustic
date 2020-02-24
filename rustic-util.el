@@ -10,6 +10,8 @@
 (require 'package)
 (require 'org-element)
 
+(require 'rustic-common)
+
 ;;; Customization
 
 (defcustom rustic-format-trigger nil

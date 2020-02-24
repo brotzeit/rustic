@@ -6,6 +6,12 @@
 ;; of a kludge and it may become unnecessary over time.
 
 ;;; Code:
+;;; Customization
+
+(defgroup rustic nil
+  "Support for Rust code."
+  :link '(url-link "https://www.rustic-lang.org/")
+  :group 'languages)
 
 ;;; _
 (provide 'rustic-common)

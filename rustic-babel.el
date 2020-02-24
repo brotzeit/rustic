@@ -9,6 +9,7 @@
 (require 'ob-ref)
 (require 'ob-core)
 
+(require 'rustic-common)
 (require 'rustic-cargo)
 (require 'rustic-compile)
 

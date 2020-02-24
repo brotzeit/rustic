@@ -5,6 +5,7 @@
 (require 'tabulated-list)
 (require 'spinner)
 
+(require 'rustic-common)
 (require 'rustic-compile)
 (require 'rustic-interaction)
 
