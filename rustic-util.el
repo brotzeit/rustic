@@ -14,11 +14,6 @@
 
 ;;; Customization
 
-(defcustom rustic-rustfmt-bin "rustfmt"
-  "Path to rustfmt executable."
-  :type 'string
-  :group 'rustic)
-
 (defcustom rustic-format-display-method 'pop-to-buffer
   "Default function used for displaying rustfmt buffer."
   :type 'function

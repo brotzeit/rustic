@@ -13,6 +13,11 @@
   :link '(url-link "https://www.rustic-lang.org/")
   :group 'languages)
 
+(defcustom rustic-rustfmt-bin "rustfmt"
+  "Path to rustfmt executable."
+  :type 'string
+  :group 'rustic)
+
 (defcustom rustic-format-trigger nil
   "Format future rust buffers before saving using rustfmt."
   :type '(choice (const :tag "Format buffer before saving." on-save)
