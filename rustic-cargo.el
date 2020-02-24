@@ -3,7 +3,6 @@
 ;;; Code:
 
 (require 'tabulated-list)
-(require 'spinner)
 
 (require 'rustic-common)
 (require 'rustic-compile)
@@ -26,32 +25,6 @@ If nil then the project is simply created."
   '((t (:foreground "LightSeaGreen")))
   "Face used for crates marked for upgrade."
   :group 'rustic)
-
-;;; Spinner
-
-(defcustom rustic-spinner-type 'horizontal-moving
-  "Holds the type of spinner to be used in the mode-line.
-Takes a value accepted by `spinner-start'."
-  :type `(choice (choice :tag "Choose a spinner by name"
-                         ,@(mapcar (lambda (c) (list 'const (car c)))
-                                   spinner-types))
-                 (const :tag "A random spinner" random)
-                 (repeat :tag "A list of symbols from `spinner-types' to randomly choose from"
-                         (choice :tag "Choose a spinner by name"
-                                 ,@(mapcar (lambda (c) (list 'const (car c)))
-                                           spinner-types)))
-                 (vector :tag "A user defined vector"
-                         (repeat :inline t string)))
-  :group 'rustic-babel)
-
-(defmacro rustic-with-spinner (spinner val mode-line &rest body)
-  (declare (indent defun))
-  `(when rustic-display-spinner
-     (when (spinner-p ,spinner)
-       (spinner-stop ,spinner))
-     (setq ,spinner ,val)
-     (setq mode-line-process ,mode-line)
-     ,@body))
 
 ;;; Clippy
 

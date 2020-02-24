@@ -59,11 +59,6 @@
 
 ;;; Customization
 
-(defcustom rustic-display-spinner t
-  "Display spinner."
-  :type 'boolean
-  :group 'rustic)
-
 (defcustom rustic-indent-offset 4
   "Indent Rust code by this number of spaces."
   :type 'integer
