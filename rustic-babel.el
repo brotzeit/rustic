@@ -3,6 +3,7 @@
 ;;; Code:
 
 (require 'org)
+(require 'org-element)
 (require 'ob)
 (require 'ob-eval)
 (require 'ob-ref)

@@ -8,6 +8,7 @@
 
 (require 'subr-x)
 (require 'package)
+(require 'org-element)
 
 ;;; Customization
 
