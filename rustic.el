@@ -40,7 +40,6 @@
 (require 'rustic-compile)
 (require 'rustic-cargo)
 (require 'rustic-util)
-(require 'rustic-interaction)
 (require 'rustic-babel)
 (require 'rustic-racer)
 (require 'rustic-popup)
@@ -1131,6 +1130,9 @@ This handles multi-line comments with a * prefix on each line."
   (rustic-mode))
 
 (provide 'rustic)
+
+(require 'rustic-interaction)
+
 (with-eval-after-load 'flycheck
   (require 'rustic-flycheck))
 

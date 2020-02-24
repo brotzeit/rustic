@@ -4,6 +4,8 @@
 
 (require 'newcomment)
 
+(require 'rustic)
+
 ;;; Indent Line
 
 (defun rustic-rewind-to-beginning-of-current-level-expr ()

@@ -6,7 +6,7 @@
 
 (require 'rustic-common)
 (require 'rustic-compile)
-(require 'rustic-interaction)
+;; TODO (require 'rustic-interaction) ; for rustic-beginning-of-function
 
 ;;; Customization
 
