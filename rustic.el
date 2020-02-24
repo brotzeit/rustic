@@ -45,12 +45,6 @@
 (require 'rustic-racer)
 (require 'rustic-popup)
 
-(with-eval-after-load 'eglot
-  (rustic-setup-eglot))
-
-(with-eval-after-load 'flycheck
-  (require 'rustic-flycheck))
-
 (defvar electric-pair-inhibit-predicate)
 (defvar electric-indent-chars)
 
@@ -1137,4 +1131,10 @@ This handles multi-line comments with a * prefix on each line."
   (rustic-mode))
 
 (provide 'rustic)
+(with-eval-after-load 'flycheck
+  (require 'rustic-flycheck))
+
+(with-eval-after-load 'eglot
+  (rustic-setup-eglot))
+
 ;;; rustic.el ends here
