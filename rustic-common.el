@@ -13,6 +13,19 @@
   :link '(url-link "https://www.rustic-lang.org/")
   :group 'languages)
 
+;;; Essentials
+
+(defun rustic-buffer-workspace (&optional nodefault)
+  "Get the workspace root.
+If NODEFAULT is t, return nil instead of `default-directory' if directory is
+not in a rust project."
+  (let ((dir (locate-dominating-file
+              (or buffer-file-name default-directory) "Cargo.toml")))
+    (if dir
+        (expand-file-name dir)
+      (if nodefault
+          nil default-directory))))
+
 ;;; Spinner
 
 (require 'spinner)
