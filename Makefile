@@ -7,9 +7,7 @@ all: lisp
 PKG = rustic
 
 EMACS ?= emacs
-
-## Without Cask
-ifdef WITHOUT_CASK
+EMACS_ARGS ?=
 
 ELS   = rustic-common.el
 ELS  += rustic.el
@@ -23,6 +21,9 @@ ELS  += rustic-interaction.el
 ELS  += rustic-flycheck.el
 ELCS  = $(ELS:.el=.elc)
 
+## Without Cask
+ifdef WITHOUT_CASK
+
 DEPS  = dash
 DEPS += f
 DEPS += flycheck
@@ -33,27 +34,31 @@ DEPS += s
 DEPS += spinner
 DEPS += xterm-color
 
-EMACS_ARGS ?=
-
 LOAD_PATH  ?= $(addprefix -L ../,$(DEPS))
 LOAD_PATH  += -L .
 
 lisp: $(ELCS) loaddefs
 
+## With Cask
+else
+
+cask-install:
+	EMACS=$(EMACS) cask install
+
+cask-build: cask-install loaddefs
+	EMACS=$(EMACS) cask build
+
+LOAD_PATH  += -L $(subst :, -L ,$(shell cask load-path))
+
+lisp: cask-install $(ELCS) loaddefs
+
+## Common
+endif
+
 %.elc: %.el
 	@printf "Compiling $<\n"
 	@$(EMACS) -Q --batch $(EMACS_ARGS) \
 	$(LOAD_PATH) --funcall batch-byte-compile $<
-
-## With Cask
-else
-
-lisp: loaddefs
-	EMACS=$(EMACS) cask install
-	EMACS=$(EMACS) cask build
-
-## Common
-endif
 
 CLEAN  = $(ELCS) $(PKG)-autoloads.el
 
