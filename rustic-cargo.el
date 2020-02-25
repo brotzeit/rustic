@@ -6,7 +6,7 @@
 (require 'tabulated-list)
 
 (require 'rustic-common)
-;; TODO (require 'rustic-interaction) ; for rustic-beginning-of-function
+(require 'rustic-interaction) ; for rustic-beginning-of-function
 
 ;;; Customization
 

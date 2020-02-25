@@ -12,6 +12,8 @@
 (require 'seq)
 (require 'json)
 
+(require 'rustic-common)
+
 (defun rustic-flycheck-dirs-list (start end)
   "Return a list of directories from START (inclusive) to END (exclusive).
 E.g., if START is '/a/b/c/d' and END is '/a', return the list

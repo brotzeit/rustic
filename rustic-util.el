@@ -12,6 +12,7 @@
 (require 'org-element)
 
 (require 'rustic-common)
+(require 'rustic-cargo)
 
 ;;; Customization
 

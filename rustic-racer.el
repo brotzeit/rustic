@@ -11,6 +11,7 @@
 (require 'help-mode)
 
 (require 'rustic-common)
+(require 'rustic)
 
 (defvar rustic-racer-args nil)
 
