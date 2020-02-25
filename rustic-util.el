@@ -6,6 +6,7 @@
 
 ;;; Code:
 
+(require 'dash)
 (require 'subr-x)
 (require 'package)
 (require 'org-element)

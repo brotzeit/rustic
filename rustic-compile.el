@@ -13,6 +13,7 @@
 (require 'projectile)
 (require 'markdown-mode)
 
+(require 'dash)
 (require 'subr-x)
 
 (require 'compile)
