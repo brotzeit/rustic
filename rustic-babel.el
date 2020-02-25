@@ -10,7 +10,6 @@
 (require 'ob-core)
 
 (require 'rustic-common)
-(require 'rustic-cargo)
 (require 'rustic-compile)
 
 ;; FIXME This variable doesn't exist in noninteractive emacs sessions,

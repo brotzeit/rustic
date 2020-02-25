@@ -7,7 +7,6 @@
 ;;; Code:
 
 (require 'rustic-common)
-(require 'rustic-compile)
 
 ;;; Customization
 
