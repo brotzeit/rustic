@@ -18,6 +18,12 @@
   :type 'string
   :group 'rustic)
 
+(defcustom rustic-lsp-setup-p t
+  "Setup LSP related stuff automatically."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'rustic)
+
 (defcustom rustic-format-trigger nil
   "Format future rust buffers before saving using rustfmt."
   :type '(choice (const :tag "Format buffer before saving." on-save)

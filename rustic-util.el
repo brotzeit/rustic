@@ -54,12 +54,6 @@
   :type '(repeat (string))
   :group 'rustic)
 
-(defcustom rustic-lsp-setup-p t
-  "Setup LSP related stuff automatically."
-  :type 'boolean
-  :safe #'booleanp
-  :group 'rustic)
-
 ;;; Rustfmt
 
 (defvar rustic-format-process-name "rustic-rustfmt-process"
