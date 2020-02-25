@@ -37,12 +37,6 @@
 (require 'json)
 
 (require 'rustic-common)
-(require 'rustic-compile)
-(require 'rustic-cargo)
-(require 'rustic-util)
-(require 'rustic-babel)
-(require 'rustic-racer)
-(require 'rustic-popup)
 
 (defvar electric-pair-inhibit-predicate)
 (defvar electric-indent-chars)
@@ -1131,6 +1125,12 @@ This handles multi-line comments with a * prefix on each line."
 
 (provide 'rustic)
 
+(require 'rustic-util)
+(require 'rustic-compile)
+(require 'rustic-popup)
+(require 'rustic-cargo)
+(require 'rustic-babel)
+(require 'rustic-racer)
 (require 'rustic-interaction)
 
 (with-eval-after-load 'flycheck
