@@ -13,13 +13,16 @@
 (require 'projectile)
 (require 'markdown-mode)
 
+(require 'dash)
 (require 'subr-x)
 
 (require 'compile)
 
+(require 'rustic-common)
+(require 'rustic-util)
+(require 'rustic-cargo)
 
-;;;;;;;;;;;;;;;;;;
-;; Customization
+;;; Customization
 
 (defgroup rustic-compilation nil
   "Rust Compilation."
@@ -42,8 +45,7 @@
                  (string :tag "full"))
   :group 'rustic-compilation)
 
-
-;; Faces
+;;; Faces
 
 (defcustom rustic-message-face
   '((t :inherit default))
@@ -93,9 +95,7 @@
   :type '(vector string string string string string string string string)
   :group 'rustic-compilation)
 
-
-;;;;;;;;;;;;;;;;;;;;;
-;; Compilation-mode
+;;; Compilation-mode
 
 (defvar rustic-compilation-mode-map
   (let ((map (make-sparse-keymap)))
@@ -116,7 +116,7 @@ Error matching regexes from compile.el are removed."
   (setq-local compilation-info-face rustic-compilation-info-face)
   (setq-local compilation-column-face rustic-compilation-line-face)
   (setq-local compilation-line-face rustic-compilation-column-face)
-  
+
   (setq-local xterm-color-names-bright rustic-ansi-faces)
   (setq-local xterm-color-names rustic-ansi-faces)
 
@@ -173,9 +173,7 @@ Error matching regexes from compile.el are removed."
       (cons re '(1 2 3))))
   "Match thread panics.")
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;
-;; Compilation Process
+;;; Compilation Process
 
 (defvar rustic-compilation-process-name "rustic-compilation-process"
   "Process name for rust compilation processes.")
@@ -189,7 +187,7 @@ Error matching regexes from compile.el are removed."
 Set environment variables for rust process."
   (let ((coding-system-for-read 'binary)
         (process-environment (nconc
-	                          (list
+                              (list
                                (format "TERM=%s" "ansi")
                                (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
                               process-environment)))
@@ -239,23 +237,23 @@ is set to 'on-compile. If rustfmt fails, don't start compilation."
 :sentinel - process sentinel
 "
   (let ((buf (get-buffer-create
-                (or (plist-get args :buffer) rustic-compilation-buffer-name)))
-          (process (or (plist-get args :process) rustic-compilation-process-name))
-          (mode (or (plist-get args :mode) 'rustic-compilation-mode))
-          (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
-          (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
-      (when compilation-scroll-output
-        (rustic-compilation-setup-buffer buf directory mode))
-      (unless (plist-get args :no-display)
-        (funcall rustic-compile-display-method buf))
-      (unless compilation-scroll-output
-        (rustic-compilation-setup-buffer buf directory mode))
-      (with-current-buffer buf
-        (rustic-make-process :name process
-                             :buffer buf
-                             :command command
-                             :filter #'rustic-compilation-filter
-                             :sentinel sentinel))))
+              (or (plist-get args :buffer) rustic-compilation-buffer-name)))
+        (process (or (plist-get args :process) rustic-compilation-process-name))
+        (mode (or (plist-get args :mode) 'rustic-compilation-mode))
+        (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
+        (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
+    (when compilation-scroll-output
+      (rustic-compilation-setup-buffer buf directory mode))
+    (unless (plist-get args :no-display)
+      (funcall rustic-compile-display-method buf))
+    (unless compilation-scroll-output
+      (rustic-compilation-setup-buffer buf directory mode))
+    (with-current-buffer buf
+      (rustic-make-process :name process
+                           :buffer buf
+                           :command command
+                           :filter #'rustic-compilation-filter
+                           :sentinel sentinel))))
 
 (defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.
@@ -268,14 +266,14 @@ Translate STRING with `xterm-color-filter'."
             ;; `save-restriction' doesn't use the right insertion type either:
             ;; If we are inserting at the end of the accessible part of the
             ;; buffer, keep the inserted text visible.
-	        (min (point-min-marker))
-	        (max (copy-marker (point-max) t))
-	        (compilation-filter-start (marker-position (process-mark proc)))
+            (min (point-min-marker))
+            (max (copy-marker (point-max) t))
+            (compilation-filter-start (marker-position (process-mark proc)))
             (xterm-string (xterm-color-filter string)))
         (unwind-protect
             (progn
-	          (widen)
-	          (goto-char compilation-filter-start)
+              (widen)
+              (goto-char compilation-filter-start)
               ;; We used to use `insert-before-markers', so that windows with
               ;; point at `process-mark' scroll along with the output, but we
               ;; now use window-point-insertion-type instead.
@@ -287,11 +285,11 @@ Translate STRING with `xterm-color-filter'."
                 (comint-carriage-motion (process-mark proc) (point)))
               (set-marker (process-mark proc) (point))
               (run-hooks 'compilation-filter-hook))
-	      (goto-char pos)
+          (goto-char pos)
           (narrow-to-region min max)
-	      (set-marker pos nil)
-	      (set-marker min nil)
-	      (set-marker max nil))))))
+          (set-marker pos nil)
+          (set-marker min nil)
+          (set-marker max nil))))))
 
 (defun rustic-compilation-process-live (&optional nosave)
   "List live rustic processes."
@@ -338,7 +336,7 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
       (kill-buffer b))
     (dolist (buffer buffers)
       (when (and (buffer-live-p buffer)
-    	         (buffer-modified-p buffer))
+                 (buffer-modified-p buffer))
         (with-current-buffer buffer
           (let ((saved-p nil))
             ;; also set rustic-format-on-save for backwards compatibility
@@ -353,9 +351,10 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
                         nil))))
             (when (and saved-p (rustic-format-on-save-p) (eq major-mode 'rustic-mode))
               (let* ((file (buffer-file-name buffer))
-                     (proc (rustic-format-start-process 'rustic-format-file-sentinel
-                                                        :buffer buffer
-                                                        :command `(,rustic-rustfmt-bin ,file))))
+                     (proc (rustic-format-start-process
+			    'rustic-format-file-sentinel
+                            :buffer buffer
+                            :command `(,rustic-rustfmt-bin ,file))))
                 (while (eq (process-status proc) 'run)
                   (sit-for 0.1))))))))))
 
@@ -379,8 +378,11 @@ This hook temporarily sets `default-directory' to the project's root."
 
 (defun rustic-compile-goto-error-hook (orig-fun &rest args)
   "Provide possibility use `compile-goto-error' on line numbers in compilation buffers.
-This hook checks if there's a line number at the beginning of the current line in an error section."
-  (-if-let* ((line-contents (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
+This hook checks if there's a line number at the beginning of the
+current line in an error section."
+  (-if-let* ((line-contents (buffer-substring-no-properties
+			     (line-beginning-position)
+			     (line-end-position)))
              (line-number-p (string-match "^[0-9]+\s+\|" line-contents))
              (line-number (car (split-string line-contents))))
       (save-excursion
@@ -394,14 +396,16 @@ This hook checks if there's a line number at the beginning of the current line i
                (file (caar (compilation--loc->file-struct loc))))
           ;; open file of error and goto line number that we parsed from the line we are on
           (with-current-buffer (find-file-other-window file)
-            (goto-line (string-to-number line-number)))))
+	    (save-restriction
+	      (widen)
+	      (goto-char (point-min))
+              (forward-line (1- (string-to-number line-number)))))))
     (let ((default-directory (projectile-project-root default-directory)))
       (apply orig-fun args))))
 
 (advice-add 'compile-goto-error :around #'rustic-compile-goto-error-hook)
 
-;;;;;;;;;;
-;; Rustc
+;;; Rustc
 
 (defface rustic-errno-face
   '((t :foreground "red3"))
@@ -449,9 +453,7 @@ This hook checks if there's a line number at the beginning of the current line i
   'face 'rustic-errno-face
   'help-echo "mouse-1, RET: Explain errno")
 
-
-;;;;;;;;;;;;;;;;
-;; Interactive
+;;; Interactive
 
 ;;;###autoload
 (defun rustic-compile (&optional arg)
@@ -478,5 +480,6 @@ Otherwise use provided argument ARG and store it in
     (rustic-compilation-process-live)
     (rustic-compilation (split-string command) :directory dir)))
 
+;;; _
 (provide 'rustic-compile)
 ;;; rustic-compile.el ends here

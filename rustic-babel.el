@@ -3,13 +3,20 @@
 ;;; Code:
 
 (require 'org)
+(require 'org-element)
 (require 'ob)
 (require 'ob-eval)
 (require 'ob-ref)
 (require 'ob-core)
 
-(require 'rustic-cargo)
+(require 'rustic-common)
 (require 'rustic-compile)
+
+;; FIXME This variable doesn't exist in noninteractive emacs sessions,
+;; which probably means that it is internal and we shouldn't use it.
+(defvar org-babel-temporary-directory)
+
+(defvar rustic-info nil)
 
 (add-to-list 'org-babel-tangle-lang-exts '("rustic" . "rs"))
 
@@ -128,8 +135,7 @@ execution with rustfmt."
 
 (defun rustic-babel-build-update-result-block (result)
   "Update result block with RESULT."
-  (let ((marker rustic-babel-src-location)
-        (result-params (list (cdr (assq :results rustic-babel-params)))))
+  (let ((marker rustic-babel-src-location))
     (with-current-buffer (marker-buffer marker)
       (goto-char marker)
       (org-babel-remove-result)
@@ -143,13 +149,13 @@ execution with rustfmt."
 
       (let ((file (cdr (assq :file rustic-babel-params)))
             (results-params (cdr (assq :result-params rustic-babel-params))))
-    	;; If non-empty result and :file then write to :file.
-	    (when (and file results-params)
-	      (when result
-	        (with-temp-file file
-	          (insert (org-babel-format-result
-	    	           result (cdr (assq :sep rustic-babel-params))))))
-	      (setq result file))
+        ;; If non-empty result and :file then write to :file.
+        (when (and file results-params)
+          (when result
+            (with-temp-file file
+              (insert (org-babel-format-result
+                       result (cdr (assq :sep rustic-babel-params))))))
+          (setq result file))
 
         (org-babel-remove-result rustic-info)
         (org-babel-insert-result result results-params rustic-info)))))
@@ -228,7 +234,7 @@ If called while there's a live Rust babel process, ask user whether to
 kill the running process."
   (let ((p (get-process rustic-babel-process-name)))
     (if (process-live-p p)
-        (let ((buf (process-buffer p)))
+        (progn
           (rustic-process-kill-p p t)
           nil)
       (let* ((default-directory org-babel-temporary-directory)

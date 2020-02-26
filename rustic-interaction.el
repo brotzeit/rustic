@@ -2,6 +2,12 @@
 
 ;;; Code:
 
+(require 'newcomment)
+
+(require 'rustic)
+
+;;; Indent Line
+
 (defun rustic-rewind-to-beginning-of-current-level-expr ()
   (let ((current-level (rustic-paren-level)))
     (back-to-indentation)
@@ -87,7 +93,10 @@
           ;;
           ((skip-dot-identifier
             (lambda ()
-              (when (and (rustic-looking-back-ident) (save-excursion (forward-thing 'symbol -1) (= ?. (char-before))))
+              (when (and (rustic-looking-back-ident)
+                         (save-excursion
+                           (forward-thing 'symbol -1)
+                           (= ?. (char-before))))
                 (forward-thing 'symbol -1)
                 (backward-char)
                 (- (current-column) rustic-indent-offset)))))
@@ -100,10 +109,7 @@
          ;; foo.bar
          (t (funcall skip-dot-identifier)))))))
 
-
-;;;;;;;;;;;;;;;;
-;; Interactive
-
+;;;###autoload
 (defun rustic-indent-line ()
   (interactive)
   (let ((indent
@@ -157,7 +163,8 @@
 
                    ;; Indent to the same level as the previous line, or the
                    ;; start of the string if the previous line starts the string
-                   (if (= (line-number-at-pos end-of-prev-line-pos) (line-number-at-pos string-begin-pos))
+                   (if (= (line-number-at-pos end-of-prev-line-pos)
+                          (line-number-at-pos string-begin-pos))
                        ;; The previous line is the start of the string.
                        ;; If the backslash is the only character after the
                        ;; string beginning, indent to the next indent
@@ -176,9 +183,9 @@
                        (current-column))))))
 
               ;; A function return type is indented to the corresponding
-	          ;; function arguments, if -to-arguments is selected.
+              ;; function arguments, if -to-arguments is selected.
               ((and rust-indent-return-type-to-arguments
-		            (looking-at "->"))
+                    (looking-at "->"))
                (save-excursion
                  (backward-list)
                  (or (rustic-align-to-expr-after-brace)
@@ -279,14 +286,19 @@
                           (= (point) 1)
                           ;; ..or if the previous line ends with any of these:
                           ;;     { ? : ( , ; [ }
-                          ;; then we are at the beginning of an expression, so stay on the baseline...
+                          ;; then we are at the beginning of an
+                          ;; expression, so stay on the baseline...
                           (looking-back "[(,:;?[{}]\\|[^|]|" (- (point) 2))
-                          ;; or if the previous line is the end of an attribute, stay at the baseline...
-                          (progn (rustic-rewind-to-beginning-of-current-level-expr) (looking-at "#")))))
+                          ;; or if the previous line is the end of an
+                          ;; attribute, stay at the baseline...
+                          (progn
+                            (rustic-rewind-to-beginning-of-current-level-expr)
+                            (looking-at "#")))))
                       baseline
 
-                    ;; Otherwise, we are continuing the same expression from the previous line,
-                    ;; so add one additional indent level
+                    ;; Otherwise, we are continuing the same
+                    ;; expression from the previous line, so add one
+                    ;; additional indent level
                     (+ baseline rustic-indent-offset))))))))))
 
     (when indent
@@ -298,6 +310,9 @@
           (indent-line-to indent)
         (save-excursion (indent-line-to indent))))))
 
+;;; Miscellaneous
+
+;;;###autoload
 (defun rustic-promote-module-into-dir ()
   "Promote the module file visited by the current buffer into its own directory.
 
@@ -320,6 +335,12 @@ visit the new file."
           (rename-file filename new-name 1)
           (set-visited-file-name new-name))))))
 
+(defun rustic-docstring-dwim ()
+  "Use `comment-dwim' to make a docstring."
+  (interactive)
+  (let ((comment-start "/// "))
+    (call-interactively 'comment-dwim)))
+
 ;;; Defun Motions
 
 (defvar rustic-func-item-beg-re
@@ -334,6 +355,7 @@ visit the new file."
 ;; TODO: since we are using `rustic-top-item-beg-re' this function actually sets
 ;;       the point where it finds the first item of the list
 ;;       this function should be renamed or documented correctly
+;;;###autoload
 (defun rustic-beginning-of-defun (&optional arg regex)
   "Move backward to the beginning of the current defun.
 
@@ -345,22 +367,24 @@ Don't move to the beginning of the line. `beginning-of-defun',
 which calls this, does that afterwards."
   (interactive "p")
   (let* ((arg (or arg 1))
-	     (magnitude (abs arg))
-	     (sign (if (< arg 0) -1 1)))
+         (magnitude (abs arg))
+         (sign (if (< arg 0) -1 1)))
     ;; If moving forward, don't find the defun we might currently be
     ;; on.
     (when (< sign 0)
       (end-of-line))
     (catch 'done
       (dotimes (_ magnitude)
-	    ;; Search until we find a match that is not in a string or comment.
-	    (while (if (re-search-backward (concat "^\\(" (or regex rustic-top-item-beg-re) "\\)")
-				                       nil 'move sign)
-		           (rustic-in-str-or-cmnt)
-		         ;; Did not find it.
-		         (throw 'done nil)))))
+        ;; Search until we find a match that is not in a string or comment.
+        (while (if (re-search-backward
+                    (concat "^\\(" (or regex rustic-top-item-beg-re) "\\)")
+                    nil 'move sign)
+                   (rustic-in-str-or-cmnt)
+                 ;; Did not find it.
+                 (throw 'done nil)))))
     t))
 
+;;;###autoload
 (defun rustic-end-of-defun ()
   "Move forward to the next end of defun.
 
@@ -380,12 +404,12 @@ This is written mainly to be used as `end-of-defun-function' for Rust."
         (condition-case nil
             (forward-sexp)
           (scan-error
-           ;; The parentheses are unbalanced; instead of being unable to fontify, just jump to the end of the buffer
+           ;; The parentheses are unbalanced; instead of being unable
+           ;; to fontify, just jump to the end of the buffer
            (goto-char (point-max)))))
     ;; There is no opening brace, so consider the whole buffer to be one "defun"
     (goto-char (point-max))))
 
-
+;;; _
 (provide 'rustic-interaction)
 ;;; rustic-interaction.el ends here
-

@@ -6,10 +6,10 @@
 
 ;;; Code:
 
-(require 'rustic-compile)
+(require 'rustic-common)
+(require 'rustic-cargo)
 
-;;;;;;;;;;;;;;;;;;
-;; Customization
+;;; Customization
 
 (defcustom rustic-popup-commands
   '((?b "build"    build)
@@ -28,15 +28,15 @@ The first element of each list contains a command's binding."
 
 (defface rustic-popup-key-face
   '((t (:foreground "DeepSkyBlue")))
-  "Face used for command shortcuts.")
+  "Face used for command shortcuts."
+  :group 'rustic)
 
 (defface rustic-popup-section-face
   '((t (:foreground "#f74c00")))
-  "Face used for popup section description.")
+  "Face used for popup section description."
+  :group 'rustic)
 
-
-;;;;;;;;;;;;;;;
-;; Popup Mode
+;;; Popup Mode
 
 (defvar rustic-popup-buffer-name "rustic-popup-buffer"
   "Buffer name for rustic popup buffers.")
@@ -96,6 +96,7 @@ The first element of each list contains a command's binding."
         (insert "\n"))
       (goto-char (point-min)))))
 
+;;;###autoload
 (defun rustic-popup ()
   "Setup popup.
 If directory is not in a rust project call `read-directory-name'."
@@ -117,10 +118,9 @@ If directory is not in a rust project call `read-directory-name'."
               (funcall func)
             (message "Not a rust project.")))))))
 
+;;; Interactive
 
-;;;;;;;;;;;;;;;;
-;; Interactive
-
+;;;###autoload
 (defun rustic-popup-invoke-popup-action (event)
   "Execute commands which are listed in `rustic-popup-commands'."
   (interactive (list last-command-event))
@@ -138,8 +138,9 @@ If directory is not in a rust project call `read-directory-name'."
           (call-interactively c)
         (call-interactively 'rustic-compile (concat "cargo " command))))))
 
+;;;###autoload
 (defun rustic-popup-default-action ()
-  "Change backtrace and `compilation-arguments' when executed on 
+  "Change backtrace and `compilation-arguments' when executed on
 corresponding line."
   (interactive)
   (let ((inhibit-read-only t))
@@ -167,9 +168,7 @@ corresponding line."
        (t
         (message "No default action for line."))))))
 
-
-;;;;;;;;;;;;;;;;
-;; Help Popup
+;;; Help Popup
 
 (defvar rustic-popup-help-buffer-name "rustic-popup-help-buffer"
   "Buffer name for rustic popup help buffers.")
@@ -186,6 +185,7 @@ corresponding line."
   (setq buffer-read-only t)
   (setq-local scroll-margin 0))
 
+;;;###autoload
 (defun rustic-popup-cargo-command-help ()
   "Display help buffer for cargo command at point."
   (interactive)
@@ -214,8 +214,7 @@ corresponding line."
 
 (defun rustic-popup-setup-help-popup (string)
   "Switch to help buffer."
-  (let ((len (length (split-string string "\n")))
-        (buf (get-buffer-create rustic-popup-help-buffer-name)))
+  (let ((buf (get-buffer-create rustic-popup-help-buffer-name)))
     (switch-to-buffer buf)
     (erase-buffer)
     (rustic-popup-help-mode)
@@ -224,6 +223,7 @@ corresponding line."
     (set-window-text-height (selected-window) (+ (window-height) 1))
     (goto-char (point-min))))
 
+;;;###autoload
 (defun rustic-popup-kill-help-buffer ()
   "Kill popup help buffer and switch to popup buffer."
   (interactive)
@@ -231,5 +231,6 @@ corresponding line."
   (fit-window-to-buffer)
   (set-window-text-height (selected-window) (+ (window-height) 1)))
 
+;;; _
 (provide 'rustic-popup)
 ;;; rustic-popup.el ends here

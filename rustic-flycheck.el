@@ -12,6 +12,8 @@
 (require 'seq)
 (require 'json)
 
+(require 'rustic-common)
+
 (defun rustic-flycheck-dirs-list (start end)
   "Return a list of directories from START (inclusive) to END (exclusive).
 E.g., if START is '/a/b/c/d' and END is '/a', return the list
@@ -118,9 +120,9 @@ description of the conventional Cargo project layout."
       (when target
         (let-alist target
           (seq-filter (lambda (kv) (cdr kv))
-                     (list (cons 'kind (rustic-flycheck-normalize-target-kind .kind))
-                           (cons 'name .name)
-                           (cons 'required-features .required-features))))))))
+                      (list (cons 'kind (rustic-flycheck-normalize-target-kind .kind))
+                            (cons 'name .name)
+                            (cons 'required-features .required-features))))))))
 
 (defun rustic-flycheck-normalize-target-kind (kinds)
   "Return the normalized target name from KIND.
@@ -160,7 +162,7 @@ Flycheck according to the Cargo project layout."
 (flycheck-define-checker rustic-clippy
   "A Rust syntax checker using clippy.
 
-  See URL `https://github.com/rust-lang-nursery/rust-clippy'."
+See URL `https://github.com/rust-lang-nursery/rust-clippy'."
   :command ("cargo" "clippy" "--message-format=json")
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
@@ -193,5 +195,6 @@ Flycheck according to the Cargo project layout."
 ;; turn off flymake
 (add-hook 'rustic-mode-hook '(lambda () (flymake-mode-off)))
 
+;;; _
 (provide 'rustic-flycheck)
 ;;; rustic-flycheck.el ends here

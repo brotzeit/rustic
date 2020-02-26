@@ -35,40 +35,16 @@
                    (require 'url-vars))
 
 (require 'json)
-(require 'newcomment)
 
-(require 'rustic-compile)
-(require 'rustic-cargo)
-(require 'rustic-util)
-(require 'rustic-interaction)
-(require 'rustic-babel)
-(require 'rustic-racer)
-(require 'rustic-popup)
-
-(with-eval-after-load 'eglot
-  (rustic-setup-eglot))
-
-(with-eval-after-load 'flycheck
-  (require 'rustic-flycheck))
+(require 'rustic-common)
 
 (defvar electric-pair-inhibit-predicate)
 (defvar electric-indent-chars)
 
-(defvar rustic-buffer-workspace-dir)
+(defvar rustic-buffer-workspace-dir nil)
 (make-variable-buffer-local 'rustic-buffer-workspace-dir)
 
-(defgroup rustic nil
-  "Support for Rust code."
-  :link '(url-link "https://www.rustic-lang.org/")
-  :group 'languages)
-
-;;;;;;;;;;;;;;;;;;
-;; Customization
-
-(defcustom rustic-display-spinner t
-  "Display spinner."
-  :type 'boolean
-  :group 'rustic)
+;;; Customization
 
 (defcustom rustic-indent-offset 4
   "Indent Rust code by this number of spaces."
@@ -77,28 +53,26 @@
   :safe #'integerp)
 
 (defcustom rustic-indent-method-chain nil
-  "Indent Rust method chains, aligned by the '.' operators."
+  "Indent Rust method chains, aligned by the `.' operators."
   :type 'boolean
   :group 'rustic
   :safe #'booleanp)
 
 (defcustom rustic-indent-where-clause nil
-  "Indent the line starting with the where keyword following a
-function or trait.  When nil, where will be aligned with fn or trait."
+  "Indent lines starting with the `where' keyword following a function or trait.
+When nil, `where' will be aligned with `fn' or `trait'."
   :type 'boolean
   :group 'rustic
   :safe #'booleanp)
 
 (defcustom rustic-match-angle-brackets t
-  "Enable angle bracket matching.  Attempt to match `<' and `>' where
-  appropriate."
+  "Whether to enable angle bracket (`<' and `>') matching where appropriate."
   :type 'boolean
   :safe #'booleanp
   :group 'rustic)
 
 (defcustom rustic-always-locate-project-on-open nil
-  "Whether to run `cargo locate-project' every time `rustic'
-  is activated."
+  "Whether to run `cargo locate-project' every time `rustic-mode' is activated."
   :type 'boolean
   :group 'rustic)
 
@@ -109,8 +83,7 @@ to the function arguments.  When nil, `->' will be indented one level."
   :group 'rust-mode
   :safe #'booleanp)
 
-;;;;;;;;;;;;;;;;;;
-;; Faces
+;;; Faces
 
 (defface rustic-unsafe-face
   '((t :inherit font-lock-warning-face))
@@ -132,9 +105,7 @@ to the function arguments.  When nil, `->' will be indented one level."
   "Face for interpolating braces in builtin formatting macro strings."
   :group 'rustic)
 
-
-;;;;;;;;;;;;;;
-;; Rust-mode
+;;; Rust-mode
 
 (defconst rustic-re-ident "[[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*")
 (defconst rustic-re-lc-ident "[[:lower:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*")
@@ -150,6 +121,60 @@ to the function arguments.  When nil, `->' will be indented one level."
      (or space line-start)
      (group symbol-start "union" symbol-end)
      (+ space) (regexp ,rustic-re-ident))))
+
+(defun rustic-re-shy (inner) (concat "\\(?:" inner "\\)"))
+(defun rustic-re-grab (inner) (concat "\\(" inner "\\)"))
+(defun rustic-re-item-def (itype)
+  (concat (rustic-re-word itype)
+          (rustic-re-shy rustic-re-generic) "?"
+          "[[:space:]]+" (rustic-re-grab rustic-re-ident)))
+(defun rustic-re-word (inner) (concat "\\<" inner "\\>"))
+
+(defun rustic-re-item-def-imenu (itype)
+  (concat "^[[:space:]]*"
+          (rustic-re-shy (concat (rustic-re-word rustic-re-vis) "[[:space:]]+")) "?"
+          (rustic-re-shy (concat (rustic-re-word "default") "[[:space:]]+")) "?"
+          (rustic-re-shy (concat (rustic-re-word rustic-re-unsafe) "[[:space:]]+")) "?"
+          (rustic-re-shy (concat (rustic-re-word rustic-re-extern) "[[:space:]]+"
+                                 (rustic-re-shy "\"[^\"]+\"[[:space:]]+") "?")) "?"
+          (rustic-re-item-def itype)))
+
+(defvar rustic-imenu-generic-expression
+  (append (mapcar #'(lambda (x)
+                      (list (capitalize x) (rustic-re-item-def-imenu x) 1))
+                  '("async fn" "enum" "struct" "union" "type" "mod" "fn" "trait" "impl"))
+          `(("Macro" ,(rustic-re-item-def-imenu "macro_rules!") 1)))
+  "Value for `imenu-generic-expression' in Rust mode.
+
+Create a hierarchical index of the item definitions in a Rust file.
+
+Imenu will show all the enums, structs, etc. in their own subheading.
+Use idomenu (imenu with `ido-mode') for best mileage.")
+
+(defvar rustic-mode-syntax-table
+  (let ((table (make-syntax-table)))
+
+    ;; Operators
+    (dolist (i '(?+ ?- ?* ?/ ?% ?& ?| ?^ ?! ?< ?> ?~ ?@))
+      (modify-syntax-entry i "." table))
+
+    ;; Strings
+    (modify-syntax-entry ?\" "\"" table)
+    (modify-syntax-entry ?\\ "\\" table)
+
+    ;; Angle brackets.  We suppress this with syntactic propertization
+    ;; when needed
+    (modify-syntax-entry ?< "(>" table)
+    (modify-syntax-entry ?> ")<" table)
+
+    ;; Comments
+    (modify-syntax-entry ?/  ". 124b" table)
+    (modify-syntax-entry ?*  ". 23n"  table)
+    (modify-syntax-entry ?\n "> b"    table)
+    (modify-syntax-entry ?\^m "> b"   table)
+
+    table)
+  "Syntax definitions and helpers.")
 
 (defvar rustic-mode-map
   (let ((map (make-sparse-keymap)))
@@ -178,7 +203,7 @@ to the function arguments.  When nil, `->' will be indented one level."
 
 \\{rustic-mode-map}"
   :group 'rustic
-  :syntax-table rustic-syntax-table
+  :syntax-table rustic-mode-syntax-table
 
   ;; Syntax.
   (setq-local syntax-propertize-function #'rustic-syntax-propertize)
@@ -190,7 +215,7 @@ to the function arguments.  When nil, `->' will be indented one level."
   (setq-local font-lock-defaults '(rustic-font-lock-keywords
                                    nil nil nil nil
                                    (font-lock-syntactic-face-function
-				    . rustic-syntactic-face-function)))
+                                    . rustic-syntactic-face-function)))
 
   ;; Misc
   (setq-local comment-start "// ")
@@ -227,7 +252,7 @@ to the function arguments.  When nil, `->' will be indented one level."
   (setq-local rustic-buffer-workspace-dir nil)
 
   (when rustic-always-locate-project-on-open
-    (rustic-update-buffer-workspace))
+    (setq-local rustic-buffer-workspace-dir (rustic-buffer-workspace)))
   (when rustic-lsp-setup-p
     (rustic-setup-lsp)))
 
@@ -238,31 +263,6 @@ to the function arguments.  When nil, `->' will be indented one level."
 (let ((mode '("\\.rs\\'" . rust-mode)))
   (when (member mode auto-mode-alist)
     (setq auto-mode-alist (remove mode auto-mode-alist))))
-
-(defvar rustic-syntax-table
-  (let ((table (make-syntax-table)))
-
-    ;; Operators
-    (dolist (i '(?+ ?- ?* ?/ ?% ?& ?| ?^ ?! ?< ?> ?~ ?@))
-      (modify-syntax-entry i "." table))
-
-    ;; Strings
-    (modify-syntax-entry ?\" "\"" table)
-    (modify-syntax-entry ?\\ "\\" table)
-
-    ;; Angle brackets.  We suppress this with syntactic propertization
-    ;; when needed
-    (modify-syntax-entry ?< "(>" table)
-    (modify-syntax-entry ?> ")<" table)
-
-    ;; Comments
-    (modify-syntax-entry ?/  ". 124b" table)
-    (modify-syntax-entry ?*  ". 23n"  table)
-    (modify-syntax-entry ?\n "> b"    table)
-    (modify-syntax-entry ?\^m "> b"   table)
-
-    table)
-  "Syntax definitions and helpers.")
 
 (defvar rustic-top-item-beg-re
   (concat "\\s-*\\(?:priv\\|pub\\)?\\s-*"
@@ -315,9 +315,9 @@ to the function arguments.  When nil, `->' will be indented one level."
     "format"
     "print"
     "println")
-  "List of builtin Rust macros for string formatting used by
-`rustic-font-lock-keywords'.
-\\(`write!' is handled separately.)")
+  "List of builtin Rust macros for string formatting.
+This is used by `rust-font-lock-keywords'.
+\(`write!' is handled separately).")
 
 (defvar rustic-formatting-macro-opening-re
   "[[:space:]]*[({[][[:space:]]*"
@@ -327,18 +327,10 @@ to the function arguments.  When nil, `->' will be indented one level."
   "\\(?:r#*\\)?\""
   "Regular expression to match the start of a Rust raw string.")
 
-(defun rustic-re-shy (inner) (concat "\\(?:" inner "\\)"))
-(defun rustic-re-grab (inner) (concat "\\(" inner "\\)"))
-(defun rustic-re-item-def (itype)
-  (concat (rustic-re-word itype)
-          (rustic-re-shy rustic-re-generic) "?"
-          "[[:space:]]+" (rustic-re-grab rustic-re-ident)))
-(defun rustic-re-word (inner) (concat "\\<" inner "\\>"))
-
 (defun rustic-path-font-lock-matcher (re-ident)
-  "Matches names like \"foo::\" or \"Foo::\" (depending on
-RE-IDENT, which should match the desired identifiers), but does
-not match type annotations \"foo::<\"."
+  "Match occurrences of RE-IDENT followed by a double-colon.
+Examples include to match names like \"foo::\" or \"Foo::\".
+Does not match type annotations of the form \"foo::<\"."
   `(lambda (limit)
      (catch 'rustic-path-font-lock-matcher
        (while t
@@ -375,8 +367,8 @@ not match type annotations \"foo::<\"."
 
      ;; Builtin formatting macros
      (,(concat (rustic-re-grab (concat (regexp-opt rustic-builtin-formatting-macros) "!"))
-	       rustic-formatting-macro-opening-re
-	       rustic-start-of-string-re)
+               rustic-formatting-macro-opening-re
+               rustic-start-of-string-re)
       (1 'rustic-builtin-formatting-macro-face)
       (rustic-string-interpolation-matcher
        (rustic-end-of-string)
@@ -385,9 +377,9 @@ not match type annotations \"foo::<\"."
 
      ;; write! macro
      (,(concat (rustic-re-grab "write\\(ln\\)?!")
-	       rustic-formatting-macro-opening-re
-	       "[[:space:]]*[^\"]+,[[:space:]]*"
-	       rustic-start-of-string-re)
+               rustic-formatting-macro-opening-re
+               "[[:space:]]*[^\"]+,[[:space:]]*"
+               rustic-start-of-string-re)
       (1 'rustic-builtin-formatting-macro-face)
       (rustic-string-interpolation-matcher
        (rustic-end-of-string)
@@ -406,8 +398,8 @@ not match type annotations \"foo::<\"."
 
      ;; Type-inferred binding
      (,(concat "\\_<\\(?:let\\s-+ref\\|let\\|ref\\)\\s-+\\(?:mut\\s-+\\)?"
-	       (rustic-re-grab rustic-re-ident)
-	       "\\_>")
+               (rustic-re-grab rustic-re-ident)
+               "\\_>")
       1 font-lock-variable-name-face)
 
      ;; Type names like `Foo::`, highlight excluding the ::
@@ -454,7 +446,7 @@ symbols."
       (and
        (= end-of-symbol pt-orig)
        (member (buffer-substring-no-properties beg-of-symbol pt-orig)
-	       symbols)))))
+               symbols)))))
 
 (defun rustic-looking-back-ident ()
   "Non-nil if we are looking backwards at a valid rust identifier."
@@ -465,9 +457,9 @@ symbols."
   "Non-nil if looking back at an ident followed by a !"
   (if (> (- (point) (point-min)) 1)
       (save-excursion
-	(backward-char)
-	(and (= ?! (char-after))
-	     (rustic-looking-back-ident)))))
+        (backward-char)
+        (and (= ?! (char-after))
+             (rustic-looking-back-ident)))))
 
 (defun rustic-paren-level () (nth 0 (syntax-ppss)))
 (defun rustic-in-str () (nth 3 (syntax-ppss)))
@@ -493,10 +485,10 @@ symbols."
       (rustic-rewind-irrelevant)
       (or (rustic-looking-back-macro)
           (and (rustic-looking-back-ident)
-	       (save-excursion
-		 (backward-sexp)
-		 (rustic-rewind-irrelevant)
-		 (rustic-looking-back-str "macro_rules!")))
+               (save-excursion
+                 (backward-sexp)
+                 (rustic-rewind-irrelevant)
+                 (rustic-looking-back-str "macro_rules!")))
           (rustic-in-macro)))))
 
 (defun rustic-looking-at-where ()
@@ -516,20 +508,10 @@ buffer."
 
 (defconst rustic-re-pre-expression-operators "[-=!%&*/:<>[{(|.^;}]")
 
-(defun rustic-re-item-def-imenu (itype)
-  (concat "^[[:space:]]*"
-          (rustic-re-shy (concat (rustic-re-word rustic-re-vis) "[[:space:]]+")) "?"
-          (rustic-re-shy (concat (rustic-re-word "default") "[[:space:]]+")) "?"
-          (rustic-re-shy (concat (rustic-re-word rustic-re-unsafe) "[[:space:]]+")) "?"
-          (rustic-re-shy (concat (rustic-re-word rustic-re-extern) "[[:space:]]+"
-                                 (rustic-re-shy "\"[^\"]+\"[[:space:]]+") "?")) "?"
-          (rustic-re-item-def itype)))
-
 (defconst rustic-re-special-types (regexp-opt rustic-special-types 'symbols))
 
 (defun rustic-next-string-interpolation (limit)
-  "Search forward from point for next Rust interpolation marker
-before LIMIT.
+  "Search forward from point for next Rust interpolation marker before LIMIT.
 Set point to the end of the occurrence found, and return match beginning
 and end."
   (catch 'match
@@ -550,8 +532,8 @@ and end."
                 (throw 'match (list start (point)))))))))))
 
 (defun rustic-string-interpolation-matcher (limit)
-  "Match next Rust interpolation marker before LIMIT and set
-match data if found. Returns nil if not within a Rust string."
+  "Match next Rust interpolation marker before LIMIT and set match data if found.
+Returns nil if not within a Rust string."
   (when (rustic-in-str)
     (let ((match (rustic-next-string-interpolation limit)))
       (when match
@@ -596,17 +578,18 @@ match data if found. Returns nil if not within a Rust string."
         (goto-char dest))))))
 
 (defun rustic-rewind-to-decl-name ()
-  "If we are before an ident that is part of a declaration that
-  can have a where clause, rewind back to just before the name of
-  the subject of that where clause and return the new point.
-  Otherwise return nil"
+  "Return the point at the beginning of the name in a declaration.
+I.e. if we are before an ident that is part of a declaration that
+can have a where clause, rewind back to just before the name of
+the subject of that where clause and return the new point.
+Otherwise return nil."
   (let* ((ident-pos (point))
          (newpos (save-excursion
                    (rustic-rewind-irrelevant)
                    (rustic-rewind-type-param-list)
                    (cond
                     ((rustic-looking-back-symbols
-		      '("fn" "trait" "enum" "struct" "union" "impl" "type"))
+                      '("fn" "trait" "enum" "struct" "union" "impl" "type"))
                      ident-pos)
 
                     ((equal 5 (rustic-syntax-class-before-point))
@@ -629,21 +612,19 @@ match data if found. Returns nil if not within a Rust string."
 
 (defun rustic-is-in-expression-context (token)
   "Return t if what comes right after the point is part of an
-  expression (as opposed to starting a type) by looking at what
-  comes before.  Takes a symbol that roughly indicates what is
-  after the point.
+expression (as opposed to starting a type) by looking at what
+comes before.  Takes a symbol that roughly indicates what is
+after the point.
 
-  This function is used as part of `rustic-is-lt-char-operator' as
-  part of angle bracket matching, and is not intended to be used
-  outside of this context."
+This function is used as part of `rustic-is-lt-char-operator' as
+part of angle bracket matching, and is not intended to be used
+outside of this context."
   (save-excursion
     (let ((postchar (char-after)))
       (rustic-rewind-irrelevant)
-
       ;; A type alias or ascription could have a type param list.  Skip backwards past it.
       (when (member token '(ambiguous-operator open-brace))
         (rustic-rewind-type-param-list))
-
       (cond
 
        ;; Certain keywords always introduce expressions
@@ -683,10 +664,11 @@ match data if found. Returns nil if not within a Rust string."
          ((equal token 'open-brace)
           ;; We now know we have:
           ;;   ident <maybe type params> [{([]
-          ;; where [{([] denotes either a {, ( or [.  This character is bound as postchar.
+          ;; where [{([] denotes either a {, ( or [.
+          ;; This character is bound as postchar.
           (cond
-           ;; If postchar is a paren or square bracket, then if the brace is a type if the
-           ;; identifier is one
+           ;; If postchar is a paren or square bracket, then if the
+           ;; brace is a type if the identifier is one
            ((member postchar '(?\( ?\[ )) (rustic-is-in-expression-context 'ident))
 
            ;; If postchar is a curly brace, the brace can only be a type if
@@ -698,7 +680,7 @@ match data if found. Returns nil if not within a Rust string."
                       (progn
                         (rustic-rewind-irrelevant)
                         (rustic-looking-back-symbols
-			 '("enum" "struct" "union" "trait" "type"))))))))
+                         '("enum" "struct" "union" "trait" "type"))))))))
 
          ((equal token 'ambiguous-operator)
           (cond
@@ -767,13 +749,10 @@ match data if found. Returns nil if not within a Rust string."
                 (rustic-rewind-qualified-ident)
                 (rustic-is-in-expression-context 'ident))))
 
-
            ;; Otherwise, if the ident: appeared with anything other than , or {
            ;; before it, it can't be part of a struct initializer and therefore
            ;; must be denoting a type.
-           (t nil)
-           ))
-         ))
+           (t nil)))))
 
        ;; An operator-like character after a string is indeed an operator
        ((and (equal token 'ambiguous-operator)
@@ -821,9 +800,8 @@ match data if found. Returns nil if not within a Rust string."
        ((looking-back rustic-re-pre-expression-operators (1- (point))) t)))))
 
 (defun rustic-is-lt-char-operator ()
-  "Return t if the < sign just after point is an operator rather
-  than an opening angle bracket, otherwise nil."
-
+  "Return non-nil if the `<' sign just after point is an operator.
+Otherwise, if it is an opening angle bracket, then return nil."
   (let ((case-fold-search nil))
     (save-excursion
       (rustic-rewind-irrelevant)
@@ -870,9 +848,8 @@ match data if found. Returns nil if not within a Rust string."
        ))))
 
 (defun rustic-electric-pair-inhibit-predicate-wrap (char)
-  "Wraps the default `electric-pair-inhibit-predicate' to prevent
-  inserting a \"matching\" > after a < that would be treated as a
-  less than sign rather than as an opening angle bracket."
+  "Prevent \"matching\" with a `>' when CHAR is the less-than operator.
+This wraps the default defined by `electric-pair-inhibit-predicate'."
   (or
    (when (= ?< char)
      (save-excursion
@@ -918,8 +895,9 @@ should be considered a paired angle bracket."
         (not (looking-at "<"))))))))
 
 (defun rustic-syntactic-face-function (state)
-  "Syntactic face function to distinguish doc comments from other comments."
-  (if (nth 3 state) 'font-lock-string-face
+  "Return face that distinguishes doc and normal comments in given syntax STATE."
+  (if (nth 3 state)
+      'font-lock-string-face
     (save-excursion
       (goto-char (nth 8 state))
       (if (looking-at "/\\([*][*!][^*!]\\|/[/!][^/!]\\)")
@@ -991,7 +969,7 @@ whichever comes first."
    (point) end))
 
 (defun rustic-fill-prefix-for-comment-start (line-start)
-  "Determine what to use for `fill-prefix' based on what is at the beginning of a line."
+  "Determine what to use for `fill-prefix' based on the text at LINE-START."
   (let ((result
          ;; Replace /* with same number of spaces
          (replace-regexp-in-string
@@ -1077,7 +1055,10 @@ whichever comes first."
 
 (defun rustic-find-fill-prefix ()
   (rustic-in-comment-paragraph
-   (lambda () (rustic-with-comment-fill-prefix (lambda () fill-prefix)))))
+   (lambda ()
+     (rustic-with-comment-fill-prefix
+      (lambda ()
+        fill-prefix)))))
 
 (defun rustic-fill-paragraph (&rest args)
   "Special wrapping for `fill-paragraph'.
@@ -1111,19 +1092,6 @@ This handles multi-line comments with a * prefix on each line."
   (rustic-with-comment-fill-prefix
    (lambda () (comment-indent-new-line arg))))
 
-;;; Imenu support
-(defvar rustic-imenu-generic-expression
-  (append (mapcar #'(lambda (x)
-                      (list (capitalize x) (rustic-re-item-def-imenu x) 1))
-                  '("async fn" "enum" "struct" "union" "type" "mod" "fn" "trait" "impl"))
-          `(("Macro" ,(rustic-re-item-def-imenu "macro_rules!") 1)))
-  "Value for `imenu-generic-expression' in Rust mode.
-
-Create a hierarchical index of the item definitions in a Rust file.
-
-Imenu will show all the enums, structs, etc. in their own subheading.
-Use idomenu (imenu with `ido-mode') for best mileage.")
-
 (defun rustic-end-of-string ()
   "Skip to the end of the current string."
   (save-excursion
@@ -1134,7 +1102,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
 (defun rustic-before-save-hook ()
   "Don't throw error if rustfmt isn't installed, as it makes saving impossible."
   (when (and (rustic-format-on-save-p) (not (rustic-compilation-process-live t)))
-    (condition-case ()
+    (condition-case nil
         (progn
           (rustic-format-buffer t)
           (sit-for 0.1))
@@ -1146,29 +1114,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
     (unless (executable-find rustic-rustfmt-bin)
       (error "Could not locate executable \"%s\"" rustic-rustfmt-bin))))
 
-(defun rustic-buffer-workspace (&optional nodefault)
-  "Get the workspace root.
-If NODEFAULT is t, return nil instead of `default-directory' if directory is
-not in a rust project."
-  (let ((dir (locate-dominating-file
-              (or buffer-file-name default-directory) "Cargo.toml")))
-    (if dir
-        (expand-file-name dir)
-      (if nodefault
-          nil default-directory))))
-
-(defun rustic-update-buffer-workspace ()
-  "Update current workspace."
-  (setq-local rustic-buffer-workspace-dir (rustic-buffer-workspace)))
-
-;;;;;;;;;;;;;;;;
-;; Interactive
-
-(defun rustic-docstring-dwim ()
-  "Use `comment-dwim' to make a docstring."
-  (interactive)
-  (let ((comment-start "/// "))
-    (call-interactively 'comment-dwim)))
+;;; _
 
 (defun rustic-reload ()
   "Reload rustic package."
@@ -1178,7 +1124,19 @@ not in a rust project."
   (rustic-mode))
 
 (provide 'rustic)
-;; Local Variables:
-;; indent-tabs-mode: nil
-;; End:
+
+(require 'rustic-util)
+(require 'rustic-compile)
+(require 'rustic-popup)
+(require 'rustic-cargo)
+(require 'rustic-babel)
+(require 'rustic-racer)
+(require 'rustic-interaction)
+
+(with-eval-after-load 'flycheck
+  (require 'rustic-flycheck))
+
+(with-eval-after-load 'eglot
+  (rustic-setup-eglot))
+
 ;;; rustic.el ends here

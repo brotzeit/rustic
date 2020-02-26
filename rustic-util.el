@@ -6,37 +6,15 @@
 
 ;;; Code:
 
+(require 'dash)
 (require 'subr-x)
 (require 'package)
+(require 'org-element)
 
-(require 'rustic-compile)
+(require 'rustic-common)
+(require 'rustic-cargo)
 
-;;;;;;;;;;;;;;;;;;
-;; Customization
-
-(defcustom rustic-format-trigger nil
-  "Format future rust buffers before saving using rustfmt."
-  :type '(choice (const :tag "Format buffer before saving." on-save)
-                 (const :tag "Run 'cargo fmt' before compilation." on-compile)
-                 (const :tag "Don't format automatically." nil))
-  :group 'rustic)
-
-(defcustom rustic-format-on-save nil
-  "Format rust buffers before saving using rustfmt."
-  :type 'boolean
-  :safe #'booleanp
-  :group 'rustic)
-(make-obsolete 'rustic-format-on-save 'rustic-format-trigger "0.19")
-
-(defun rustic-format-on-save-p ()
-  "Checks if either deprecated `rustic-format-on-save' or `rustic-format-trigger' is set
-to format buffer when saving."
-  (or rustic-format-on-save (eq rustic-format-trigger 'on-save)))
-
-(defcustom rustic-rustfmt-bin "rustfmt"
-  "Path to rustfmt executable."
-  :type 'string
-  :group 'rustic)
+;;; Customization
 
 (defcustom rustic-format-display-method 'pop-to-buffer
   "Default function used for displaying rustfmt buffer."
@@ -59,20 +37,13 @@ to format buffer when saving."
                  (const :tag "rust-analyzer" rust-analyzer))
   :group 'rustic)
 
+(define-obsolete-variable-alias 'rustic-rls-pkg 'rustic-lsp-client "Rustic 0.18")
 (defcustom rustic-lsp-client 'lsp-mode
   "Emacs package for interaction with the language server."
   :type '(choice (const :tag "eglot" eglot)
                  (const :tag "lsp-mode" lsp-mode)
                  (const :tag "No LSP client" nil))
   :group 'rustic)
-
-(defcustom rustic-rls-pkg nil
-  "Emacs package for interaction with rls."
-  :type '(choice (const :tag "eglot" eglot)
-                 (const :tag "lsp-mode" lsp-mode)
-                 (const :tag "No LSP client" nil))
-  :group 'rustic)
-(make-obsolete 'rustic-rls-pkg 'rustic-lsp-client "0.18")
 
 (defcustom rustic-lsp-format nil
   "Allow formatting through lsp server."
@@ -82,17 +53,10 @@ to format buffer when saving."
 
 (defcustom rustic-analyzer-command '("~/.cargo/bin/rust-analyzer")
   "Command for calling rust analyzer."
-  :type '(repeat (string)))
-
-(defcustom rustic-lsp-setup-p t
-  "Setup LSP related stuff automatically."
-  :type 'boolean
-  :safe #'booleanp
+  :type '(repeat (string))
   :group 'rustic)
 
-
-;;;;;;;;;;;;
-;; Rustfmt
+;;; Rustfmt
 
 (defvar rustic-format-process-name "rustic-rustfmt-process"
   "Process name for rustfmt processes.")
@@ -199,6 +163,7 @@ Use `:command' when formatting files and `:stdin' for strings."
         (kill-buffer proc-buffer)
         (message "Workspace formatted with cargo-fmt.")))))
 
+;;;###autoload
 (defun rustic-format-buffer (&optional no-stdin)
   "Format the current buffer using rustfmt.
 
@@ -225,13 +190,11 @@ were issues when using stdin for formatting."
     (while (eq (process-status proc) 'run)
       (sit-for 0.1))))
 
-
-;;;;;;;;
-;; LSP
+;;; LSP
 
 (defun rustic-setup-lsp ()
   "Setup LSP client. If client isn't installed, offer to install it."
-  (let ((client (or rustic-rls-pkg rustic-lsp-client)))
+  (let ((client rustic-lsp-client))
     (cond ((eq client nil)
            nil)
           ((require client nil t)
@@ -241,6 +204,18 @@ were issues when using stdin for formatting."
              (lsp)))
           (t
            (rustic-install-lsp-client-p client)))))
+
+;;;; lsp
+
+(defvar lsp-clients)
+(defvar lsp-rust-analyzer-macro-expansion-method)
+(defvar lsp-rust-analyzer-server-command)
+(defvar lsp-rust-server)
+(declare-function lsp "lsp-mode" (&optional arg))
+(declare-function lsp--client-priority "lsp-mode" (cl-x))
+(declare-function lsp-rust-switch-server "lsp-rust" ())
+(declare-function lsp-workspace-folders-add "lsp-rust" (project-root))
+(declare-function lsp-workspace-root "lsp-mode" (&optional path))
 
 (defun rustic-lsp-mode-setup ()
   "When changing the `lsp-rust-server', it's also necessary to update the priorities
@@ -267,10 +242,17 @@ with `lsp-rust-switch-server'."
         (error err))
     (message "No LSP server running.")))
 
-;; eglot
+;;;; eglot
+
+(defvar eglot-ignored-server-capabilites)
+(defvar eglot-ignored-server-capabilites)
+(defvar eglot-server-programs)
+(defvar eglot-server-programs)
+(declare-function eglot-ensure "eglot" ())
 
 (defun rustic-setup-eglot ()
   "Configure eglot for rustic."
+  (require 'eglot)
   (if (equal rustic-lsp-server 'rls)
       ;; add rustic to `eglot-server-programs'
       (let ((rls '(rustic-mode . (eglot-rls "rls"))))
@@ -289,26 +271,26 @@ with `lsp-rust-switch-server'."
       (unless (-contains? eglot-ignored-server-capabilites feature)
         (add-to-list 'eglot-ignored-server-capabilites feature)))))
 
-;; lsp-mode
-;; rust-analyzer
-
-;; macro expansion
+;;;; lsp-mode
 
 (setq lsp-rust-analyzer-macro-expansion-method 'rustic-analyzer-macro-expand)
 
 (define-derived-mode rustic-macro-expansion-mode special-mode "Rust"
   :group 'rustic
-  :syntax-table rustic-syntax-table
+  :syntax-table rustic-mode-syntax-table
   ;; Fonts
   (setq-local font-lock-defaults '(rustic-font-lock-keywords
                                    nil nil nil nil
-                                   (font-lock-syntactic-face-function . rustic-syntactic-face-function))))
+                                   (font-lock-syntactic-face-function
+                                    . rustic-syntactic-face-function))))
 
+;;;###autoload
 (defun rustic-analyzer-macro-expand (result)
   "Default method for displaying macro expansion results."
   (interactive)
   (let* ((root (lsp-workspace-root default-directory))
-         (buf (get-buffer-create (get-buffer-create (format "*rust-analyzer macro expansion %s*" root)))))
+         (buf (get-buffer-create
+               (format "*rust-analyzer macro expansion %s*" root))))
     (with-current-buffer buf
       (let ((inhibit-read-only t))
         (erase-buffer)
@@ -327,9 +309,7 @@ with `lsp-rust-switch-server'."
             (delete-region (line-beginning-position) (point-max))))))
     (display-buffer buf)))
 
-
-;;;;;;;;;;;
-;; Rustix
+;;; Rustix
 
 (defvar rustic-rustfix-process-name "rustic-rustfix-process"
   "Process name for rustfix processes.")
@@ -346,15 +326,12 @@ with `lsp-rust-switch-server'."
   (interactive)
   (let* ((command (list rustic-cargo-bin "fix" "--allow-dirty"))
          (err-buf rustic-rustfix-buffer-name)
-         (buf (current-buffer))
          (proc rustic-rustfix-process-name)
          (mode 'rustic-rustfix-mode))
     (rustic-compilation-process-live)
     (rustic-compilation-start command :buffer err-buf :process proc :mode mode)))
 
-
-;;;;;;;;;;;;;;;;
-;; Interactive
+;;; Interactive
 
 ;;;###autoload
 (defun rustic-playpen (begin end)
@@ -370,7 +347,9 @@ src-block or buffer on the Rust playpen."
      (t
       (setq data (buffer-substring (point-min) (point-max)))))
     (let* ((escaped-data (url-hexify-string data))
-           (escaped-playpen-url (url-hexify-string (format rustic-playpen-url-format escaped-data))))
+           (escaped-playpen-url (url-hexify-string
+                                 (format rustic-playpen-url-format
+                                         escaped-data))))
       (if (> (length escaped-playpen-url) 5000)
           (error "encoded playpen data exceeds 5000 character limit (length %s)"
                  (length escaped-playpen-url))
@@ -391,7 +370,6 @@ src-block or buffer on the Rust playpen."
                               (let ((URL (read-from-minibuffer "Playpen URL: " last-line)))
                                 (browse-url URL)))))))))))
 
-
 ;;;###autoload
 (defun rustic-open-dependency-file ()
   "Open the 'Cargo.toml' file at the project root if the current buffer is
@@ -402,5 +380,6 @@ visiting a project."
         (find-file (concat workspace "/Cargo.toml"))
       (message "The current buffer is not inside a rust project!"))))
 
+;;; _
 (provide 'rustic-util)
 ;;; rustic-util.el ends here

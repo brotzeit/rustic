@@ -2,14 +2,13 @@
 
 ;;; Code:
 
+(require 'dash)
 (require 'tabulated-list)
-(require 'spinner)
 
-(require 'rustic-compile)
-(require 'rustic-interaction)
+(require 'rustic-common)
+(require 'rustic-interaction) ; for rustic-beginning-of-function
 
-;;;;;;;;;;;;;;;;;;
-;; Customization
+;;; Customization
 
 (defcustom rustic-cargo-bin "cargo"
   "Path to cargo executable."
@@ -24,39 +23,10 @@ If nil then the project is simply created."
 
 (defface rustic-cargo-outdated-upgrade-face
   '((t (:foreground "LightSeaGreen")))
-  "Face used for crates marked for upgrade.")
+  "Face used for crates marked for upgrade."
+  :group 'rustic)
 
-
-;;;;;;;;;;;;
-;; Spinner
-
-(defcustom rustic-spinner-type 'horizontal-moving
-  "Holds the type of spinner to be used in the mode-line.
-Takes a value accepted by `spinner-start'."
-  :type `(choice (choice :tag "Choose a spinner by name"
-                         ,@(mapcar (lambda (c) (list 'const (car c)))
-                                   spinner-types))
-                 (const :tag "A random spinner" random)
-                 (repeat :tag "A list of symbols from `spinner-types' to randomly choose from"
-                         (choice :tag "Choose a spinner by name"
-                                 ,@(mapcar (lambda (c) (list 'const (car c)))
-                                           spinner-types)))
-                 (vector :tag "A user defined vector"
-                         (repeat :inline t string)))
-  :group 'rustic-babel)
-
-(defmacro rustic-with-spinner (spinner val mode-line &rest body)
-  (declare (indent defun))
-  `(when rustic-display-spinner
-     (when (spinner-p ,spinner)
-       (spinner-stop ,spinner))
-     (setq ,spinner ,val)
-     (setq mode-line-process ,mode-line)
-     ,@body))
-
-
-;;;;;;;;;;;
-;; Clippy
+;;; Clippy
 
 (defvar rustic-clippy-process-name "rustic-cargo-clippy-process"
   "Process name for clippy processes.")
@@ -81,9 +51,7 @@ Takes a value accepted by `spinner-start'."
                         :process proc
                         :mode mode)))
 
-
-;;;;;;;;;
-;; Test
+;;; Test
 
 (defvar rustic-test-process-name "rustic-cargo-test-process"
   "Process name for test processes.")
@@ -109,11 +77,12 @@ Takes a value accepted by `spinner-start'."
          (mode 'rustic-cargo-test-mode))
     (rustic-compilation c :buffer buf :process proc :mode mode)))
 
+;;;###autoload
 (defun rustic-cargo-test (&optional arg)
   "Run 'cargo test'.
 
 If ARG is not nil, use value as argument and store it in `rustic-test-arguments'.
-When calling this function from `rustic-popup-mode', always use the value of 
+When calling this function from `rustic-popup-mode', always use the value of
 `rustic-test-arguments'."
   (interactive "P")
   (rustic-cargo-test-run
@@ -123,6 +92,7 @@ When calling this function from `rustic-popup-mode', always use the value of
           rustic-test-arguments)
          (t ""))))
 
+;;;###autoload
 (defun rustic-cargo-test-rerun ()
   "Run 'cargo test' with `rustic-test-arguments'."
   (interactive)
@@ -141,8 +111,10 @@ When calling this function from `rustic-popup-mode', always use the value of
         (rustic-compilation command :buffer buf :process proc :mode mode))
     (message "Could not find test at point.")))
 
-(defconst rustic-cargo-mod-regexp "^\s*mod\s+\\([[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*\\)\s*{")
-(defconst rustic-cargo-fn-regexp "^\s*fn\s+\\([^(]+\\)\s*(")
+(defconst rustic-cargo-mod-regexp
+  "^\s*mod\s+\\([[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*\\)\s*{")
+(defconst rustic-cargo-fn-regexp
+  "^\s*fn\s+\\([^(]+\\)\s*(")
 
 (defun rustic-cargo--get-current-fn-fullname()
   "Return full name of the fn around point including module name if any."
@@ -173,8 +145,7 @@ When calling this function from `rustic-popup-mode', always use the value of
           (rustic-beginning-of-function)
           (rustic-cargo--get-current-line-fn-name)))))
 
-;;;;;;;;;;;;;
-;; Outdated
+;;; Outdated
 
 (defcustom rustic-cargo-outdated-face "red"
   "Face for upgradeable crates."
@@ -185,7 +156,7 @@ When calling this function from `rustic-popup-mode', always use the value of
 
 (defvar rustic-cargo-oudated-buffer-name "*cargo-outdated*")
 
-(defvar rustic-outdated-spinner nil)
+(defvar rustic-cargo-outdated-spinner nil)
 
 (defvar rustic-cargo-outdated-mode-map
   (let ((map (make-sparse-keymap)))
@@ -213,6 +184,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   (setq tabulated-list-padding 2)
   (tabulated-list-init-header))
 
+;;;###autoload
 (defun rustic-cargo-outdated (&optional path)
   "Use 'cargo outdated' to list outdated packages in `tabulated-list-mode'.
 Execute process in PATH."
@@ -230,12 +202,14 @@ Execute process in PATH."
       (setq default-directory dir)
       (erase-buffer)
       (rustic-cargo-outdated-mode)
-      (rustic-with-spinner rustic-outdated-spinner
+      (rustic-with-spinner rustic-cargo-outdated-spinner
         (make-spinner rustic-spinner-type t 10)
-        '(rustic-outdated-spinner (":Executing " (:eval (spinner-print rustic-outdated-spinner))))
-        (spinner-start rustic-outdated-spinner)))
+        '(rustic-cargo-outdated-spinner
+          (":Executing " (:eval (spinner-print rustic-cargo-outdated-spinner))))
+        (spinner-start rustic-cargo-outdated-spinner)))
     (display-buffer buf)))
 
+;;;###autoload
 (defun rustic-cargo-reload-outdated ()
   "Update list of outdated packages."
   (interactive)
@@ -266,7 +240,7 @@ Execute process in PATH."
           (if (= exit-status 101)
               (rustic-cargo-install-crate-p "outdated")
             (message out))))))
-  (rustic-with-spinner rustic-outdated-spinner nil nil))
+  (rustic-with-spinner rustic-cargo-outdated-spinner nil nil))
 
 (defun rustic-cargo-install-crate-p (crate)
   "Ask whether to install crate CRATE."
@@ -298,6 +272,7 @@ Execute process in PATH."
                  ,(nth 4 fields)
                  ,(nth 5 fields)])))
 
+;;;###autoload
 (defun rustic-cargo-mark-upgrade ()
   "Mark an upgradable package."
   (interactive)
@@ -320,6 +295,7 @@ Execute process in PATH."
                                        'rustic-cargo-outdated-upgrade-face)))))
       (tabulated-list-put-tag "U" t))))
 
+;;;###autoload
 (defun rustic-cargo-mark-all-upgrades ()
   "Mark all upgradable packages in the Package Menu."
   (interactive)
@@ -333,11 +309,13 @@ Execute process in PATH."
             (forward-line)
           (tabulated-list-put-tag "U" t))))))
 
+;;;###autoload
 (defun rustic-cargo-menu-mark-unmark ()
   "Clear any marks on a package."
   (interactive)
   (tabulated-list-put-tag " " t))
 
+;;;###autoload
 (defun rustic-cargo-upgrade-execute ()
   "Perform marked menu actions."
   (interactive)
@@ -366,8 +344,7 @@ Execute process in PATH."
           (rustic-cargo-install-crate-p "edit")
         (rustic-cargo-reload-outdated)))))
 
-;;;;;;;;;;;;;;;;
-;; New project
+;;; New project
 
 ;;;###autoload
 (defun rustic-cargo-new (project-path &optional bin)
@@ -377,7 +354,7 @@ If BIN is not nil, create a binary application, otherwise a library."
   (let ((bin (if (or bin (y-or-n-p "Create new binary package? "))
                  "--bin"
                "--lib"))
-        (new-sentinel (lambda (process signal)
+        (new-sentinel (lambda (_process signal)
                         (when (equal signal "finished\n")
                           (message (format "Created new package: %s"
                                            (file-name-base project-path)))
@@ -390,8 +367,7 @@ If BIN is not nil, create a binary application, otherwise a library."
                   :command (list rustic-cargo-bin "new" bin project-path)
                   :sentinel new-sentinel)))
 
-;;;;;;;;;;;;;;;;
-;; Interactive
+;;; Interactive
 
 (defun rustic-run-cargo-command (command)
   "Run the specified COMMAND with cargo."
