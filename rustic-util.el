@@ -51,7 +51,7 @@
   :safe #'booleanp
   :group 'rustic)
 
-(defcustom rustic-analyzer-command '("~/.cargo/bin/rust-analyzer")
+(defcustom rustic-analyzer-command '("rust-analyzer")
   "Command for calling rust analyzer."
   :type '(repeat (string))
   :group 'rustic)
