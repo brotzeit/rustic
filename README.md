@@ -135,7 +135,7 @@ RLS is the default and can be changed to rust-analyzer. lsp-mode related code wa
 Change rust-analyzer path.
 
 ``` emacs-lisp
-(setq lsp-rust-analyzer-server-command '("~/.cargo/bin/ra_lsp_server"))
+(setq lsp-rust-analyzer-server-command '("~/.cargo/bin/rust-analyzer"))
 ```
 
 ## Client
