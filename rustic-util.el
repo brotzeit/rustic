@@ -207,28 +207,22 @@ were issues when using stdin for formatting."
 
 ;;;; lsp
 
-(defvar lsp-clients)
 (defvar lsp-rust-analyzer-macro-expansion-method)
 (defvar lsp-rust-analyzer-server-command)
 (defvar lsp-rust-server)
 (declare-function lsp "lsp-mode" (&optional arg))
-(declare-function lsp--client-priority "lsp-mode" (cl-x))
-(declare-function lsp-rust-switch-server "lsp-rust" ())
+(declare-function lsp-rust-switch-server "lsp-rust" (lsp-server))
 (declare-function lsp-workspace-folders-add "lsp-rust" (project-root))
 (declare-function lsp-workspace-root "lsp-mode" (&optional path))
 
 (defun rustic-lsp-mode-setup ()
   "When changing the `lsp-rust-server', it's also necessary to update the priorities
 with `lsp-rust-switch-server'."
-  ;; we need to require lsp-clients for the call to `lsp--client-priority'
-  (require 'lsp-clients)
   (require 'lsp-rust)
   (lsp-workspace-folders-add (rustic-buffer-workspace))
   (setq lsp-rust-server rustic-lsp-server)
   (setq lsp-rust-analyzer-server-command rustic-analyzer-command)
-  (let ((priority (lsp--client-priority (gethash rustic-lsp-server lsp-clients))))
-    (when (< priority 0)
-      (lsp-rust-switch-server))))
+  (lsp-rust-switch-server rustic-lsp-server))
 
 (defun rustic-install-lsp-client-p (lsp-client)
   "Ask user whether to install missing LSP-CLIENT."
