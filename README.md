@@ -6,33 +6,34 @@
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
-- [Intro](#intro)
-- [Installation](#installation)
-    - [straight](#straight)
-- [Compilation](#compilation)
-    - [rustc errors](#rustc-errors)
-- [Rustfmt](#rustfmt)
-- [LSP](#lsp)
-    - [Server](#server)
-    - [Client](#client)
-        - [eglot](#eglot)
-        - [lsp-mode](#lsp-mode)
-            - [Macro expansion](#macro-expansion)
-- [Cargo](#cargo)
-    - [Test](#test)
-    - [Outdated](#outdated)
-- [Lints](#lints)
-    - [Clippy](#clippy)
-    - [Flycheck](#flycheck)
-- [Rustfix](#rustfix)
-- [Org-babel](#org-babel)
-- [Popup](#popup)
-- [elisp tests](#elisp-tests)
-- [Contributing](#contributing)
+- [Rustic](#rustic)
+    - [Intro](#intro)
+    - [Installation](#installation)
+        - [straight](#straight)
+    - [Compilation](#compilation)
+        - [rustc errors](#rustc-errors)
+    - [Rustfmt](#rustfmt)
+    - [LSP](#lsp)
+        - [Server](#server)
+        - [Client](#client)
+            - [eglot](#eglot)
+            - [lsp-mode](#lsp-mode)
+                - [Macro expansion](#macro-expansion)
+    - [Cargo](#cargo)
+        - [Test](#test)
+        - [Outdated](#outdated)
+    - [Lints](#lints)
+        - [Clippy](#clippy)
+        - [Flycheck](#flycheck)
+    - [Rustfix](#rustfix)
+    - [Org-babel](#org-babel)
+    - [Popup](#popup)
+    - [elisp tests](#elisp-tests)
+    - [Contributing](#contributing)
 
 <!-- markdown-toc end -->
 
-# Intro
+## Intro
 
 This package is a fork of [rust-mode](https://github.com/rust-lang/rust-mode)
 
@@ -52,7 +53,7 @@ Differences with rust-mode:
 
 [Why fork](https://github.com/brotzeit/rustic/issues/92) ?
 
-# Installation
+## Installation
 
 Simply put `(use-package rustic)` in your config and most stuff gets configured automatically.
 ([use-package](https://github.com/jwiegley/use-package))
@@ -75,11 +76,11 @@ If you have any issues with rustic, please try running emacs without `rust-mode`
 If you can't run rust-analyzer or cargo can't be found, your environment variables probably don't work in emacs.
 Try [exec-path-from-shell](https://github.com/purcell/exec-path-from-shell/tree/81125c5adbc903943c016c2984906dc089372a41#usage) to fix this.
 
-## straight
+### straight
 
 [straight.el](https://github.com/raxod502/straight.el#install-packages) clones each of your packages directly from its source. There are good additional [installation instructions](https://github.crookster.org/switching-to-straight.el-from-emacs-26-builtin-package.el/) for moving your package management from package.el to straight.
 
-# Compilation
+## Compilation
 
 Rustic defines a derived compilation-mode. Colors can be customized with several defcustoms.
 You can use `next-error` and `compilation-next-error` as for any other compilation buffer.
@@ -100,11 +101,11 @@ Supported compile.el variables:
 - compilation-arguments
 - compilation-scroll-output (not `first-error`)
 
-## rustc errors
+### rustc errors
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/rustc_errno.png)
 
-# Rustfmt
+## Rustfmt
 
 You can format your code with `rustic-format-buffer` or `rustic-cargo-fmt`. Rustic uses the function `rustic-save-some-buffers` for saving buffers before compilation. To save buffers automatically, you can change the value of `buffer-save-without-query`. In case you prefer using lsp for formatting, turn off `rustic-format-on-save` and set `rustic-lsp-format`to `t`.
 
@@ -119,11 +120,11 @@ Customization:
   * `'on-compile` run 'cargo fmt' before compilation
   * `nil`         don't format automatically
 
-# LSP
+## LSP
 
 Disable LSP support by setting `rustic-lsp-client` to nil. You have to restart emacs when you switch lsp clients.
 
-## Server
+### Server
 
 RLS is the default and can be changed to rust-analyzer. lsp-mode related code was moved to the lsp-mode repo.
 `rustic-lsp-server` sets the value of `lsp-rust-server`.
@@ -138,7 +139,7 @@ Change rust-analyzer path.
 (setq lsp-rust-analyzer-server-command '("~/.cargo/bin/rust-analyzer"))
 ```
 
-## Client
+### Client
 
 The default package is `lsp-mode`. But you can also use `eglot`.
 
@@ -150,7 +151,7 @@ LSP commands:
 
 `xref-find-definitions` find definition
 
-### eglot
+#### eglot
 
 Turn off flymake.
 
@@ -158,14 +159,14 @@ Turn off flymake.
 (add-hook 'eglot--managed-mode-hook (lambda () (flymake-mode -1)))
 ```
 
-### lsp-mode
+#### lsp-mode
 
 - `lsp-describe-thing-at-point` display documentation
 - `lsp-find-definition` makes use of xref
 
 You can find more information in the [lsp-mode wiki](https://github.com/emacs-lsp/lsp-mode/wiki/Rust).
 
-#### Macro expansion
+##### Macro expansion
 
 `lsp-rust-analyzer-expand-macro` expand macro call at point recursively
 
@@ -173,9 +174,9 @@ The results are formatted and highlighted by default, but you can use your own f
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/macro_expansion.png)
 
-# Cargo
+## Cargo
 
-## Test
+### Test
 
 `rustic-cargo-test` run 'cargo test', when called with `C-u` store arguments in `rustic-test-arguments`
 
@@ -185,7 +186,7 @@ The results are formatted and highlighted by default, but you can use your own f
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/cargo_current_test.png)
 
-## Outdated
+### Outdated
 
 Use `rustic-cargo-outdated` to get a list of dependencies that are out of date. The results 
 are displayed in `tabulated-list-mode` and you can use most commands you know from the emacs
@@ -201,9 +202,9 @@ installed before being used.
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
 
-# Lints
+## Lints
 
-## Clippy
+### Clippy
 
 Currently cargo does not display the correct installation command for some toolchains when
 clippy isn't installed. 
@@ -211,7 +212,7 @@ If you have problems try it with `rustup component add --toolchain nightly clipp
 
 Use `rustic-cargo-clippy` to view the results in a derived compilation mode.
 
-## Flycheck
+### Flycheck
 
 If you are running `lsp-mode`, you can view errors through your lsp client with `lsp-ui-flycheck-list`.
 
@@ -228,13 +229,13 @@ Turn off flycheck.
 (remove-hook 'rustic-mode-hook 'flycheck-mode)
 ```
 
-# Rustfix
+## Rustfix
 
 `rustic-rustfix` runs rustfix, but it seems it's not very mature at this point.
 It would be a lot more helpful if we had an indicator for fixable errors and if it would be
 possible to run rustfix on a single file.
 
-# Org-babel
+## Org-babel
 
 Blocks run asynchronously and a running babel process is indicated by a spinner
 in the mode-line. It's possible to use crates in babel blocks.
@@ -264,7 +265,7 @@ Customization:
 - `rustic-babel-display-compilation-buffer` display compilation buffer of babel process
 - `rustic-display-spinner` turn off spinner in the mode-line
 
-# Popup
+## Popup
 
 You can execute commands with `rustic-popup`. The list of commands can be customized
 with `rustic-popup-commands`. It's also possible to view the command's flags with `h`.
@@ -276,7 +277,7 @@ The command `rustic-popup-default-action` (`RET` or `TAB`) allows you to change:
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup.png)
 
-# elisp tests
+## elisp tests
 
 To run the tests, you will need [Cask](https://github.com/cask/cask).
 
@@ -284,6 +285,6 @@ To run the tests, you will need [Cask](https://github.com/cask/cask).
 make test
 ```
 
-# Contributing
+## Contributing
 
 PRs, feature requests and bug reports are very welcome.
