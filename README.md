@@ -18,6 +18,7 @@
         - [Client](#client)
             - [eglot](#eglot)
             - [lsp-mode](#lsp-mode)
+                - [Auto import](#auto-import)
                 - [Macro expansion](#macro-expansion)
     - [Cargo](#cargo)
         - [Test](#test)
@@ -149,7 +150,11 @@ The default package is `lsp-mode`. But you can also use `eglot`.
 
 LSP commands:
 
-`xref-find-definitions` find definition
+`xref-find-definitions`
+
+`xref-find-references` with helm and rust-analyzer
+
+![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/xref_references.png)
 
 #### eglot
 
@@ -165,6 +170,12 @@ Turn off flymake.
 - `lsp-find-definition` makes use of xref
 
 You can find more information in the [lsp-mode wiki](https://github.com/emacs-lsp/lsp-mode/wiki/Rust).
+
+##### Auto import
+
+Run `lsp-execute-code-action`
+
+![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/auto_import.png)
 
 ##### Macro expansion
 
