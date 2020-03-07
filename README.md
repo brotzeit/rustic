@@ -18,7 +18,9 @@
         - [Client](#client)
             - [eglot](#eglot)
             - [lsp-mode](#lsp-mode)
-                - [Auto import](#auto-import)
+                - [`lsp-execute-code-action`](#lsp-execute-code-action)
+                    - [Applying code actions](#applying-code-actions)
+                    - [Auto import](#auto-import)
                 - [Macro expansion](#macro-expansion)
     - [Cargo](#cargo)
         - [Test](#test)
@@ -171,9 +173,17 @@ Turn off flymake.
 
 You can find more information in the [lsp-mode wiki](https://github.com/emacs-lsp/lsp-mode/wiki/Rust).
 
-##### Auto import
+##### `lsp-execute-code-action`
 
-Run `lsp-execute-code-action`
+This command can be extremely convenient when applying code actions or using auto-imports.
+
+Run `lsp-execute-code-action` when lsp-ui displays code actions at the top of the sideline.
+
+###### Applying code actions
+
+![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/code_actions.png)
+
+###### Auto import
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/auto_import.png)
 
