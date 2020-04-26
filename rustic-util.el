@@ -103,10 +103,16 @@ Use `:command' when formatting files and `:stdin' for strings."
           (inhibit-read-only t))
       (with-current-buffer proc-buffer
         (if (string-match-p "^finished" output)
-            (let ((file-buffer next-error-last-buffer))
-              (copy-to-buffer file-buffer (point-min) (point-max))
+            (let ((file-buffer next-error-last-buffer)
+                  ;; replace-buffer-contents was in emacs 26.1, but it
+                  ;; was broken for non-ASCII strings, so we need 26.2.
+                  (use-replace (version<= "26.2" emacs-version)))
+              (unless use-replace
+                (copy-to-buffer file-buffer (point-min) (point-max)))
               (with-current-buffer file-buffer
-                (goto-char rustic-save-pos))
+                (if use-replace
+                    (replace-buffer-contents proc-buffer)
+                  (goto-char rustic-save-pos)))
               (kill-buffer proc-buffer)
               (message "Formatted buffer with rustfmt."))
           (goto-char (point-min))
