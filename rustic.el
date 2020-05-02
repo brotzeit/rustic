@@ -1,6 +1,6 @@
 ;;; rustic.el --- Rust development environment -*-lexical-binding: t-*-
 
-;; Version: 0.21
+;; Version: 1.0
 ;; Author: Mozilla
 ;;
 ;; Keywords: languages
