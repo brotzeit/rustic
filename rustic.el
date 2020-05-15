@@ -453,8 +453,71 @@ symbols."
   (let ((beg-of-symbol (save-excursion (forward-thing 'symbol -1) (point))))
     (looking-back rustic-re-ident beg-of-symbol)))
 
+(defvar-local rustic-macro-scopes nil
+  "Cache for the scopes calculated by `rustic-macro-scope'.
+This variable can be `let' bound directly or indirectly around
+`rustic-macro-scope' as an optimization but should not be otherwise
+set.")
+
+(defun rustic-macro-scope (start end)
+  "Return the scope of macros in the buffer.
+The return value is a list of (START END) positions in the
+buffer.
+If set START and END are optimizations which limit the return
+value to scopes which are approximately with this range."
+  (save-excursion
+    ;; need to special case macro_rules which has unique syntax
+    (let ((scope nil)
+          (start (or start (point-min)))
+          (end (or end (point-max))))
+      (goto-char start)
+      ;; if there is a start move back to the previous top level,
+      ;; as any macros before that must have closed by this time.
+      (let ((top (syntax-ppss-toplevel-pos (syntax-ppss))))
+        (when top
+          (goto-char top)))
+      (while
+          (and
+           ;; The movement below may have moved us passed end, in
+           ;; which case search-forward will error
+           (< (point) end)
+           (search-forward "!" end t))
+        (let ((pt (point)))
+          (cond
+           ;; in a string or comment is boring, move straight on
+           ((rustic-in-str-or-cmnt))
+           ;; in a normal macro,
+           ((and (skip-chars-forward " \t\n\r")
+                 (memq (char-after)
+                       '(?\[ ?\( ?\{))
+                 ;; Check that we have a macro declaration after.
+                 (rustic-looking-back-macro))
+            (let ((start (point)))
+              (ignore-errors (forward-list))
+              (setq scope (cons (list start (point)) scope))))
+           ;; macro_rules, why, why, why did you not use macro syntax??
+           ((save-excursion
+              ;; yuck -- last test moves point, even if it fails
+              (goto-char (- pt 1))
+              (skip-chars-backward " \t\n\r")
+              (rustic-looking-back-str "macro_rules"))
+            (save-excursion
+              (when (re-search-forward "[[({]" nil t)
+                (backward-char)
+                (let ((start (point)))
+                  (ignore-errors (forward-list))
+                  (setq scope (cons (list start (point)) scope)))))))))
+      ;; Return 'empty rather than nil, to indicate a buffer with no
+      ;; macros at all.
+      (or scope 'empty))))
+
 (defun rustic-looking-back-macro ()
   "Non-nil if looking back at an ident followed by a !"
+  "Non-nil if looking back at an ident followed by a !
+This is stricter than rust syntax which allows a space between
+the ident and the ! symbol. If this space is allowed, then we
+would also need a keyword check to avoid `if !(condition)` being
+seen as a macro."
   (if (> (- (point) (point-min)) 1)
       (save-excursion
         (backward-char)
@@ -478,18 +541,27 @@ symbols."
         ;; Rewind until the point no longer moves
         (setq continue (/= starting (point)))))))
 
-(defun rustic-in-macro ()
-  (save-excursion
-    (when (> (rustic-paren-level) 0)
-      (backward-up-list)
-      (rustic-rewind-irrelevant)
-      (or (rustic-looking-back-macro)
-          (and (rustic-looking-back-ident)
-               (save-excursion
-                 (backward-sexp)
-                 (rustic-rewind-irrelevant)
-                 (rustic-looking-back-str "macro_rules!")))
-          (rustic-in-macro)))))
+(defun rustic-in-macro (&optional start end)
+  "Return non-nil when point is within the scope of a macro.
+If START and END are set, minimize the buffer analysis to
+approximately this location as an optimization.
+Alternatively, if `rustic-macro-scopes' is a list use the scope
+information in this variable. This last is an optimization and
+the caller is responsible for ensuring that the data in
+`rustic-macro-scopes' is up to date."
+  (when (> (rustic-paren-level) 0)
+    (let ((scopes
+           (or
+            rustic-macro-scopes
+            (rustic-macro-scope start end))))
+      ;; `rustic-macro-scope' can return the symbol `empty' if the
+      ;; buffer has no macros at all.
+      (when (listp scopes)
+        (seq-some
+         (lambda (sc)
+           (and (>= (point) (car sc))
+                (< (point) (cadr sc))))
+         scopes)))))
 
 (defun rustic-looking-at-where ()
   "Return T when looking at the \"where\" keyword."
