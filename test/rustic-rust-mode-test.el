@@ -1584,3 +1584,107 @@ fn imagine_long_enough_to_wrap_at_arrow(a:i32, b:char)
     let body;
 }
 ")))
+
+(ert-deftest rustic-test-paren-matching-no-angle-brackets-in-macro-rules ()
+  (rustic-test-matching-parens
+   "
+fn foo<A>(a:A) {
+    macro_rules! foo ( foo::<ignore the bracets> );
+    macro_rules! bar [ foo as Option<B> ];
+}
+macro_c!{
+    struct Boo<D> {}
+}"
+   '((8 10))
+   ;; Inside macros, it should not find any angle brackets, even if it normally
+   ;; would
+   '(47 ;; foo <
+     62 ;; foo >
+     107 ;; bar <
+     109 ;; bar >
+     141 ;; macro_c <
+     143 ;; macro_c >
+     )))
+
+(ert-deftest rustic-test-in-macro-do-not-fail-on-unbalance ()
+  (should
+   ;; We don't care about the results here, so long as they do not error
+   (with-temp-buffer
+     (insert
+      "fn foo<A>(a:A) {
+    macro_c!{
+        struct Boo<D> {}
+")
+     (rustic-mode)
+     (goto-char (point-max))
+     (syntax-ppss))))
+
+
+(ert-deftest rustic-test-in-macro-no-caching ()
+  (should-not
+   (with-temp-buffer
+     (insert
+      "fn foo<A>(a:A) {
+    macro_c!{
+        struct Boo<D> {}
+")
+     (rustic-mode)
+     (search-backward "macro")
+     ;; do not use the cache
+     (let ((rustic-macro-scopes nil))
+       (rustic-in-macro)))))
+
+(ert-deftest rustic-test-in-macro-fake-cache ()
+  (should
+   (with-temp-buffer
+     (insert
+      "fn foo<A>(a:A) {
+    macro_c!{
+        struct Boo<D> {}
+")
+     (rustic-mode)
+     (search-backward "macro")
+     ;; make the cache lie to make the whole buffer in scope
+     ;; we need to be at paren level 1 for this to work
+     (let ((rustic-macro-scopes `((,(point-min) ,(point-max)))))
+       (rustic-in-macro)))))
+
+(ert-deftest rustic-test-in-macro-broken-cache ()
+  (should-error
+   (with-temp-buffer
+     (insert
+      "fn foo<A>(a:A) {
+    macro_c!{
+        struct Boo<D> {}
+")
+     (rustic-mode)
+     (search-backward "Boo")
+     ;; do we use the cache at all
+     (let ((rustic-macro-scopes '(I should break)))
+       (rustic-in-macro)))))
+
+(ert-deftest rustic-test-in-macro-nested ()
+  (should
+   (equal
+    (with-temp-buffer
+      (insert
+       "macro_rules! outer {
+    () => { vec![] };
+}")
+      (rustic-mode)
+      (rustic-macro-scope (point-min) (point-max)))
+    '((38 40) (20 45)))))
+
+(ert-deftest rustic-test-in-macro-not-with-space ()
+  (should
+   (equal
+    (with-temp-buffer
+      (insert
+       "fn foo<T>() {
+    if !(mem::size_of::<T>() > 8) {
+        bar()
+    }
+}")
+      (rustic-mode)
+      (rustic-macro-scope (point-min) (point-max)))
+    'empty)))
