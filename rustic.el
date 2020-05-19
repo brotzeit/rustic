@@ -1013,32 +1013,33 @@ whichever comes first."
 
 (defun rustic-syntax-propertize (start end)
   "A `syntax-propertize-function' to apply properties from START to END."
-  (goto-char start)
-  (let ((str-start (rustic-in-str-or-cmnt)))
-    (when str-start
-      (rustic--syntax-propertize-raw-string str-start end)))
-  (funcall
-   (syntax-propertize-rules
-    ;; Character literals.
-    (rustic--char-literal-rx (1 "\"") (2 "\""))
-    ;; Raw strings.
-    ("\\(r\\)#*\""
-     (0 (ignore
-         (goto-char (match-end 0))
-         (unless (save-excursion (nth 8 (syntax-ppss (match-beginning 0))))
-           (put-text-property (match-beginning 1) (match-end 1)
-                              'syntax-table (string-to-syntax "|"))
-           (rustic--syntax-propertize-raw-string (match-beginning 0) end)))))
-    ("[<>]"
-     (0 (ignore
-         (when (save-match-data
-                 (save-excursion
-                   (goto-char (match-beginning 0))
-                   (rustic-ordinary-lt-gt-p)))
-           (put-text-property (match-beginning 0) (match-end 0)
-                              'syntax-table (string-to-syntax "."))
-           (goto-char (match-end 0)))))))
-   (point) end))
+  (let ((rustic-macro-scopes (rustic-macro-scope start end)))
+    (goto-char start)
+    (let ((str-start (rustic-in-str-or-cmnt)))
+      (when str-start
+        (rustic--syntax-propertize-raw-string str-start end)))
+    (funcall
+     (syntax-propertize-rules
+      ;; Character literals.
+      (rustic--char-literal-rx (1 "\"") (2 "\""))
+      ;; Raw strings.
+      ("\\(r\\)#*\""
+       (0 (ignore
+           (goto-char (match-end 0))
+           (unless (save-excursion (nth 8 (syntax-ppss (match-beginning 0))))
+             (put-text-property (match-beginning 1) (match-end 1)
+                                'syntax-table (string-to-syntax "|"))
+             (rustic--syntax-propertize-raw-string (match-beginning 0) end)))))
+      ("[<>]"
+       (0 (ignore
+           (when (save-match-data
+                   (save-excursion
+                     (goto-char (match-beginning 0))
+                     (rustic-ordinary-lt-gt-p)))
+             (put-text-property (match-beginning 0) (match-end 0)
+                                'syntax-table (string-to-syntax "."))
+             (goto-char (match-end 0)))))))
+     (point) end)))
 
 (defun rustic-fill-prefix-for-comment-start (line-start)
   "Determine what to use for `fill-prefix' based on the text at LINE-START."
