@@ -939,6 +939,11 @@ should be considered a paired angle bracket."
    ;; If matching is turned off suppress all of them
    ((not rustic-match-angle-brackets) t)
 
+   ;; This is a cheap check so we do it early.
+   ;; Don't treat the > in -> or => as an angle bracket
+   ((and (= (following-char) ?>) (memq (preceding-char) '(?- ?=))) t)
+
+
    ;; We don't take < or > in strings or comments to be angle brackets
    ((rustic-in-str-or-cmnt) t)
 
