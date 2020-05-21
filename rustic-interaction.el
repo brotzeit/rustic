@@ -344,7 +344,7 @@ visit the new file."
 ;;; Defun Motions
 
 (defvar rustic-func-item-beg-re
-  (concat "\\s-*\\(?:priv\\|pub\\)?\\s-*"
+  (concat "\\s-*\\(?:priv\\|pub\\)?\\s-*\\(?:async\\)?\\s-*"
           (regexp-opt '("fn")))
   "Start of a rust function.")
 

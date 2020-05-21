@@ -114,7 +114,7 @@ When calling this function from `rustic-popup-mode', always use the value of
 (defconst rustic-cargo-mod-regexp
   "^\s*mod\s+\\([[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*\\)\s*{")
 (defconst rustic-cargo-fn-regexp
-  "^\s*fn\s+\\([^(]+\\)\s*(")
+  "^\s*\\(?:async\\)?\s+fn\s+\\([^(]+\\)\s*(")
 
 (defun rustic-cargo--get-current-fn-fullname()
   "Return full name of the fn around point including module name if any."
