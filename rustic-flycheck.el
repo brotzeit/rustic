@@ -163,7 +163,7 @@ Flycheck according to the Cargo project layout."
   "A Rust syntax checker using clippy.
 
 See URL `https://github.com/rust-lang-nursery/rust-clippy'."
-  :command ("cargo" "clippy" "--message-format=json")
+  :command ("cargo" "clippy" "-Zunstable-options" "--message-format=json")
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
