@@ -242,12 +242,9 @@ is set to 'on-compile. If rustfmt fails, don't start compilation."
         (mode (or (plist-get args :mode) 'rustic-compilation-mode))
         (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
         (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
-    (when compilation-scroll-output
-      (rustic-compilation-setup-buffer buf directory mode))
+    (rustic-compilation-setup-buffer buf directory mode)
     (unless (plist-get args :no-display)
       (funcall rustic-compile-display-method buf))
-    (unless compilation-scroll-output
-      (rustic-compilation-setup-buffer buf directory mode))
     (with-current-buffer buf
       (rustic-make-process :name process
                            :buffer buf
@@ -258,38 +255,47 @@ is set to 'on-compile. If rustfmt fails, don't start compilation."
 (defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.
 Translate STRING with `xterm-color-filter'."
-  (when (buffer-live-p (process-buffer proc))
-    (with-current-buffer (process-buffer proc)
-      (let ((inhibit-read-only t)
-            ;; `save-excursion' doesn't use the right insertion-type for us.
-            (pos (copy-marker (point) t))
-            ;; `save-restriction' doesn't use the right insertion type either:
-            ;; If we are inserting at the end of the accessible part of the
-            ;; buffer, keep the inserted text visible.
-            (min (point-min-marker))
-            (max (copy-marker (point-max) t))
-            (compilation-filter-start (marker-position (process-mark proc)))
-            (xterm-string (xterm-color-filter string)))
-        (unwind-protect
-            (progn
-              (widen)
-              (goto-char compilation-filter-start)
-              ;; We used to use `insert-before-markers', so that windows with
-              ;; point at `process-mark' scroll along with the output, but we
-              ;; now use window-point-insertion-type instead.
+  (let ((buffer (process-buffer proc))
+        buffer-empty-p)
+    (when (buffer-live-p buffer)
+      (with-current-buffer buffer
+        (when (= (buffer-size) 0)
+          (setq buffer-empty-p t))
+        (let ((inhibit-read-only t)
+              ;; `save-excursion' doesn't use the right insertion-type for us.
+              (pos (copy-marker (point) t))
+              ;; `save-restriction' doesn't use the right insertion type either:
+              ;; If we are inserting at the end of the accessible part of the
+              ;; buffer, keep the inserted text visible.
+              (min (point-min-marker))
+              (max (copy-marker (point-max) t))
+              (compilation-filter-start (marker-position (process-mark proc)))
+              (xterm-string (xterm-color-filter string)))
+          (unwind-protect
+              (progn
+                (widen)
+                (goto-char compilation-filter-start)
+                ;; We used to use `insert-before-markers', so that windows with
+                ;; point at `process-mark' scroll along with the output, but we
+                ;; now use window-point-insertion-type instead.
 
-              (insert xterm-string)
-              (compilation--ensure-parse (point-max))
+                (insert xterm-string)
+                (compilation--ensure-parse (point-max))
 
-              (unless comint-inhibit-carriage-motion
-                (comint-carriage-motion (process-mark proc) (point)))
-              (set-marker (process-mark proc) (point))
-              (run-hooks 'compilation-filter-hook))
-          (goto-char pos)
-          (narrow-to-region min max)
-          (set-marker pos nil)
-          (set-marker min nil)
-          (set-marker max nil))))))
+                (unless comint-inhibit-carriage-motion
+                  (comint-carriage-motion (process-mark proc) (point)))
+                (set-marker (process-mark proc) (point))
+                (run-hooks 'compilation-filter-hook))
+            (goto-char pos)
+            (narrow-to-region min max)
+            (set-marker pos nil)
+            (set-marker min nil)
+            (set-marker max nil))))
+      ;; Issue #101: set window point to `point-min' when `compilation-scroll-output' is nil
+      (when (and (not compilation-scroll-output) buffer-empty-p)
+        (let ((win (get-buffer-window buffer)))
+          (set-window-start win (point-min))
+          (set-window-point win (point-min)))))))
 
 (defun rustic-compilation-process-live (&optional nosave)
   "List live rustic processes."
