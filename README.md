@@ -257,9 +257,7 @@ before being used.
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
 
-## Lints
-
-### Clippy
+## Clippy
 
 Currently cargo does not display the correct installation command for
 some toolchains when clippy isn't installed.  If you have problems try
@@ -269,9 +267,6 @@ Use `rustic-cargo-clippy` to view the results in a derived compilation
 mode.
 
 ### Flycheck
-
-If you are running `lsp-mode`, you can view errors through your lsp
-client with `lsp-ui-flycheck-list`.
 
 In case you want to see clippy lints with flycheck, you can activate
 this checker and use the command `flycheck-list-errors`
@@ -285,6 +280,12 @@ Turn off flycheck.
 ```elisp
 (remove-hook 'rustic-mode-hook 'flycheck-mode)
 ```
+
+### lsp-mode
+
+If you are using `lsp-mode` with rust-analyzer, you can set
+`lsp-rust-analyzer-cargo-watch-command` to clippy instead of
+activating the checker `rustic-clippy`.
 
 ## Org-babel
 
