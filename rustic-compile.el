@@ -372,35 +372,6 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
 
 (advice-add 'save-some-buffers :around #'rustic-save-some-buffers-advice)
 
-(defun rustic-compile-goto-error-hook (orig-fun &rest args)
-  "Provide possibility use `compile-goto-error' on line numbers in compilation buffers.
-This hook checks if there's a line number at the beginning of the
-current line in an error section."
-  (-if-let* ((line-contents (buffer-substring-no-properties
-			     (line-beginning-position)
-			     (line-end-position)))
-             (line-number-p (string-match "^[0-9]+\s+\|" line-contents))
-             (line-number (car (split-string line-contents))))
-      (save-excursion
-        ;; find compilation message in error
-        (while (not (or (get-text-property (point) 'compilation-message)
-                        (bobp)))
-          (forward-line -1))
-        ;; get file of text property
-        (let* ((msg (get-text-property (point) 'compilation-message))
-               (loc (compilation--message->loc msg))
-               (file (caar (compilation--loc->file-struct loc))))
-          ;; open file of error and goto line number that we parsed from the line we are on
-          (with-current-buffer (find-file-other-window file)
-	    (save-restriction
-	      (widen)
-	      (goto-char (point-min))
-              (forward-line (1- (string-to-number line-number)))))))
-    (let ((default-directory (projectile-project-root default-directory)))
-      (apply orig-fun args))))
-
-(advice-add 'compile-goto-error :around #'rustic-compile-goto-error-hook)
-
 ;;; Rustc
 
 (defface rustic-errno-face
