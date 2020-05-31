@@ -210,6 +210,9 @@ Set environment variables for rust process."
               '((:propertize ":%s" face compilation-mode-line-run)
                 compilation-mode-line-errors)))
       (force-mode-line-update)
+      (if (or compilation-auto-jump-to-first-error
+              (eq compilation-scroll-output 'first-error))
+          (set (make-local-variable 'compilation-auto-jump-to-next) t))
       (sit-for 0))))
 
 (defun rustic-compilation-start (command &rest args)
