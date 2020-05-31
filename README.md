@@ -122,7 +122,7 @@ Customization:
 Supported compile.el variables:
 
 - compilation-arguments
-- compilation-scroll-output (not `first-error`)
+- compilation-scroll-output
 
 ### Faces
 
