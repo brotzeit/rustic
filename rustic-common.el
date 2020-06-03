@@ -18,6 +18,11 @@
   :type 'string
   :group 'rustic)
 
+(defcustom rustic-rustfmt-args nil
+  "List of arguments to rustfmt."
+  :type '(repeat string)
+  :group 'rustic)
+
 (defcustom rustic-lsp-setup-p t
   "Setup LSP related stuff automatically."
   :type 'boolean
