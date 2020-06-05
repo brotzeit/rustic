@@ -138,7 +138,7 @@ Rust edition 2018 requires a `rustfmt.toml` file.
 Customization:
 
 - `rustic-rustfmt-bin` path to rustfmt executable
-- `rustic-rustfmt-args` extra arguments to rustfmt
+- `rustic-rustfmt-config-alist` alist of rustfmt configuration options
 - `rustic-format-display-method` default function used for displaying
   rustfmt buffer (use the function `ignore`, if you don't want the
   buffer to be displayed)
