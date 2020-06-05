@@ -358,9 +358,9 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
             (when (and saved-p (rustic-format-on-save-p) (eq major-mode 'rustic-mode))
               (let* ((file (buffer-file-name buffer))
                      (proc (rustic-format-start-process
-			    'rustic-format-file-sentinel
+                            'rustic-format-file-sentinel
                             :buffer buffer
-                            :command `(,rustic-rustfmt-bin ,file))))
+                            :files file)))
                 (while (eq (process-status proc) 'run)
                   (sit-for 0.1))))))))))
 
