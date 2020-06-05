@@ -71,6 +71,14 @@ not in a rust project."
       (if nodefault
           nil default-directory))))
 
+(defun rustic-compute-rustfmt-args ()
+  "Compute the arguments to rustfmt from `rustic-rustfmt-config-alist'."
+  (let (args)
+    (cl-dolist (elem rustic-rustfmt-config-alist args)
+      (cl-destructuring-bind (key . val) elem
+        (push (format "%s=%s" key (if (booleanp val) (if val "true" "false") val)) args)
+        (push "--config" args)))))
+
 ;;; Spinner
 
 (require 'spinner)
