@@ -205,10 +205,9 @@ were issues when using stdin for formatting."
              (file (buffer-file-name buf))
              (string (buffer-string)))
         (write-region string nil file nil 0)
-        (let ((command `(,rustic-rustfmt-bin ,file ,@rustic-rustfmt-args)))
-          (setq proc (rustic-format-start-process 'rustic-format-file-sentinel
-                                                  :buffer buf
-                                                  :command command)))))
+        (setq proc (rustic-format-start-process 'rustic-format-file-sentinel
+                                                :buffer buf
+                                                :files file))))
     (while (eq (process-status proc) 'run)
       (sit-for 0.1))))
 
