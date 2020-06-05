@@ -91,7 +91,7 @@ will be used."
          (files  (plist-get args :files))
          (files (if (listp files) files (list files)))
          (command (or (plist-get args :command)
-                      (cons rustic-rustfmt-bin rustic-rustfmt-args)))
+                      (cons rustic-rustfmt-bin (rustic-compute-rustfmt-args))))
          (command (if (listp command) command (list command))))
     (setq rustic-save-pos (point))
     (rustic-compilation-setup-buffer err-buf dir 'rustic-format-mode t)
