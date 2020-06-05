@@ -78,11 +78,10 @@ When `:files' is non-nil, STRING will be ignored by rustfmt.
 specify the input file or files to rustfmt.
 
 :command COMMAND -- COMMAND is a string or a list of strings.
+When COMMAND is non-nil, it replaces the default command.
 When COMMAND is a string, it is the program file name.
 When COMMAND is a list, it's `car' is the program file name
-and it's `cdr' is a list of arguments
-When COMMAND is nil, \(cons `rustic-rustfmt-bin' `rustic-rustfmt-args'\)
-will be used."
+and it's `cdr' is a list of arguments."
   (let* ((err-buf (get-buffer-create rustic-format-buffer-name))
          (inhibit-read-only t)
          (dir (rustic-buffer-workspace))
