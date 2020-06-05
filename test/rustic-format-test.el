@@ -71,7 +71,7 @@
 (ert-deftest rustic-test-format-file-with-tabs ()
   (let* ((string "fn main()      {()}")
          (formatted-string "fn main() {\n\t()\n}\n")
-         (rustic-rustfmt-args '("--config" "hard_tabs=true"))
+         (rustic-rustfmt-config-alist '((hard_tabs . t)))
          (dir (rustic-babel-generate-project t))
          (main (expand-file-name "main.rs" (concat dir "/src")))
          (buf (get-buffer-create "test")))
