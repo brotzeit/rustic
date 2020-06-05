@@ -75,17 +75,20 @@ Use `:command' when formatting files and `:stdin' for strings."
          (dir (rustic-buffer-workspace))
          (buffer (plist-get args :buffer))
          (string (plist-get args :stdin))
-         (command (plist-get args :command))
-         (file (and command (nth 1 command)))
-         (command (or command `(,rustic-rustfmt-bin ,@rustic-rustfmt-args))))
+         (files  (plist-get args :files))
+         (files (if (listp files) files (list files)))
+         (command (or (plist-get args :command)
+                      (cons rustic-rustfmt-bin rustic-rustfmt-args)))
+         (command (if (listp command) command (list command))))
     (setq rustic-save-pos (point))
     (rustic-compilation-setup-buffer err-buf dir 'rustic-format-mode t)
-    (when (and file (not (file-exists-p file)))
-      (error (format "File %s does not exist." file)))
+    (--each files
+      (unless (file-exists-p it)
+        (error (format "File %s does not exist." it))))
     (with-current-buffer err-buf
       (let ((proc (rustic-make-process :name rustic-format-process-name
                                        :buffer err-buf
-                                       :command command
+                                       :command `(,@command "--" ,@files)
                                        :filter #'rustic-compilation-filter
                                        :sentinel sentinel)))
         (setq next-error-last-buffer buffer)
