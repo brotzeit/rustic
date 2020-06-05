@@ -23,6 +23,15 @@
   :type '(repeat string)
   :group 'rustic)
 
+(defcustom rustic-rustfmt-config-alist nil
+  "An alist of (KEY . VAL) pairs that are passed to rustfmt.
+
+KEY is a symbol that corresponds to a config value of rustfmt.
+VALUE is a string, an integer or a boolean."
+  :type '(alist :key-type symbol
+                :value-type (choice string integer boolean))
+  :group 'rustic)
+
 (defcustom rustic-lsp-setup-p t
   "Setup LSP related stuff automatically."
   :type 'boolean
