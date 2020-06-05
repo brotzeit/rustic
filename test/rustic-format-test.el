@@ -57,7 +57,7 @@
     (let ((proc (rustic-format-start-process
                  'rustic-format-file-sentinel
                  :buffer buf
-                 :command `(,rustic-rustfmt-bin ,main))))
+                 :files main)))
       (while (eq (process-status proc) 'run)
         (sit-for 0.1)))
     (with-temp-buffer
@@ -66,7 +66,7 @@
     (should-error (rustic-format-start-process
                    'rustic-format-file-sentinel
                    :buffer "dummy"
-                   :command `(,rustic-rustfmt-bin "/tmp/nofile")))))
+                   :files "/tmp/nofile"))))
 
 (ert-deftest rustic-test-format-buffer-before-save ()
   (let* ((string "fn main()      {}")
