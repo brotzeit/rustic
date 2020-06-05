@@ -68,6 +68,66 @@
                    :buffer "dummy"
                    :files "/tmp/nofile"))))
 
+(ert-deftest rustic-test-format-file-with-tabs ()
+  (let* ((string "fn main()      {()}")
+         (formatted-string "fn main() {\n\t()\n}\n")
+         (rustic-rustfmt-args '("--config" "hard_tabs=true"))
+         (dir (rustic-babel-generate-project t))
+         (main (expand-file-name "main.rs" (concat dir "/src")))
+         (buf (get-buffer-create "test")))
+    (with-current-buffer buf (write-file main))
+    (write-region string nil main nil 0)
+    (let ((proc (rustic-format-start-process
+                 'rustic-format-file-sentinel
+                 :buffer buf
+                 :files main)))
+      (while (eq (process-status proc) 'run)
+        (sit-for 0.1)))
+    (with-temp-buffer
+      (insert-file-contents main)
+      (should (string= (buffer-string) formatted-string)))))
+
+(ert-deftest rustic-test-format-file-old-syntax ()
+  (let* ((string "fn main()      {}")
+         (formatted-string "fn main() {}\n")
+         (dir (rustic-babel-generate-project t))
+         (main (expand-file-name "main.rs" (concat dir "/src")))
+         (buf (get-buffer-create "test")))
+    (with-current-buffer buf (write-file main))
+    (write-region string nil main nil 0)
+    (let ((proc (rustic-format-start-process
+                 'rustic-format-file-sentinel
+                 :buffer buf
+                 :command `(,rustic-rustfmt-bin ,main))))
+      (while (eq (process-status proc) 'run)
+        (sit-for 0.1)))
+    (with-temp-buffer
+      (insert-file-contents main)
+      (should (string= (buffer-string) formatted-string)))))
+
+(ert-deftest rustic-test-format-multiple-files ()
+  (let* ((string "fn main()      {}")
+         (formatted-string "fn main() {}\n")
+         (dir (rustic-babel-generate-project t))
+         (f-one (expand-file-name "one.rs" (concat dir "/src")))
+         (f-two (expand-file-name "two.rs" (concat dir "/src")))
+         (buf (get-buffer-create "test")))
+    (with-current-buffer buf (write-file f-one) (write-file f-two))
+    (write-region string nil f-one nil 0)
+    (write-region string nil f-two nil 0)
+    (let ((proc (rustic-format-start-process
+                 'rustic-format-file-sentinel
+                 :buffer buf
+                 :files (list f-one f-two))))
+      (while (eq (process-status proc) 'run)
+        (sit-for 0.1)))
+    (with-temp-buffer
+      (insert-file-contents f-one)
+      (should (string= (buffer-string) formatted-string)))
+    (with-temp-buffer
+      (insert-file-contents f-two)
+      (should (string= (buffer-string) formatted-string)))))
+
 (ert-deftest rustic-test-format-buffer-before-save ()
   (let* ((string "fn main()      {}")
          (formatted-string "fn main() {}\n")
