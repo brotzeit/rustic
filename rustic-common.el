@@ -18,11 +18,6 @@
   :type 'string
   :group 'rustic)
 
-(defcustom rustic-rustfmt-args nil
-  "List of arguments to rustfmt."
-  :type '(repeat string)
-  :group 'rustic)
-
 (defcustom rustic-rustfmt-config-alist nil
   "An alist of (KEY . VAL) pairs that are passed to rustfmt.
 
