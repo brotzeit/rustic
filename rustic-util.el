@@ -69,7 +69,20 @@
 (defun rustic-format-start-process (sentinel &rest args)
   "Run rustfmt with ARGS.
 
-Use `:command' when formatting files and `:stdin' for strings."
+:buffer BUFFER -- BUFFER is the buffer that is being formatted.
+
+:stdin STRING -- STRING will be written to the standard input of rustfmt.
+When `:files' is non-nil, STRING will be ignored by rustfmt.
+
+:files FILES -- FILES is a string or list of strings that
+specify the input file or files to rustfmt.
+
+:command COMMAND -- COMMAND is a string or a list of strings.
+When COMMAND is a string, it is the program file name.
+When COMMAND is a list, it's `car' is the program file name
+and it's `cdr' is a list of arguments
+When COMMAND is nil, \(cons `rustic-rustfmt-bin' `rustic-rustfmt-args'\)
+will be used."
   (let* ((err-buf (get-buffer-create rustic-format-buffer-name))
          (inhibit-read-only t)
          (dir (rustic-buffer-workspace))
