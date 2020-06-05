@@ -80,7 +80,7 @@ execution with rustfmt."
                   (proc
                    (make-process :name "rustic-babel-format"
                                  :buffer "rustic-babel-format-buffer"
-                                 :command `(,rustic-rustfmt-bin)
+                                 :command `(,rustic-rustfmt-bin ,@rustic-rustfmt-args)
                                  :filter #'rustic-compilation-filter
                                  :sentinel #'rustic-babel-format-sentinel)))
               (while (not (process-live-p proc))
