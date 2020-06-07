@@ -198,7 +198,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
   "Keymap for Rust major mode.")
 
 ;;;###autoload
-(define-derived-mode rustic-mode prog-mode "Rust"
+(define-derived-mode rustic-mode prog-mode "Rustic"
   "Major mode for Rust code.
 
 \\{rustic-mode-map}"
