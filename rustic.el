@@ -85,22 +85,31 @@ to the function arguments.  When nil, `->' will be indented one level."
 
 ;;; Faces
 
-(defface rustic-unsafe-face
+(define-obsolete-face-alias 'rustic-unsafe-face
+  'rustic-unsafe "1.2")
+(define-obsolete-face-alias 'rustic-question-mark-face
+  'rustic-question-mark "1.2")
+(define-obsolete-face-alias 'rustic-builtin-formatting-macro-face
+  'rustic-builtin-formatting-macro "1.2")
+(define-obsolete-face-alias 'rustic-string-interpolation-face
+  'rustic-string-interpolation "1.2")
+
+(defface rustic-unsafe
   '((t :inherit font-lock-warning-face))
   "Face for the `unsafe' keyword."
   :group 'rustic)
 
-(defface rustic-question-mark-face
+(defface rustic-question-mark
   '((t :weight bold :inherit font-lock-builtin-face))
   "Face for the question mark operator."
   :group 'rustic)
 
-(defface rustic-builtin-formatting-macro-face
+(defface rustic-builtin-formatting-macro
   '((t :inherit font-lock-builtin-face))
   "Face for builtin formatting macros (print! &c.)."
   :group 'rustic)
 
-(defface rustic-string-interpolation-face
+(defface rustic-string-interpolation
   '((t :slant italic :inherit font-lock-string-face))
   "Face for interpolating braces in builtin formatting macro strings."
   :group 'rustic)
@@ -359,7 +368,7 @@ Does not match type annotations of the form \"foo::<\"."
      (,(regexp-opt rustic-special-types 'symbols) . font-lock-type-face)
 
      ;; The unsafe keyword
-     ("\\_<unsafe\\_>" . 'rustic-unsafe-face)
+     ("\\_<unsafe\\_>" . 'rustic-unsafe)
 
      ;; Attributes like `#[bar(baz)]` or `#![bar(baz)]` or `#[bar = "baz"]`
      (,(rustic-re-grab (concat "#\\!?\\[" rustic-re-ident "[^]]*\\]"))
@@ -369,22 +378,22 @@ Does not match type annotations of the form \"foo::<\"."
      (,(concat (rustic-re-grab (concat (regexp-opt rustic-builtin-formatting-macros) "!"))
                rustic-formatting-macro-opening-re
                rustic-start-of-string-re)
-      (1 'rustic-builtin-formatting-macro-face)
+      (1 'rustic-builtin-formatting-macro)
       (rustic-string-interpolation-matcher
        (rustic-end-of-string)
        nil
-       (0 'rustic-string-interpolation-face t nil)))
+       (0 'rustic-string-interpolation t nil)))
 
      ;; write! macro
      (,(concat (rustic-re-grab "write\\(ln\\)?!")
                rustic-formatting-macro-opening-re
                "[[:space:]]*[^\"]+,[[:space:]]*"
                rustic-start-of-string-re)
-      (1 'rustic-builtin-formatting-macro-face)
+      (1 'rustic-builtin-formatting-macro)
       (rustic-string-interpolation-matcher
        (rustic-end-of-string)
        nil
-       (0 'rustic-string-interpolation-face t nil)))
+       (0 'rustic-string-interpolation t nil)))
 
      ;; Syntax extension invocations like `foo!`, highlight including the !
      (,(concat (rustic-re-grab (concat rustic-re-ident "!")) "[({[:space:][]")
@@ -412,7 +421,7 @@ Does not match type annotations of the form \"foo::<\"."
      (,(concat "'" (rustic-re-grab rustic-re-ident) "[^']") 1 font-lock-variable-name-face)
 
      ;; Question mark operator
-     ("\\?" . 'rustic-question-mark-face)
+     ("\\?" . 'rustic-question-mark)
      )
 
    ;; Ensure we highlight `Foo` in `struct Foo` as a type.

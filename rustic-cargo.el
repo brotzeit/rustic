@@ -31,7 +31,10 @@ If nil then the project is simply created."
   "Face used for outdated crates."
   :group 'rustic)
 
-(defface rustic-cargo-outdated-upgrade-face
+(define-obsolete-face-alias 'rustic-cargo-outdated-upgrade-face
+  'rustic-cargo-outdated-upgrade "1.2")
+
+(defface rustic-cargo-outdated-upgrade
   '((t (:foreground "LightSeaGreen")))
   "Face used for crates marked for upgrade."
   :group 'rustic)
@@ -290,12 +293,12 @@ Execute process in PATH."
           (when (search-forward (elt crate 0))
             (replace-match (propertize (elt crate 0)
                                        'font-lock-face
-                                       'rustic-cargo-outdated-upgrade-face)))
+                                       'rustic-cargo-outdated-upgrade)))
           (goto-char (line-beginning-position))
           (when (search-forward (elt crate 1))
             (replace-match (propertize v
                                        'font-lock-face
-                                       'rustic-cargo-outdated-upgrade-face)))))
+                                       'rustic-cargo-outdated-upgrade)))))
       (tabulated-list-put-tag "U" t))))
 
 ;;;###autoload
