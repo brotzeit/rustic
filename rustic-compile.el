@@ -47,32 +47,45 @@
 
 ;;; Faces
 
-(defface rustic-message-face
+(define-obsolete-face-alias 'rustic-message-face
+  'rustic-message "1.2")
+(define-obsolete-face-alias 'rustic-compilation-error-face
+  'rustic-compilation-error "1.2")
+(define-obsolete-face-alias 'rustic-compilation-warning-face
+  'rustic-compilation-warning "1.2")
+(define-obsolete-face-alias 'rustic-compilation-info-face
+  'rustic-compilation-info "1.2")
+(define-obsolete-face-alias 'rustic-compilation-line-face
+  'rustic-compilation-line "1.2")
+(define-obsolete-face-alias 'rustic-compilation-column-face
+  'rustic-compilation-column "1.2")
+
+(defface rustic-message
   '((t :inherit default))
   "Don't use `compilation-message-face', as ansi colors get messed up."
   :group 'rustic-compilation)
 
-(defface rustic-compilation-error-face
+(defface rustic-compilation-error
   '((t :inherit default))
   "Override `compilation-error-face' for rust compilation."
   :group 'rustic-compilation)
 
-(defface rustic-compilation-warning-face
+(defface rustic-compilation-warning
   '((t :inherit default))
   "Override `compilation-warning-face' for rust compilation."
   :group 'rustic-compilation)
 
-(defface rustic-compilation-info-face
+(defface rustic-compilation-info
   '((t :inherit default))
   "Override `compilation-info-face' for rust compilation."
   :group 'rustic-compilation)
 
-(defface rustic-compilation-line-face
+(defface rustic-compilation-line
   '((t :inherit default))
   "Override `compilation-line-face' for rust compilation."
   :group 'rustic-compilation)
 
-(defface rustic-compilation-column-face
+(defface rustic-compilation-column
   '((t :inherit default))
   "Override `compilation-column-face' for rust compilation."
   :group 'rustic-compilation)

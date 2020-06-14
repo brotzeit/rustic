@@ -26,12 +26,17 @@ The first element of each list contains a command's binding."
   :type 'list
   :group 'rustic-popup)
 
-(defface rustic-popup-key-face
+(define-obsolete-face-alias 'rustic-popup-key-face
+  'rustic-popup-key "1.2")
+(define-obsolete-face-alias 'rustic-popup-section-face
+  'rustic-popup-section "1.2")
+
+(defface rustic-popup-key
   '((t (:foreground "DeepSkyBlue")))
   "Face used for command shortcuts."
   :group 'rustic)
 
-(defface rustic-popup-section-face
+(defface rustic-popup-section
   '((t (:foreground "#f74c00")))
   "Face used for popup section description."
   :group 'rustic)
@@ -62,7 +67,7 @@ The first element of each list contains a command's binding."
   "Insert backtrace section."
   (let ((inhibit-read-only t)
         (prop (lambda (s)
-                (propertize s 'face 'rustic-popup-section-face))))
+                (propertize s 'face 'rustic-popup-section))))
     (insert (funcall prop "Backtrace: "))
     (cond
      ((string= rustic-compile-backtrace "0")
@@ -80,14 +85,15 @@ The first element of each list contains a command's binding."
       (erase-buffer)
       (rustic-popup-mode)
       (rustic-popup-insert-backtrace)
-      (insert (propertize "Commands: " 'face 'rustic-popup-section-face) "\n")
-      (insert " " (propertize "g" 'face 'rustic-popup-key-face)
+      (insert (propertize "Commands: " 'face 'rustic-popup-section) "\n")
+      (insert " " (propertize "g" 'face 'rustic-popup-key)
               "      " "recompile" "   " "\""
               (or compilation-arguments rustic-compile-command)
               "\"" "\n\n")
       (dolist (command rustic-popup-commands)
         (insert "\s")
-        (insert (propertize (char-to-string (nth 0 command)) 'face 'rustic-popup-key-face))
+        (insert (propertize (char-to-string (nth 0 command))
+                            'face 'rustic-popup-key))
         (insert "\s\s\s\s\s\s")
         (insert (nth 1 command))
         (when (and (string= (nth 1 command) "test")

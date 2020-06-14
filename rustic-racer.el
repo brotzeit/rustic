@@ -60,7 +60,10 @@ If nil, we will query $CARGO_HOME at runtime."
 
 ;;; Faces
 
-(defface rustic-racer-help-heading-face
+(define-obsolete-face-alias 'rustic-racer-help-heading-face
+  'rustic-racer-help-heading "1.2")
+
+(defface rustic-racer-help-heading
   '((t :weight bold))
   "Face for markdown headings in *Racer Help* buffers.")
 
@@ -88,7 +91,7 @@ Commands:
 
 (defun rustic-racer-header (text)
   "Helper function for adding text properties to TEXT."
-  (propertize text 'face 'rustic-racer-help-heading-face))
+  (propertize text 'face 'rustic-racer-help-heading))
 
 (defun rustic-racer-button-go-to-src (button)
   (rustic-racer-find-file
