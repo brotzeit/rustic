@@ -21,6 +21,16 @@ If nil then the project is simply created."
   :type 'boolean
   :group 'rustic-cargo)
 
+(defvar rustic-cargo-outdated-face nil)
+(make-obsolete-variable 'rustic-cargo-outdated-face
+                        "use the face `rustic-cargo-outdated' instead."
+                        "1.2")
+
+(defface rustic-cargo-outdated
+  '((t (:foreground "red")))
+  "Face used for outdated crates."
+  :group 'rustic)
+
 (defface rustic-cargo-outdated-upgrade-face
   '((t (:foreground "LightSeaGreen")))
   "Face used for crates marked for upgrade."
@@ -147,11 +157,6 @@ When calling this function from `rustic-popup-mode', always use the value of
 
 ;;; Outdated
 
-(defcustom rustic-cargo-outdated-face "red"
-  "Face for upgradeable crates."
-  :type 'face
-  :group 'rustic)
-
 (defvar rustic-cargo-outdated-process-name "rustic-cargo-outdated-process")
 
 (defvar rustic-cargo-oudated-buffer-name "*cargo-outdated*")
@@ -264,9 +269,7 @@ Execute process in PATH."
                  ,project
                  ,(if (when (not (string-match "^-" compat))
                         (version< project compat))
-                      (propertize compat
-                                  'font-lock-face
-                                  `(:foreground ,rustic-cargo-outdated-face))
+                      (propertize compat 'font-lock-face 'rustic-cargo-outdated)
                     compat)
                  ,(nth 3 fields)
                  ,(nth 4 fields)
