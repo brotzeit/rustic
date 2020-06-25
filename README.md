@@ -282,6 +282,16 @@ Turn off flycheck.
 (remove-hook 'rustic-mode-hook 'flycheck-mode)
 ```
 
+The parameters of the checker can be modified with `rustic-flycheck-clippy-params`
+and are by default configured for using unstable options that are only available
+on the nightly toolchains.
+
+If you are using the stable toolchain you have to change the value:
+
+```elisp
+(setq rustic-flycheck-clippy-params "--message-format=json")
+```
+
 ### lsp-mode
 
 If you are using `lsp-mode` with rust-analyzer, you can set

@@ -14,6 +14,11 @@
 
 (require 'rustic-common)
 
+(defcustom rustic-flycheck-clippy-params "--message-format=json -Zunstable-options"
+  "Parameters for the flycheck clippy checker `rustic-clippy'."
+  :type 'string
+  :group 'rustic-flycheck)
+
 (defun rustic-flycheck-dirs-list (start end)
   "Return a list of directories from START (inclusive) to END (exclusive).
 E.g., if START is '/a/b/c/d' and END is '/a', return the list
@@ -163,7 +168,7 @@ Flycheck according to the Cargo project layout."
   "A Rust syntax checker using clippy.
 
 See URL `https://github.com/rust-lang-nursery/rust-clippy'."
-  :command ("cargo" "clippy" "-Zunstable-options" "--message-format=json")
+  :command ("cargo" "clippy" (eval (split-string rustic-flycheck-clippy-params)))
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
