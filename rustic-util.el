@@ -144,13 +144,12 @@ and it's `cdr' is a list of arguments."
   (ignore-errors
     (let ((proc-buffer (process-buffer proc)))
       (with-current-buffer proc-buffer
-        (if (string-match-p "^finished" output)
-            (progn
-              (with-current-buffer next-error-last-buffer
-                (revert-buffer t t)))
-          (goto-char (point-min))
-          (funcall rustic-format-display-method proc-buffer)
-          (message "Rustfmt error."))))))
+        (with-current-buffer next-error-last-buffer
+          (goto-char rustic-save-pos)
+          (revert-buffer t t))
+        (goto-char (point-min))
+        (funcall rustic-format-display-method proc-buffer)
+        (message "Rustfmt error.")))))
 
 (define-derived-mode rustic-format-mode rustic-compilation-mode "rustfmt"
   :group 'rustic)
