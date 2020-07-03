@@ -135,6 +135,9 @@ formatting, turn off `rustic-format-on-save` and set
 
 Rust edition 2018 requires a `rustfmt.toml` file.
 
+Commands:
+- `rustic-compile-send-input` send string to process of current buffer
+
 Customization:
 
 - `rustic-rustfmt-bin` path to rustfmt executable
