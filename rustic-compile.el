@@ -415,7 +415,7 @@ buffer."
   (let ((input (read-from-minibuffer "Send input to rust process: "))
         (proc (get-buffer-process (current-buffer)))
         (inhibit-read-only t))
-    (process-send-string (concat input "\n"))))
+    (process-send-string proc (concat input "\n"))))
 
 
 ;;; Rustc
