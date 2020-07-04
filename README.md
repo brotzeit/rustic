@@ -3,12 +3,15 @@
 [![MELPA](https://melpa.org/packages/rustic-badge.svg)](https://melpa.org/#/rustic)
 [![Build
 Status](https://travis-ci.com/brotzeit/rustic.svg?branch=master)](https://travis-ci.com/brotzeit/rustic)
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
 
 - [Rustic](#rustic)
     - [Intro](#intro)
     - [Installation](#installation)
         - [straight](#straight)
     - [Compilation](#compilation)
+        - [Faces](#faces)
         - [rustc errors](#rustc-errors)
     - [Rustfmt](#rustfmt)
     - [LSP](#lsp)
@@ -23,13 +26,15 @@ Status](https://travis-ci.com/brotzeit/rustic.svg?branch=master)](https://travis
     - [Cargo](#cargo)
         - [Test](#test)
         - [Outdated](#outdated)
-    - [Lints](#lints)
-        - [Clippy](#clippy)
+    - [Clippy](#clippy)
         - [Flycheck](#flycheck)
+        - [lsp-mode](#lsp-mode-1)
     - [Org-babel](#org-babel)
     - [Popup](#popup)
     - [elisp tests](#elisp-tests)
     - [Contributing](#contributing)
+
+<!-- markdown-toc end -->
 
 
 ## Intro
@@ -118,6 +123,29 @@ Supported compile.el variables:
 
 - compilation-arguments
 - compilation-scroll-output (not `first-error`)
+
+### Faces
+
+The colors that are displayed in compilation buffers come from cargo
+and are translated by xterm-color. You can change these colors by
+modifying `rustic-ansi-faces`.
+
+`rustic-compilation-mode` doesn't use the default faces of
+compile.el. If you want to change these colors you can use something
+similiar to:
+
+```elisp
+(custom-set-faces
+  '(rustic-compilation-column ((t (:inherit compilation-column-number))))
+  '(rustic-compilation-line ((t (:foreground "LimeGreen")))))
+```
+
+Additional faces:
+
+- `rustic-message`
+- `rustic-compilation-error`
+- `rustic-compilation-warning`
+- `rustic-compilation-info`
 
 ### rustc errors
 
