@@ -117,12 +117,12 @@
   "Rust compilation mode.
 
 Error matching regexes from compile.el are removed."
-  (setq-local compilation-message-face 'rustic-message-face)
-  (setq-local compilation-error-face   'rustic-compilation-error-face)
-  (setq-local compilation-warning-face 'rustic-compilation-warning-face)
-  (setq-local compilation-info-face    'rustic-compilation-info-face)
-  (setq-local compilation-column-face  'rustic-compilation-line-face)
-  (setq-local compilation-line-face    'rustic-compilation-column-face)
+  (setq-local compilation-message-face 'rustic-message)
+  (setq-local compilation-error-face   'rustic-compilation-error)
+  (setq-local compilation-warning-face 'rustic-compilation-warning)
+  (setq-local compilation-info-face    'rustic-compilation-info)
+  (setq-local compilation-column-face  'rustic-compilation-column)
+  (setq-local compilation-line-face    'rustic-compilation-line)
 
   (setq-local xterm-color-names-bright rustic-ansi-faces)
   (setq-local xterm-color-names rustic-ansi-faces)
