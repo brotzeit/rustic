@@ -18,7 +18,9 @@
 
 (defvar rustic-info nil)
 
+(add-to-list 'org-src-lang-modes '("rust" . rustic))
 (add-to-list 'org-babel-tangle-lang-exts '("rustic" . "rs"))
+(defalias 'org-babel-execute:rust #'org-babel-execute:rustic)
 
 (defcustom rustic-babel-display-compilation-buffer nil
   "Whether to display compilation buffer."
