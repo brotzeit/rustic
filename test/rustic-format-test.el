@@ -181,7 +181,6 @@
           (while (eq (process-status proc) 'run)
             (sit-for 0.01)))
       (with-current-buffer buffer1
-        (revert-buffer t t)
         (should (string= (buffer-string) formatted-string))))
     (kill-buffer buffer1)))
 
