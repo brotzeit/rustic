@@ -14,6 +14,7 @@ Status](https://travis-ci.com/brotzeit/rustic.svg?branch=master)](https://travis
         - [Faces](#faces)
         - [rustc errors](#rustc-errors)
     - [Rustfmt](#rustfmt)
+        - [edition 2018](#edition-2018)
     - [LSP](#lsp)
         - [Server](#server)
         - [Client](#client)
@@ -161,8 +162,6 @@ save buffers automatically, you can change the value of
 formatting, turn off `rustic-format-on-save` and set
 `rustic-lsp-format`to `t`.
 
-Rust edition 2018 requires a `rustfmt.toml` file.
-
 Commands:
 - `rustic-compile-send-input` send string to process of current buffer
 
@@ -177,6 +176,10 @@ Customization:
   * `'on-save` format buffer before saving
   * `'on-compile` run 'cargo fmt' before compilation
   * `nil` don't format automatically
+
+### edition 2018
+
+You have to put `edition = "2018"` in a `rustfmt.toml`.
 
 ## LSP
 
