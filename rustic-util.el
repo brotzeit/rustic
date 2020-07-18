@@ -182,6 +182,10 @@ and it's `cdr' is a list of arguments."
     (with-current-buffer proc-buffer
       (if (not (string-match-p "^finished" output))
           (funcall rustic-compile-display-method proc-buffer)
+        (let ((buffers (projectile-buffers-with-file (projectile-project-buffers))))
+          (dolist (b buffers)
+            (with-current-buffer b
+              (revert-buffer t t))))
         (kill-buffer proc-buffer)
         (message "Workspace formatted with cargo-fmt.")))))
 
