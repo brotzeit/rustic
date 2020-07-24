@@ -31,7 +31,7 @@
   :type 'string
   :group 'rustic)
 
-(defcustom rustic-lsp-server 'rls
+(defcustom rustic-lsp-server 'rust-analyzer
   "Choose your LSP server."
   :type '(choice (const :tag "rls" rls)
                  (const :tag "rust-analyzer" rust-analyzer))

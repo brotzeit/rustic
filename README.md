@@ -188,12 +188,12 @@ restart emacs when you switch lsp clients.
 
 ### Server
 
-RLS is the default and can be changed to rust-analyzer. lsp-mode
+rust-analyzer is the default and can be changed to rls. lsp-mode
 related code was moved to the lsp-mode repo.  `rustic-lsp-server` sets
 the value of `lsp-rust-server`.
 
 ``` emacs-lisp
-(setq rustic-lsp-server 'rust-analyzer)
+(setq rustic-lsp-server 'rls)
 ```
 
 Change rust-analyzer path.
