@@ -133,7 +133,7 @@ modifying `rustic-ansi-faces`.
 
 `rustic-compilation-mode` doesn't use the default faces of
 compile.el. If you want to change these colors you can use something
-similiar to:
+similar to:
 
 ```elisp
 (custom-set-faces
