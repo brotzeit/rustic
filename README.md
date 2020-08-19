@@ -34,6 +34,7 @@ Status](https://travis-ci.com/brotzeit/rustic.svg?branch=master)](https://travis
     - [Spinner](#spinner)
     - [Popup](#popup)
     - [elisp tests](#elisp-tests)
+    - [Inline documentation](#inline-documentation)
     - [Contributing](#contributing)
 
 <!-- markdown-toc end -->
@@ -388,6 +389,30 @@ To run the tests, you will need [Cask](https://github.com/cask/cask).
 ``` bash
 make test
 ```
+
+## inline-documentation
+With some setup, it is possible to read rust documentation inside Emacs!
+
+### Prequisites
+
+* Install Pandoc https://pandoc.org/installing.html
+* Install cargo https://doc.rust-lang.org/cargo/getting-started/installation.html
+* Install ripgrep with `cargo install ripgrep` or one of the alternatives: https://github.com/BurntSushi/ripgrep#installation
+* Install cargo-makedocs by running `cargo install cargo-makedocs` https://github.com/Bunogi/cargo-makedocs
+* Install fd with `cargo install fd`, or your package manager
+
+### Usage
+
+* Enable `rustdoc-mode`.
+* Run `M-x rustdoc-setup` to download files that rustdoc needs to convert rust documentation and also convert `std`.
+* You can now convert package-specific documentation with `M-x rustdoc-convert-current-package`
+* Search the org files with `rustdoc-search` (bound to `C-#` by default) if you are in `Rust mode`, `Rustic mode` or `Org mode`. If you hover over a symbol when you invoke the command, `rustdoc-search` will insert a default value.
+* Add `universal argument` to only search for level 1 headers like struct or enum names.
+
+### Notes
+* We are waiting for an update to Pandoc that will make the generated documents prettier, it should be available soon https://github.com/jgm/pandoc/issues/6554
+* You should re-run `rustdoc-setup` once in a while, to update the pandoc filter.
+* If rustdoc does not find the documentation for something, the first thing to do is check the project's `target/doc` folder for the corresponding `.html-file`. If there is no file there, there is nothing for rustdoc to convert. If there is a file there, please create an issue!
 
 ## Contributing
 
