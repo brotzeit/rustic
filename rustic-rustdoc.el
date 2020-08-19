@@ -63,10 +63,7 @@
                                      ".local/bin/rustdoc-convert.sh")
   "Save location for the rustdoc conversion script.")
 
-(defvar rustdoc-source-user "samhedin")
-
-(defvar rustdoc-source-repo (format "https://raw.githubusercontent.com/%s/rustdoc-to-org/master/"
-                                    rustdoc-source-user))
+(defvar rustdoc-source-repo "https://raw.githubusercontent.com/samhedin/rustic/rustic-rustdoc/rustdoc/")
 
 (defvar rustdoc-current-project nil "Location to search for documentation.
 All projects and std by default, otherwise last open project and std.")
