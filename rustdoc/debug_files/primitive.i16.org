@@ -1,0 +1,3444 @@
+Primitive Type i16
+
+* Primitive Type i16
+
+The 16-bit signed integer type.
+
+* Implementations
+
+** =impl i16=
+
+*** =pub const MIN: i16= 
+
+The smallest value that can be represented by this integer type.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(i16::MIN, -32768);
+#+END_SRC
+
+*** =pub const MAX: i16= 
+
+The largest value that can be represented by this integer type.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(i16::MAX, 32767);
+#+END_SRC
+
+*** =pub fn from_str_radix(src: &str, radix: u32) -> Result<i16, ParseIntError>=
+
+Converts a string slice in a given base to an integer.
+
+The string is expected to be an optional =+= or =-= sign followed by
+digits. Leading and trailing whitespace represent an error. Digits are a
+subset of these characters, depending on =radix=:
+
+- =0-9=
+- =a-z=
+- =A-Z=
+
+This function panics if =radix= is not in the range from 2 to 36.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(i16::from_str_radix("A", 16), Ok(10));
+#+END_SRC
+
+*** =pub fn onst  count_ones(self) -> u32=
+
+Returns the number of ones in the binary representation of =self=.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+let n = 0b100_0000i16;
+
+assert_eq!(n.count_ones(), 1);
+#+END_SRC
+
+*** =pub fn onst  count_zeros(self) -> u32=
+
+Returns the number of zeros in the binary representation of =self=.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(i16::MAX.count_zeros(), 1);
+#+END_SRC
+
+*** =pub fn onst  leading_zeros(self) -> u32=
+
+Returns the number of leading zeros in the binary representation of
+=self=.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+let n = -1i16;
+
+assert_eq!(n.leading_zeros(), 0);
+#+END_SRC
+
+*** =pub fn onst  trailing_zeros(self) -> u32=
+
+Returns the number of trailing zeros in the binary representation of
+=self=.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+let n = -4i16;
+
+assert_eq!(n.trailing_zeros(), 2);
+#+END_SRC
+
+*** =pub fn leading_ones(self) -> u32=
+
+This is a nightly-only experimental API.
+(=leading_trailing_ones= #57969)
+
+Returns the number of leading ones in the binary representation of
+=self=.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+#![feature(leading_trailing_ones)]
+let n = -1i16;
+
+assert_eq!(n.leading_ones(), 16);
+#+END_SRC
+
+*** =pub fn trailing_ones(self) -> u32=
+
+This is a nightly-only experimental API.
+(=leading_trailing_ones= #57969)
+
+Returns the number of trailing ones in the binary representation of
+=self=.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+#![feature(leading_trailing_ones)]
+let n = 3i16;
+
+assert_eq!(n.trailing_ones(), 2);
+#+END_SRC
+
+*** =pub fn onst  rotate_left(self, n: u32) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Shifts the bits to the left by a specified amount, =n=, wrapping the
+truncated bits to the end of the resulting integer.
+
+Please note this isn't the same operation as the =<<= shifting operator!
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+let n = -0x5ffdi16;
+let m = 0x3a;
+
+assert_eq!(n.rotate_left(4), m);
+#+END_SRC
+
+*** =pub fn onst  rotate_right(self, n: u32) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Shifts the bits to the right by a specified amount, =n=, wrapping the
+truncated bits to the beginning of the resulting integer.
+
+Please note this isn't the same operation as the =>>= shifting operator!
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+let n = 0x3ai16;
+let m = -0x5ffd;
+
+assert_eq!(n.rotate_right(4), m);
+#+END_SRC
+
+*** =pub fn onst  swap_bytes(self) -> i16=
+
+Reverses the byte order of the integer.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+let n = 0x1234i16;
+
+let m = n.swap_bytes();
+
+assert_eq!(m, 0x3412);
+#+END_SRC
+
+*** =pub fn onst  reverse_bits(self) -> i16=
+
+Reverses the bit pattern of the integer.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+let n = 0x1234i16;
+let m = n.reverse_bits();
+
+assert_eq!(m, 0x2c48);
+#+END_SRC
+
+*** =pub fn onst  from_be(x: i16) -> i16=
+
+Converts an integer from big endian to the target's endianness.
+
+On big endian this is a no-op. On little endian the bytes are swapped.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+let n = 0x1Ai16;
+
+if cfg!(target_endian = "big") {
+    assert_eq!(i16::from_be(n), n)
+} else {
+    assert_eq!(i16::from_be(n), n.swap_bytes())
+}
+#+END_SRC
+
+*** =pub fn onst  from_le(x: i16) -> i16=
+
+Converts an integer from little endian to the target's endianness.
+
+On little endian this is a no-op. On big endian the bytes are swapped.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+let n = 0x1Ai16;
+
+if cfg!(target_endian = "little") {
+    assert_eq!(i16::from_le(n), n)
+} else {
+    assert_eq!(i16::from_le(n), n.swap_bytes())
+}
+#+END_SRC
+
+*** =pub fn onst  to_be(self) -> i16=
+
+Converts =self= to big endian from the target's endianness.
+
+On big endian this is a no-op. On little endian the bytes are swapped.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+let n = 0x1Ai16;
+
+if cfg!(target_endian = "big") {
+    assert_eq!(n.to_be(), n)
+} else {
+    assert_eq!(n.to_be(), n.swap_bytes())
+}
+#+END_SRC
+
+*** =pub fn onst  to_le(self) -> i16=
+
+Converts =self= to little endian from the target's endianness.
+
+On little endian this is a no-op. On big endian the bytes are swapped.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+let n = 0x1Ai16;
+
+if cfg!(target_endian = "little") {
+    assert_eq!(n.to_le(), n)
+} else {
+    assert_eq!(n.to_le(), n.swap_bytes())
+}
+#+END_SRC
+
+*** =pub fn checked_add(self, rhs: i16) -> Option<i16>=
+
+this returns the result of the operation, \                           without modifying the original
+
+Checked integer addition. Computes =self + rhs=, returning =None= if
+overflow occurred.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!((i16::MAX - 2).checked_add(1), Some(i16::MAX - 1));
+assert_eq!((i16::MAX - 2).checked_add(3), None);
+#+END_SRC
+
+*** =pub fn nsafe  unchecked_add(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+This is a nightly-only experimental API. (=unchecked_math=)
+niche optimization path
+
+Unchecked integer addition. Computes
+=self + rhs, assuming overflow cannot occur. This results in undefined behavior when =self
++ rhs > i16::max_value()=or=self + rhs < i16::min_value()`.
+
+*** =pub fn checked_sub(self, rhs: i16) -> Option<i16>=
+
+this returns the result of the operation, \                           without modifying the original
+
+Checked integer subtraction. Computes =self - rhs=, returning =None= if
+overflow occurred.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!((i16::MIN + 2).checked_sub(1), Some(i16::MIN + 1));
+assert_eq!((i16::MIN + 2).checked_sub(3), None);
+#+END_SRC
+
+*** =pub fn nsafe  unchecked_sub(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+This is a nightly-only experimental API. (=unchecked_math=)
+niche optimization path
+
+Unchecked integer subtraction. Computes
+=self - rhs, assuming overflow cannot occur. This results in undefined behavior when =self -
+rhs > i16::max_value()=or=self - rhs < i16::min_value()`.
+
+*** =pub fn checked_mul(self, rhs: i16) -> Option<i16>=
+
+this returns the result of the operation, \                           without modifying the original
+
+Checked integer multiplication. Computes =self * rhs=, returning =None=
+if overflow occurred.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(i16::MAX.checked_mul(1), Some(i16::MAX));
+assert_eq!(i16::MAX.checked_mul(2), None);
+#+END_SRC
+
+*** =pub fn nsafe  unchecked_mul(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+This is a nightly-only experimental API. (=unchecked_math=)
+niche optimization path
+
+Unchecked integer multiplication. Computes
+=self * rhs, assuming overflow cannot occur. This results in undefined behavior when =self
+* rhs > i16::max_value()=or=self * rhs < i16::min_value()`.
+
+*** =pub fn checked_div(self, rhs: i16) -> Option<i16>=
+
+this returns the result of the operation, \                           without modifying the original
+
+Checked integer division. Computes =self / rhs=, returning =None= if
+=rhs == 0= or the division results in overflow.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!((i16::MIN + 1).checked_div(-1), Some(32767));
+assert_eq!(i16::MIN.checked_div(-1), None);
+assert_eq!((1i16).checked_div(0), None);
+#+END_SRC
+
+*** =pub fn checked_div_euclid(self, rhs: i16) -> Option<i16>=
+
+this returns the result of the operation, \                           without modifying the original
+
+Checked Euclidean division. Computes =self.div_euclid(rhs)=, returning
+=None= if =rhs == 0= or the division results in overflow.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!((i16::MIN + 1).checked_div_euclid(-1), Some(32767));
+assert_eq!(i16::MIN.checked_div_euclid(-1), None);
+assert_eq!((1i16).checked_div_euclid(0), None);
+#+END_SRC
+
+*** =pub fn checked_rem(self, rhs: i16) -> Option<i16>=
+
+this returns the result of the operation, \                           without modifying the original
+
+Checked integer remainder. Computes =self % rhs=, returning =None= if
+=rhs == 0= or the division results in overflow.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+
+assert_eq!(5i16.checked_rem(2), Some(1));
+assert_eq!(5i16.checked_rem(0), None);
+assert_eq!(i16::MIN.checked_rem(-1), None);
+#+END_SRC
+
+*** =pub fn checked_rem_euclid(self, rhs: i16) -> Option<i16>=
+
+this returns the result of the operation, \                           without modifying the original
+
+Checked Euclidean remainder. Computes =self.rem_euclid(rhs)=, returning
+=None= if =rhs == 0= or the division results in overflow.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(5i16.checked_rem_euclid(2), Some(1));
+assert_eq!(5i16.checked_rem_euclid(0), None);
+assert_eq!(i16::MIN.checked_rem_euclid(-1), None);
+#+END_SRC
+
+*** =pub fn checked_neg(self) -> Option<i16>=
+
+Checked negation. Computes =-self=, returning =None= if =self == MIN=.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+
+assert_eq!(5i16.checked_neg(), Some(-5));
+assert_eq!(i16::MIN.checked_neg(), None);
+#+END_SRC
+
+*** =pub fn checked_shl(self, rhs: u32) -> Option<i16>=
+
+this returns the result of the operation, \                           without modifying the original
+
+Checked shift left. Computes =self << rhs=, returning =None= if =rhs= is
+larger than or equal to the number of bits in =self=.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(0x1i16.checked_shl(4), Some(0x10));
+assert_eq!(0x1i16.checked_shl(129), None);
+#+END_SRC
+
+*** =pub fn checked_shr(self, rhs: u32) -> Option<i16>=
+
+this returns the result of the operation, \                           without modifying the original
+
+Checked shift right. Computes =self >> rhs=, returning =None= if =rhs=
+is larger than or equal to the number of bits in =self=.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(0x10i16.checked_shr(4), Some(0x1));
+assert_eq!(0x10i16.checked_shr(128), None);
+#+END_SRC
+
+*** =pub fn checked_abs(self) -> Option<i16>=
+
+Checked absolute value. Computes =self.abs()=, returning =None= if
+=self == MIN=.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+
+assert_eq!((-5i16).checked_abs(), Some(5));
+assert_eq!(i16::MIN.checked_abs(), None);
+#+END_SRC
+
+*** =pub fn checked_pow(self, exp: u32) -> Option<i16>=
+
+this returns the result of the operation, \                           without modifying the original
+
+Checked exponentiation. Computes =self.pow(exp)=, returning =None= if
+overflow occurred.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(8i16.checked_pow(2), Some(64));
+assert_eq!(i16::MAX.checked_pow(2), None);
+#+END_SRC
+
+*** =pub fn saturating_add(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Saturating integer addition. Computes =self + rhs=, saturating at the
+numeric bounds instead of overflowing.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(100i16.saturating_add(1), 101);
+assert_eq!(i16::MAX.saturating_add(100), i16::MAX);
+assert_eq!(i16::MIN.saturating_add(-1), i16::MIN);
+#+END_SRC
+
+*** =pub fn saturating_sub(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Saturating integer subtraction. Computes =self - rhs=, saturating at the
+numeric bounds instead of overflowing.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(100i16.saturating_sub(127), -27);
+assert_eq!(i16::MIN.saturating_sub(100), i16::MIN);
+assert_eq!(i16::MAX.saturating_sub(-1), i16::MAX);
+#+END_SRC
+
+*** =pub fn saturating_neg(self) -> i16=
+
+Saturating integer negation. Computes =-self=, returning =MAX= if
+=self == MIN= instead of overflowing.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(100i16.saturating_neg(), -100);
+assert_eq!((-100i16).saturating_neg(), 100);
+assert_eq!(i16::MIN.saturating_neg(), i16::MAX);
+assert_eq!(i16::MAX.saturating_neg(), i16::MIN + 1);
+#+END_SRC
+
+*** =pub fn saturating_abs(self) -> i16=
+
+Saturating absolute value. Computes =self.abs()=, returning =MAX= if
+=self == MIN= instead of overflowing.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(100i16.saturating_abs(), 100);
+assert_eq!((-100i16).saturating_abs(), 100);
+assert_eq!(i16::MIN.saturating_abs(), i16::MAX);
+assert_eq!((i16::MIN + 1).saturating_abs(), i16::MAX);
+#+END_SRC
+
+*** =pub fn saturating_mul(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Saturating integer multiplication. Computes =self * rhs=, saturating at
+the numeric bounds instead of overflowing.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+
+assert_eq!(10i16.saturating_mul(12), 120);
+assert_eq!(i16::MAX.saturating_mul(10), i16::MAX);
+assert_eq!(i16::MIN.saturating_mul(10), i16::MIN);
+#+END_SRC
+
+*** =pub fn saturating_pow(self, exp: u32) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Saturating integer exponentiation. Computes =self.pow(exp)=, saturating
+at the numeric bounds instead of overflowing.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+
+assert_eq!((-4i16).saturating_pow(3), -64);
+assert_eq!(i16::MIN.saturating_pow(2), i16::MAX);
+assert_eq!(i16::MIN.saturating_pow(3), i16::MIN);
+#+END_SRC
+
+*** =pub fn onst  wrapping_add(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Wrapping (modular) addition. Computes =self + rhs=, wrapping around at
+the boundary of the type.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(100i16.wrapping_add(27), 127);
+assert_eq!(i16::MAX.wrapping_add(2), i16::MIN + 1);
+#+END_SRC
+
+*** =pub fn onst  wrapping_sub(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Wrapping (modular) subtraction. Computes =self - rhs=, wrapping around
+at the boundary of the type.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(0i16.wrapping_sub(127), -127);
+assert_eq!((-2i16).wrapping_sub(i16::MAX), i16::MAX);
+#+END_SRC
+
+*** =pub fn onst  wrapping_mul(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Wrapping (modular) multiplication. Computes =self * rhs=, wrapping
+around at the boundary of the type.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(10i16.wrapping_mul(12), 120);
+assert_eq!(11i8.wrapping_mul(12), -124);
+#+END_SRC
+
+*** =pub fn wrapping_div(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Wrapping (modular) division. Computes =self / rhs=, wrapping around at
+the boundary of the type.
+
+The only case where such wrapping can occur is when one divides
+=MIN / -1= on a signed type (where =MIN= is the negative minimal value
+for the type); this is equivalent to =-MIN=, a positive value that is
+too large to represent in the type. In such a case, this function
+returns =MIN= itself.
+
+This function will panic if =rhs= is 0.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(100i16.wrapping_div(10), 10);
+assert_eq!((-128i8).wrapping_div(-1), -128);
+#+END_SRC
+
+*** =pub fn wrapping_div_euclid(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Wrapping Euclidean division. Computes =self.div_euclid(rhs)=, wrapping
+around at the boundary of the type.
+
+Wrapping will only occur in =MIN / -1= on a signed type (where =MIN= is
+the negative minimal value for the type). This is equivalent to =-MIN=,
+a positive value that is too large to represent in the type. In this
+case, this method returns =MIN= itself.
+
+This function will panic if =rhs= is 0.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(100i16.wrapping_div_euclid(10), 10);
+assert_eq!((-128i8).wrapping_div_euclid(-1), -128);
+#+END_SRC
+
+*** =pub fn wrapping_rem(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Wrapping (modular) remainder. Computes =self % rhs=, wrapping around at
+the boundary of the type.
+
+Such wrap-around never actually occurs mathematically; implementation
+artifacts make =x % y= invalid for =MIN / -1= on a signed type (where
+=MIN= is the negative minimal value). In such a case, this function
+returns =0=.
+
+This function will panic if =rhs= is 0.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(100i16.wrapping_rem(10), 0);
+assert_eq!((-128i8).wrapping_rem(-1), 0);
+#+END_SRC
+
+*** =pub fn wrapping_rem_euclid(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Wrapping Euclidean remainder. Computes =self.rem_euclid(rhs)=, wrapping
+around at the boundary of the type.
+
+Wrapping will only occur in =MIN % -1= on a signed type (where =MIN= is
+the negative minimal value for the type). In this case, this method
+returns 0.
+
+This function will panic if =rhs= is 0.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(100i16.wrapping_rem_euclid(10), 0);
+assert_eq!((-128i8).wrapping_rem_euclid(-1), 0);
+#+END_SRC
+
+*** =pub fn onst  wrapping_neg(self) -> i16=
+
+Wrapping (modular) negation. Computes =-self=, wrapping around at the
+boundary of the type.
+
+The only case where such wrapping can occur is when one negates =MIN= on
+a signed type (where =MIN= is the negative minimal value for the type);
+this is a positive value that is too large to represent in the type. In
+such a case, this function returns =MIN= itself.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(100i16.wrapping_neg(), -100);
+assert_eq!(i16::MIN.wrapping_neg(), i16::MIN);
+#+END_SRC
+
+*** =pub fn onst  wrapping_shl(self, rhs: u32) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Panic-free bitwise shift-left; yields =self << mask(rhs)=, where =mask=
+removes any high-order bits of =rhs= that would cause the shift to
+exceed the bitwidth of the type.
+
+Note that this is /not/ the same as a rotate-left; the RHS of a wrapping
+shift-left is restricted to the range of the type, rather than the bits
+shifted out of the LHS being returned to the other end. The primitive
+integer types all implement a =[=rotate_left`](#method.rotate_left)
+function, which may be what you want instead.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!((-1i16).wrapping_shl(7), -128);
+assert_eq!((-1i16).wrapping_shl(128), -1);
+#+END_SRC
+
+*** =pub fn onst  wrapping_shr(self, rhs: u32) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Panic-free bitwise shift-right; yields =self >> mask(rhs)=, where =mask=
+removes any high-order bits of =rhs= that would cause the shift to
+exceed the bitwidth of the type.
+
+Note that this is /not/ the same as a rotate-right; the RHS of a
+wrapping shift-right is restricted to the range of the type, rather than
+the bits shifted out of the LHS being returned to the other end. The
+primitive integer types all implement a =rotate_right= function, which
+may be what you want instead.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!((-128i16).wrapping_shr(7), -1);
+assert_eq!((-128i16).wrapping_shr(64), -128);
+#+END_SRC
+
+*** =pub fn onst  wrapping_abs(self) -> i16=
+
+Wrapping (modular) absolute value. Computes =self.abs()=, wrapping
+around at the boundary of the type.
+
+The only case where such wrapping can occur is when one takes the
+absolute value of the negative minimal value for the type this is a
+positive value that is too large to represent in the type. In such a
+case, this function returns =MIN= itself.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(100i16.wrapping_abs(), 100);
+assert_eq!((-100i16).wrapping_abs(), 100);
+assert_eq!(i16::MIN.wrapping_abs(), i16::MIN);
+assert_eq!((-128i8).wrapping_abs() as u8, 128);
+#+END_SRC
+
+*** =pub fn wrapping_pow(self, exp: u32) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Wrapping (modular) exponentiation. Computes =self.pow(exp)=, wrapping
+around at the boundary of the type.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(3i16.wrapping_pow(4), 81);
+assert_eq!(3i8.wrapping_pow(5), -13);
+assert_eq!(3i8.wrapping_pow(6), -39);
+#+END_SRC
+
+*** =pub fn onst  overflowing_add(self, rhs: i16) -> (i16, bool)=
+
+this returns the result of the operation, \                           without modifying the original
+
+Calculates =self= + =rhs=
+
+Returns a tuple of the addition along with a boolean indicating whether
+an arithmetic overflow would occur. If an overflow would have occurred
+then the wrapped value is returned.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+
+assert_eq!(5i16.overflowing_add(2), (7, false));
+assert_eq!(i16::MAX.overflowing_add(1), (i16::MIN, true));
+#+END_SRC
+
+*** =pub fn onst  overflowing_sub(self, rhs: i16) -> (i16, bool)=
+
+this returns the result of the operation, \                           without modifying the original
+
+Calculates =self= - =rhs=
+
+Returns a tuple of the subtraction along with a boolean indicating
+whether an arithmetic overflow would occur. If an overflow would have
+occurred then the wrapped value is returned.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+
+assert_eq!(5i16.overflowing_sub(2), (3, false));
+assert_eq!(i16::MIN.overflowing_sub(1), (i16::MAX, true));
+#+END_SRC
+
+*** =pub fn onst  overflowing_mul(self, rhs: i16) -> (i16, bool)=
+
+this returns the result of the operation, \                           without modifying the original
+
+Calculates the multiplication of =self= and =rhs=.
+
+Returns a tuple of the multiplication along with a boolean indicating
+whether an arithmetic overflow would occur. If an overflow would have
+occurred then the wrapped value is returned.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(5i16.overflowing_mul(2), (10, false));
+assert_eq!(1_000_000_000i32.overflowing_mul(10), (1410065408, true));
+#+END_SRC
+
+*** =pub fn overflowing_div(self, rhs: i16) -> (i16, bool)=
+
+this returns the result of the operation, \                           without modifying the original
+
+Calculates the divisor when =self= is divided by =rhs=.
+
+Returns a tuple of the divisor along with a boolean indicating whether
+an arithmetic overflow would occur. If an overflow would occur then self
+is returned.
+
+This function will panic if =rhs= is 0.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+
+assert_eq!(5i16.overflowing_div(2), (2, false));
+assert_eq!(i16::MIN.overflowing_div(-1), (i16::MIN, true));
+#+END_SRC
+
+*** =pub fn overflowing_div_euclid(self, rhs: i16) -> (i16, bool)=
+
+this returns the result of the operation, \                           without modifying the original
+
+Calculates the quotient of Euclidean division =self.div_euclid(rhs)=.
+
+Returns a tuple of the divisor along with a boolean indicating whether
+an arithmetic overflow would occur. If an overflow would occur then
+=self= is returned.
+
+This function will panic if =rhs= is 0.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(5i16.overflowing_div_euclid(2), (2, false));
+assert_eq!(i16::MIN.overflowing_div_euclid(-1), (i16::MIN, true));
+#+END_SRC
+
+*** =pub fn overflowing_rem(self, rhs: i16) -> (i16, bool)=
+
+this returns the result of the operation, \                           without modifying the original
+
+Calculates the remainder when =self= is divided by =rhs=.
+
+Returns a tuple of the remainder after dividing along with a boolean
+indicating whether an arithmetic overflow would occur. If an overflow
+would occur then 0 is returned.
+
+This function will panic if =rhs= is 0.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+
+assert_eq!(5i16.overflowing_rem(2), (1, false));
+assert_eq!(i16::MIN.overflowing_rem(-1), (0, true));
+#+END_SRC
+
+*** =pub fn overflowing_rem_euclid(self, rhs: i16) -> (i16, bool)=
+
+this returns the result of the operation, \                           without modifying the original
+
+Overflowing Euclidean remainder. Calculates =self.rem_euclid(rhs)=.
+
+Returns a tuple of the remainder after dividing along with a boolean
+indicating whether an arithmetic overflow would occur. If an overflow
+would occur then 0 is returned.
+
+This function will panic if =rhs= is 0.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(5i16.overflowing_rem_euclid(2), (1, false));
+assert_eq!(i16::MIN.overflowing_rem_euclid(-1), (0, true));
+#+END_SRC
+
+*** =pub fn onst  overflowing_neg(self) -> (i16, bool)=
+
+Negates self, overflowing if this is equal to the minimum value.
+
+Returns a tuple of the negated version of self along with a boolean
+indicating whether an overflow happened. If =self= is the minimum value
+(e.g., =i32::MIN= for values of type =i32=), then the minimum value will
+be returned again and =true= will be returned for an overflow happening.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(2i16.overflowing_neg(), (-2, false));
+assert_eq!(i16::MIN.overflowing_neg(), (i16::MIN, true));
+#+END_SRC
+
+*** =pub fn onst  overflowing_shl(self, rhs: u32) -> (i16, bool)=
+
+this returns the result of the operation, \                           without modifying the original
+
+Shifts self left by =rhs= bits.
+
+Returns a tuple of the shifted version of self along with a boolean
+indicating whether the shift value was larger than or equal to the
+number of bits. If the shift value is too large, then value is masked
+(N-1) where N is the number of bits, and this value is then used to
+perform the shift.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(0x1i16.overflowing_shl(4), (0x10, false));
+assert_eq!(0x1i32.overflowing_shl(36), (0x10, true));
+#+END_SRC
+
+*** =pub fn onst  overflowing_shr(self, rhs: u32) -> (i16, bool)=
+
+this returns the result of the operation, \                           without modifying the original
+
+Shifts self right by =rhs= bits.
+
+Returns a tuple of the shifted version of self along with a boolean
+indicating whether the shift value was larger than or equal to the
+number of bits. If the shift value is too large, then value is masked
+(N-1) where N is the number of bits, and this value is then used to
+perform the shift.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(0x10i16.overflowing_shr(4), (0x1, false));
+assert_eq!(0x10i32.overflowing_shr(36), (0x1, true));
+#+END_SRC
+
+*** =pub fn onst  overflowing_abs(self) -> (i16, bool)=
+
+Computes the absolute value of =self=.
+
+Returns a tuple of the absolute version of self along with a boolean
+indicating whether an overflow happened. If self is the minimum value
+(e.g., i16::MIN for values of type i16), then the minimum value will be
+returned again and true will be returned for an overflow happening.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(10i16.overflowing_abs(), (10, false));
+assert_eq!((-10i16).overflowing_abs(), (10, false));
+assert_eq!((i16::MIN).overflowing_abs(), (i16::MIN, true));
+#+END_SRC
+
+*** =pub fn overflowing_pow(self, exp: u32) -> (i16, bool)=
+
+this returns the result of the operation, \                           without modifying the original
+
+Raises self to the power of =exp=, using exponentiation by squaring.
+
+Returns a tuple of the exponentiation along with a bool indicating
+whether an overflow happened.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(3i16.overflowing_pow(4), (81, false));
+assert_eq!(3i8.overflowing_pow(5), (-13, true));
+#+END_SRC
+
+*** =pub fn pow(self, exp: u32) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Raises self to the power of =exp=, using exponentiation by squaring.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+let x: i16 = 2; // or any other integer type
+
+assert_eq!(x.pow(5), 32);
+#+END_SRC
+
+*** =pub fn div_euclid(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Calculates the quotient of Euclidean division of =self= by =rhs=.
+
+This computes the integer =n= such that
+=self = n * rhs + self.rem_euclid(rhs)=, with
+=0 <= self.rem_euclid(rhs) < rhs=.
+
+In other words, the result is =self / rhs= rounded to the integer =n=
+such that =self >= n * rhs=. If =self > 0=, this is equal to round
+towards zero (the default in Rust); if =self < 0=, this is equal to
+round towards +/- infinity.
+
+This function will panic if =rhs= is 0 or the division results in
+overflow.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+let a: i16 = 7; // or any other integer type
+let b = 4;
+
+assert_eq!(a.div_euclid(b), 1); // 7 >= 4 * 1
+assert_eq!(a.div_euclid(-b), -1); // 7 >= -4 * -1
+assert_eq!((-a).div_euclid(b), -2); // -7 >= 4 * -2
+assert_eq!((-a).div_euclid(-b), 2); // -7 >= -4 * 2
+#+END_SRC
+
+*** =pub fn rem_euclid(self, rhs: i16) -> i16=
+
+this returns the result of the operation, \                           without modifying the original
+
+Calculates the least nonnegative remainder of =self (mod rhs)=.
+
+This is done as if by the Euclidean division algorithm -- given
+=r = self.rem_euclid(rhs)=, =self = rhs * self.div_euclid(rhs) + r=, and
+=0 <= r < abs(rhs)=.
+
+This function will panic if =rhs= is 0 or the division results in
+overflow.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+let a: i16 = 7; // or any other integer type
+let b = 4;
+
+assert_eq!(a.rem_euclid(b), 3);
+assert_eq!((-a).rem_euclid(b), 1);
+assert_eq!(a.rem_euclid(-b), 3);
+assert_eq!((-a).rem_euclid(-b), 1);
+#+END_SRC
+
+*** =pub fn onst  abs(self) -> i16=
+
+Computes the absolute value of =self=.
+
+The absolute value of =i16::MIN= cannot be represented as an =i16=, and
+attempting to calculate it will cause an overflow. This means that code
+in debug mode will trigger a panic on this case and optimized code will
+return =i16::MIN= without a panic.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(10i16.abs(), 10);
+assert_eq!((-10i16).abs(), 10);
+#+END_SRC
+
+*** =pub fn signum(self) -> i16=
+
+Returns a number representing sign of =self=.
+
+- =0= if the number is zero
+- =1= if the number is positive
+- =-1= if the number is negative
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert_eq!(10i16.signum(), 1);
+assert_eq!(0i16.signum(), 0);
+assert_eq!((-10i16).signum(), -1);
+#+END_SRC
+
+*** =pub fn onst  is_positive(self) -> bool=
+
+Returns =true= if =self= is positive and =false= if the number is zero
+or negative.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert!(10i16.is_positive());
+assert!(!(-10i16).is_positive());
+#+END_SRC
+
+*** =pub fn onst  is_negative(self) -> bool=
+
+Returns =true= if =self= is negative and =false= if the number is zero
+or positive.
+
+Basic usage:
+
+#+BEGIN_SRC rust 
+assert!((-10i16).is_negative());
+assert!(!10i16.is_negative());
+#+END_SRC
+
+*** =pub fn onst  to_be_bytes(self) -> [u8; 2]=
+
+Return the memory representation of this integer as a byte array in
+big-endian (network) byte order.
+
+#+BEGIN_SRC rust 
+let bytes = 0x1234i16.to_be_bytes();
+assert_eq!(bytes, [0x12, 0x34]);
+#+END_SRC
+
+*** =pub fn onst  to_le_bytes(self) -> [u8; 2]=
+
+Return the memory representation of this integer as a byte array in
+little-endian byte order.
+
+#+BEGIN_SRC rust 
+let bytes = 0x1234i16.to_le_bytes();
+assert_eq!(bytes, [0x34, 0x12]);
+#+END_SRC
+
+*** =pub fn onst  to_ne_bytes(self) -> [u8; 2]=
+
+Return the memory representation of this integer as a byte array in
+native byte order.
+
+As the target platform's native endianness is used, portable code should
+use =to_be_bytes= or =to_le_bytes=, as appropriate, instead.
+
+#+BEGIN_SRC rust 
+let bytes = 0x1234i16.to_ne_bytes();
+assert_eq!(
+    bytes,
+    if cfg!(target_endian = "big") {
+        [0x12, 0x34]
+    } else {
+        [0x34, 0x12]
+    }
+);
+#+END_SRC
+
+*** =pub fn onst  from_be_bytes(bytes: [u8; 2]-> i16=
+
+Create an integer value from its representation as a byte array in big
+endian.
+
+#+BEGIN_SRC rust 
+let value = i16::from_be_bytes([0x12, 0x34]);
+assert_eq!(value, 0x1234);
+#+END_SRC
+
+When starting from a slice rather than an array, fallible conversion
+APIs can be used:
+
+#+BEGIN_SRC rust 
+use std::convert::TryInto;
+
+fn read_be_i16(input: &mut &[u8]) -> i16 {
+    let (int_bytes, rest) = input.split_at(std::mem::size_of::<i16>());
+    *input = rest;
+    i16::from_be_bytes(int_bytes.try_into().unwrap())
+}
+#+END_SRC
+
+*** =pub fn onst  from_le_bytes(bytes: [u8; 2]-> i16=
+
+Create an integer value from its representation as a byte array in
+little endian.
+
+#+BEGIN_SRC rust 
+let value = i16::from_le_bytes([0x34, 0x12]);
+assert_eq!(value, 0x1234);
+#+END_SRC
+
+When starting from a slice rather than an array, fallible conversion
+APIs can be used:
+
+#+BEGIN_SRC rust 
+use std::convert::TryInto;
+
+fn read_le_i16(input: &mut &[u8]) -> i16 {
+    let (int_bytes, rest) = input.split_at(std::mem::size_of::<i16>());
+    *input = rest;
+    i16::from_le_bytes(int_bytes.try_into().unwrap())
+}
+#+END_SRC
+
+*** =pub fn onst  from_ne_bytes(bytes: [u8; 2]-> i16=
+
+Create an integer value from its memory representation as a byte array
+in native endianness.
+
+As the target platform's native endianness is used, portable code likely
+wants to use =from_be_bytes= or =from_le_bytes=, as appropriate instead.
+
+#+BEGIN_SRC rust 
+let value = i16::from_ne_bytes(if cfg!(target_endian = "big") {
+    [0x12, 0x34]
+} else {
+    [0x34, 0x12]
+});
+assert_eq!(value, 0x1234);
+#+END_SRC
+
+When starting from a slice rather than an array, fallible conversion
+APIs can be used:
+
+#+BEGIN_SRC rust 
+use std::convert::TryInto;
+
+fn read_ne_i16(input: &mut &[u8]) -> i16 {
+    let (int_bytes, rest) = input.split_at(std::mem::size_of::<i16>());
+    *input = rest;
+    i16::from_ne_bytes(int_bytes.try_into().unwrap())
+}
+#+END_SRC
+
+*** =pub fn onst  min_value() -> i16=
+
+*This method is soft-deprecated.*
+
+Although using it won't cause compilation warning, new code should use
+=i16::MIN= instead.
+
+Returns the smallest value that can be represented by this integer type.
+
+*** =pub fn onst  max_value() -> i16=
+
+*This method is soft-deprecated.*
+
+Although using it won't cause compilation warning, new code should use
+=i16::MAX= instead.
+
+Returns the largest value that can be represented by this integer type.
+
+* Trait
+
+<<trait-implementations-list>>
+** =impl<'_> Add<&'_ i16> for i16=
+
+*** =type Output = <i16 as Add<i16>>::Output=
+
+The resulting type after applying the =+= operator.
+
+=fn add(self, other: &i16) -> <i16 as Add<i16>>::Output= 
+
+Performs the =+= operation.
+
+** =impl<'_, '_> Add<&'_ i16> for &'_ i16=
+
+*** =type Output = <i16 as Add<i16>>::Output=
+
+The resulting type after applying the =+= operator.
+
+=fn add(self, other: &i16) -> <i16 as Add<i16>>::Output= 
+
+Performs the =+= operation.
+
+** =impl Add<i16> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =+= operator.
+
+=fn add(self, other: i16) -> i16= 
+
+Performs the =+= operation.
+
+** =impl<'a> Add<i16> for &'a i16=
+
+*** =type Output = <i16 as Add<i16>>::Output=
+
+The resulting type after applying the =+= operator.
+
+=fn add(self, other: i16) -> <i16 as Add<i16>>::Output= 
+
+Performs the =+= operation.
+
+** =impl<'_> AddAssign<&'_ i16> for i16=
+
+=fn add_assign(&mut self, other: &i16)= 
+
+Performs the =+== operation.
+
+** =impl AddAssign<i16> for i16=
+
+=fn add_assign(&mut self, other: i16)= 
+
+Performs the =+== operation.
+
+** =impl Binary for i16=
+
+=fn fmt(&self, f: &mut Formatter) -> Result<(), Error>= 
+
+Formats the value using the given formatter.
+
+** =impl<'_, '_> BitAnd<&'_ i16> for &'_ i16=
+
+*** =type Output = <i16 as BitAnd<i16>>::Output=
+
+The resulting type after applying the =&= operator.
+
+=fn bitand(self, other: &i16) -> <i16 as BitAnd<i16>>::Output= 
+
+Performs the =&= operation.
+
+** =impl<'_> BitAnd<&'_ i16> for i16=
+
+*** =type Output = <i16 as BitAnd<i16>>::Output=
+
+The resulting type after applying the =&= operator.
+
+=fn bitand(self, other: &i16) -> <i16 as BitAnd<i16>>::Output= 
+
+Performs the =&= operation.
+
+** =impl BitAnd<i16> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =&= operator.
+
+=fn bitand(self, rhs: i16) -> i16= 
+
+Performs the =&= operation.
+
+** =impl<'a> BitAnd<i16> for &'a i16=
+
+*** =type Output = <i16 as BitAnd<i16>>::Output=
+
+The resulting type after applying the =&= operator.
+
+=fn bitand(self, other: i16) -> <i16 as BitAnd<i16>>::Output= 
+
+Performs the =&= operation.
+
+** =impl<'_> BitAndAssign<&'_ i16> for i16=
+
+=fn bitand_assign(&mut self, other: &i16)= 
+
+Performs the =&== operation.
+
+** =impl BitAndAssign<i16> for i16=
+
+=fn bitand_assign(&mut self, other: i16)= 
+
+Performs the =&== operation.
+
+** =impl<'_> BitOr<&'_ i16> for i16=
+
+*** =type Output = <i16 as BitOr<i16>>::Output=
+
+The resulting type after applying the =|= operator.
+
+=fn bitor(self, other: &i16) -> <i16 as BitOr<i16>>::Output= 
+
+Performs the =|= operation.
+
+** =impl<'_, '_> BitOr<&'_ i16> for &'_ i16=
+
+*** =type Output = <i16 as BitOr<i16>>::Output=
+
+The resulting type after applying the =|= operator.
+
+=fn bitor(self, other: &i16) -> <i16 as BitOr<i16>>::Output= 
+
+Performs the =|= operation.
+
+** =impl BitOr<NonZeroI16> for i16=
+
+*** =type Output = NonZeroI16=
+
+The resulting type after applying the =|= operator.
+
+=fn bitor(self, rhs: NonZeroI16) -> <i16 as BitOr<NonZeroI16>>::Output= 
+
+Performs the =|= operation.
+
+** =impl BitOr<i16> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =|= operator.
+
+=fn bitor(self, rhs: i16) -> i16= 
+
+Performs the =|= operation.
+
+** =impl<'a> BitOr<i16> for &'a i16=
+
+*** =type Output = <i16 as BitOr<i16>>::Output=
+
+The resulting type after applying the =|= operator.
+
+=fn bitor(self, other: i16) -> <i16 as BitOr<i16>>::Output= 
+
+Performs the =|= operation.
+
+** =impl<'_> BitOrAssign<&'_ i16> for i16=
+
+=fn bitor_assign(&mut self, other: &i16)= 
+
+Performs the =|== operation.
+
+** =impl BitOrAssign<i16> for i16=
+
+=fn bitor_assign(&mut self, other: i16)= 
+
+Performs the =|== operation.
+
+** =impl<'_, '_> BitXor<&'_ i16> for &'_ i16=
+
+*** =type Output = <i16 as BitXor<i16>>::Output=
+
+The resulting type after applying the =^= operator.
+
+=fn bitxor(self, other: &i16) -> <i16 as BitXor<i16>>::Output= 
+
+Performs the =^= operation.
+
+** =impl<'_> BitXor<&'_ i16> for i16=
+
+*** =type Output = <i16 as BitXor<i16>>::Output=
+
+The resulting type after applying the =^= operator.
+
+=fn bitxor(self, other: &i16) -> <i16 as BitXor<i16>>::Output= 
+
+Performs the =^= operation.
+
+** =impl<'a> BitXor<i16> for &'a i16=
+
+*** =type Output = <i16 as BitXor<i16>>::Output=
+
+The resulting type after applying the =^= operator.
+
+=fn bitxor(self, other: i16) -> <i16 as BitXor<i16>>::Output= 
+
+Performs the =^= operation.
+
+** =impl BitXor<i16> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =^= operator.
+
+=fn bitxor(self, other: i16) -> i16= 
+
+Performs the =^= operation.
+
+** =impl<'_> BitXorAssign<&'_ i16> for i16=
+
+=fn bitxor_assign(&mut self, other: &i16)= 
+
+Performs the =^== operation.
+
+** =impl BitXorAssign<i16> for i16=
+
+=fn bitxor_assign(&mut self, other: i16)= 
+
+Performs the =^== operation.
+
+** =impl Clone for i16=
+
+=fn clone(&self) -> i16= 
+
+Returns a copy of the value. Read more
+
+=fn clone_from(&mut self, source: &Self)= 
+
+Performs copy-assignment from =source=. Read more
+
+** =impl Copy for i16=
+
+** =impl Debug for i16=
+
+=fn fmt(&self, f: &mut Formatter) -> Result<(), Error>= 
+
+Formats the value using the given formatter. Read more
+
+** =impl Default for i16=
+
+*** = fn default() -> i16=
+
+Returns the default value of =0=
+
+** =impl Display for i16=
+
+=fn fmt(&self, f: &mut Formatter) -> Result<(), Error>= 
+
+Formats the value using the given formatter. Read more
+
+** =impl<'_, '_> Div<&'_ i16> for &'_ i16=
+
+*** =type Output = <i16 as Div<i16>>::Output=
+
+The resulting type after applying the =/= operator.
+
+=fn div(self, other: &i16) -> <i16 as Div<i16>>::Output= 
+
+Performs the =/= operation.
+
+** =impl<'_> Div<&'_ i16> for i16=
+
+*** =type Output = <i16 as Div<i16>>::Output=
+
+The resulting type after applying the =/= operator.
+
+=fn div(self, other: &i16) -> <i16 as Div<i16>>::Output= 
+
+Performs the =/= operation.
+
+** =impl<'a> Div<i16> for &'a i16=
+
+*** =type Output = <i16 as Div<i16>>::Output=
+
+The resulting type after applying the =/= operator.
+
+=fn div(self, other: i16) -> <i16 as Div<i16>>::Output= 
+
+Performs the =/= operation.
+
+** =impl Div<i16> for i16=
+
+This operation rounds towards zero, truncating any fractional part of
+the exact result.
+
+*** =type Output = i16=
+
+The resulting type after applying the =/= operator.
+
+=fn div(self, other: i16) -> i16= 
+
+Performs the =/= operation.
+
+** =impl<'_> DivAssign<&'_ i16> for i16=
+
+=fn div_assign(&mut self, other: &i16)= 
+
+Performs the =/== operation.
+
+** =impl DivAssign<i16> for i16=
+
+=fn div_assign(&mut self, other: i16)= 
+
+Performs the =/== operation.
+
+** =impl Eq for i16=
+
+** =impl From<NonZeroI16> for i16=
+
+*** = fn from(nonzero: NonZeroI16) -> i16=
+
+Converts a =NonZeroI16= into an =i16=
+
+** =impl From<bool> for i16=
+
+Converts a =bool= to a =i16=. The resulting value is =0= for =false= and
+=1= for =true= values.
+
+#+BEGIN_SRC rust 
+assert_eq!(i16::from(true), 1);
+assert_eq!(i16::from(false), 0);
+#+END_SRC
+
+=fn from(small: bool) -> i16= 
+
+Performs the conversion.
+
+** =impl From<i8> for i16=
+
+Converts =i8= to =i16= losslessly.
+
+=fn from(small: i8) -> i16= 
+
+Performs the conversion.
+
+** =impl From<u8> for i16=
+
+Converts =u8= to =i16= losslessly.
+
+=fn from(small: u8) -> i16= 
+
+Performs the conversion.
+
+** =impl FromStr for i16=
+
+*** =type Err = ParseIntError=
+
+The associated error which can be returned from parsing.
+
+=fn from_str(src: &str) -> Result<i16, ParseIntError>= 
+
+Parses a string =s= to return a value of this type. Read more
+
+** =impl Hash for i16=
+
+=fn hash<H>(&self, state: &mut H) where    H: Hasher, = 
+
+Feeds this value into the given [=Hasher=]. Read more
+
+=fn hash_slice<H>(data: &[i16], state: &mut H) where    H: Hasher, = 
+
+Feeds a slice of this type into the given [=Hasher=]. Read more
+
+** =impl LowerExp for i16=
+
+=fn fmt(&self, f: &mut Formatter) -> Result<(), Error>= 
+
+Formats the value using the given formatter.
+
+** =impl LowerHex for i16=
+
+=fn fmt(&self, f: &mut Formatter) -> Result<(), Error>= 
+
+Formats the value using the given formatter.
+
+** =impl<'_> Mul<&'_ i16> for i16=
+
+*** =type Output = <i16 as Mul<i16>>::Output=
+
+The resulting type after applying the =*= operator.
+
+=fn mul(self, other: &i16) -> <i16 as Mul<i16>>::Output= 
+
+Performs the =*= operation.
+
+** =impl<'_, '_> Mul<&'_ i16> for &'_ i16=
+
+*** =type Output = <i16 as Mul<i16>>::Output=
+
+The resulting type after applying the =*= operator.
+
+=fn mul(self, other: &i16) -> <i16 as Mul<i16>>::Output= 
+
+Performs the =*= operation.
+
+** =impl<'a> Mul<i16> for &'a i16=
+
+*** =type Output = <i16 as Mul<i16>>::Output=
+
+The resulting type after applying the =*= operator.
+
+=fn mul(self, other: i16) -> <i16 as Mul<i16>>::Output= 
+
+Performs the =*= operation.
+
+** =impl Mul<i16> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =*= operator.
+
+=fn mul(self, other: i16) -> i16= 
+
+Performs the =*= operation.
+
+** =impl<'_> MulAssign<&'_ i16> for i16=
+
+=fn mul_assign(&mut self, other: &i16)= 
+
+Performs the =*== operation.
+
+** =impl MulAssign<i16> for i16=
+
+=fn mul_assign(&mut self, other: i16)= 
+
+Performs the =*== operation.
+
+** =impl<'_> Neg for &'_ i16=
+
+*** =type Output = <i16 as Neg>::Output=
+
+The resulting type after applying the =-= operator.
+
+=fn neg(self) -> <i16 as Neg>::Output= 
+
+Performs the unary =-= operation.
+
+** =impl Neg for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =-= operator.
+
+=fn neg(self) -> i16= 
+
+Performs the unary =-= operation.
+
+** =impl<'_> Not for &'_ i16=
+
+*** =type Output = <i16 as Not>::Output=
+
+The resulting type after applying the =!= operator.
+
+=fn not(self) -> <i16 as Not>::Output= 
+
+Performs the unary =!= operation.
+
+** =impl Not for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =!= operator.
+
+=fn not(self) -> i16= 
+
+Performs the unary =!= operation.
+
+** =impl Octal for i16=
+
+=fn fmt(&self, f: &mut Formatter) -> Result<(), Error>= 
+
+Formats the value using the given formatter.
+
+** =impl Ord for i16=
+
+=fn cmp(&self, other: &i16) -> Ordering= 
+
+This method returns an [=Ordering=] between =self= and =other=. Read
+more
+
+=#[must_use]fn max(self, other: Self) -> Self= 
+
+Compares and returns the maximum of two values. Read more
+
+=#[must_use]fn min(self, other: Self) -> Self= 
+
+Compares and returns the minimum of two values. Read more
+
+=#[must_use]fn clamp(self, min: Self, max: Self) -> Self= 
+
+This is a nightly-only experimental API. (=clamp= #44095)
+
+Restrict a value to a certain interval. Read more
+
+** =impl PartialEq<i16> for i16=
+
+=fn eq(&self, other: &i16) -> bool= 
+
+This method tests for =self= and =other= values to be equal, and is used
+by ====. Read more
+
+=fn ne(&self, other: &i16) -> bool= 
+
+This method tests for =!==.
+
+** =impl PartialOrd<i16> for i16=
+
+=fn partial_cmp(&self, other: &i16) -> Option<Ordering>= 
+
+This method returns an ordering between =self= and =other= values if one
+exists. Read more
+
+=fn lt(&self, other: &i16) -> bool= 
+
+This method tests less than (for =self= and =other=) and is used by the
+=<= operator. Read more
+
+=fn le(&self, other: &i16) -> bool= 
+
+This method tests less than or equal to (for =self= and =other=) and is
+used by the =<== operator. Read more
+
+=fn ge(&self, other: &i16) -> bool= 
+
+This method tests greater than or equal to (for =self= and =other=) and
+is used by the =>== operator. Read more
+
+=fn gt(&self, other: &i16) -> bool= 
+
+This method tests greater than (for =self= and =other=) and is used by
+the =>= operator. Read more
+
+** =impl<'a> Product<&'a i16> for i16=
+
+=fn product<I>(iter: I) -> i16 where    I: Iterator<Item = &'a i16>, = 
+
+Method which takes an iterator and generates =Self= from the elements by
+multiplying the items. Read more
+
+** =impl Product<i16> for i16=
+
+=fn product<I>(iter: I) -> i16 where    I: Iterator<Item = i16>, = 
+
+Method which takes an iterator and generates =Self= from the elements by
+multiplying the items. Read more
+
+** =impl<'_, '_> Rem<&'_ i16> for &'_ i16=
+
+*** =type Output = <i16 as Rem<i16>>::Output=
+
+The resulting type after applying the =%= operator.
+
+=fn rem(self, other: &i16) -> <i16 as Rem<i16>>::Output= 
+
+Performs the =%= operation.
+
+** =impl<'_> Rem<&'_ i16> for i16=
+
+*** =type Output = <i16 as Rem<i16>>::Output=
+
+The resulting type after applying the =%= operator.
+
+=fn rem(self, other: &i16) -> <i16 as Rem<i16>>::Output= 
+
+Performs the =%= operation.
+
+** =impl Rem<i16> for i16=
+
+This operation satisfies =n % d == n - (n / d) * d=. The result has the
+same sign as the left operand.
+
+*** =type Output = i16=
+
+The resulting type after applying the =%= operator.
+
+=fn rem(self, other: i16) -> i16= 
+
+Performs the =%= operation.
+
+** =impl<'a> Rem<i16> for &'a i16=
+
+*** =type Output = <i16 as Rem<i16>>::Output=
+
+The resulting type after applying the =%= operator.
+
+=fn rem(self, other: i16) -> <i16 as Rem<i16>>::Output= 
+
+Performs the =%= operation.
+
+** =impl<'_> RemAssign<&'_ i16> for i16=
+
+=fn rem_assign(&mut self, other: &i16)= 
+
+Performs the =%== operation.
+
+** =impl RemAssign<i16> for i16=
+
+=fn rem_assign(&mut self, other: i16)= 
+
+Performs the =%== operation.
+
+** =impl<'_> Shl<&'_ i128> for i16=
+
+*** =type Output = <i16 as Shl<i128>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &i128) -> <i16 as Shl<i128>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_, '_> Shl<&'_ i128> for &'_ i16=
+
+*** =type Output = <i16 as Shl<i128>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &i128) -> <i16 as Shl<i128>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_> Shl<&'_ i16> for i16=
+
+*** =type Output = <i16 as Shl<i16>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &i16) -> <i16 as Shl<i16>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_, '_> Shl<&'_ i16> for &'_ i16=
+
+*** =type Output = <i16 as Shl<i16>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &i16) -> <i16 as Shl<i16>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_, '_> Shl<&'_ i32> for &'_ i16=
+
+*** =type Output = <i16 as Shl<i32>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &i32) -> <i16 as Shl<i32>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_> Shl<&'_ i32> for i16=
+
+*** =type Output = <i16 as Shl<i32>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &i32) -> <i16 as Shl<i32>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_> Shl<&'_ i64> for i16=
+
+*** =type Output = <i16 as Shl<i64>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &i64) -> <i16 as Shl<i64>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_, '_> Shl<&'_ i64> for &'_ i16=
+
+*** =type Output = <i16 as Shl<i64>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &i64) -> <i16 as Shl<i64>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_> Shl<&'_ i8> for i16=
+
+*** =type Output = <i16 as Shl<i8>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &i8) -> <i16 as Shl<i8>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_, '_> Shl<&'_ i8> for &'_ i16=
+
+*** =type Output = <i16 as Shl<i8>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &i8) -> <i16 as Shl<i8>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_> Shl<&'_ isize> for i16=
+
+*** =type Output = <i16 as Shl<isize>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &isize) -> <i16 as Shl<isize>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_, '_> Shl<&'_ isize> for &'_ i16=
+
+*** =type Output = <i16 as Shl<isize>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &isize) -> <i16 as Shl<isize>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_> Shl<&'_ u128> for i16=
+
+*** =type Output = <i16 as Shl<u128>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &u128) -> <i16 as Shl<u128>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_, '_> Shl<&'_ u128> for &'_ i16=
+
+*** =type Output = <i16 as Shl<u128>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &u128) -> <i16 as Shl<u128>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_> Shl<&'_ u16> for i16=
+
+*** =type Output = <i16 as Shl<u16>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &u16) -> <i16 as Shl<u16>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_, '_> Shl<&'_ u16> for &'_ i16=
+
+*** =type Output = <i16 as Shl<u16>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &u16) -> <i16 as Shl<u16>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_, '_> Shl<&'_ u32> for &'_ i16=
+
+*** =type Output = <i16 as Shl<u32>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &u32) -> <i16 as Shl<u32>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_> Shl<&'_ u32> for i16=
+
+*** =type Output = <i16 as Shl<u32>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &u32) -> <i16 as Shl<u32>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_, '_> Shl<&'_ u64> for &'_ i16=
+
+*** =type Output = <i16 as Shl<u64>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &u64) -> <i16 as Shl<u64>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_> Shl<&'_ u64> for i16=
+
+*** =type Output = <i16 as Shl<u64>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &u64) -> <i16 as Shl<u64>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_, '_> Shl<&'_ u8> for &'_ i16=
+
+*** =type Output = <i16 as Shl<u8>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &u8) -> <i16 as Shl<u8>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_> Shl<&'_ u8> for i16=
+
+*** =type Output = <i16 as Shl<u8>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &u8) -> <i16 as Shl<u8>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_, '_> Shl<&'_ usize> for &'_ i16=
+
+*** =type Output = <i16 as Shl<usize>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &usize) -> <i16 as Shl<usize>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'_> Shl<&'_ usize> for i16=
+
+*** =type Output = <i16 as Shl<usize>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: &usize) -> <i16 as Shl<usize>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'a> Shl<i128> for &'a i16=
+
+*** =type Output = <i16 as Shl<i128>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: i128) -> <i16 as Shl<i128>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl Shl<i128> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: i128) -> i16= 
+
+Performs the =<<= operation.
+
+** =impl Shl<i16> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: i16) -> i16= 
+
+Performs the =<<= operation.
+
+** =impl<'a> Shl<i16> for &'a i16=
+
+*** =type Output = <i16 as Shl<i16>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: i16) -> <i16 as Shl<i16>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl Shl<i32> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: i32) -> i16= 
+
+Performs the =<<= operation.
+
+** =impl<'a> Shl<i32> for &'a i16=
+
+*** =type Output = <i16 as Shl<i32>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: i32) -> <i16 as Shl<i32>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'a> Shl<i64> for &'a i16=
+
+*** =type Output = <i16 as Shl<i64>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: i64) -> <i16 as Shl<i64>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl Shl<i64> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: i64) -> i16= 
+
+Performs the =<<= operation.
+
+** =impl Shl<i8> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: i8) -> i16= 
+
+Performs the =<<= operation.
+
+** =impl<'a> Shl<i8> for &'a i16=
+
+*** =type Output = <i16 as Shl<i8>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: i8) -> <i16 as Shl<i8>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl Shl<isize> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: isize) -> i16= 
+
+Performs the =<<= operation.
+
+** =impl<'a> Shl<isize> for &'a i16=
+
+*** =type Output = <i16 as Shl<isize>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: isize) -> <i16 as Shl<isize>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl Shl<u128> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: u128) -> i16= 
+
+Performs the =<<= operation.
+
+** =impl<'a> Shl<u128> for &'a i16=
+
+*** =type Output = <i16 as Shl<u128>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: u128) -> <i16 as Shl<u128>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl Shl<u16> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: u16) -> i16= 
+
+Performs the =<<= operation.
+
+** =impl<'a> Shl<u16> for &'a i16=
+
+*** =type Output = <i16 as Shl<u16>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: u16) -> <i16 as Shl<u16>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl Shl<u32> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: u32) -> i16= 
+
+Performs the =<<= operation.
+
+** =impl<'a> Shl<u32> for &'a i16=
+
+*** =type Output = <i16 as Shl<u32>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: u32) -> <i16 as Shl<u32>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl Shl<u64> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: u64) -> i16= 
+
+Performs the =<<= operation.
+
+** =impl<'a> Shl<u64> for &'a i16=
+
+*** =type Output = <i16 as Shl<u64>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: u64) -> <i16 as Shl<u64>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl Shl<u8> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: u8) -> i16= 
+
+Performs the =<<= operation.
+
+** =impl<'a> Shl<u8> for &'a i16=
+
+*** =type Output = <i16 as Shl<u8>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: u8) -> <i16 as Shl<u8>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl<'a> Shl<usize> for &'a i16=
+
+*** =type Output = <i16 as Shl<usize>>::Output=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: usize) -> <i16 as Shl<usize>>::Output= 
+
+Performs the =<<= operation.
+
+** =impl Shl<usize> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =<<= operator.
+
+=fn shl(self, other: usize) -> i16= 
+
+Performs the =<<= operation.
+
+** =impl<'_> ShlAssign<&'_ i128> for i16=
+
+=fn shl_assign(&mut self, other: &i128)= 
+
+Performs the =<<== operation.
+
+** =impl<'_> ShlAssign<&'_ i16> for i16=
+
+=fn shl_assign(&mut self, other: &i16)= 
+
+Performs the =<<== operation.
+
+** =impl<'_> ShlAssign<&'_ i32> for i16=
+
+=fn shl_assign(&mut self, other: &i32)= 
+
+Performs the =<<== operation.
+
+** =impl<'_> ShlAssign<&'_ i64> for i16=
+
+=fn shl_assign(&mut self, other: &i64)= 
+
+Performs the =<<== operation.
+
+** =impl<'_> ShlAssign<&'_ i8> for i16=
+
+=fn shl_assign(&mut self, other: &i8)= 
+
+Performs the =<<== operation.
+
+** =impl<'_> ShlAssign<&'_ isize> for i16=
+
+=fn shl_assign(&mut self, other: &isize)= 
+
+Performs the =<<== operation.
+
+** =impl<'_> ShlAssign<&'_ u128> for i16=
+
+=fn shl_assign(&mut self, other: &u128)= 
+
+Performs the =<<== operation.
+
+** =impl<'_> ShlAssign<&'_ u16> for i16=
+
+=fn shl_assign(&mut self, other: &u16)= 
+
+Performs the =<<== operation.
+
+** =impl<'_> ShlAssign<&'_ u32> for i16=
+
+=fn shl_assign(&mut self, other: &u32)= 
+
+Performs the =<<== operation.
+
+** =impl<'_> ShlAssign<&'_ u64> for i16=
+
+=fn shl_assign(&mut self, other: &u64)= 
+
+Performs the =<<== operation.
+
+** =impl<'_> ShlAssign<&'_ u8> for i16=
+
+=fn shl_assign(&mut self, other: &u8)= 
+
+Performs the =<<== operation.
+
+** =impl<'_> ShlAssign<&'_ usize> for i16=
+
+=fn shl_assign(&mut self, other: &usize)= 
+
+Performs the =<<== operation.
+
+** =impl ShlAssign<i128> for i16=
+
+=fn shl_assign(&mut self, other: i128)= 
+
+Performs the =<<== operation.
+
+** =impl ShlAssign<i16> for i16=
+
+=fn shl_assign(&mut self, other: i16)= 
+
+Performs the =<<== operation.
+
+** =impl ShlAssign<i32> for i16=
+
+=fn shl_assign(&mut self, other: i32)= 
+
+Performs the =<<== operation.
+
+** =impl ShlAssign<i64> for i16=
+
+=fn shl_assign(&mut self, other: i64)= 
+
+Performs the =<<== operation.
+
+** =impl ShlAssign<i8> for i16=
+
+=fn shl_assign(&mut self, other: i8)= 
+
+Performs the =<<== operation.
+
+** =impl ShlAssign<isize> for i16=
+
+=fn shl_assign(&mut self, other: isize)= 
+
+Performs the =<<== operation.
+
+** =impl ShlAssign<u128> for i16=
+
+=fn shl_assign(&mut self, other: u128)= 
+
+Performs the =<<== operation.
+
+** =impl ShlAssign<u16> for i16=
+
+=fn shl_assign(&mut self, other: u16)= 
+
+Performs the =<<== operation.
+
+** =impl ShlAssign<u32> for i16=
+
+=fn shl_assign(&mut self, other: u32)= 
+
+Performs the =<<== operation.
+
+** =impl ShlAssign<u64> for i16=
+
+=fn shl_assign(&mut self, other: u64)= 
+
+Performs the =<<== operation.
+
+** =impl ShlAssign<u8> for i16=
+
+=fn shl_assign(&mut self, other: u8)= 
+
+Performs the =<<== operation.
+
+** =impl ShlAssign<usize> for i16=
+
+=fn shl_assign(&mut self, other: usize)= 
+
+Performs the =<<== operation.
+
+** =impl<'_> Shr<&'_ i128> for i16=
+
+*** =type Output = <i16 as Shr<i128>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &i128) -> <i16 as Shr<i128>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_, '_> Shr<&'_ i128> for &'_ i16=
+
+*** =type Output = <i16 as Shr<i128>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &i128) -> <i16 as Shr<i128>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_, '_> Shr<&'_ i16> for &'_ i16=
+
+*** =type Output = <i16 as Shr<i16>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &i16) -> <i16 as Shr<i16>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_> Shr<&'_ i16> for i16=
+
+*** =type Output = <i16 as Shr<i16>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &i16) -> <i16 as Shr<i16>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_, '_> Shr<&'_ i32> for &'_ i16=
+
+*** =type Output = <i16 as Shr<i32>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &i32) -> <i16 as Shr<i32>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_> Shr<&'_ i32> for i16=
+
+*** =type Output = <i16 as Shr<i32>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &i32) -> <i16 as Shr<i32>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_> Shr<&'_ i64> for i16=
+
+*** =type Output = <i16 as Shr<i64>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &i64) -> <i16 as Shr<i64>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_, '_> Shr<&'_ i64> for &'_ i16=
+
+*** =type Output = <i16 as Shr<i64>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &i64) -> <i16 as Shr<i64>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_, '_> Shr<&'_ i8> for &'_ i16=
+
+*** =type Output = <i16 as Shr<i8>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &i8) -> <i16 as Shr<i8>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_> Shr<&'_ i8> for i16=
+
+*** =type Output = <i16 as Shr<i8>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &i8) -> <i16 as Shr<i8>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_, '_> Shr<&'_ isize> for &'_ i16=
+
+*** =type Output = <i16 as Shr<isize>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &isize) -> <i16 as Shr<isize>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_> Shr<&'_ isize> for i16=
+
+*** =type Output = <i16 as Shr<isize>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &isize) -> <i16 as Shr<isize>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_> Shr<&'_ u128> for i16=
+
+*** =type Output = <i16 as Shr<u128>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &u128) -> <i16 as Shr<u128>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_, '_> Shr<&'_ u128> for &'_ i16=
+
+*** =type Output = <i16 as Shr<u128>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &u128) -> <i16 as Shr<u128>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_, '_> Shr<&'_ u16> for &'_ i16=
+
+*** =type Output = <i16 as Shr<u16>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &u16) -> <i16 as Shr<u16>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_> Shr<&'_ u16> for i16=
+
+*** =type Output = <i16 as Shr<u16>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &u16) -> <i16 as Shr<u16>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_, '_> Shr<&'_ u32> for &'_ i16=
+
+*** =type Output = <i16 as Shr<u32>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &u32) -> <i16 as Shr<u32>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_> Shr<&'_ u32> for i16=
+
+*** =type Output = <i16 as Shr<u32>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &u32) -> <i16 as Shr<u32>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_, '_> Shr<&'_ u64> for &'_ i16=
+
+*** =type Output = <i16 as Shr<u64>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &u64) -> <i16 as Shr<u64>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_> Shr<&'_ u64> for i16=
+
+*** =type Output = <i16 as Shr<u64>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &u64) -> <i16 as Shr<u64>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_, '_> Shr<&'_ u8> for &'_ i16=
+
+*** =type Output = <i16 as Shr<u8>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &u8) -> <i16 as Shr<u8>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_> Shr<&'_ u8> for i16=
+
+*** =type Output = <i16 as Shr<u8>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &u8) -> <i16 as Shr<u8>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_, '_> Shr<&'_ usize> for &'_ i16=
+
+*** =type Output = <i16 as Shr<usize>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &usize) -> <i16 as Shr<usize>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_> Shr<&'_ usize> for i16=
+
+*** =type Output = <i16 as Shr<usize>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: &usize) -> <i16 as Shr<usize>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl Shr<i128> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: i128) -> i16= 
+
+Performs the =>>= operation.
+
+** =impl<'a> Shr<i128> for &'a i16=
+
+*** =type Output = <i16 as Shr<i128>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: i128) -> <i16 as Shr<i128>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'a> Shr<i16> for &'a i16=
+
+*** =type Output = <i16 as Shr<i16>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: i16) -> <i16 as Shr<i16>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl Shr<i16> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: i16) -> i16= 
+
+Performs the =>>= operation.
+
+** =impl<'a> Shr<i32> for &'a i16=
+
+*** =type Output = <i16 as Shr<i32>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: i32) -> <i16 as Shr<i32>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl Shr<i32> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: i32) -> i16= 
+
+Performs the =>>= operation.
+
+** =impl<'a> Shr<i64> for &'a i16=
+
+*** =type Output = <i16 as Shr<i64>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: i64) -> <i16 as Shr<i64>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl Shr<i64> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: i64) -> i16= 
+
+Performs the =>>= operation.
+
+** =impl<'a> Shr<i8> for &'a i16=
+
+*** =type Output = <i16 as Shr<i8>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: i8) -> <i16 as Shr<i8>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl Shr<i8> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: i8) -> i16= 
+
+Performs the =>>= operation.
+
+** =impl<'a> Shr<isize> for &'a i16=
+
+*** =type Output = <i16 as Shr<isize>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: isize) -> <i16 as Shr<isize>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl Shr<isize> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: isize) -> i16= 
+
+Performs the =>>= operation.
+
+** =impl Shr<u128> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: u128) -> i16= 
+
+Performs the =>>= operation.
+
+** =impl<'a> Shr<u128> for &'a i16=
+
+*** =type Output = <i16 as Shr<u128>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: u128) -> <i16 as Shr<u128>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl Shr<u16> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: u16) -> i16= 
+
+Performs the =>>= operation.
+
+** =impl<'a> Shr<u16> for &'a i16=
+
+*** =type Output = <i16 as Shr<u16>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: u16) -> <i16 as Shr<u16>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl Shr<u32> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: u32) -> i16= 
+
+Performs the =>>= operation.
+
+** =impl<'a> Shr<u32> for &'a i16=
+
+*** =type Output = <i16 as Shr<u32>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: u32) -> <i16 as Shr<u32>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'a> Shr<u64> for &'a i16=
+
+*** =type Output = <i16 as Shr<u64>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: u64) -> <i16 as Shr<u64>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl Shr<u64> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: u64) -> i16= 
+
+Performs the =>>= operation.
+
+** =impl Shr<u8> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: u8) -> i16= 
+
+Performs the =>>= operation.
+
+** =impl<'a> Shr<u8> for &'a i16=
+
+*** =type Output = <i16 as Shr<u8>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: u8) -> <i16 as Shr<u8>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl Shr<usize> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: usize) -> i16= 
+
+Performs the =>>= operation.
+
+** =impl<'a> Shr<usize> for &'a i16=
+
+*** =type Output = <i16 as Shr<usize>>::Output=
+
+The resulting type after applying the =>>= operator.
+
+=fn shr(self, other: usize) -> <i16 as Shr<usize>>::Output= 
+
+Performs the =>>= operation.
+
+** =impl<'_> ShrAssign<&'_ i128> for i16=
+
+=fn shr_assign(&mut self, other: &i128)= 
+
+Performs the =>>== operation.
+
+** =impl<'_> ShrAssign<&'_ i16> for i16=
+
+=fn shr_assign(&mut self, other: &i16)= 
+
+Performs the =>>== operation.
+
+** =impl<'_> ShrAssign<&'_ i32> for i16=
+
+=fn shr_assign(&mut self, other: &i32)= 
+
+Performs the =>>== operation.
+
+** =impl<'_> ShrAssign<&'_ i64> for i16=
+
+=fn shr_assign(&mut self, other: &i64)= 
+
+Performs the =>>== operation.
+
+** =impl<'_> ShrAssign<&'_ i8> for i16=
+
+=fn shr_assign(&mut self, other: &i8)= 
+
+Performs the =>>== operation.
+
+** =impl<'_> ShrAssign<&'_ isize> for i16=
+
+=fn shr_assign(&mut self, other: &isize)= 
+
+Performs the =>>== operation.
+
+** =impl<'_> ShrAssign<&'_ u128> for i16=
+
+=fn shr_assign(&mut self, other: &u128)= 
+
+Performs the =>>== operation.
+
+** =impl<'_> ShrAssign<&'_ u16> for i16=
+
+=fn shr_assign(&mut self, other: &u16)= 
+
+Performs the =>>== operation.
+
+** =impl<'_> ShrAssign<&'_ u32> for i16=
+
+=fn shr_assign(&mut self, other: &u32)= 
+
+Performs the =>>== operation.
+
+** =impl<'_> ShrAssign<&'_ u64> for i16=
+
+=fn shr_assign(&mut self, other: &u64)= 
+
+Performs the =>>== operation.
+
+** =impl<'_> ShrAssign<&'_ u8> for i16=
+
+=fn shr_assign(&mut self, other: &u8)= 
+
+Performs the =>>== operation.
+
+** =impl<'_> ShrAssign<&'_ usize> for i16=
+
+=fn shr_assign(&mut self, other: &usize)= 
+
+Performs the =>>== operation.
+
+** =impl ShrAssign<i128> for i16=
+
+=fn shr_assign(&mut self, other: i128)= 
+
+Performs the =>>== operation.
+
+** =impl ShrAssign<i16> for i16=
+
+=fn shr_assign(&mut self, other: i16)= 
+
+Performs the =>>== operation.
+
+** =impl ShrAssign<i32> for i16=
+
+=fn shr_assign(&mut self, other: i32)= 
+
+Performs the =>>== operation.
+
+** =impl ShrAssign<i64> for i16=
+
+=fn shr_assign(&mut self, other: i64)= 
+
+Performs the =>>== operation.
+
+** =impl ShrAssign<i8> for i16=
+
+=fn shr_assign(&mut self, other: i8)= 
+
+Performs the =>>== operation.
+
+** =impl ShrAssign<isize> for i16=
+
+=fn shr_assign(&mut self, other: isize)= 
+
+Performs the =>>== operation.
+
+** =impl ShrAssign<u128> for i16=
+
+=fn shr_assign(&mut self, other: u128)= 
+
+Performs the =>>== operation.
+
+** =impl ShrAssign<u16> for i16=
+
+=fn shr_assign(&mut self, other: u16)= 
+
+Performs the =>>== operation.
+
+** =impl ShrAssign<u32> for i16=
+
+=fn shr_assign(&mut self, other: u32)= 
+
+Performs the =>>== operation.
+
+** =impl ShrAssign<u64> for i16=
+
+=fn shr_assign(&mut self, other: u64)= 
+
+Performs the =>>== operation.
+
+** =impl ShrAssign<u8> for i16=
+
+=fn shr_assign(&mut self, other: u8)= 
+
+Performs the =>>== operation.
+
+** =impl ShrAssign<usize> for i16=
+
+=fn shr_assign(&mut self, other: usize)= 
+
+Performs the =>>== operation.
+
+** =impl Step for i16=
+
+=unsafe fn forward_unchecked(start: i16, n: usize) -> i16= 
+
+This is a nightly-only experimental API. (=unchecked_math=)
+niche optimization path
+
+Returns the value that would be obtained by taking the successor of
+=self= =count= times. Read more
+
+=unsafe fn backward_unchecked(start: i16, n: usize) -> i16= 
+
+This is a nightly-only experimental API. (=unchecked_math=)
+niche optimization path
+
+Returns the value that would be obtained by taking the predecessor of
+=self= =count= times. Read more
+
+=fn forward(start: i16, n: usize) -> i16= 
+
+This is a nightly-only experimental API. (=step_trait_ext= #42168)
+recently added
+
+Returns the value that would be obtained by taking the successor of
+=self= =count= times. Read more
+
+=fn backward(start: i16, n: usize) -> i16= 
+
+This is a nightly-only experimental API. (=step_trait_ext= #42168)
+recently added
+
+Returns the value that would be obtained by taking the predecessor of
+=self= =count= times. Read more
+
+=fn steps_between(start: &i16, end: &i16) -> Option<usize>= 
+
+This is a nightly-only experimental API. (=step_trait= #42168)
+recently redesigned
+
+Returns the number of successor steps required to get from =start= to
+=end=. Read more
+
+=fn forward_checked(start: i16, n: usize) -> Option<i16>= 
+
+This is a nightly-only experimental API. (=step_trait_ext= #42168)
+recently added
+
+Returns the value that would be obtained by taking the successor of
+=self= =count= times. Read more
+
+=fn backward_checked(start: i16, n: usize) -> Option<i16>= 
+
+This is a nightly-only experimental API. (=step_trait_ext= #42168)
+recently added
+
+Returns the value that would be obtained by taking the successor of
+=self= =count= times. Read more
+
+** =impl<'_, '_> Sub<&'_ i16> for &'_ i16=
+
+*** =type Output = <i16 as Sub<i16>>::Output=
+
+The resulting type after applying the =-= operator.
+
+=fn sub(self, other: &i16) -> <i16 as Sub<i16>>::Output= 
+
+Performs the =-= operation.
+
+** =impl<'_> Sub<&'_ i16> for i16=
+
+*** =type Output = <i16 as Sub<i16>>::Output=
+
+The resulting type after applying the =-= operator.
+
+=fn sub(self, other: &i16) -> <i16 as Sub<i16>>::Output= 
+
+Performs the =-= operation.
+
+** =impl Sub<i16> for i16=
+
+*** =type Output = i16=
+
+The resulting type after applying the =-= operator.
+
+=fn sub(self, other: i16) -> i16= 
+
+Performs the =-= operation.
+
+** =impl<'a> Sub<i16> for &'a i16=
+
+*** =type Output = <i16 as Sub<i16>>::Output=
+
+The resulting type after applying the =-= operator.
+
+=fn sub(self, other: i16) -> <i16 as Sub<i16>>::Output= 
+
+Performs the =-= operation.
+
+** =impl<'_> SubAssign<&'_ i16> for i16=
+
+=fn sub_assign(&mut self, other: &i16)= 
+
+Performs the =-== operation.
+
+** =impl SubAssign<i16> for i16=
+
+=fn sub_assign(&mut self, other: i16)= 
+
+Performs the =-== operation.
+
+** =impl<'a> Sum<&'a i16> for i16=
+
+=fn sum<I>(iter: I) -> i16 where    I: Iterator<Item = &'a i16>, = 
+
+Method which takes an iterator and generates =Self= from the elements by
+"summing up" the items. Read more
+
+** =impl Sum<i16> for i16=
+
+=fn sum<I>(iter: I) -> i16 where    I: Iterator<Item = i16>, = 
+
+Method which takes an iterator and generates =Self= from the elements by
+"summing up" the items. Read more
+
+** =impl TryFrom<i128> for i16=
+
+*** =type Error = TryFromIntError=
+
+The type returned in the event of a conversion error.
+
+*** = fn try_from(u: i128) -> Result<i16, <i16 as TryFrom<i128>>::Error>=
+
+Try to create the target number type from a source number type. This
+returns an error if the source value is outside of the range of the
+target type.
+
+** =impl TryFrom<i32> for i16=
+
+*** =type Error = TryFromIntError=
+
+The type returned in the event of a conversion error.
+
+*** = fn try_from(u: i32) -> Result<i16, <i16 as TryFrom<i32>>::Error>=
+
+Try to create the target number type from a source number type. This
+returns an error if the source value is outside of the range of the
+target type.
+
+** =impl TryFrom<i64> for i16=
+
+*** =type Error = TryFromIntError=
+
+The type returned in the event of a conversion error.
+
+*** = fn try_from(u: i64) -> Result<i16, <i16 as TryFrom<i64>>::Error>=
+
+Try to create the target number type from a source number type. This
+returns an error if the source value is outside of the range of the
+target type.
+
+** =impl TryFrom<isize> for i16=
+
+*** =type Error = TryFromIntError=
+
+The type returned in the event of a conversion error.
+
+*** = fn try_from(u: isize) -> Result<i16, <i16 as TryFrom<isize>>::Error>=
+
+Try to create the target number type from a source number type. This
+returns an error if the source value is outside of the range of the
+target type.
+
+** =impl TryFrom<u128> for i16=
+
+*** =type Error = TryFromIntError=
+
+The type returned in the event of a conversion error.
+
+*** = fn try_from(u: u128) -> Result<i16, <i16 as TryFrom<u128>>::Error>=
+
+Try to create the target number type from a source number type. This
+returns an error if the source value is outside of the range of the
+target type.
+
+** =impl TryFrom<u16> for i16=
+
+*** =type Error = TryFromIntError=
+
+The type returned in the event of a conversion error.
+
+*** = fn try_from(u: u16) -> Result<i16, <i16 as TryFrom<u16>>::Error>=
+
+Try to create the target number type from a source number type. This
+returns an error if the source value is outside of the range of the
+target type.
+
+** =impl TryFrom<u32> for i16=
+
+*** =type Error = TryFromIntError=
+
+The type returned in the event of a conversion error.
+
+*** = fn try_from(u: u32) -> Result<i16, <i16 as TryFrom<u32>>::Error>=
+
+Try to create the target number type from a source number type. This
+returns an error if the source value is outside of the range of the
+target type.
+
+** =impl TryFrom<u64> for i16=
+
+*** =type Error = TryFromIntError=
+
+The type returned in the event of a conversion error.
+
+*** = fn try_from(u: u64) -> Result<i16, <i16 as TryFrom<u64>>::Error>=
+
+Try to create the target number type from a source number type. This
+returns an error if the source value is outside of the range of the
+target type.
+
+** =impl TryFrom<usize> for i16=
+
+*** =type Error = TryFromIntError=
+
+The type returned in the event of a conversion error.
+
+*** = fn try_from(u: usize) -> Result<i16, <i16 as TryFrom<usize>>::Error>=
+
+Try to create the target number type from a source number type. This
+returns an error if the source value is outside of the range of the
+target type.
+
+** =impl UpperExp for i16=
+
+=fn fmt(&self, f: &mut Formatter) -> Result<(), Error>= 
+
+Formats the value using the given formatter.
+
+** =impl UpperHex for i16=
+
+=fn fmt(&self, f: &mut Formatter) -> Result<(), Error>= 
+
+Formats the value using the given formatter.
+
+* Auto
+
+<<synthetic-implementations-list>>
+** =impl RefUnwindSafe for i16=
+
+** =impl Send for i16=
+
+** =impl Sync for i16=
+
+** =impl Unpin for i16=
+
+** =impl UnwindSafe for i16=
+
+* Blanket
+
+<<blanket-implementations-list>>
+** =impl<T> Any for T where    T: 'static + ?Sized, =
+
+=fn type_id(&self) -> TypeId= 
+
+Gets the =TypeId= of =self=. Read more
+
+** =impl<T> Borrow<T> for T where    T: ?Sized, =
+
+=fn borrow(&self) -> &T= 
+
+Immutably borrows from an owned value. Read more
+
+** =impl<T> BorrowMut<T> for T where    T: ?Sized, =
+
+=fn borrow_mut(&mut self) -> &mut T= 
+
+Mutably borrows from an owned value. Read more
+
+** =impl<T> From<T> for T=
+
+=fn from(t: T) -> T= 
+
+Performs the conversion.
+
+** =impl<T, U> Into<U> for T where    U: From<T>, =
+
+=fn into(self) -> U= 
+
+Performs the conversion.
+
+** =impl<T> ToOwned for T where    T: Clone, =
+
+*** =type Owned = T=
+
+The resulting type after obtaining ownership.
+
+=fn to_owned(&self) -> T= 
+
+Creates owned data from borrowed data, usually by cloning. Read more
+
+=fn clone_into(&self, target: &mut T)= 
+
+This is a nightly-only experimental API. (=toowned_clone_into= #41263)
+recently added
+
+Uses borrowed data to replace owned data, usually by cloning. Read more
+
+** =impl<T> ToString for T where    T: Display + ?Sized, =
+
+=default fn to_string(&self) -> String= 
+
+Converts the given value to a =String=. Read more
+
+** =impl<T, U> TryFrom<U> for T where    U: Into<T>, =
+
+*** =type Error = Infallible=
+
+The type returned in the event of a conversion error.
+
+=fn try_from(value: U) -> Result<T, <T as TryFrom<U>>::Error>= 
+
+Performs the conversion.
+
+** =impl<T, U> TryInto<U> for T where    U: TryFrom<T>, =
+
+*** =type Error = <U as TryFrom<T>>::Error=
+
+The type returned in the event of a conversion error.
+
+=fn try_into(self) -> Result<U, <U as TryFrom<T>>::Error>= 
+
+Performs the conversion.

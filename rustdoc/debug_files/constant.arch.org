@@ -1,0 +1,22 @@
+* Constant std::env::consts::ARCH
+
+#+BEGIN_SRC rust 
+pub const ARCH: &str;
+#+END_SRC
+
+A string describing the architecture of the CPU that is currently in
+use.
+
+Some possible values:
+
+- x86
+- x86_64
+- arm
+- aarch64
+- mips
+- mips64
+- powerpc
+- powerpc64
+- riscv64
+- s390x
+- sparc64
