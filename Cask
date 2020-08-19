@@ -5,6 +5,7 @@
 
 (development
  (depends-on "ert-runner")
+ (depends-on "helm-ag")
  (depends-on "lsp-mode")
  (depends-on "flycheck")
  (depends-on "f"))
