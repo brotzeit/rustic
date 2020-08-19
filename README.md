@@ -30,10 +30,10 @@ Status](https://travis-ci.com/brotzeit/rustic.svg?branch=master)](https://travis
     - [Clippy](#clippy)
         - [Flycheck](#flycheck)
         - [lsp-mode](#lsp-mode-1)
+    - [Inline documentation](#inline-documentation)
     - [Org-babel](#org-babel)
     - [Popup](#popup)
     - [elisp tests](#elisp-tests)
-    - [Inline documentation](#inline-documentation)
     - [Contributing](#contributing)
 
 <!-- markdown-toc end -->
@@ -57,6 +57,7 @@ Differences with rust-mode:
 - automatic LSP configuration with
   [eglot](https://github.com/joaotavora/eglot) or
   [lsp-mode](https://github.com/emacs-lsp/lsp-mode)
+- Optional rust inline documentation
 - cask for testing
 - requires emacs 26
 - etc.
@@ -365,28 +366,8 @@ Customization:
   of babel process
 - `rustic-display-spinner` turn off spinner in the mode-line
 
-## Popup
-
-You can execute commands with `rustic-popup`. The list of commands can
-be customized with `rustic-popup-commands`. It's also possible to view
-the command's flags with `h`.  The command
-`rustic-popup-default-action` (`RET` or `TAB`) allows you to change:
-
-- `RUST_BACKTRACE` environment variable
-- `compilation-arguments` for `recompile`
-- arguments for `cargo test`
-
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup.png)
-
-## elisp tests
-
-To run the tests, you will need [Cask](https://github.com/cask/cask).
-
-``` bash
-make test
-```
-
 ## inline-documentation
+
 With some setup, it is possible to read rust documentation inside Emacs!
 
 ### Prequisites
@@ -409,6 +390,27 @@ With some setup, it is possible to read rust documentation inside Emacs!
 * We are waiting for an update to Pandoc that will make the generated documents prettier, it should be available soon https://github.com/jgm/pandoc/issues/6554
 * You should re-run `rustdoc-setup` once in a while, to update the pandoc filter.
 * If rustdoc does not find the documentation for something, the first thing to do is check the project's `target/doc` folder for the corresponding `.html-file`. If there is no file there, there is nothing for rustdoc to convert. If there is a file there, please create an issue!
+
+## Popup
+
+You can execute commands with `rustic-popup`. The list of commands can
+be customized with `rustic-popup-commands`. It's also possible to view
+the command's flags with `h`.  The command
+`rustic-popup-default-action` (`RET` or `TAB`) allows you to change:
+
+- `RUST_BACKTRACE` environment variable
+- `compilation-arguments` for `recompile`
+- arguments for `cargo test`
+
+![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup.png)
+
+## elisp tests
+
+To run the tests, you will need [Cask](https://github.com/cask/cask).
+
+``` bash
+make test
+```
 
 ## Contributing
 
