@@ -310,6 +310,6 @@ If the user has not visited a project, returns the main doc directory."
     (add-hook mode 'rustdoc-mode))
   (rustdoc--update-current-project))
 
-(provide 'rustdoc)
+(provide 'rustic-rustdoc)
 
 ;;; rustdoc.el ends here
