@@ -1,4 +1,4 @@
-;;; rustdoc.el --- Browse rust documentation as .org files -*- lexical-binding: t -*-
+;;; rustic-rustdoc.el --- Browse rust documentation as .org files -*- lexical-binding: t -*-
 
 ;; Copyright (c) 2020 Sam Hedin
 
@@ -283,4 +283,4 @@ If the user has not visited a project, returns the main doc directory."
 
 (provide 'rustic-rustdoc)
 
-;;; rustdoc.el ends here
+;;; rustic-rustdoc.el ends here
