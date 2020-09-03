@@ -290,7 +290,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
   '("as" "async" "await"
     "box" "break"
     "const" "continue" "crate"
-    "do"
+    "do" "dyn"
     "else" "enum" "extern" "existential"
     "false" "fn" "for"
     "if" "impl" "in"
