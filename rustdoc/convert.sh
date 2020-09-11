@@ -2,10 +2,6 @@
 
 LUA_FILTER="$HOME/.local/bin/rustdoc-filter.lua"
 
-function num_cpus {
-    rg -c '^$' /proc/cpuinfo
-}
-
 function get_toolchain {
     rustup show | sed -nr 's/(.*) \(default\)/\1/p' | head -n 1
 }
@@ -55,7 +51,7 @@ BEGIN { m = length(PRE)
 fd . \
     -ehtml \
     --ignore-file "$ignore_file" \
-    -j"$(num_cpus)" \
+    -j"$(nproc)" \
     -x pandoc '{}' \
     --lua-filter "$LUA_FILTER" \
     -o "$DEST_DIR/{.}.org"
