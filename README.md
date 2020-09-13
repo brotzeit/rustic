@@ -31,6 +31,7 @@ Status](https://travis-ci.com/brotzeit/rustic.svg?branch=master)](https://travis
         - [Flycheck](#flycheck)
         - [lsp-mode](#lsp-mode-1)
     - [Org-babel](#org-babel)
+    - [Spinner](#spinner)
     - [Popup](#popup)
     - [elisp tests](#elisp-tests)
     - [Contributing](#contributing)
@@ -362,7 +363,10 @@ Customization:
 - `rustic-babel-format-src-block` format block after successful build
 - `rustic-babel-display-compilation-buffer` display compilation buffer
   of babel process
-- `rustic-display-spinner` turn off spinner in the mode-line
+
+## Spinner
+
+In case you want to use a different spinner type you can modify `rustic-spinner-type` or turn it off completely with `rustic-display-spinner`.([Available spinner types](https://github.com/Malabarba/spinner.el/blob/master/spinner.el#L104)).
 
 ## Popup
 
