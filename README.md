@@ -381,6 +381,7 @@ With some setup, it is possible to read rust documentation inside Emacs!
 * Install ripgrep with `cargo install ripgrep` or one of the alternatives: https://github.com/BurntSushi/ripgrep#installation
 * Install cargo-makedocs by running `cargo install cargo-makedocs` https://github.com/Bunogi/cargo-makedocs
 * Install fd with `cargo install fd`, or your package manager
+* Install helm-ag https://github.com/emacsorphanage/helm-ag
 
 ### Usage
 
