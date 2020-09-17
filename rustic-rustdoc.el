@@ -49,7 +49,6 @@ All projects and std by default, otherwise last open project and std.")
                             (,rustdoc-lua-filter
                              ()
                              ,(concat rustdoc-source-repo "filter.lua"))))
-(defvar rustdoc-supports-pcre nil)
 (setq rustdoc-search-function (if nil ;; (require 'helm-ag)
                                     (lambda (search-dir search-term)
                                       (let* ((helm-ag-base-command (if rustdoc-current-project ; If the user has not visited a project the search will be done from the doc root, in which case we should not follow symlinks.
@@ -63,10 +62,8 @@ All projects and std by default, otherwise last open project and std.")
                                           (error (helm-ag rustdoc-save-loc search-term)))))
                                   (lambda (search-dir search-term)
                                     (message "%s" search-term)
-                                    (grep (format "grep -RPIn %s %s" search-term (rustdoc--project-doc-dest))))))
+                                    (grep (format "grep -RPIni '%s' %s" search-term (rustdoc--project-doc-dest))))))
 
-(grep (format "grep -RPIn '^\*+[^-*(<]*option' %s" (rustdoc--project-doc-dest)))
-(grep "grep -RPIn '^\\*+[^-*(<]*option' /home/sam/.local/share/emacs")
 
 (defun rustdoc--install-resources ()
   "Install or update the rustdoc resources."
@@ -138,9 +135,7 @@ it doesn't manage to find what you're looking for, try `rustdoc-dumb-search'."
                     (progn
                       (setq current-prefix-arg nil)
                       "^\\*")
-                  (if rustdoc-supports-pcre
-                      "^(?!.*impl)^\\*+"
-                    "^\\*+")))  ; Do not match if it's an impl
+                  "^(?!.*impl)^\\*+"))  ; Do not match if it's an impl
          ;; This seq-reduce turns `enum option' into (kind of) `enum.*option', which lets there be chars between the searched words
          (regexed-search-term (concat regex
                                         ; Regex explanation
