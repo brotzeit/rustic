@@ -50,6 +50,18 @@ All projects and std by default, otherwise last open project and std.")
                              ()
                              ,(concat rustdoc-source-repo "filter.lua"))))
 
+(defvar search-function (lambda (search-dir search-term)
+                          (let* ((helm-ag-base-command (if rustdoc-current-project ; If the user has not visited a project the search will be done from the doc root, in which case we should not follow symlinks.
+                                                           "rg -L --smart-case --no-heading --color=never --line-number --pcre2"
+                                                         "rg --smart-case --no-heading --color=never --line-number --pcre2"))
+                                 (helm-ag-fuzzy-match t)
+                                 (helm-ag-success-exit-status '(0 2)))
+                            (condition-case nil
+                                (helm-ag search-dir search-term)
+                              ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
+                              (error (helm-ag rustdoc-save-loc search-term))))))
+
+
 (defun rustdoc--install-resources ()
   "Install or update the rustdoc resources."
   (dolist (resource rustdoc-resources)
@@ -105,14 +117,9 @@ it doesn't manage to find what you're looking for, try `rustdoc-dumb-search'."
                                     nil
                                     short-name))))
 
-    (rustdoc--update-current-project)
+  (rustdoc--update-current-project)
   ;; These helm-ag settings are to make it work properly with ripgrep.
-    (let* ((helm-ag-base-command (if rustdoc-current-project ; If the user has not visited a project the search will be done from the doc root, in which case we should not follow symlinks.
-                                     "rg -L --smart-case --no-heading --color=never --line-number --pcre2"
-                                   "rg --smart-case --no-heading --color=never --line-number --pcre2"))
-         (helm-ag-fuzzy-match t)
-         (helm-ag-success-exit-status '(0 2))
-         (thing-at-point (rustdoc--thing-at-point))
+  (let* ((thing-at-point (rustdoc--thing-at-point))
          (short-name (alist-get 'short-name thing-at-point))
          ;; If the user did not accept the default search suggestion, we should not search in that suggestion's directory.
          (search-dir
@@ -144,10 +151,7 @@ it doesn't manage to find what you're looking for, try `rustdoc-dumb-search'."
     ;; If the user has not run `rustdoc-convert-current-package' in the current project, we create a default directory that only contains a symlink to std.
     (unless (file-directory-p (rustdoc--project-doc-dest))
       (rustdoc-create-project-dir))
-    (condition-case nil
-        (helm-ag search-dir regexed-search-term)
-      ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
-      (error (helm-ag rustdoc-save-loc regexed-search-term)))))
+    (funcall search-function search-dir regexed-search-term)))
 
 (defun rustdoc--update-current-project ()
   "Update `rustdoc-current-project' if editing a rust file, otherwise leave it."
