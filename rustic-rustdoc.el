@@ -49,15 +49,24 @@ All projects and std by default, otherwise last open project and std.")
                              ()
                              ,(concat rustdoc-source-repo "filter.lua"))))
 
-;; (defun rustdoc-default-search-command ())
-;; (defcustom rustdoc-helm-ag-default-search-command )
+(defun rustdoc-default-search-command ()
+  "The default search command when using helm-ag.
+Needs to be a function because of its reliance on
+`rustdoc-current-project'"
+  (concat "rg --smart-case --no-heading --color=never --line-number --pcre2" (if rustdoc-current-project "-L" "")))
 
-(defun rustdoc-default-search-function ()
+(defcustom rustdoc-helm-ag-default-search-command 'rustdoc-default-search-command
+  "The default command args to pass helm-ag when searching."
+  :type 'function
+  :group 'rustic-rustdoc)
+
+(defun rustdoc-default-search-function (search-dir search-term)
   "Default search functionality.
-Uses helm-ag and ripgrep if possible, grep otherwise."
-  (if (and  (require 'helm-ag nil t) (executable-find "rg")) ; If helm-ag and rg is available we use them by default, otherwise revert to using grep
+Uses helm-ag and ripgrep if possible, grep otherwise.
+Search for SEARCH-TERM inside SEARCH-DIR"
+  (if (and  (require 'helm-ag nil t) (executable-find "rg"))
       (lambda (search-dir search-term)
-        (let* ((helm-ag-base-command (concat "rg --smart-case --no-heading --color=never --line-number --pcre2" (if rustdoc-current-project "-L" "")))
+        (let* ((helm-ag-base-command (funcall rustdoc-helm-ag-default-search-command))
                (helm-ag-success-exit-status '(0 2)))
           (condition-case nil
               (helm-ag search-dir search-term)
