@@ -49,7 +49,7 @@ All projects and std by default, otherwise last open project and std.")
                              ()
                              ,(concat rustdoc-source-repo "filter.lua"))))
 
-(defvar rustdoc-search-function (if (require 'helm-ag nil t) ; If helm-ag is available we use it by default, otherwise revert to using grep
+(defvar rustdoc-search-function (if (and  (require 'helm-ag nil t) (executable-find "rg")) ; If helm-ag and rg is available we use them by default, otherwise revert to using grep
                                        (lambda (search-dir search-term)
                                          (let* ((helm-ag-base-command (if rustdoc-current-project ; If the user has not visited a project the search will be done from the doc root, in which case we should not follow symlinks.
                                                                           "rg -L --smart-case --no-heading --color=never --line-number --pcre2"
