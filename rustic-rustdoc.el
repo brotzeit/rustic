@@ -63,9 +63,10 @@ All projects and std by default, otherwise last open project and std.")
                                           (error (helm-ag rustdoc-save-loc search-term)))))
                                   (lambda (search-dir search-term)
                                     (message "%s" search-term)
-                                    (grep (format "grep -RIn %s %s" search-term (rustdoc--project-doc-dest))))))
+                                    (grep (format "grep -RPIn %s %s" search-term (rustdoc--project-doc-dest))))))
 
-(format "%s" (rustdoc--project-doc-dest))
+(grep (format "grep -RPIn '^\*+[^-*(<]*option' %s" (rustdoc--project-doc-dest)))
+(grep "grep -RPIn '^\\*+[^-*(<]*option' /home/sam/.local/share/emacs")
 
 (defun rustdoc--install-resources ()
   "Install or update the rustdoc resources."
