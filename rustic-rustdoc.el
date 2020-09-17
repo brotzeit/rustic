@@ -49,18 +49,23 @@ All projects and std by default, otherwise last open project and std.")
                             (,rustdoc-lua-filter
                              ()
                              ,(concat rustdoc-source-repo "filter.lua"))))
+(defvar rustdoc-supports-pcre nil)
+(setq rustdoc-search-function (if nil ;; (require 'helm-ag)
+                                    (lambda (search-dir search-term)
+                                      (let* ((helm-ag-base-command (if rustdoc-current-project ; If the user has not visited a project the search will be done from the doc root, in which case we should not follow symlinks.
+                                                                       "rg -L --smart-case --no-heading --color=never --line-number --pcre2"
+                                                                     "rg --smart-case --no-heading --color=never --line-number --pcre2"))
+                                             (helm-ag-fuzzy-match t)
+                                             (helm-ag-success-exit-status '(0 2)))
+                                        (condition-case nil
+                                            (helm-ag search-dir search-term)
+                                          ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
+                                          (error (helm-ag rustdoc-save-loc search-term)))))
+                                  (lambda (search-dir search-term)
+                                    (message "%s" search-term)
+                                    (grep (format "grep -RIn %s %s" search-term (rustdoc--project-doc-dest))))))
 
-(defvar search-function (lambda (search-dir search-term)
-                          (let* ((helm-ag-base-command (if rustdoc-current-project ; If the user has not visited a project the search will be done from the doc root, in which case we should not follow symlinks.
-                                                           "rg -L --smart-case --no-heading --color=never --line-number --pcre2"
-                                                         "rg --smart-case --no-heading --color=never --line-number --pcre2"))
-                                 (helm-ag-fuzzy-match t)
-                                 (helm-ag-success-exit-status '(0 2)))
-                            (condition-case nil
-                                (helm-ag search-dir search-term)
-                              ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
-                              (error (helm-ag rustdoc-save-loc search-term))))))
-
+(format "%s" (rustdoc--project-doc-dest))
 
 (defun rustdoc--install-resources ()
   "Install or update the rustdoc resources."
@@ -130,10 +135,11 @@ it doesn't manage to find what you're looking for, try `rustdoc-dumb-search'."
          ;; If the prefix arg is provided, we only search for level 1 headers by making sure that there is only one * at the beginning of the line.
          (regex (if current-prefix-arg
                     (progn
-                      ;; If current-prefix-arg is not set to nil, helm-ag will pick up the prefix arg too and do funny business.
                       (setq current-prefix-arg nil)
                       "^\\*")
-                  "^(?!.*impl)^\\*+"))  ; Do not match if it's an impl
+                  (if rustdoc-supports-pcre
+                      "^(?!.*impl)^\\*+"
+                    "^\\*+")))  ; Do not match if it's an impl
          ;; This seq-reduce turns `enum option' into (kind of) `enum.*option', which lets there be chars between the searched words
          (regexed-search-term (concat regex
                                         ; Regex explanation
@@ -151,7 +157,7 @@ it doesn't manage to find what you're looking for, try `rustdoc-dumb-search'."
     ;; If the user has not run `rustdoc-convert-current-package' in the current project, we create a default directory that only contains a symlink to std.
     (unless (file-directory-p (rustdoc--project-doc-dest))
       (rustdoc-create-project-dir))
-    (funcall search-function search-dir regexed-search-term)))
+    (funcall rustdoc-search-function search-dir regexed-search-term)))
 
 (defun rustdoc--update-current-project ()
   "Update `rustdoc-current-project' if editing a rust file, otherwise leave it."
