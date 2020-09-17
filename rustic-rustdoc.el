@@ -49,19 +49,28 @@ All projects and std by default, otherwise last open project and std.")
                              ()
                              ,(concat rustdoc-source-repo "filter.lua"))))
 
-(defvar rustdoc-search-function (if (and  (require 'helm-ag nil t) (executable-find "rg")) ; If helm-ag and rg is available we use them by default, otherwise revert to using grep
-                                       (lambda (search-dir search-term)
-                                         (let* ((helm-ag-base-command (if rustdoc-current-project ; If the user has not visited a project the search will be done from the doc root, in which case we should not follow symlinks.
-                                                                          "rg -L --smart-case --no-heading --color=never --line-number --pcre2"
-                                                                        "rg --smart-case --no-heading --color=never --line-number --pcre2"))
-                                                (helm-ag-fuzzy-match t)
-                                                (helm-ag-success-exit-status '(0 2)))
-                                           (condition-case nil
-                                               (helm-ag search-dir search-term)
-                                             ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
-                                             (error (helm-ag rustdoc-save-loc search-term)))))
-                                     (lambda (search-dir search-term)
-                                       (grep (format "grep -RPIni '%s' %s" search-term (rustdoc--project-doc-dest))))))
+;; (defun rustdoc-default-search-command ())
+;; (defcustom rustdoc-helm-ag-default-search-command )
+
+(defun rustdoc-default-search-function ()
+  "Default search functionality.
+Uses helm-ag and ripgrep if possible, grep otherwise."
+  (if (and  (require 'helm-ag nil t) (executable-find "rg")) ; If helm-ag and rg is available we use them by default, otherwise revert to using grep
+      (lambda (search-dir search-term)
+        (let* ((helm-ag-base-command (concat "rg --smart-case --no-heading --color=never --line-number --pcre2" (if rustdoc-current-project "-L" "")))
+               (helm-ag-success-exit-status '(0 2)))
+          (condition-case nil
+              (helm-ag search-dir search-term)
+            ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
+            (error (helm-ag rustdoc-save-loc search-term)))))
+    (lambda (search-dir search-term)
+      (grep (format "grep -RPIni '%s' %s" search-term (rustdoc--project-doc-dest))))))
+
+(defcustom rustdoc-search-function 'rustdoc-default-search-function
+  "Function to use for searching documentation.
+The function should take search-dir and search-term as arguments."
+  :type 'function
+  :group 'rustic-rustdoc)
 
 (defun rustdoc--install-resources ()
   "Install or update the rustdoc resources."
