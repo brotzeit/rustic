@@ -13,7 +13,6 @@
 
 ;;; Code:
 
-(require 'helm-ag)
 (require 'url)
 (require 'lsp-mode)
 (require 'f)
@@ -49,7 +48,8 @@ All projects and std by default, otherwise last open project and std.")
                             (,rustdoc-lua-filter
                              ()
                              ,(concat rustdoc-source-repo "filter.lua"))))
-(setq rustdoc-search-function (if nil ;; (require 'helm-ag)
+
+(defvar rustdoc-search-function (if (require 'helm-ag nil t)
                                     (lambda (search-dir search-term)
                                       (let* ((helm-ag-base-command (if rustdoc-current-project ; If the user has not visited a project the search will be done from the doc root, in which case we should not follow symlinks.
                                                                        "rg -L --smart-case --no-heading --color=never --line-number --pcre2"
@@ -61,9 +61,7 @@ All projects and std by default, otherwise last open project and std.")
                                           ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
                                           (error (helm-ag rustdoc-save-loc search-term)))))
                                   (lambda (search-dir search-term)
-                                    (message "%s" search-term)
                                     (grep (format "grep -RPIni '%s' %s" search-term (rustdoc--project-doc-dest))))))
-
 
 (defun rustdoc--install-resources ()
   "Install or update the rustdoc resources."
