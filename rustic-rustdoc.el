@@ -55,25 +55,33 @@ Needs to be a function because of its reliance on
 `rustdoc-current-project'"
   (concat "rg --smart-case --no-heading --color=never --line-number --pcre2" (if rustdoc-current-project "-L" "")))
 
-(defcustom rustdoc-helm-ag-default-search-command 'rustdoc-default-search-command
-  "The default command args to pass helm-ag when searching."
+(defcustom rustdoc-helm-ag-base-command 'rustdoc-default-search-command
+  "The default command string to pass helm-ag when searching."
   :type 'function
   :group 'rustic-rustdoc)
 
-(defun rustdoc-default-search-function (search-dir search-term)
+(defun rustdoc-default-search-function (&rest _r)
   "Default search functionality.
 Uses helm-ag and ripgrep if possible, grep otherwise.
 Search for SEARCH-TERM inside SEARCH-DIR"
   (if (and  (require 'helm-ag nil t) (executable-find "rg"))
-      (lambda (search-dir search-term)
-        (let* ((helm-ag-base-command (funcall rustdoc-helm-ag-default-search-command))
-               (helm-ag-success-exit-status '(0 2)))
-          (condition-case nil
-              (helm-ag search-dir search-term)
-            ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
-            (error (helm-ag rustdoc-save-loc search-term)))))
-    (lambda (search-dir search-term)
-      (grep (format "grep -RPIni '%s' %s" search-term (rustdoc--project-doc-dest))))))
+      'rustdoc-helm-ag-search
+    'rustdoc-grep-search))
+
+(defun rustdoc-grep-search (&rest _r)
+  "Return function for searching docs using grep."
+  (lambda (search-dir search-term)
+      (grep (format "grep -RPIni '%s' %s" search-term (rustdoc--project-doc-dest)))))
+
+(defun rustdoc-helm-ag-search (&rest _r)
+  "Return function for searching docs using helm-ag."
+  (lambda (search-dir search-term)
+    (let* ((helm-ag-base-command (funcall rustdoc-helm-ag-base-command))
+           (helm-ag-success-exit-status '(0 2)))
+      (condition-case nil
+          (helm-ag search-dir search-term)
+        ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
+        (error (helm-ag rustdoc-save-loc search-term))))))
 
 (defcustom rustdoc-search-function 'rustdoc-default-search-function
   "Function to use for searching documentation.
