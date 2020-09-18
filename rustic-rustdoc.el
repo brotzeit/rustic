@@ -49,39 +49,30 @@ All projects and std by default, otherwise last open project and std.")
                              ()
                              ,(concat rustdoc-source-repo "filter.lua"))))
 
-(defun rustdoc-default-search-command ()
+(defun rustdoc-default-helm-ag-search-command ()
   "The default search command when using helm-ag.
 Needs to be a function because of its reliance on
 `rustdoc-current-project'"
   (concat "rg --smart-case --no-heading --color=never --line-number --pcre2" (if rustdoc-current-project "-L" "")))
 
-(defcustom rustdoc-helm-ag-base-command 'rustdoc-default-search-command
+(defcustom rustdoc-helm-ag-base-command 'rustdoc-default-helm-ag-search-command
   "The default command string to pass helm-ag when searching."
   :type 'function
   :group 'rustic-rustdoc)
 
-(defun rustdoc-default-search-function (&rest _r)
+(defun rustdoc-default-search-function (search-dir search-term)
   "Default search functionality.
 Uses helm-ag and ripgrep if possible, grep otherwise.
 Search for SEARCH-TERM inside SEARCH-DIR"
   (if (and  (require 'helm-ag nil t) (executable-find "rg"))
-      'rustdoc-helm-ag-search
-    'rustdoc-grep-search))
+      (let* ((helm-ag-base-command (funcall rustdoc-helm-ag-base-command))
+             (helm-ag-success-exit-status '(0 2)))
+        (condition-case nil
+            (helm-ag search-dir search-term)
+          ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
+          (error (helm-ag rustdoc-save-loc search-term))))
+    (grep (format "grep -RPIni '%s' %s" search-term search-dir))))
 
-(defun rustdoc-grep-search (&rest _r)
-  "Return function for searching docs using grep."
-  (lambda (search-dir search-term)
-      (grep (format "grep -RPIni '%s' %s" search-term (rustdoc--project-doc-dest)))))
-
-(defun rustdoc-helm-ag-search (&rest _r)
-  "Return function for searching docs using helm-ag."
-  (lambda (search-dir search-term)
-    (let* ((helm-ag-base-command (funcall rustdoc-helm-ag-base-command))
-           (helm-ag-success-exit-status '(0 2)))
-      (condition-case nil
-          (helm-ag search-dir search-term)
-        ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
-        (error (helm-ag rustdoc-save-loc search-term))))))
 
 (defcustom rustdoc-search-function 'rustdoc-default-search-function
   "Function to use for searching documentation.
@@ -145,7 +136,6 @@ it doesn't manage to find what you're looking for, try `rustdoc-dumb-search'."
                                     short-name))))
 
   (rustdoc--update-current-project)
-  ;; These helm-ag settings are to make it work properly with ripgrep.
   (let* ((thing-at-point (rustdoc--thing-at-point))
          (short-name (alist-get 'short-name thing-at-point))
          ;; If the user did not accept the default search suggestion, we should not search in that suggestion's directory.
@@ -178,6 +168,8 @@ it doesn't manage to find what you're looking for, try `rustdoc-dumb-search'."
     (unless (file-directory-p (rustdoc--project-doc-dest))
       (rustdoc-create-project-dir))
     (funcall rustdoc-search-function search-dir regexed-search-term)))
+
+;; (rustdoc--helm-ag-search (rustdoc--project-doc-dest) "^(?!.*impl)^\\*+[^-*(<]*enum[^-*(<]*option")
 
 (defun rustdoc--update-current-project ()
   "Update `rustdoc-current-project' if editing a rust file, otherwise leave it."
