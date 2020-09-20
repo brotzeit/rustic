@@ -49,13 +49,13 @@ All projects and std by default, otherwise last open project and std.")
                              ()
                              ,(concat rustdoc-source-repo "filter.lua"))))
 
-(defun rustdoc-default-helm-ag-search-command ()
+(defun rustdoc-default-rg-search-command ()
   "The default search command when using helm-ag.
 Needs to be a function because of its reliance on
 `rustdoc-current-project'"
   (concat "rg --smart-case --no-heading --color=never --line-number --pcre2" (if rustdoc-current-project "-L" "")))
 
-(defcustom rustdoc-helm-ag-base-command 'rustdoc-default-helm-ag-search-command
+(defcustom rustdoc-rg-search-command 'rustdoc-default-rg-search-command
   "The default command string to pass helm-ag when searching."
   :type 'function
   :group 'rustic-rustdoc)
@@ -64,14 +64,16 @@ Needs to be a function because of its reliance on
   "Default search functionality.
 Uses helm-ag and ripgrep if possible, grep otherwise.
 Search for SEARCH-TERM inside SEARCH-DIR"
-  (if (and  (require 'helm-ag nil t) (executable-find "rg"))
-      (let* ((helm-ag-base-command (funcall rustdoc-helm-ag-base-command))
-             (helm-ag-success-exit-status '(0 2)))
-        (condition-case nil
-            (helm-ag search-dir search-term)
-          ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
-          (error (helm-ag rustdoc-save-loc search-term))))
-    (grep (format "grep -RPIni '%s' %s" search-term search-dir))))
+  (cond
+   ((and  (require 'helmg-ag nil t) (executable-find "rg"))
+    (let* ((helm-ag-base-command (funcall rustdoc-rg-search-command))
+           (helm-ag-success-exit-status '(0 2)))
+      (condition-case nil
+          (helm-ag search-dir search-term)
+        ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
+        (error (helm-ag rustdoc-save-loc search-term)))))
+   ((executable-find "rgg") (grep (format "%s '%s' %s" (rustdoc-default-rg-search-command) search-term search-dir)))
+   (t (grep (format "grep -RPIni '%s' %s" search-term search-dir)))))
 
 
 (defcustom rustdoc-search-function 'rustdoc-default-search-function
