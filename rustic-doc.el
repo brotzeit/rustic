@@ -34,7 +34,7 @@
                                      ".local/bin/rustic-doc-convert.sh")
   "Save location for the rustic-doc conversion script.")
 
-(defvar rustic-doc-source-repo "https://raw.githubusercontent.com/brotzeit/rustic/master/rustic-doc/")
+(defvar rustic-doc-source-repo "https://raw.githubusercontent.com/brotzeit/rustic/master/rustdoc/")
 
 (defvar rustic-doc-current-project nil "Location to search for documentation.
 All projects and std by default, otherwise last open project and std.")
@@ -75,6 +75,7 @@ Search for SEARCH-TERM inside SEARCH-DIR"
    ((executable-find "rgg") (grep (format "%s '%s' %s" (rustic-doc-default-rg-search-command) search-term search-dir)))
    (t (grep (format "grep -RPIni '%s' %s" search-term search-dir)))))
 
+;; (grep (format "grep -RPIni '%s' %s" "option" "/home/sam/.local/share/emacs"))
 
 (defcustom rustic-doc-search-function 'rustic-doc-default-search-function
   "Function to use for searching documentation.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-LUA_FILTER="$HOME/.local/bin/rustdoc-filter.lua"
+LUA_FILTER="$HOME/.local/bin/rustic-doc-filter.lua"
 
 function get_toolchain {
     rustup show | sed -nr 's/(.*) \(default\)/\1/p' | head -n 1
@@ -25,7 +25,7 @@ if [ "$DEST_DIR" = "" ]; then
     RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}"
     ## Set
     DOC_PATH="$RUSTUP_HOME/toolchains/$TARGET/share/doc/rust/html/$LIBRARY"
-    DEST_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/emacs/rustdoc/$LIBRARY"
+    DEST_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/emacs/rustic-doc/$LIBRARY"
 
     echo "Generating org files in: $DEST_DIR"
 fi
