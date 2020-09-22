@@ -34,7 +34,7 @@
                                      ".local/bin/rustic-doc-convert.sh")
   "Save location for the rustic-doc conversion script.")
 
-(defvar rustic-doc-source-repo "https://raw.githubusercontent.com/brotzeit/rustic/master/rustdoc/")
+(defvar rustic-doc-source-repo "https://raw.githubusercontent.com/brotzeit/rustic/master/rustic-doc/")
 
 (defvar rustic-doc-current-project nil "Location to search for documentation.
 All projects and std by default, otherwise last open project and std.")
