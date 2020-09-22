@@ -65,14 +65,14 @@ Needs to be a function because of its reliance on
 Uses helm-ag and ripgrep if possible, grep otherwise.
 Search for SEARCH-TERM inside SEARCH-DIR"
   (cond
-   ((and  (require 'helmg-ag nil t) (executable-find "rg"))
+   ((and  (require 'helm-ag nil t) (executable-find "rg"))
     (let* ((helm-ag-base-command (funcall rustic-doc-rg-search-command))
            (helm-ag-success-exit-status '(0 2)))
       (condition-case nil
           (helm-ag search-dir search-term)
         ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
         (error (helm-ag rustic-doc-save-loc search-term)))))
-   ((executable-find "rgg") (grep (format "%s '%s' %s" (rustic-doc-default-rg-search-command) search-term search-dir)))
+   ((executable-find "rg") (grep (format "%s '%s' %s" (rustic-doc-default-rg-search-command) search-term search-dir)))
    (t (grep (format "grep -RPIni '%s' %s" search-term search-dir)))))
 
 ;; (grep (format "grep -RPIni '%s' %s" "option" "/home/sam/.local/share/emacs"))
