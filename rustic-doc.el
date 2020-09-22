@@ -27,11 +27,11 @@
     (fset 'rustic-doc--xdg-data-home 'xdg-data-home)))
 
 (defvar rustic-doc-lua-filter (concat (file-name-as-directory (getenv "HOME"))
-                                   ".local/bin/rustic-doc-filter.lua")
+                                      ".local/bin/rustic-doc-filter.lua")
   "Save location for the rustic-doc lua filter.")
 
 (defvar rustic-doc-convert-prog (concat (file-name-as-directory (getenv "HOME"))
-                                     ".local/bin/rustic-doc-convert.sh")
+                                        ".local/bin/rustic-doc-convert.sh")
   "Save location for the rustic-doc conversion script.")
 
 (defvar rustic-doc-source-repo "https://raw.githubusercontent.com/brotzeit/rustic/master/rustic-doc/")
@@ -40,14 +40,14 @@
 All projects and std by default, otherwise last open project and std.")
 
 (defvar rustic-doc-save-loc (concat (rustic-doc--xdg-data-home)
-                                 "/emacs/rustic-doc"))
+                                    "/emacs/rustic-doc"))
 
 (defvar rustic-doc-resources `((,rustic-doc-convert-prog
-                             (:exec)
-                             ,(concat rustic-doc-source-repo "convert.sh"))
-                            (,rustic-doc-lua-filter
-                             ()
-                             ,(concat rustic-doc-source-repo "filter.lua"))))
+                                (:exec)
+                                ,(concat rustic-doc-source-repo "convert.sh"))
+                               (,rustic-doc-lua-filter
+                                ()
+                                ,(concat rustic-doc-source-repo "filter.lua"))))
 
 (defun rustic-doc-default-rg-search-command ()
   "The default search command when using helm-ag.
@@ -75,7 +75,6 @@ Search for SEARCH-TERM inside SEARCH-DIR"
    ((executable-find "rg") (grep (format "%s '%s' %s" (rustic-doc-default-rg-search-command) search-term search-dir)))
    (t (grep (format "grep -RPIni '%s' %s" search-term search-dir)))))
 
-;; (grep (format "grep -RPIni '%s' %s" "option" "/home/sam/.local/share/emacs"))
 
 (defcustom rustic-doc-search-function 'rustic-doc-default-search-function
   "Function to use for searching documentation.
@@ -289,10 +288,10 @@ If the user has not visited a project, returns the main doc directory."
                               "::"
                               short-name))
            (search-dir (rustic-doc--deepest-dir (concat (rustic-doc--project-doc-dest)
-                                                     "/"
-                                                     (seq-reduce (lambda (path p)
-                                                                   (concat path "/" p))
-                                                                 (split-string long-name "::") "")))))
+                                                        "/"
+                                                        (seq-reduce (lambda (path p)
+                                                                      (concat path "/" p))
+                                                                    (split-string long-name "::") "")))))
       `((search-dir . ,search-dir)
         (short-name . ,short-name))
     `((search-dir . ,(rustic-doc--project-doc-dest))
