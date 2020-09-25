@@ -448,7 +448,7 @@ If running with prefix command `C-u', read whole command from minibuffer."
   (interactive "P")
   (let* ((command (if arg
                       (read-from-minibuffer "Cargo rm command: " "cargo rm ")
-                    (concat "cargo add " (read-from-minibuffer "Crate: ")))))
+                    (concat "cargo rm " (read-from-minibuffer "Crate: ")))))
     (rustic-run-cargo-command command)))
 
 ;;;###autoload
@@ -458,7 +458,7 @@ If running with prefix command `C-u', read whole command from minibuffer."
   (interactive "P")
   (let* ((command (if arg
                       (read-from-minibuffer "Cargo upgrade command: " "cargo upgrade ")
-                    (concat "cargo upgrade " (read-from-minibuffer "Crate: ")))))
+                    (concat "cargo upgrade"))))
     (rustic-run-cargo-command command)))
 
 (provide 'rustic-cargo)
