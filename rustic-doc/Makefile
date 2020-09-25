@@ -37,5 +37,5 @@ constant:
 	pandoc -f native filterednative -o constant.arch.org
 
 overwrite_filter:
-	rm ~/.local/bin/rustdoc-filter.lua
-	cp ./filter.lua ~/.local/bin/rustdoc-filter.lua
+	rm ~/.local/bin/rustic-doc-filter.lua
+	cp ./filter.lua ~/.local/bin/rustic-doc-filter.lua

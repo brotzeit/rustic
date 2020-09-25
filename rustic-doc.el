@@ -1,4 +1,4 @@
-;;; rustic-rustdoc.el --- Browse rust documentation as .org files -*- lexical-binding: t -*-
+;;; rustic-doc.el --- Browse rust documentation as .org files -*- lexical-binding: t -*-
 
 ;; Copyright (c) 2020 Sam Hedin
 
@@ -7,52 +7,84 @@
 
 ;;; Commentary:
 
-;; This package lets you convert rustdoc html-files to org mode files, and lets you browse them with `rustdoc-search'.
-;; Run `M-x rustdoc-setup' to download the required files and convert the rust standard library.
-;; Run `M-x rustdoc-convert-current-package' to generate and convert docs for the package you are currently visiting.
+;; This package lets you convert rustic-doc html-files to org mode files, and lets you browse them with `rustic-doc-search'.
+;; Run `M-x rustic-doc-setup' to download the required files and convert the rust standard library.
+;; Run `M-x rustic-doc-convert-current-package' to generate and convert docs for the package you are currently visiting.
 
 ;;; Code:
 
-(require 'helm-ag)
 (require 'url)
 (require 'lsp-mode)
 (require 'f)
 
 (if (< emacs-major-version 27)
-    (defun rustdoc--xdg-data-home ()
+    (defun rustic-doc--xdg-data-home ()
       (or (getenv "XDG_DATA_HOME")
           (concat (file-name-as-directory (getenv "HOME"))
                   ".local/share")))
   (progn
     (require 'xdg)
-    (fset 'rustdoc--xdg-data-home 'xdg-data-home)))
+    (fset 'rustic-doc--xdg-data-home 'xdg-data-home)))
 
-(defvar rustdoc-lua-filter (concat (file-name-as-directory (getenv "HOME"))
-                                   ".local/bin/rustdoc-filter.lua")
-  "Save location for the rustdoc lua filter.")
+(defvar rustic-doc-lua-filter (concat (file-name-as-directory (getenv "HOME"))
+                                      ".local/bin/rustic-doc-filter.lua")
+  "Save location for the rustic-doc lua filter.")
 
-(defvar rustdoc-convert-prog (concat (file-name-as-directory (getenv "HOME"))
-                                     ".local/bin/rustdoc-convert.sh")
-  "Save location for the rustdoc conversion script.")
+(defvar rustic-doc-convert-prog (concat (file-name-as-directory (getenv "HOME"))
+                                        ".local/bin/rustic-doc-convert.sh")
+  "Save location for the rustic-doc conversion script.")
 
-(defvar rustdoc-source-repo "https://raw.githubusercontent.com/brotzeit/rustic/master/rustdoc/")
+(defvar rustic-doc-source-repo "https://raw.githubusercontent.com/brotzeit/rustic/master/rustic-doc/")
 
-(defvar rustdoc-current-project nil "Location to search for documentation.
+(defvar rustic-doc-current-project nil "Location to search for documentation.
 All projects and std by default, otherwise last open project and std.")
 
-(defvar rustdoc-save-loc (concat (rustdoc--xdg-data-home)
-                                 "/emacs/rustdoc"))
+(defvar rustic-doc-save-loc (concat (rustic-doc--xdg-data-home)
+                                    "/emacs/rustic-doc"))
 
-(defvar rustdoc-resources `((,rustdoc-convert-prog
-                             (:exec)
-                             ,(concat rustdoc-source-repo "convert.sh"))
-                            (,rustdoc-lua-filter
-                             ()
-                             ,(concat rustdoc-source-repo "filter.lua"))))
+(defvar rustic-doc-resources `((,rustic-doc-convert-prog
+                                (:exec)
+                                ,(concat rustic-doc-source-repo "convert.sh"))
+                               (,rustic-doc-lua-filter
+                                ()
+                                ,(concat rustic-doc-source-repo "filter.lua"))))
 
-(defun rustdoc--install-resources ()
-  "Install or update the rustdoc resources."
-  (dolist (resource rustdoc-resources)
+(defun rustic-doc-default-rg-search-command ()
+  "The default search command when using helm-ag.
+Needs to be a function because of its reliance on
+`rustic-doc-current-project'"
+  (concat "rg --smart-case --no-heading --color=never --line-number --pcre2" (if rustic-doc-current-project "-L" "")))
+
+(defcustom rustic-doc-rg-search-command 'rustic-doc-default-rg-search-command
+  "The default command string to pass helm-ag when searching."
+  :type 'function
+  :group 'rustic-doc)
+
+(defun rustic-doc-default-search-function (search-dir search-term)
+  "Default search functionality.
+Uses helm-ag and ripgrep if possible, grep otherwise.
+Search for SEARCH-TERM inside SEARCH-DIR"
+  (cond
+   ((and  (require 'helm-ag nil t) (executable-find "rg"))
+    (let* ((helm-ag-base-command (funcall rustic-doc-rg-search-command))
+           (helm-ag-success-exit-status '(0 2)))
+      (condition-case nil
+          (helm-ag search-dir search-term)
+        ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
+        (error (helm-ag rustic-doc-save-loc search-term)))))
+   ((executable-find "rg") (grep (format "%s '%s' %s" (rustic-doc-default-rg-search-command) search-term search-dir)))
+   (t (grep (format "grep -RPIni '%s' %s" search-term search-dir)))))
+
+
+(defcustom rustic-doc-search-function 'rustic-doc-default-search-function
+  "Function to use for searching documentation.
+The function should take search-dir and search-term as arguments."
+  :type 'function
+  :group 'rustic-doc)
+
+(defun rustic-doc--install-resources ()
+  "Install or update the rustic-doc resources."
+  (dolist (resource rustic-doc-resources)
     (pcase resource
       (`(,dst ,opts ,src)
        (condition-case nil
@@ -73,22 +105,22 @@ All projects and std by default, otherwise last open project and std.")
       (x (error "Invalid resource spec: %s" x)))))
 
 ;;;###autoload
-(defun rustdoc-dumb-search (search-term)
+(defun rustic-doc-dumb-search (search-term)
   "Search all projects and std for SEARCH-TERM.
-Use this when `rustdoc-search' does not find what you're looking for.
+Use this when `rustic-doc-search' does not find what you're looking for.
 Add `universal-argument' to only search level 1 headers.
-See `rustdoc-search' for more information."
+See `rustic-doc-search' for more information."
   (interactive (let ((short-name (alist-get 'short-name
-                                            (rustdoc--thing-at-point))))
+                                            (rustic-doc--thing-at-point))))
                  (list (read-string (format "search term, default %s: " short-name)
                                     nil
                                     nil
                                     short-name))))
-  (rustdoc-search search-term t))
+  (rustic-doc-search search-term t))
 
 
 ;;;###autoload
-(defun rustdoc-search (search-term &optional root)
+(defun rustic-doc-search (search-term &optional root)
   "Search the rust documentation for SEARCH-TERM.
 Only searches in headers (structs, functions, traits, enums, etc)
 to limit the number of results.
@@ -97,33 +129,26 @@ Level 1 headers are things like struct or enum names.
 if ROOT is non-nil the search is performed from the root dir.
 This function tries to be smart and limits the search results
 as much as possible. If it ends up being so smart that
-it doesn't manage to find what you're looking for, try `rustdoc-dumb-search'."
+it doesn't manage to find what you're looking for, try `rustic-doc-dumb-search'."
   (interactive (let ((short-name (alist-get 'short-name
-                                            (rustdoc--thing-at-point))))
+                                            (rustic-doc--thing-at-point))))
                  (list (read-string (format "search term, default %s: " short-name)
                                     nil
                                     nil
                                     short-name))))
 
-    (rustdoc--update-current-project)
-  ;; These helm-ag settings are to make it work properly with ripgrep.
-    (let* ((helm-ag-base-command (if rustdoc-current-project ; If the user has not visited a project the search will be done from the doc root, in which case we should not follow symlinks.
-                                     "rg -L --smart-case --no-heading --color=never --line-number --pcre2"
-                                   "rg --smart-case --no-heading --color=never --line-number --pcre2"))
-         (helm-ag-fuzzy-match t)
-         (helm-ag-success-exit-status '(0 2))
-         (thing-at-point (rustdoc--thing-at-point))
+  (rustic-doc--update-current-project)
+  (let* ((thing-at-point (rustic-doc--thing-at-point))
          (short-name (alist-get 'short-name thing-at-point))
          ;; If the user did not accept the default search suggestion, we should not search in that suggestion's directory.
          (search-dir
           (cond
-           (root rustdoc-save-loc)
+           (root rustic-doc-save-loc)
            ((string-equal short-name search-term) (alist-get 'search-dir thing-at-point))
-           (t (rustdoc--project-doc-dest))))
+           (t (rustic-doc--project-doc-dest))))
          ;; If the prefix arg is provided, we only search for level 1 headers by making sure that there is only one * at the beginning of the line.
          (regex (if current-prefix-arg
                     (progn
-                      ;; If current-prefix-arg is not set to nil, helm-ag will pick up the prefix arg too and do funny business.
                       (setq current-prefix-arg nil)
                       "^\\*")
                   "^(?!.*impl)^\\*+"))  ; Do not match if it's an impl
@@ -137,25 +162,24 @@ it doesn't manage to find what you're looking for, try `rustdoc-dumb-search'."
                                                     (concat acc "[^-\*(<]*" s))
                                                   (split-string search-term " ")
                                                   ""))))
-    (unless (file-directory-p rustdoc-save-loc)
-      (rustdoc-setup)
+    (unless (file-directory-p rustic-doc-save-loc)
+      (rustic-doc-setup)
       (message "Running first time setup. Please re-run your search once conversion has completed.")
       (sleep-for 3))
-    ;; If the user has not run `rustdoc-convert-current-package' in the current project, we create a default directory that only contains a symlink to std.
-    (unless (file-directory-p (rustdoc--project-doc-dest))
-      (rustdoc-create-project-dir))
-    (condition-case nil
-        (helm-ag search-dir regexed-search-term)
-      ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
-      (error (helm-ag rustdoc-save-loc regexed-search-term)))))
+    ;; If the user has not run `rustic-doc-convert-current-package' in the current project, we create a default directory that only contains a symlink to std.
+    (unless (file-directory-p (rustic-doc--project-doc-dest))
+      (rustic-doc-create-project-dir))
+    (funcall rustic-doc-search-function search-dir regexed-search-term)))
 
-(defun rustdoc--update-current-project ()
-  "Update `rustdoc-current-project' if editing a rust file, otherwise leave it."
+;; (rustic-doc--helm-ag-search (rustic-doc--project-doc-dest) "^(?!.*impl)^\\*+[^-*(<]*enum[^-*(<]*option")
+
+(defun rustic-doc--update-current-project ()
+  "Update `rustic-doc-current-project' if editing a rust file, otherwise leave it."
   (when (and lsp-mode
              (derived-mode-p 'rust-mode 'rustic-mode))
-    (setq rustdoc-current-project (lsp-workspace-root))))
+    (setq rustic-doc-current-project (lsp-workspace-root))))
 
-(defun rustdoc--deepest-dir (path)
+(defun rustic-doc--deepest-dir (path)
   "Find the deepest existing and non-empty arg-directory parent of PATH.
 We can sometimes infer the filepath from the crate name.
 E.g the enum std::option::Option is in the folder std/option.
@@ -166,46 +190,46 @@ In these cases, the deepest dir will be the current project dir."
            (file-directory-p path)
            (not (f-empty-p path)))
       path
-    (rustdoc--deepest-dir (f-slash (f-dirname path)))))
+    (rustic-doc--deepest-dir (f-slash (f-dirname path)))))
 
-(defun rustdoc--project-doc-dest ()
+(defun rustic-doc--project-doc-dest ()
   "The location of the documentation for the current or last seen project.
 If the user has not visited a project, returns the main doc directory."
-  (if rustdoc-current-project
-      (f-join rustdoc-save-loc
-              (f-filename rustdoc-current-project))
-    rustdoc-save-loc))
+  (if rustic-doc-current-project
+      (f-join rustic-doc-save-loc
+              (f-filename rustic-doc-current-project))
+    rustic-doc-save-loc))
 
-(defun rustdoc-create-project-dir ()
-  "Create a rustdoc arg-directory for the current project. Link with std."
-  (let* ((link-tgt (concat (file-name-as-directory (rustdoc--xdg-data-home))
-                           "emacs/rustdoc/std"))
-         (link-name (concat (rustdoc--project-doc-dest)
+(defun rustic-doc-create-project-dir ()
+  "Create a rustic-doc arg-directory for the current project. Link with std."
+  (let* ((link-tgt (concat (file-name-as-directory (rustic-doc--xdg-data-home))
+                           "emacs/rustic-doc/std"))
+         (link-name (concat (rustic-doc--project-doc-dest)
                             "/std"))
-         (current-doc-dest (rustdoc--project-doc-dest)))
+         (current-doc-dest (rustic-doc--project-doc-dest)))
     (if current-doc-dest
         (progn
-          (make-directory (rustdoc--project-doc-dest)
+          (make-directory (rustic-doc--project-doc-dest)
                           t)
           (make-symbolic-link link-tgt link-name t))
       (message "Couldn't create project doc directory."))))
 
 
 ;;;###autoload
-(defun rustdoc-convert-current-package ()
+(defun rustic-doc-convert-current-package ()
   "Convert the documentation for a project and its dependencies."
   (interactive)
-  (unless (file-directory-p rustdoc-save-loc)
-    (rustdoc-setup)
+  (unless (file-directory-p rustic-doc-save-loc)
+    (rustic-doc-setup)
     (message "Running first time setup.")
     (sleep-for 3))
-  (if rustdoc-current-project
+  (if rustic-doc-current-project
       (progn
         (message "Converting documentation for %s "
-                 rustdoc-current-project)
+                 rustic-doc-current-project)
         (if (/= 0 (call-process "cargo" nil "*cargo-makedocs*" nil "makedocs"))
             (message "cargo makedocs could not generate docs for the current package. See buffer *cargo-makedocs* for more info")
-          (let* ((docs-src (concat (file-name-as-directory rustdoc-current-project)
+          (let* ((docs-src (concat (file-name-as-directory rustic-doc-current-project)
                                    "target/doc"))
                  ;; FIXME: Many projects could share the same docs.
                  ;;        *However* that would have to be versioned, so
@@ -214,30 +238,30 @@ If the user has not visited a project, returns the main doc directory."
                  ;;        then we'd have to review different parsing solutions.
                  (finish-func (lambda (_p)
                                 (message (format "Finished converting docs for %s"
-                                                 rustdoc-current-project)))))
-            (rustdoc-create-project-dir)
-            (async-start-process "rustdoc-convert"
-                                 rustdoc-convert-prog
+                                                 rustic-doc-current-project)))))
+            (rustic-doc-create-project-dir)
+            (async-start-process "rustic-doc-convert"
+                                 rustic-doc-convert-prog
                                  finish-func
                                  docs-src
-                                 (rustdoc--project-doc-dest)))))
-    (message "Could not find project to convert. Visit a rust project first! (Or activate rustdoc-mode if you are in one)")))
+                                 (rustic-doc--project-doc-dest)))))
+    (message "Could not find project to convert. Visit a rust project first! (Or activate rustic-doc-mode if you are in one)")))
 
 ;;;###autoload
-(defun rustdoc-setup ()
-  "Setup or update rustdoc filter and convert script. Convert std."
+(defun rustic-doc-setup ()
+  "Setup or update rustic-doc filter and convert script. Convert std."
   (interactive)
-  (rustdoc--install-resources)
+  (rustic-doc--install-resources)
   (message "Setup is converting the standard library")
-  (delete-directory (concat rustdoc-save-loc "/std")
+  (delete-directory (concat rustic-doc-save-loc "/std")
                     t)
-  (async-start-process "*rustdoc-std-conversion*"
-                       rustdoc-convert-prog
+  (async-start-process "*rustic-doc-std-conversion*"
+                       rustic-doc-convert-prog
                        (lambda (_p)
                          (message "Finished converting docs for std"))
                        "std"))
 
-(defun rustdoc--thing-at-point ()
+(defun rustic-doc--thing-at-point ()
   "Return info about `thing-at-point'. If `thing-at-point' is nil, return defaults."
   (if-let ((active lsp-mode)
            (lsp-content (-some->> (lsp--text-document-position-params)
@@ -263,27 +287,27 @@ If the user has not visited a project, returns the main doc directory."
                                (t lsp-info))
                               "::"
                               short-name))
-           (search-dir (rustdoc--deepest-dir (concat (rustdoc--project-doc-dest)
-                                                     "/"
-                                                     (seq-reduce (lambda (path p)
-                                                                   (concat path "/" p))
-                                                                 (split-string long-name "::") "")))))
+           (search-dir (rustic-doc--deepest-dir (concat (rustic-doc--project-doc-dest)
+                                                        "/"
+                                                        (seq-reduce (lambda (path p)
+                                                                      (concat path "/" p))
+                                                                    (split-string long-name "::") "")))))
       `((search-dir . ,search-dir)
         (short-name . ,short-name))
-    `((search-dir . ,(rustdoc--project-doc-dest))
+    `((search-dir . ,(rustic-doc--project-doc-dest))
       (short-name . ,nil))))
 
 ;;;###autoload
-(define-minor-mode rustdoc-mode
+(define-minor-mode rustic-doc-mode
   "Convert rust html docs to .org, and browse the converted docs."
   :lighter " browse rust documentation"
   :keymap (let ((map (make-sparse-keymap)))
-            (define-key map (kbd "C-#") 'rustdoc-search)
+            (define-key map (kbd "C-#") 'rustic-doc-search)
             map)
   (dolist (mode '(rust-mode-hook rustic-mode-hook org-mode-hook))
-    (add-hook mode 'rustdoc-mode))
-  (rustdoc--update-current-project))
+    (add-hook mode 'rustic-doc-mode))
+  (rustic-doc--update-current-project))
 
-(provide 'rustic-rustdoc)
+(provide 'rustic-doc)
 
-;;; rustic-rustdoc.el ends here
+;;; rustic-doc.el ends here
