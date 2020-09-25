@@ -398,16 +398,18 @@ With some setup, it is possible to read rust documentation inside Emacs!
 
 ## Popup
 
-You can execute commands with `rustic-popup`. The list of commands can
-be customized with `rustic-popup-commands`. It's also possible to view
-the command's flags with `h`.  The command
-`rustic-popup-default-action` (`RET` or `TAB`) allows you to change:
+You can execute commands with `rustic-popup`. The list of commands can be customized with `rustic-popup-commands`.
+The command `rustic-popup-default-action` (`RET` or `TAB`) allows you to change:
 
 - `RUST_BACKTRACE` environment variable
 - `compilation-arguments` for `recompile`
 - arguments for `cargo test`
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup.png)
+
+View help buffer containing a command's flags with `h`:
+
+![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup_help.png)
 
 ## elisp tests
 
