@@ -25,6 +25,7 @@ Status](https://travis-ci.com/brotzeit/rustic.svg?branch=master)](https://travis
                     - [Auto import](#auto-import)
                 - [Macro expansion](#macro-expansion)
     - [Cargo](#cargo)
+        - [Edit](#edit)
         - [Test](#test)
         - [Outdated](#outdated)
     - [Clippy](#clippy)
@@ -268,6 +269,17 @@ your own function by customizing
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/macro_expansion.png)
 
 ## Cargo
+
+### Edit
+
+[cargo-edit](https://github.com/killercup/cargo-edit) provides commands to edit
+your dependencies quickly.
+
+The rustic commands can be called with prefix `C-u` if you want to modify the parameters of a command.
+
+- `rustic-cargo-add`     Add crate to Cargo.toml using 'cargo add'
+- `rustic-cargo-rm`      Remove crate from Cargo.toml using 'cargo rm'
+- `rustic-cargo-update`  Upgrade dependencies as specified in the local manifest file using 'cargo upgrade'
 
 ### Test
 
