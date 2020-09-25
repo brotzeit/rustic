@@ -5,6 +5,7 @@
 ;; TODO: this shouldn't be necessary
 (require 'lsp-mode)
 (require 'lsp-rust)
+(require 'lsp-modeline)
 
 (ert-deftest rustic-test-rustic-lsp-server ()
   "Test if value of `rustic-lsp-server' is used and priority set correctly."
