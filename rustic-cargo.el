@@ -458,7 +458,7 @@ If running with prefix command `C-u', read whole command from minibuffer."
       (rustic-run-cargo-command command))))
 
 ;;;###autoload
-(defun rustic-cargo-update (&optional arg)
+(defun rustic-cargo-upgrade (&optional arg)
   "Upgrade dependencies as specified in the local manifest file using 'cargo upgrade'.
 If running with prefix command `C-u', read whole command from minibuffer."
   (interactive "P")
