@@ -84,7 +84,7 @@
     (let ((proc (rustic-recompile)))
       (while (eq (process-status proc) 'run)
         (sit-for 0.1))
-      (print (process-exit-status proc))
+      ;; (print (process-exit-status proc))
       (should (= 0 (process-exit-status proc))))))
 
 (ert-deftest rustic-test-backtrace ()
