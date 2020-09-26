@@ -432,7 +432,7 @@ The documentation is built if necessary."
 ;;; cargo edit
 
 (defun rustic-cargo-edit-installed-p ()
-  "Check if cargo-edit is installed."
+  "Check if cargo-edit is installed. If not, ask the user if he wants to install it."
   (if (executable-find "cargo-add") t (rustic-cargo-install-crate-p "edit") nil))
 
 ;;;###autoload
