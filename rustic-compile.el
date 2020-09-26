@@ -494,7 +494,7 @@ Otherwise use provided argument ARG and store it in
   (let* ((command (or compilation-arguments rustic-compile-command))
          (dir compilation-directory))
     (rustic-compilation-process-live)
-    (rustic-compilation (split-string command) :directory dir)))
+    (rustic-compilation-start (split-string command) :directory dir)))
 
 ;;; _
 (provide 'rustic-compile)
