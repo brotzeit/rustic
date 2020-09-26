@@ -431,35 +431,42 @@ The documentation is built if necessary."
 
 ;;; cargo edit
 
+(defun rustic-cargo-edit-installed-p ()
+  "Check if cargo-edit is installed."
+  (if (executable-find "cargo-add") t (rustic-cargo-install-crate-p "edit") nil))
+
 ;;;###autoload
 (defun rustic-cargo-add (&optional arg)
   "Add crate to Cargo.toml using 'cargo add'.
 If running with prefix command `C-u', read whole command from minibuffer."
   (interactive "P")
-  (let* ((command (if arg
-                      (read-from-minibuffer "Cargo add command: " "cargo add ")
-                    (concat "cargo add " (read-from-minibuffer "Crate: ")))))
-    (rustic-run-cargo-command command)))
+  (when (rustic-cargo-edit-installed-p)
+    (let* ((command (if arg
+                        (read-from-minibuffer "Cargo add command: " "cargo add ")
+                      (concat "cargo add " (read-from-minibuffer "Crate: ")))))
+      (rustic-run-cargo-command command))))
 
 ;;;###autoload
 (defun rustic-cargo-rm (&optional arg)
   "Remove crate from Cargo.toml using 'cargo rm'.
 If running with prefix command `C-u', read whole command from minibuffer."
   (interactive "P")
-  (let* ((command (if arg
-                      (read-from-minibuffer "Cargo rm command: " "cargo rm ")
-                    (concat "cargo rm " (read-from-minibuffer "Crate: ")))))
-    (rustic-run-cargo-command command)))
+  (when (rustic-cargo-edit-installed-p)
+    (let* ((command (if arg
+                        (read-from-minibuffer "Cargo rm command: " "cargo rm ")
+                      (concat "cargo rm " (read-from-minibuffer "Crate: ")))))
+      (rustic-run-cargo-command command))))
 
 ;;;###autoload
 (defun rustic-cargo-update (&optional arg)
   "Upgrade dependencies as specified in the local manifest file using 'cargo upgrade'.
 If running with prefix command `C-u', read whole command from minibuffer."
   (interactive "P")
-  (let* ((command (if arg
-                      (read-from-minibuffer "Cargo upgrade command: " "cargo upgrade ")
-                    (concat "cargo upgrade"))))
-    (rustic-run-cargo-command command)))
+  (when (rustic-cargo-edit-installed-p)
+    (let* ((command (if arg
+                        (read-from-minibuffer "Cargo upgrade command: " "cargo upgrade ")
+                      (concat "cargo upgrade"))))
+      (rustic-run-cargo-command command))))
 
 (provide 'rustic-cargo)
 ;;; rustic-cargo.el ends here
