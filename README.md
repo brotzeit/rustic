@@ -161,7 +161,7 @@ Additional faces:
 
 ## Rustfmt
 
-You can format your code with `rustic-format-buffer` or
+You can format your code with `rustic-format-buffer`, `rustic-format-file` or
 `rustic-cargo-fmt`. Rustic uses the function
 `rustic-save-some-buffers` for saving buffers before compilation. To
 save buffers automatically, you can change the value of
