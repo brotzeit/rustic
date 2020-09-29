@@ -53,7 +53,7 @@ All projects and std by default, otherwise last open project and std.")
   "The default search command when using helm-ag.
 Needs to be a function because of its reliance on
 `rustic-doc-current-project'"
-  (concat "rg --smart-case --no-heading --color=never --line-number --pcre2" (if rustic-doc-current-project " -L" "")))
+  (concat "rg --smart-case --no-heading --color=never --line-number " (if rustic-doc-current-project " -L" "")))
 
 (defcustom rustic-doc-rg-search-command 'rustic-doc-default-rg-search-command
   "The default command string to pass helm-ag when searching."
@@ -151,7 +151,7 @@ it doesn't manage to find what you're looking for, try `rustic-doc-dumb-search'.
                     (progn
                       (setq current-prefix-arg nil)
                       "^\\*")
-                  "^(?!.*impl)^\\*+"))  ; Do not match if it's an impl
+                  "^\\*+"))
          ;; This seq-reduce turns `enum option' into (kind of) `enum.*option', which lets there be chars between the searched words
          (regexed-search-term (concat regex
                                         ; Regex explanation
