@@ -126,8 +126,8 @@ and it's `cdr' is a list of arguments."
                 (copy-to-buffer file-buffer (point-min) (point-max)))
               (with-current-buffer file-buffer
                 (if use-replace
-                    (replace-buffer-contents proc-buffer)
-                  (goto-char rustic-save-pos)))
+                    (replace-buffer-contents proc-buffer))
+                (goto-char rustic-save-pos))
               (kill-buffer proc-buffer)
               (message "Formatted buffer with rustfmt."))
           (goto-char (point-min))
