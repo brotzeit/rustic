@@ -213,7 +213,26 @@ were issues when using stdin for formatting."
                                                 :buffer buf
                                                 :files file))))
     (while (eq (process-status proc) 'run)
-      (sit-for 0.1))))
+      (sit-for 0.05))))
+
+(defun rustic-format-file (&optional file)
+  "Unlike `rustic-format-buffer' format file directly and revert the buffer."
+  (interactive "P")
+  (unless (or (eq major-mode 'rustic-mode)
+              (eq major-mode 'rustic-macro-expansion-mode))
+    (error "Not a rustic-mode buffer."))
+  (let* ((buf (current-buffer))
+         (file (or (if file (read-from-minibuffer "Format file: ") nil)
+                   (buffer-file-name buf)
+                   (read-from-minibuffer "Format file: ")))
+         (string (buffer-string)))
+    (write-region string nil file nil 0)
+    (let ((proc (rustic-format-start-process 'rustic-format-file-sentinel
+                                             :buffer buf
+                                             :files file)))
+      (while (eq (process-status proc) 'run)
+        (sit-for 0.05)))))
+
 
 ;;; LSP
 
