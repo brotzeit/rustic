@@ -247,16 +247,18 @@ If the user has not visited a project, returns the main doc directory."
 
 (defun rustic-doc-install-deps ()
   "Install dependencies with Cargo."
-  (let ((missing-rg (not  (executable-find "rg")))
-        (missing-fd (not  (executable-find "fd")))
-        (missing-makedocs (not  (executable-find "cargo-makedocs"))))
-    (when (and  (or missing-fd missing-makedocs missing-rg) (y-or-n-p "Missing some dependencies for rustic doc, install them? "))
-      (when missing-fd
-        (async-start-process "install-fd" "cargo" nil "install" "fd-find"))
-      (when missing-rg
-        (async-start-process "install-rg" "cargo" nil "install" "ripgrep"))
-      (when missing-makedocs
-        (async-start-process "install-makedocs" "cargo" nil "install" "cargo-makedocs")))))
+  (if (not (executable-find "cargo"))
+      (message "You need to have cargo installed to use rustic-doc")
+    (let ((missing-rg (not (executable-find "rg")))
+          (missing-fd (not (executable-find "fd")))
+          (missing-makedocs (not (executable-find "cargo-makedocs"))))
+      (when (and  (or missing-fd missing-makedocs missing-rg) (y-or-n-p "Missing some dependencies for rustic doc, install them? "))
+        (when missing-fd
+          (async-start-process "install-fd" "cargo" nil "install" "fd-find"))
+        (when missing-rg
+          (async-start-process "install-rg" "cargo" nil "install" "ripgrep"))
+        (when missing-makedocs
+          (async-start-process "install-makedocs" "cargo" nil "install" "cargo-makedocs"))))))
 
 
 ;;;###autoload
