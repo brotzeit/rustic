@@ -53,7 +53,7 @@ All projects and std by default, otherwise last open project and std.")
   "The default search command when using helm-ag.
 Needs to be a function because of its reliance on
 `rustic-doc-current-project'"
-  (concat "rg --smart-case --no-heading --color=never --line-number --pcre2" (if rustic-doc-current-project "-L" "")))
+  (concat "rg --smart-case --no-heading --color=never --line-number " (if rustic-doc-current-project " -L" "")))
 
 (defcustom rustic-doc-rg-search-command 'rustic-doc-default-rg-search-command
   "The default command string to pass helm-ag when searching."
@@ -151,7 +151,7 @@ it doesn't manage to find what you're looking for, try `rustic-doc-dumb-search'.
                     (progn
                       (setq current-prefix-arg nil)
                       "^\\*")
-                  "^(?!.*impl)^\\*+"))  ; Do not match if it's an impl
+                  "^\\*+"))
          ;; This seq-reduce turns `enum option' into (kind of) `enum.*option', which lets there be chars between the searched words
          (regexed-search-term (concat regex
                                         ; Regex explanation
@@ -170,8 +170,6 @@ it doesn't manage to find what you're looking for, try `rustic-doc-dumb-search'.
     (unless (file-directory-p (rustic-doc--project-doc-dest))
       (rustic-doc-create-project-dir))
     (funcall rustic-doc-search-function search-dir regexed-search-term)))
-
-;; (rustic-doc--helm-ag-search (rustic-doc--project-doc-dest) "^(?!.*impl)^\\*+[^-*(<]*enum[^-*(<]*option")
 
 (defun rustic-doc--update-current-project ()
   "Update `rustic-doc-current-project' if editing a rust file, otherwise leave it."
@@ -247,11 +245,28 @@ If the user has not visited a project, returns the main doc directory."
                                  (rustic-doc--project-doc-dest)))))
     (message "Could not find project to convert. Visit a rust project first! (Or activate rustic-doc-mode if you are in one)")))
 
+(defun rustic-doc-install-deps ()
+  "Install dependencies with Cargo."
+  (if (not (executable-find "cargo"))
+      (message "You need to have cargo installed to use rustic-doc")
+    (let ((missing-rg (not (executable-find "rg")))
+          (missing-fd (not (executable-find "fd")))
+          (missing-makedocs (not (executable-find "cargo-makedocs"))))
+      (when (and  (or missing-fd missing-makedocs missing-rg) (y-or-n-p "Missing some dependencies for rustic doc, install them? "))
+        (when missing-fd
+          (async-start-process "install-fd" "cargo" nil "install" "fd-find"))
+        (when missing-rg
+          (async-start-process "install-rg" "cargo" nil "install" "ripgrep"))
+        (when missing-makedocs
+          (async-start-process "install-makedocs" "cargo" nil "install" "cargo-makedocs"))))))
+
+
 ;;;###autoload
 (defun rustic-doc-setup ()
   "Setup or update rustic-doc filter and convert script. Convert std."
   (interactive)
   (rustic-doc--install-resources)
+  (rustic-doc-install-deps)
   (message "Setup is converting the standard library")
   (delete-directory (concat rustic-doc-save-loc "/std")
                     t)

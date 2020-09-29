@@ -393,10 +393,9 @@ With some setup, it is possible to read rust documentation inside Emacs!
 
 * Install Pandoc https://pandoc.org/installing.html
 * Install cargo https://doc.rust-lang.org/cargo/getting-started/installation.html
-* Install ripgrep with `cargo install ripgrep` or one of the alternatives: https://github.com/BurntSushi/ripgrep#installation (Optional, but highly recommended)
-* Install cargo-makedocs by running `cargo install cargo-makedocs` https://github.com/Bunogi/cargo-makedocs
-* Install fd with `cargo install fd`, or your package manager
 * Install helm-ag https://github.com/emacsorphanage/helm-ag (Optional, but highly recommended)
+If you do not have them, you will be prompted to install `fd-find`, `ripgrep` and `cargo-makedocs` when you run `rustic-doc-setup`. 
+`ripgrep` is optional but highly recommended.
 If helm-ag and ripgrep is installed, those will be used by default.
 If only ripgrep is installed, it will be used with the emacs `grep` command.
 If neither is installed, the emacs `grep` command will use `grep`, like in the good old days.
