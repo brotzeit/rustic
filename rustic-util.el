@@ -68,6 +68,12 @@
   "Marker, holding location of the cursor's position before
 running rustfmt.")
 
+(defvar rustic-format-warning-buffer-name "*rustfmt-warnings*"
+  "Name for buffer that holds rustfmt warnings.")
+
+(define-derived-mode rustic-format-warnings-mode special-mode "rustfmt-warnings"
+  :group 'rustic)
+
 (defun rustic-format-start-process (sentinel &rest args)
   "Run rustfmt with ARGS.
 
@@ -94,6 +100,8 @@ and it's `cdr' is a list of arguments."
          (command (or (plist-get args :command)
                       (cons rustic-rustfmt-bin (rustic-compute-rustfmt-args))))
          (command (if (listp command) command (list command))))
+    (-when-let (buf (buffer-live-p (get-buffer rustic-format-warning-buffer-name)))
+      (kill-buffer rustic-format-warning-buffer-name))
     (setq rustic-save-pos (set-marker (make-marker) (point) (current-buffer)))
     (rustic-compilation-setup-buffer err-buf dir 'rustic-format-mode t)
     (--each files
@@ -104,7 +112,8 @@ and it's `cdr' is a list of arguments."
                                        :buffer err-buf
                                        :command `(,@command "--" ,@files)
                                        :filter #'rustic-compilation-filter
-                                       :sentinel sentinel)))
+                                       :sentinel sentinel
+                                       :stderr rustic-format-warning-buffer-name)))
         (setq next-error-last-buffer buffer)
         (when string
           (while (not (process-live-p proc))
@@ -112,6 +121,17 @@ and it's `cdr' is a list of arguments."
           (process-send-string proc (concat string "\n"))
           (process-send-eof proc))
         proc))))
+
+(defun rustic-format-check-warning-buffer ()
+  "In case rustfmt emits warnings, display the buffer containing these
+errors."
+  (let ((buf rustic-format-warning-buffer-name)
+        buf-str)
+    (with-current-buffer buf (setq buf-str (buffer-string)))
+    (if (not (string-match "^Warning:" buf-str))
+        (kill-buffer buf)
+      (with-current-buffer buf (rustic-format-warnings-mode))
+      (pop-to-buffer buf))))
 
 (defun rustic-format-sentinel (proc output)
   "Sentinel for rustfmt processes when using stdin."
@@ -131,6 +151,7 @@ and it's `cdr' is a list of arguments."
                     (replace-buffer-contents proc-buffer))
                 (goto-char rustic-save-pos))
               (kill-buffer proc-buffer)
+              (rustic-format-check-warning-buffer)
               (message "Formatted buffer with rustfmt."))
           (goto-char (point-min))
           (when-let ((file (buffer-file-name next-error-last-buffer)))
