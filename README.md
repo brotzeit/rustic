@@ -120,6 +120,12 @@ at the beginning of a line.  This feature is provided by a hook around
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/compilation_buffer.png)
 
+Commands:
+
+- `rustic-compile`            compile project using `rustic-compile-command`
+- `rustic-recompile`          recompile using `compilation-arguments`
+- `rustic-compile-send-input` send string to process of current buffer
+
 Customization:
 
 - `rustic-compile-display-method` choose function that displays the
@@ -161,16 +167,17 @@ Additional faces:
 
 ## Rustfmt
 
-You can format your code with `rustic-format-buffer`, `rustic-format-file` or
-`rustic-cargo-fmt`. Rustic uses the function
-`rustic-save-some-buffers` for saving buffers before compilation. To
-save buffers automatically, you can change the value of
+You can format your code with:
+
+- `rustic-format-buffer` format buffer with stdin
+- `rustic-format-file`   form file and revert buffer
+- `rustic-cargo-fmt`     run cargo-fmt on workspace
+
+Rustic uses the function `rustic-save-some-buffers` for saving buffers before
+compilation. To save buffers automatically, you can change the value of
 `buffer-save-without-query`. In case you prefer using lsp for
 formatting, turn off `rustic-format-on-save` and set
 `rustic-lsp-format`to `t`.
-
-Commands:
-- `rustic-compile-send-input` send string to process of current buffer
 
 Customization:
 
