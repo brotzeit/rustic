@@ -64,7 +64,9 @@
 (defvar rustic-format-buffer-name "*rustfmt*"
   "Buffer name for rustfmt process buffers.")
 
-(defvar rustic-save-pos nil)
+(defvar rustic-save-pos nil
+  "Marker, holding location of the cursor's position before
+running rustfmt.")
 
 (defun rustic-format-start-process (sentinel &rest args)
   "Run rustfmt with ARGS.
@@ -92,7 +94,7 @@ and it's `cdr' is a list of arguments."
          (command (or (plist-get args :command)
                       (cons rustic-rustfmt-bin (rustic-compute-rustfmt-args))))
          (command (if (listp command) command (list command))))
-    (setq rustic-save-pos (point))
+    (setq rustic-save-pos (set-marker (make-marker) (point) (current-buffer)))
     (rustic-compilation-setup-buffer err-buf dir 'rustic-format-mode t)
     (--each files
       (unless (file-exists-p it)
