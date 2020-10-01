@@ -18,7 +18,8 @@ matrix:
     - env: EMACS_VERSION=snapshot
   fast_finish: true
   include:
-    - env: EMACS_VERSION=26.1
+    - env: EMACS_VERSION=26.3
+    - env: EMACS_VERSION=27.1
     - env: EMACS_VERSION=snapshot
 
 before_install:
