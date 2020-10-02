@@ -217,6 +217,7 @@ were issues when using stdin for formatting."
     (while (eq (process-status proc) 'run)
       (sit-for 0.05))))
 
+;;;###autoload
 (defun rustic-format-file (&optional file)
   "Unlike `rustic-format-buffer' format file directly and revert the buffer."
   (interactive "P")
