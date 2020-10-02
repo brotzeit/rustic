@@ -277,7 +277,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
   (concat "\\s-*\\(?:priv\\|pub\\)?\\s-*"
           (regexp-opt
            '("enum" "struct" "union" "type" "mod" "use" "fn" "static" "impl"
-             "extern" "trait"))
+             "extern" "trait" "async"))
           "\\_>")
   "Start of a Rust item.")
 
