@@ -277,7 +277,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
   (concat "\\s-*\\(?:priv\\|pub\\)?\\s-*"
           (regexp-opt
            '("enum" "struct" "union" "type" "mod" "use" "fn" "static" "impl"
-             "extern" "trait"))
+             "extern" "trait" "async"))
           "\\_>")
   "Start of a Rust item.")
 
@@ -1191,7 +1191,7 @@ This handles multi-line comments with a * prefix on each line."
   (when (and (rustic-format-on-save-p) (not (rustic-compilation-process-live t)))
     (condition-case nil
         (progn
-          (rustic-format-buffer t)
+          (rustic-format-file)
           (sit-for 0.1))
       (error nil))))
 

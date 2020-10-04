@@ -192,7 +192,7 @@ and it's `cdr' is a list of arguments."
         (message "Workspace formatted with cargo-fmt.")))))
 
 ;;;###autoload
-(defun rustic-format-buffer (&optional no-stdin)
+(defun rustic-format-buffer ()
   "Format the current buffer using rustfmt.
 
 Provide optional argument NO-STDIN for `rustic-before-save-hook' since there
@@ -202,28 +202,14 @@ were issues when using stdin for formatting."
               (eq major-mode 'rustic-macro-expansion-mode))
     (error "Not a rustic-mode buffer."))
   (rustic-compilation-process-live t)
-  (let (proc)
-    (if (not no-stdin)
-        (setq proc (rustic-format-start-process 'rustic-format-sentinel
-                                                :buffer (current-buffer)
-                                                :stdin (buffer-string)))
-      (let* ((buf (current-buffer))
-             (file (buffer-file-name buf))
-             (string (buffer-string)))
-        (write-region string nil file nil 0)
-        (setq proc (rustic-format-start-process 'rustic-format-file-sentinel
-                                                :buffer buf
-                                                :files file))))
-    (while (eq (process-status proc) 'run)
-      (sit-for 0.05))))
+  (rustic-format-start-process 'rustic-format-sentinel
+                               :buffer (current-buffer)
+                               :stdin (buffer-string)))
 
 ;;;###autoload
 (defun rustic-format-file (&optional file)
   "Unlike `rustic-format-buffer' format file directly and revert the buffer."
   (interactive "P")
-  (unless (or (eq major-mode 'rustic-mode)
-              (eq major-mode 'rustic-macro-expansion-mode))
-    (error "Not a rustic-mode buffer."))
   (let* ((buf (current-buffer))
          (file (or (if file (read-from-minibuffer "Format file: ") nil)
                    (buffer-file-name buf)
