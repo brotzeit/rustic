@@ -246,7 +246,7 @@ Turn off flymake.
 - `lsp-find-definition` makes use of xref
 
 You can find more information in the [lsp-mode
-wiki](https://github.com/emacs-lsp/lsp-mode/wiki/Rust).
+wiki](https://emacs-lsp.github.io/lsp-mode/page/lsp-rust/).
 
 ##### `lsp-execute-code-action`
 
