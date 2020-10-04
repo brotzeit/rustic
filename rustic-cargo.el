@@ -446,7 +446,7 @@ If running with prefix command `C-u', read whole command from minibuffer."
                       (concat "cargo add " (read-from-minibuffer "Crate: ")))))
       (rustic-run-cargo-command command))))
 
-(defun rustic-cargo-add-missing-import ()
+(defun rustic-cargo-add-missing-imports ()
   "Add missing imports to Cargo.toml."
   (interactive)
   (let ((missing-imports (seq-reduce (lambda (missing-crates errortable)
@@ -454,7 +454,9 @@ If running with prefix command `C-u', read whole command from minibuffer."
                                            (cons (nth 3 (split-string (gethash "message" errortable) "`")) missing-crates)
                                          missing-crates))
                                      (gethash (buffer-file-name) (lsp-diagnostics t)) '())))
-    missing-imports) )
+
+    (rustic-run-cargo-command (format  "cargo add %s" (mapconcat 'identity  missing-imports " ")))))
+
 
 ;;;###autoload
 (defun rustic-cargo-rm (&optional arg)
