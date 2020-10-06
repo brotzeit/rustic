@@ -100,8 +100,9 @@ and it's `cdr' is a list of arguments."
          (command (or (plist-get args :command)
                       (cons rustic-rustfmt-bin (rustic-compute-rustfmt-args))))
          (command (if (listp command) command (list command))))
-    (-when-let (buf (buffer-live-p (get-buffer rustic-format-warning-buffer-name)))
-      (kill-buffer rustic-format-warning-buffer-name))
+    (when (buffer-live-p (get-buffer rustic-format-warning-buffer-name))
+      (with-current-buffer rustic-format-warning-buffer-name
+        (erase-buffer)))
     (setq rustic-save-pos (set-marker (make-marker) (point) (current-buffer)))
     (rustic-compilation-setup-buffer err-buf dir 'rustic-format-mode t)
     (--each files
