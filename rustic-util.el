@@ -169,8 +169,10 @@ errors."
     (let ((proc-buffer (process-buffer proc)))
       (with-current-buffer proc-buffer
         (if (string-match-p "^finished" output)
-            (with-current-buffer next-error-last-buffer
-              (revert-buffer t t))
+            (progn
+              (with-current-buffer next-error-last-buffer
+                (revert-buffer t t))
+              (rustic-format-check-warning-buffer))
           (with-current-buffer next-error-last-buffer
             (goto-char rustic-save-pos))
           (goto-char (point-min))
