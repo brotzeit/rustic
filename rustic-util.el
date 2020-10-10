@@ -126,13 +126,13 @@ and it's `cdr' is a list of arguments."
 (defun rustic-format-check-warning-buffer ()
   "In case rustfmt emits warnings, display the buffer containing these
 errors."
-  (let ((buf rustic-format-warning-buffer-name)
-        buf-str)
-    (with-current-buffer buf (setq buf-str (buffer-string)))
-    (if (not (string-match "^Warning:" buf-str))
-        (kill-buffer buf)
-      (with-current-buffer buf (rustic-format-warnings-mode))
-      (pop-to-buffer buf))))
+  (let ((buf (get-buffer rustic-format-warning-buffer-name)))
+    (when (buffer-live-p buf)
+      (with-current-buffer buf
+        (if (not (string-match "^Warning:" (buffer-string)))
+            (kill-buffer buf)
+          (rustic-format-warnings-mode))
+        (pop-to-buffer buf)))))
 
 (defun rustic-format-sentinel (proc output)
   "Sentinel for rustfmt processes when using stdin."
