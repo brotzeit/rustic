@@ -446,25 +446,6 @@ If running with prefix command `C-u', read whole command from minibuffer."
                       (concat "cargo add " (read-from-minibuffer "Crate: ")))))
       (rustic-run-cargo-command command))))
 
-(defun rustic-cargo-add-missing-imports ()
-  "Add missing imports to Cargo.toml.
-Adds all missing imports by default.
-Use with 'prefix-arg` to select imports to add."
-  (interactive)
-  (when (rustic-cargo-edit-installed-p)
-    (let ((missing-imports (delete-dups
-                            (seq-reduce (lambda (missing-crates errortable)
-                                          (if (string= "E0432" (gethash "code" errortable))
-                                              (cons (nth 3 (split-string (gethash "message" errortable) "`")) missing-crates)
-                                            missing-crates))
-                                        (gethash (buffer-file-name) (lsp-diagnostics t)) '()))))
-      (if missing-imports
-          (rustic-run-cargo-command (format  "cargo add %s"
-                                             (if current-prefix-arg
-                                                 (completing-read "Select import to add to Cargo.toml" missing-imports)
-                                               (mapconcat 'identity  missing-imports " "))))
-        (message "Couldn't find any imports to add. If this was a mistake, make sure your language server is running properly.")))))
-
 ;;;###autoload
 (defun rustic-cargo-rm (&optional arg)
   "Remove crate from Cargo.toml using 'cargo rm'.
