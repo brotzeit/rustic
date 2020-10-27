@@ -198,12 +198,14 @@ Set environment variables for rust process."
                                (format "TERM=%s" "ansi")
                                (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
                               process-environment)))
-    (make-process :name (plist-get args :name)
-                  :buffer (plist-get args :buffer)
-                  :command (plist-get args :command)
-                  :filter (plist-get args :filter)
-                  :sentinel (plist-get args :sentinel)
-                  :coding 'utf-8-emacs-unix)))
+    (let ((process (apply
+                    #'start-file-process (plist-get args :name)
+                    (plist-get args :buffer)
+                    (plist-get args :command))))
+      (set-process-filter process (plist-get args :filter))
+      (set-process-sentinel process (plist-get args :sentinel))
+      (set-process-coding-system process 'utf-8-emacs-unix 'utf-8-emacs-unix)
+      process)))
 
 (defun rustic-compilation-setup-buffer (buf dir mode &optional no-mode-line)
   "Prepare BUF for compilation process."
