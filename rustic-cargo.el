@@ -447,6 +447,7 @@ If running with prefix command `C-u', read whole command from minibuffer."
       (rustic-run-cargo-command command))))
 
 (defun rustic-cargo--eglot-missing-imports ()
+  "Find missing imports when using eglot."
   (delete-dups (seq-reduce (lambda (missing-crates clstruct)
                              (if (and  (flymake--diag-p clstruct)
                                        (string-match-p
@@ -456,18 +457,24 @@ If running with prefix command `C-u', read whole command from minibuffer."
                                missing-crates))
                            eglot--unreported-diagnostics '())))
 
+(defun rustic-cargo--lsp-missing-imports ()
+  "Find missing imports when using lsp-mode."
+  (delete-dups
+   (seq-reduce (lambda (missing-crates errortable)
+                 (if (string= "E0432" (gethash "code" errortable))
+                     (cons (nth 3 (split-string (gethash "message" errortable) "`")) missing-crates)
+                   missing-crates))
+               (gethash (buffer-file-name) (lsp-diagnostics t)) '())))
+
 (defun rustic-cargo-add-missing-imports ()
   "Add missing imports to Cargo.toml.
 Adds all missing imports by default.
 Use with 'prefix-arg` to select imports to add."
   (interactive)
   (when (rustic-cargo-edit-installed-p)
-    (if-let ((missing-imports (delete-dups
-                               (seq-reduce (lambda (missing-crates errortable)
-                                             (if (string= "E0432" (gethash "code" errortable))
-                                                 (cons (nth 3 (split-string (gethash "message" errortable) "`")) missing-crates)
-                                               missing-crates))
-                                           (gethash (buffer-file-name) (lsp-diagnostics t)) '()))))
+    (if-let ((missing-imports (if lsp-mode
+                                  (rustic-cargo--lsp-missing-imports)
+                                (rustic-cargo--eglot-missing-imports))))
         (rustic-run-cargo-command (format  "cargo add %s"
                                            (if current-prefix-arg
                                                (completing-read "Select import to add to Cargo.toml" missing-imports)
