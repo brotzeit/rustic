@@ -448,22 +448,23 @@ If running with prefix command `C-u', read whole command from minibuffer."
 
 
 ;; (:code "E0432" :message "unresolved import `aosenuh`\nno `aosenuh` external crate" :range
-                   ;; (:end
-                   ;;  (:character 11 :line 0)
-                   ;;  :start
-                   ;;  (:character 4 :line 0))
-                   ;; :severity 1 :source "rustc")
-                   ;;
+;; (:end
+;;  (:character 11 :line 0)
+;;  :start
+;;  (:character 4 :line 0))
+;; :severity 1 :source "rustc")
+;;
 (defun rustic-cargo-add-missing-imports-eglot ()
   "Quiet doctor."
   (interactive)
   (seq-reduce (lambda (missing-crates clstruct)
-                (message "struct: %s" clstruct)
-                (if (string-match-p
-                     (regexp-quote "unresolved import")
-                     (format "%s" (flymake--diag-text clstruct)))
-                    (cons clstruct missing-crates)
-                  missing-crates)) eglot--unreported-diagnostics '()))
+                (when (and  (flymake--diag-p clstruct)
+                            (string-match-p
+                             (regexp-quote "unresolved import `")
+                             (format "%s" (flymake--diag-text clstruct))))
+                  (progn
+                    (message "missing crate: %s" (nth 3 (split-string (flymake--diag-text clstruct) "`"))))))
+              eglot--unreported-diagnostics '()))
 
 (defun rustic-cargo-add-missing-imports ()
   "Add missing imports to Cargo.toml.
