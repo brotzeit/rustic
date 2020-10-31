@@ -59,8 +59,9 @@ non-nil."
   "Get the workspace root.
 If NODEFAULT is t, return nil instead of `default-directory' if directory is
 not in a rust project."
-  (let ((dir (locate-dominating-file
-              (or buffer-file-name default-directory) "Cargo.toml")))
+  (let ((dir (alist-get '\workspace_root
+                        (json-read-from-string
+                         (shell-command-to-string "cargo metadata --format-version 1")))))
     (if dir
         (expand-file-name dir)
       (if nodefault
