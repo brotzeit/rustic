@@ -54,6 +54,7 @@ non-nil."
   (or rustic-format-on-save (eq rustic-format-trigger 'on-save)))
 
 ;;; Essentials
+
 (defun rustic-buffer-workspace (&optional nodefault)
   "Get the workspace root.
 If NODEFAULT is t, return nil instead of `default-directory' if directory is
@@ -63,7 +64,7 @@ not in a rust project."
                                  (json-read-from-string
                                   (shell-command-to-string "cargo metadata --format-version 1")))
                     (error nil))
-                  (locate-dominating-file default-directory "Cargo.toml"))))
+                  default-directory)))
     (if dir
         (expand-file-name dir)
       (if nodefault
