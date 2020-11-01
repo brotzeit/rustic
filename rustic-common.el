@@ -60,9 +60,9 @@ non-nil."
 If NODEFAULT is t, return nil instead of `default-directory' if directory is
 not in a rust project."
   (let ((dir (or  (condition-case nil
-                      (alist-get '\workspace_root
-                                 (json-read-from-string
-                                  (shell-command-to-string "cargo metadata --format-version 1")))
+                      (concat  (alist-get '\workspace_root
+                                          (json-read-from-string
+                                           (shell-command-to-string "cargo metadata --format-version 1"))) "/")
                     (error nil))
                   default-directory)))
     (if dir
