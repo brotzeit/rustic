@@ -217,7 +217,7 @@ directory DIR."
         (dependencies ""))
     (dolist (crate crates)
       (let ((name (symbol-name (car crate)))
-            (version (number-to-string (cdr crate))))
+            (version (cdr crate)))
         (setq dependencies (concat dependencies name " = " "\"" version "\"" "\n"))))
     (setq dependencies (concat "[dependencies]\n" dependencies) )
     (make-directory (file-name-directory toml) t)
