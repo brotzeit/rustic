@@ -366,7 +366,7 @@ blocks.
 Execute babel block with `org-babel-execute-src-block`
 
 ```
-#+BEGIN_SRC rust :crates '((regex . 0.2))
+#+BEGIN_SRC rust :crates '((regex . "0.2"))
   extern crate regex;
 
   use regex::Regex;

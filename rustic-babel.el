@@ -166,17 +166,18 @@ execution with rustfmt."
 (defun rustic-babel-format-sentinel (proc output)
   "This sentinel is used by the process `rustic-babel-format', that runs
 after successful compilation."
-  (let ((proc-buffer (process-buffer proc))
-        (marker rustic-babel-src-location))
-    (save-excursion
-      (with-current-buffer proc-buffer
-        (when (string-match-p "^finished" output)
-          (with-current-buffer (marker-buffer marker)
-            (goto-char marker)
-            (org-babel-update-block-body
-             (with-current-buffer "rustic-babel-format-buffer"
-               (buffer-string)))))))
-    (kill-buffer "rustic-babel-format-buffer")))
+  (ignore-errors
+    (let ((proc-buffer (process-buffer proc))
+          (marker rustic-babel-src-location))
+      (save-excursion
+        (with-current-buffer proc-buffer
+          (when (string-match-p "^finished" output)
+            (with-current-buffer (marker-buffer marker)
+              (goto-char marker)
+              (org-babel-update-block-body
+               (with-current-buffer "rustic-babel-format-buffer"
+                 (buffer-string)))))))
+      (kill-buffer "rustic-babel-format-buffer"))))
 
 (defun rustic-babel-generate-project (&optional expand)
   "Create rust project in `org-babel-temporary-directory'.
@@ -217,7 +218,9 @@ directory DIR."
         (dependencies ""))
     (dolist (crate crates)
       (let ((name (symbol-name (car crate)))
-            (version (number-to-string (cdr crate))))
+            (version (cdr crate)))
+        (when (numberp version)
+          (setq version (number-to-string version)))
         (setq dependencies (concat dependencies name " = " "\"" version "\"" "\n"))))
     (setq dependencies (concat "[dependencies]\n" dependencies) )
     (make-directory (file-name-directory toml) t)
