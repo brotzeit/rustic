@@ -60,7 +60,7 @@ non-nil."
 If NODEFAULT is t, return nil instead of `default-directory' if directory is
 not in a rust project."
   (let ((dir (locate-dominating-file
-              (or buffer-file-name default-directory) "Cargo.toml")))
+              (or buffer-file-name default-directory) "Cargo.lock")))
     (if dir
         (expand-file-name dir)
       (if nodefault
