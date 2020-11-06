@@ -472,7 +472,7 @@ Adds all missing imports by default.
 Use with 'prefix-arg` to select imports to add."
   (interactive)
   (when (rustic-cargo-edit-installed-p)
-    (if-let ((missing-imports (if lsp-mode
+    (if-let ((missing-imports (if (ignore-error lsp-mode)
                                   (rustic-cargo--lsp-missing-imports)
                                 (rustic-cargo--eglot-missing-imports))))
         (rustic-run-cargo-command (format  "cargo add %s"
