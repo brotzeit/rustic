@@ -54,7 +54,8 @@ targets could be found."
                                          (format "%s exited with %s." args code-or-signal))))
                    (user-error error-message)))
                (goto-char (point-min))
-               (let ((json-array-type 'list))
+               (let ((json-array-type 'list)
+                     (json-object-type 'alist))
                  (json-read))))))
         (cargo (funcall flycheck-executable-find "cargo")))
     (unless cargo
