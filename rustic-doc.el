@@ -60,6 +60,10 @@ Needs to be a function because of its reliance on
   :type 'function
   :group 'rustic-doc)
 
+(defvar helm-ag-base-command)
+(defvar helm-ag-success-exit-status)
+(declare-function helm-ag "ext:helm-ag")
+
 (defun rustic-doc-default-search-function (search-dir search-term)
   "Default search functionality.
 Uses helm-ag and ripgrep if possible, grep otherwise.
