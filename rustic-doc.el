@@ -18,14 +18,14 @@
 (require 'f)
 (require 'async)
 
-(if (< emacs-major-version 27)
-    (defun rustic-doc--xdg-data-home ()
-      (or (getenv "XDG_DATA_HOME")
-          (concat (file-name-as-directory (getenv "HOME"))
-                  ".local/share")))
-  (progn
+(eval-and-compile
+  (if (< emacs-major-version 27)
+      (defun rustic-doc--xdg-data-home ()
+        (or (getenv "XDG_DATA_HOME")
+            (concat (file-name-as-directory (getenv "HOME"))
+                    ".local/share")))
     (require 'xdg)
-    (fset 'rustic-doc--xdg-data-home 'xdg-data-home)))
+    (fset 'rustic-doc--xdg-data-home #'xdg-data-home)))
 
 (defvar rustic-doc-lua-filter (concat (file-name-as-directory (getenv "HOME"))
                                       ".local/bin/rustic-doc-filter.lua")
