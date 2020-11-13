@@ -16,6 +16,7 @@
 (require 'url)
 (require 'lsp-mode)
 (require 'f)
+(require 'async)
 
 (if (< emacs-major-version 27)
     (defun rustic-doc--xdg-data-home ()
