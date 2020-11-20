@@ -10,9 +10,9 @@
 ;;; Code:
 
 (require 'xterm-color)
-(require 'projectile)
 (require 'markdown-mode)
 
+(require 'cl-lib)
 (require 'dash)
 (require 'subr-x)
 
@@ -347,9 +347,11 @@ If NO-ERROR is t, don't throw error if user chooses not to kill running process.
 
 The variable `buffer-save-without-query' can be used for customization and
 buffers are formatted after saving if turned on by `rustic-format-trigger'."
-  (let ((buffers (condition-case ()
-                     (projectile-buffers-with-file (projectile-project-buffers))
-                   (buffer-list)))
+  (let ((buffers (cl-remove-if-not
+                  #'buffer-file-name
+                  (if (fboundp rustic-list-project-buffers-function)
+                      (funcall rustic-list-project-buffers-function)
+                    (buffer-list))))
         (b (get-buffer rustic-format-buffer-name)))
     (when (buffer-live-p b)
       (kill-buffer b))
