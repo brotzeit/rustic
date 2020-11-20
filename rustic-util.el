@@ -6,6 +6,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'dash)
 (require 'subr-x)
 (require 'package)
@@ -54,6 +55,16 @@
 (defcustom rustic-analyzer-command '("rust-analyzer")
   "Command for calling rust analyzer."
   :type '(repeat (string))
+  :group 'rustic)
+
+(defcustom rustic-list-project-buffers-function
+  (if (fboundp 'projectile-project-buffers)
+      'projectile-project-buffers
+    'rustic-project-buffer-list)
+  "Function used to list buffers belonging to current project."
+  :type '(choice (const projectile-project-buffers)
+                 (const rustic-project-buffer-list)
+                 function)
   :group 'rustic)
 
 ;;; Rustfmt
@@ -184,10 +195,13 @@ and it's `cdr' is a list of arguments."
     (with-current-buffer proc-buffer
       (if (not (string-match-p "^finished" output))
           (funcall rustic-compile-display-method proc-buffer)
-        (let ((buffers (projectile-buffers-with-file (projectile-project-buffers))))
-          (dolist (b buffers)
-            (with-current-buffer b
-              (revert-buffer t t))))
+        (when (fboundp rustic-list-project-buffers-function)
+          (let ((buffers (cl-remove-if-not
+                          #'buffer-file-name
+                          (funcall rustic-list-project-buffers-function))))
+            (dolist (b buffers)
+              (with-current-buffer b
+                (revert-buffer t t)))))
         (kill-buffer proc-buffer)
         (message "Workspace formatted with cargo-fmt.")))))
 
@@ -222,6 +236,21 @@ were issues when using stdin for formatting."
       (while (eq (process-status proc) 'run)
         (sit-for 0.05)))))
 
+(defun rustic-project-buffer-list ()
+  "Return a list of the buffers belonging to the current project.
+This is basically a wrapper around `project--buffer-list'."
+  (when-let ((pr (project-current)))
+    (if (fboundp 'project--buffer-list)
+        (project--buffer-list pr)
+      ;; Like the above function but releases before Emacs 28.
+      (let ((root (cdr pr))
+            bufs)
+        (dolist (buf (buffer-list))
+          (let ((filename (or (buffer-file-name buf)
+                              (buffer-local-value 'default-directory buf))))
+            (when (and filename (file-in-directory-p filename root))
+              (push buf bufs))))
+        (nreverse bufs)))))
 
 ;;; LSP
 
