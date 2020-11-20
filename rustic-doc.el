@@ -285,11 +285,12 @@ If the user has not visited a project, returns the main doc directory."
          (proc (let ((process-connection-type nil))
                  (apply #'start-process name buf program program-args))))
     (set-process-sentinel
-     proc (or finish-func
-              (lambda (proc)
-                (let ((buf (process-buffer proc)))
-                  (when (buffer-live-p buf)
-                    (kill-buffer buf))))))
+     proc (lambda (proc)
+            (let ((buf (process-buffer proc)))
+              (when finish-func
+                (funcall finish-func proc))
+              (when (buffer-live-p buf)
+                (kill-buffer buf)))))
     proc))
 
 (defun rustic-doc--thing-at-point ()
