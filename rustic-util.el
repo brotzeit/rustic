@@ -151,6 +151,7 @@ and it's `cdr' is a list of arguments."
         (if (string-match-p "^finished" output)
             (with-current-buffer next-error-last-buffer
               (revert-buffer t t))
+          (sit-for 0.1)
           (with-current-buffer next-error-last-buffer
             (goto-char rustic-save-pos))
           (goto-char (point-min))
