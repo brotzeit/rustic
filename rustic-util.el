@@ -138,6 +138,8 @@ and it's `cdr' is a list of arguments."
               (save-match-data
                 (when (search-forward "<stdin>" nil t)
                   (replace-match file)))))
+          (with-current-buffer next-error-last-buffer
+            (goto-char rustic-save-pos))
           (funcall rustic-format-display-method proc-buffer)
           (message "Rustfmt error."))))))
 
