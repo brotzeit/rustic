@@ -88,7 +88,7 @@ If nil then the project is simply created."
          (buf rustic-test-buffer-name)
          (proc rustic-test-process-name)
          (mode 'rustic-cargo-test-mode))
-    (rustic-compilation c :buffer buf :process proc :mode mode)))
+    (rustic-compilation c (list :buffer buf :process proc :mode mode))))
 
 ;;;###autoload
 (defun rustic-cargo-test (&optional arg)
@@ -121,7 +121,7 @@ When calling this function from `rustic-popup-mode', always use the value of
              (buf rustic-test-buffer-name)
              (proc rustic-test-process-name)
              (mode 'rustic-cargo-test-mode))
-        (rustic-compilation command :buffer buf :process proc :mode mode))
+        (rustic-compilation command (list :buffer buf :process proc :mode mode)))
     (message "Could not find test at point.")))
 
 (defconst rustic-cargo-mod-regexp
@@ -375,10 +375,10 @@ If BIN is not nil, create a binary application, otherwise a library."
 
 ;;; Interactive
 
-(defun rustic-run-cargo-command (command)
+(defun rustic-run-cargo-command (command &optional args)
   "Run the specified COMMAND with cargo."
   (rustic-compilation-process-live)
-  (rustic-compilation-start (split-string command)))
+  (rustic-compilation-start (split-string command) args))
 
 ;;;###autoload
 (defun rustic-cargo-build ()
@@ -390,7 +390,7 @@ If BIN is not nil, create a binary application, otherwise a library."
 (defun rustic-cargo-run ()
   "Run 'cargo run' for the current project."
   (interactive)
-  (rustic-run-cargo-command "cargo run"))
+  (rustic-run-cargo-command "cargo run" (list :mode 'comint-mode)))
 
 ;;;###autoload
 (defun rustic-cargo-clean ()

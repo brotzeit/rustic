@@ -224,7 +224,7 @@ Set environment variables for rust process."
           (set (make-local-variable 'compilation-auto-jump-to-next) t))
       (sit-for 0))))
 
-(defun rustic-compilation-start (command &rest args)
+(defun rustic-compilation-start (command &optional args)
   "Format crate before running actual compile command when `rustic-format-trigger'
 is set to 'on-compile. If rustfmt fails, don't start compilation."
   (let ((compile-p t))
@@ -238,7 +238,7 @@ is set to 'on-compile. If rustfmt fails, don't start compilation."
     (when compile-p
       (rustic-compilation command args))))
 
-(defun rustic-compilation (command &rest args)
+(defun rustic-compilation (command &optional args)
   "Start a compilation process with COMMAND.
 
 :no-display - don't display buffer when starting compilation process
@@ -487,7 +487,7 @@ Otherwise use provided argument ARG and store it in
                           rustic-compile-command)))
          (dir (setq compilation-directory (rustic-buffer-workspace))))
     (rustic-compilation-process-live)
-    (rustic-compilation-start (split-string command) :directory dir)))
+    (rustic-compilation-start (split-string command) (list :directory dir))))
 
 ;;;###autoload
 (defun rustic-recompile ()
@@ -496,7 +496,7 @@ Otherwise use provided argument ARG and store it in
   (let* ((command (or compilation-arguments rustic-compile-command))
          (dir compilation-directory))
     (rustic-compilation-process-live)
-    (rustic-compilation (split-string command) :directory dir)))
+    (rustic-compilation (split-string command) (list :directory dir))))
 
 ;;; _
 (provide 'rustic-compile)

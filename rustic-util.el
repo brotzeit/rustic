@@ -174,11 +174,12 @@ and it's `cdr' is a list of arguments."
         (mode 'rustic-cargo-fmt-mode))
     (rustic-compilation-process-live)
     (rustic-compilation command
-                        :no-display t
-                        :buffer buffer
-                        :process proc
-                        :mode mode
-                        :sentinel #'rustic-cargo-fmt-sentinel)))
+                        (list
+                         :no-display t
+                         :buffer buffer
+                         :process proc
+                         :mode mode
+                         :sentinel #'rustic-cargo-fmt-sentinel))))
 
 (defun rustic-cargo-fmt-sentinel (proc output)
   "Sentinel for formatting with `rustic-cargo-fmt'."
