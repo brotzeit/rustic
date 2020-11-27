@@ -255,6 +255,7 @@ were issues when using stdin for formatting."
   "When changing the `lsp-rust-server', it's also necessary to update the priorities
 with `lsp-rust-switch-server'."
   (require 'lsp-rust)
+  (require 'lsp-modeline)
   (lsp-workspace-folders-add (rustic-buffer-workspace))
   (setq lsp-rust-server rustic-lsp-server)
   (setq lsp-rust-analyzer-server-command rustic-analyzer-command)
