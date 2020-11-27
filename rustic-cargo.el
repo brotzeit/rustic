@@ -373,7 +373,7 @@ If BIN is not nil, create a binary application, otherwise a library."
                   :command (list rustic-cargo-bin "new" bin project-path)
                   :sentinel new-sentinel)))
 
-;;; Interactive
+;;; Cargo commands
 
 (defun rustic-run-cargo-command (command &optional args)
   "Run the specified COMMAND with cargo."
@@ -390,7 +390,14 @@ If BIN is not nil, create a binary application, otherwise a library."
 (defun rustic-cargo-run ()
   "Run 'cargo run' for the current project."
   (interactive)
-  (rustic-run-cargo-command "cargo run" (list :mode 'comint-mode)))
+  (rustic-run-cargo-command "cargo run" (list :mode 'rustic-cargo-run-mode)))
+
+(define-derived-mode rustic-cargo-run-mode rustic-compilation-mode "Cargo run"
+  "Mode for 'cargo run' that derives from `rustic-compilation-mode', but uses
+the keymap of `comint-mode' so user input is possible."
+  (buffer-disable-undo)
+  (setq buffer-read-only nil)
+  (use-local-map comint-mode-map))
 
 ;;;###autoload
 (defun rustic-cargo-clean ()
