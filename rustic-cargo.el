@@ -60,9 +60,10 @@ If nil then the project is simply created."
         (mode 'rustic-cargo-clippy-mode))
     (rustic-compilation-process-live)
     (rustic-compilation command
-                        :buffer buf
-                        :process proc
-                        :mode mode)))
+                        (list
+                         :buffer buf
+                         :process proc
+                         :mode mode))))
 
 ;;; Test
 
