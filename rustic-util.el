@@ -361,7 +361,7 @@ with `lsp-rust-switch-server'."
          (proc rustic-rustfix-process-name)
          (mode 'rustic-rustfix-mode))
     (rustic-compilation-process-live)
-    (rustic-compilation-start command :buffer err-buf :process proc :mode mode)))
+    (rustic-compilation-start command (list :buffer err-buf :process proc :mode mode))))
 
 ;;; Interactive
 
