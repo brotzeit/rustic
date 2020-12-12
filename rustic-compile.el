@@ -255,6 +255,7 @@ is set to 'on-compile. If rustfmt fails, don't start compilation."
         (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
         (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
     (rustic-compilation-setup-buffer buf directory mode)
+    (setq next-error-last-buffer buf)
     (unless (plist-get args :no-display)
       (funcall rustic-compile-display-method buf))
     (with-current-buffer buf
