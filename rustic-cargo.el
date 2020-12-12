@@ -387,11 +387,23 @@ If BIN is not nil, create a binary application, otherwise a library."
   (interactive)
   (rustic-run-cargo-command "cargo build"))
 
+(defvar rustic--cargo-run-argument-history nil
+  "Minibuffer history of the `rustic-cargo-run' command.")
+
 ;;;###autoload
-(defun rustic-cargo-run ()
-  "Run 'cargo run' for the current project."
-  (interactive)
-  (rustic-run-cargo-command "cargo run" (list :mode 'rustic-cargo-run-mode)))
+(defun rustic-cargo-run (&optional arg)
+  "Run 'cargo run' for the current project.
+If running with prefix command `C-u', read whole command from minibuffer."
+  (interactive "P")
+  (let* ((command (if arg
+                      (read-from-minibuffer "Cargo run command: " "cargo run ")
+                    (concat "cargo run "
+                            (read-from-minibuffer
+                             "Run arguments: "
+                             (car rustic--cargo-run-argument-history)
+                             nil nil
+                             'rustic--cargo-run-argument-history)))))
+    (rustic-run-cargo-command command (list :mode 'rustic-cargo-run-mode))))
 
 (define-derived-mode rustic-cargo-run-mode rustic-compilation-mode "Cargo run"
   "Mode for 'cargo run' that derives from `rustic-compilation-mode', but uses
