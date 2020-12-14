@@ -394,7 +394,7 @@ If running with prefix command `C-u', read whole command from minibuffer."
   (interactive "P")
   (let* ((command (if arg
                       (read-from-minibuffer "Cargo run command: " "cargo run ")
-                    (concat "cargo run "
+                    (concat rustic-cargo-bin " run "
                             (read-from-minibuffer
                              "Run arguments: "
                              (car compile-history)
