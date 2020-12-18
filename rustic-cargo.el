@@ -357,7 +357,7 @@ Execute process in PATH."
 (defun rustic-cargo-new (project-path &optional bin)
   "Run 'cargo new' to start a new package in the path specified by PROJECT-PATH.
 If BIN is not nil, create a binary application, otherwise a library."
-  (interactive "DProject path: ")
+  (interactive "FProject path: ")
   (let ((bin (if (or bin (y-or-n-p "Create new binary package? "))
                  "--bin"
                "--lib"))
@@ -371,7 +371,8 @@ If BIN is not nil, create a binary application, otherwise a library."
         (buf "*cargo-new*"))
     (make-process :name proc
                   :buffer buf
-                  :command (list rustic-cargo-bin "new" bin project-path)
+                  :command (list rustic-cargo-bin "new" bin
+                                 (expand-file-name project-path))
                   :sentinel new-sentinel)))
 
 ;;; Cargo commands
