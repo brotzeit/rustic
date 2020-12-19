@@ -1,0 +1,57 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+    unix-test:
+        runs-on: ubuntu-latest
+        strategy:
+            max-parallel: 6
+            matrix:
+                emacs-version:
+                    - 26.3
+                    - 27.1
+                    - snapshot
+
+        steps:
+            - uses: purcell/setup-emacs@master
+              with:
+                  version: ${{ matrix.emacs-version }}
+
+            - uses: conao3/setup-cask@master
+              with:
+                  version: 0.8.4
+
+            - name: Install requirements
+              run: |
+                  # Configure $PATH: Executables are installed to $HOME/bin
+                  export PATH="$HOME/bin:$PATH"
+
+                  sudo apt update
+                  sudo apt install -y gnutls-bin gnupg2 dirmngr
+
+                  sudo apt install -y texinfo libgif-dev libxpm-dev
+
+            # - name: Install needed rust stuff
+            #   run: |
+            #       curl -sSf https://build.travis-ci.com/files/rustup-init.sh | sh -s -- --default-toolchain=stable -y
+            #       source $HOME/.cargo/env
+            #       rustup component add rustfmt-preview
+
+            #       # install RLS
+            #       rustup component add rls rust-analysis rust-src
+            #       # install rust-analyzer
+            #       git clone https://github.com/rust-analyzer/rust-analyzer && cd rust-analyzer
+            #       cargo xtask install --server && cd ..
+
+            - name: Prepare Cask
+              run: |
+                  mkdir -p $HOME/.emacs.d/elpa/gnupg || true
+                  chmod 700 $HOME/.emacs.d/elpa/gnupg
+                  gpg2 --keyserver hkp://pool.sks-keyservers.net:80 --homedir $HOME/.emacs.d/elpa/gnupg --recv-keys 066DAFCB81E42C40 || true
+                  mkdir -p $(cask package-directory) || true
+                  rsync -azSH $HOME/.emacs.d/elpa/gnupg $(cask package-directory)
+                  cask install
+
+            - name: Run tests
+              run: cask exec ert-runner
