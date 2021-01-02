@@ -287,7 +287,7 @@ If the user has not visited a project, returns the main doc directory."
          (proc (let ((process-connection-type nil))
                  (apply #'start-process name buf program program-args))))
     (set-process-sentinel
-     proc (lambda (proc)
+     proc (lambda (proc _event)
             (let ((buf (process-buffer proc)))
               (when finish-func
                 (funcall finish-func proc))
