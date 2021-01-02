@@ -6,6 +6,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'dash)
 (require 'subr-x)
 (require 'package)
@@ -54,6 +55,16 @@
 (defcustom rustic-analyzer-command '("rust-analyzer")
   "Command for calling rust analyzer."
   :type '(repeat (string))
+  :group 'rustic)
+
+(defcustom rustic-list-project-buffers-function
+  (if (fboundp 'projectile-project-buffers)
+      'projectile-project-buffers
+    'rustic-project-buffer-list)
+  "Function used to list buffers belonging to current project."
+  :type '(choice (const projectile-project-buffers)
+                 (const rustic-project-buffer-list)
+                 function)
   :group 'rustic)
 
 ;;; Rustfmt
@@ -138,6 +149,8 @@ and it's `cdr' is a list of arguments."
               (save-match-data
                 (when (search-forward "<stdin>" nil t)
                   (replace-match file)))))
+          (with-current-buffer next-error-last-buffer
+            (goto-char rustic-save-pos))
           (funcall rustic-format-display-method proc-buffer)
           (message "Rustfmt error."))))))
 
@@ -149,6 +162,7 @@ and it's `cdr' is a list of arguments."
         (if (string-match-p "^finished" output)
             (with-current-buffer next-error-last-buffer
               (revert-buffer t t))
+          (sit-for 0.1)
           (with-current-buffer next-error-last-buffer
             (goto-char rustic-save-pos))
           (goto-char (point-min))
@@ -171,11 +185,12 @@ and it's `cdr' is a list of arguments."
         (mode 'rustic-cargo-fmt-mode))
     (rustic-compilation-process-live)
     (rustic-compilation command
-                        :no-display t
-                        :buffer buffer
-                        :process proc
-                        :mode mode
-                        :sentinel #'rustic-cargo-fmt-sentinel)))
+                        (list
+                         :no-display t
+                         :buffer buffer
+                         :process proc
+                         :mode mode
+                         :sentinel #'rustic-cargo-fmt-sentinel))))
 
 (defun rustic-cargo-fmt-sentinel (proc output)
   "Sentinel for formatting with `rustic-cargo-fmt'."
@@ -184,10 +199,13 @@ and it's `cdr' is a list of arguments."
     (with-current-buffer proc-buffer
       (if (not (string-match-p "^finished" output))
           (funcall rustic-compile-display-method proc-buffer)
-        (let ((buffers (projectile-buffers-with-file (projectile-project-buffers))))
-          (dolist (b buffers)
-            (with-current-buffer b
-              (revert-buffer t t))))
+        (when (fboundp rustic-list-project-buffers-function)
+          (let ((buffers (cl-remove-if-not
+                          #'buffer-file-name
+                          (funcall rustic-list-project-buffers-function))))
+            (dolist (b buffers)
+              (with-current-buffer b
+                (revert-buffer t t)))))
         (kill-buffer proc-buffer)
         (message "Workspace formatted with cargo-fmt.")))))
 
@@ -222,6 +240,21 @@ were issues when using stdin for formatting."
       (while (eq (process-status proc) 'run)
         (sit-for 0.05)))))
 
+(defun rustic-project-buffer-list ()
+  "Return a list of the buffers belonging to the current project.
+This is basically a wrapper around `project--buffer-list'."
+  (when-let ((pr (project-current)))
+    (if (fboundp 'project--buffer-list)
+        (project--buffer-list pr)
+      ;; Like the above function but releases before Emacs 28.
+      (let ((root (cdr pr))
+            bufs)
+        (dolist (buf (buffer-list))
+          (let ((filename (or (buffer-file-name buf)
+                              (buffer-local-value 'default-directory buf))))
+            (when (and filename (file-in-directory-p filename root))
+              (push buf bufs))))
+        (nreverse bufs)))))
 
 ;;; LSP
 
@@ -252,6 +285,7 @@ were issues when using stdin for formatting."
   "When changing the `lsp-rust-server', it's also necessary to update the priorities
 with `lsp-rust-switch-server'."
   (require 'lsp-rust)
+  (require 'lsp-modeline)
   (lsp-workspace-folders-add (rustic-buffer-workspace))
   (setq lsp-rust-server rustic-lsp-server)
   (setq lsp-rust-analyzer-server-command rustic-analyzer-command)
@@ -356,7 +390,7 @@ with `lsp-rust-switch-server'."
          (proc rustic-rustfix-process-name)
          (mode 'rustic-rustfix-mode))
     (rustic-compilation-process-live)
-    (rustic-compilation-start command :buffer err-buf :process proc :mode mode)))
+    (rustic-compilation-start command (list :buffer err-buf :process proc :mode mode))))
 
 ;;; Interactive
 

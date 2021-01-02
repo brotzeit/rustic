@@ -45,7 +45,7 @@ targets could be found."
   (let ((process-output-as-json
          (lambda (program &rest args)
            (with-temp-buffer
-             (let ((code-or-signal (apply 'call-process program nil '(t nil) nil args)))
+             (let ((code-or-signal (apply 'process-file program nil '(t nil) nil args)))
                (unless (equal code-or-signal 0)
                  ;; Prevent from displaying "JSON readtable error".
                  (let* ((args (combine-and-quote-strings (cons program args)))
@@ -54,7 +54,8 @@ targets could be found."
                                          (format "%s exited with %s." args code-or-signal))))
                    (user-error error-message)))
                (goto-char (point-min))
-               (let ((json-array-type 'list))
+               (let ((json-array-type 'list)
+                     (json-object-type 'alist))
                  (json-read))))))
         (cargo (funcall flycheck-executable-find "cargo")))
     (unless cargo
@@ -92,7 +93,7 @@ the closest matching target, or nil if no targets could be found.
 See http://doc.crates.io/manifest.html#the-project-layout for a
 description of the conventional Cargo project layout."
   (-when-let* ((workspace (rustic-buffer-workspace t))
-               (manifest (concat workspace "Cargo.toml"))
+               (manifest (file-local-name (concat workspace "Cargo.toml")))
                (packages (rustic-flycheck-get-cargo-targets manifest))
                (targets (-flatten-n 1 packages)))
     (let ((target

@@ -1,8 +1,8 @@
 # Rustic
 
 [![MELPA](https://melpa.org/packages/rustic-badge.svg)](https://melpa.org/#/rustic)
-[![Build
-Status](https://travis-ci.com/brotzeit/rustic.svg?branch=master)](https://travis-ci.com/brotzeit/rustic)
+[![](https://github.com/brotzeit/rustic/workflows/CI/badge.svg)](https://github.com/brotzeit/rustic/actions?query=workflow%3ACI)
+
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 

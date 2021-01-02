@@ -17,14 +17,14 @@
 (require 'lsp-mode)
 (require 'f)
 
-(if (< emacs-major-version 27)
-    (defun rustic-doc--xdg-data-home ()
-      (or (getenv "XDG_DATA_HOME")
-          (concat (file-name-as-directory (getenv "HOME"))
-                  ".local/share")))
-  (progn
+(eval-and-compile
+  (if (< emacs-major-version 27)
+      (defun rustic-doc--xdg-data-home ()
+        (or (getenv "XDG_DATA_HOME")
+            (concat (file-name-as-directory (getenv "HOME"))
+                    ".local/share")))
     (require 'xdg)
-    (fset 'rustic-doc--xdg-data-home 'xdg-data-home)))
+    (fset 'rustic-doc--xdg-data-home #'xdg-data-home)))
 
 (defvar rustic-doc-lua-filter (concat (file-name-as-directory (getenv "HOME"))
                                       ".local/bin/rustic-doc-filter.lua")
@@ -244,11 +244,11 @@ If the user has not visited a project, returns the main doc directory."
                                 (message (format "Finished converting docs for %s"
                                                  rustic-doc-current-project)))))
             (rustic-doc-create-project-dir)
-            (async-start-process "rustic-doc-convert"
-                                 rustic-doc-convert-prog
-                                 finish-func
-                                 docs-src
-                                 (rustic-doc--project-doc-dest)))))
+            (rustic-doc--start-process "rustic-doc-convert"
+                                       rustic-doc-convert-prog
+                                       finish-func
+                                       docs-src
+                                       (rustic-doc--project-doc-dest)))))
     (message "Could not find project to convert. Visit a rust project first! (Or activate rustic-doc-mode if you are in one)")))
 
 (defun rustic-doc-install-deps ()
@@ -260,11 +260,11 @@ If the user has not visited a project, returns the main doc directory."
           (missing-makedocs (not (executable-find "cargo-makedocs"))))
       (when (and  (or missing-fd missing-makedocs missing-rg) (y-or-n-p "Missing some dependencies for rustic doc, install them? "))
         (when missing-fd
-          (async-start-process "install-fd" "cargo" nil "install" "fd-find"))
+          (rustic-doc--start-process "install-fd" "cargo" nil "install" "fd-find"))
         (when missing-rg
-          (async-start-process "install-rg" "cargo" nil "install" "ripgrep"))
+          (rustic-doc--start-process "install-rg" "cargo" nil "install" "ripgrep"))
         (when missing-makedocs
-          (async-start-process "install-makedocs" "cargo" nil "install" "cargo-makedocs"))))))
+          (rustic-doc--start-process "install-makedocs" "cargo" nil "install" "cargo-makedocs"))))))
 
 
 ;;;###autoload
@@ -276,11 +276,24 @@ If the user has not visited a project, returns the main doc directory."
   (message "Setup is converting the standard library")
   (delete-directory (concat rustic-doc-save-loc "/std")
                     t)
-  (async-start-process "*rustic-doc-std-conversion*"
-                       rustic-doc-convert-prog
-                       (lambda (_p)
-                         (message "Finished converting docs for std"))
-                       "std"))
+  (rustic-doc--start-process "*rustic-doc-std-conversion*"
+                             rustic-doc-convert-prog
+                             (lambda (_p)
+                               (message "Finished converting docs for std"))
+                             "std"))
+
+(defun rustic-doc--start-process (name program finish-func &rest program-args)
+  (let* ((buf (generate-new-buffer (concat "*" name "*")))
+         (proc (let ((process-connection-type nil))
+                 (apply #'start-process name buf program program-args))))
+    (set-process-sentinel
+     proc (lambda (proc)
+            (let ((buf (process-buffer proc)))
+              (when finish-func
+                (funcall finish-func proc))
+              (when (buffer-live-p buf)
+                (kill-buffer buf)))))
+    proc))
 
 (defun rustic-doc--thing-at-point ()
   "Return info about `thing-at-point'. If `thing-at-point' is nil, return defaults."

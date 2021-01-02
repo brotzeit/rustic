@@ -10,9 +10,9 @@
 ;;; Code:
 
 (require 'xterm-color)
-(require 'projectile)
 (require 'markdown-mode)
 
+(require 'cl-lib)
 (require 'dash)
 (require 'subr-x)
 
@@ -198,12 +198,14 @@ Set environment variables for rust process."
                                (format "TERM=%s" "ansi")
                                (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
                               process-environment)))
-    (make-process :name (plist-get args :name)
-                  :buffer (plist-get args :buffer)
-                  :command (plist-get args :command)
-                  :filter (plist-get args :filter)
-                  :sentinel (plist-get args :sentinel)
-                  :coding 'utf-8-emacs-unix)))
+    (let ((process (apply
+                    #'start-file-process (plist-get args :name)
+                    (plist-get args :buffer)
+                    (plist-get args :command))))
+      (set-process-filter process (plist-get args :filter))
+      (set-process-sentinel process (plist-get args :sentinel))
+      (set-process-coding-system process 'utf-8-emacs-unix 'utf-8-emacs-unix)
+      process)))
 
 (defun rustic-compilation-setup-buffer (buf dir mode &optional no-mode-line)
   "Prepare BUF for compilation process."
@@ -222,7 +224,7 @@ Set environment variables for rust process."
           (set (make-local-variable 'compilation-auto-jump-to-next) t))
       (sit-for 0))))
 
-(defun rustic-compilation-start (command &rest args)
+(defun rustic-compilation-start (command &optional args)
   "Format crate before running actual compile command when `rustic-format-trigger'
 is set to 'on-compile. If rustfmt fails, don't start compilation."
   (let ((compile-p t))
@@ -236,7 +238,7 @@ is set to 'on-compile. If rustfmt fails, don't start compilation."
     (when compile-p
       (rustic-compilation command args))))
 
-(defun rustic-compilation (command &rest args)
+(defun rustic-compilation (command &optional args)
   "Start a compilation process with COMMAND.
 
 :no-display - don't display buffer when starting compilation process
@@ -253,6 +255,7 @@ is set to 'on-compile. If rustfmt fails, don't start compilation."
         (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
         (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
     (rustic-compilation-setup-buffer buf directory mode)
+    (setq next-error-last-buffer buf)
     (unless (plist-get args :no-display)
       (funcall rustic-compile-display-method buf))
     (with-current-buffer buf
@@ -344,9 +347,11 @@ If NO-ERROR is t, don't throw error if user chooses not to kill running process.
 
 The variable `buffer-save-without-query' can be used for customization and
 buffers are formatted after saving if turned on by `rustic-format-trigger'."
-  (let ((buffers (condition-case ()
-                     (projectile-buffers-with-file (projectile-project-buffers))
-                   (buffer-list)))
+  (let ((buffers (cl-remove-if-not
+                  #'buffer-file-name
+                  (if (fboundp rustic-list-project-buffers-function)
+                      (funcall rustic-list-project-buffers-function)
+                    (buffer-list))))
         (b (get-buffer rustic-format-buffer-name)))
     (when (buffer-live-p b)
       (kill-buffer b))
@@ -485,7 +490,7 @@ Otherwise use provided argument ARG and store it in
                           rustic-compile-command)))
          (dir (setq compilation-directory (rustic-buffer-workspace))))
     (rustic-compilation-process-live)
-    (rustic-compilation-start (split-string command) :directory dir)))
+    (rustic-compilation-start (split-string command) (list :directory dir))))
 
 ;;;###autoload
 (defun rustic-recompile ()
@@ -494,7 +499,7 @@ Otherwise use provided argument ARG and store it in
   (let* ((command (or compilation-arguments rustic-compile-command))
          (dir compilation-directory))
     (rustic-compilation-process-live)
-    (rustic-compilation (split-string command) :directory dir)))
+    (rustic-compilation (split-string command) (list :directory dir))))
 
 ;;; _
 (provide 'rustic-compile)
