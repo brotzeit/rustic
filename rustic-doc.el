@@ -93,6 +93,8 @@ The function should take search-dir and search-term as arguments."
       (`(,dst ,opts ,src)
        (condition-case nil
            (progn
+             (unless (f-exists? (f-dirname dst))
+               (f-mkdir (f-dirname dst)))
              (url-copy-file src dst t)
              (when (memq :exec opts)
                (call-process (executable-find "chmod")
