@@ -93,6 +93,8 @@ The function should take search-dir and search-term as arguments."
       (`(,dst ,opts ,src)
        (condition-case nil
            (progn
+             (unless (f-exists? (f-dirname dst))
+               (f-mkdir (f-dirname dst)))
              (url-copy-file src dst t)
              (when (memq :exec opts)
                (call-process (executable-find "chmod")
@@ -285,7 +287,7 @@ If the user has not visited a project, returns the main doc directory."
          (proc (let ((process-connection-type nil))
                  (apply #'start-process name buf program program-args))))
     (set-process-sentinel
-     proc (lambda (proc)
+     proc (lambda (proc _event)
             (let ((buf (process-buffer proc)))
               (when finish-func
                 (funcall finish-func proc))
