@@ -2,13 +2,13 @@
 
 (ert-deftest rustic-test-cargo-test ()
   (let* ((string "#[test]
-                   fn it_works1() {
-                      assert_eq!(2 + 2, 3);
-                   }
-                   #[test]
-                   fn it_works2() {
-                      assert_eq!(2 + 2, 3);
-                   }")
+fn it_works1() {
+    assert_eq!(2 + 2, 3);
+}
+#[test]
+fn it_works2() {
+    assert_eq!(2 + 2, 3);
+}")
          (default-directory (rustic-test-count-error-helper string))
          (proc (call-interactively 'rustic-cargo-test))
          (buf (process-buffer proc)))
@@ -25,13 +25,13 @@
 (ert-deftest rustic-test-cargo-test-run ()
   (should (string= rustic-test-arguments ""))
   (let* ((string "#[test]
-                   fn it_works1() {
-                      assert_eq!(2 + 2, 3);
-                   }
-                   #[test]
-                   fn it_works2() {
-                      assert_eq!(2 + 2, 3);
-                   }")
+fn it_works1() {
+    assert_eq!(2 + 2, 3);
+}
+#[test]
+fn it_works2() {
+    assert_eq!(2 + 2, 3);
+}")
          (default-directory (rustic-test-count-error-helper string))
          (proc (rustic-cargo-test-run "it_works2"))
          (buf (process-buffer proc)))
@@ -44,11 +44,11 @@
 
 (ert-deftest rustic-test-cargo-current-test ()
   (let* ((string "#[test]
-                   fn test1() {
-                   }
-                   #[test]
-                   fn test2() {
-                   }")
+fn test1() {
+}
+#[test]
+fn test2() {
+}")
          (default-directory (rustic-test-count-error-helper string))
          (buf (get-buffer-create "test-current-test")))
     (with-current-buffer buf
@@ -67,9 +67,9 @@
 
   ;; test with use #46
   (let* ((string "#[test]
-                   fn test1() {
-                   use std;
-                   }")
+fn test1() {
+use std;
+}")
          (default-directory (rustic-test-count-error-helper string))
          (buf (get-buffer-create "test-current-test")))
     (with-current-buffer buf
@@ -86,10 +86,11 @@
     (kill-buffer buf))
 
   ;; test with comment
-  (let* ((string "#[test]
-                   fn test1() {
-                   // test with comment
-                   }")
+  (let* ((string "
+#[test]
+fn test1() {
+// test with comment
+}")
          (default-directory (rustic-test-count-error-helper string))
          (buf (get-buffer-create "test-current-test")))
     (with-current-buffer buf
