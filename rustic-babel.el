@@ -209,21 +209,41 @@ Otherwise create it with `rustic-babel-generate-project'."
           (put-text-property beg end 'project (make-symbol new))
           new)))))
 
+(defun crate-dependencies (name version features)
+  "Generate a Cargo.toml [dependencies] entry for a crate given a version and features."
+  (let ((version-string (concat "version = \"" version "\""))
+	(features-string
+         (if features
+	     (concat "features = [" (mapconcat (lambda (s) (concat "\"" s "\"")) features ", ") "]")
+	   nil)))
+    (let ((toml-entry (string-join (remove nil (list version-string features-string)) ", ")))
+      (concat name " = {" toml-entry "}"))))
+
+(defun cargo-toml-dependencies (crate-versions crate-features)
+  "Generate the [dependencies] section of a Cargo.toml file given crates and their versions & features."
+  (let ((dependencies ""))
+    (dolist (crate-and-version crate-versions)
+      (let ((name (car crate-and-version))
+	    (version (cdr crate-and-version)))
+	(let ((features (cdr (assoc name crate-features))))
+          (setq name (symbol-name name))
+          (when (numberp version)
+            (setq version (number-to-string version)))
+          (when (not (listp features))
+            (setq features (list features)))
+	  (let ((cargo-toml-entry (crate-dependencies name version features)))
+	    (setq dependencies (concat dependencies cargo-toml-entry "\n"))))))
+    (setq dependencies (concat "[dependencies]\n" dependencies))))
+
 (defun rustic-babel-cargo-toml (dir params)
   "Append crates to Cargo.toml.
 Use org-babel parameter crates from PARAMS and add them to the project in
 directory DIR."
   (let ((crates (cdr (assq :crates params)))
-        (toml (expand-file-name "Cargo.toml" dir))
-        (dependencies ""))
-    (dolist (crate crates)
-      (let ((name (symbol-name (car crate)))
-            (version (cdr crate)))
-        (when (numberp version)
-          (setq version (number-to-string version)))
-        (setq dependencies (concat dependencies name " = " "\"" version "\"" "\n"))))
-    (setq dependencies (concat "[dependencies]\n" dependencies) )
-    (make-directory (file-name-directory toml) t)
+        (features (cdr (assq :features params)))
+        (toml (expand-file-name "Cargo.toml" dir)))
+    (let ((dependencies (cargo-toml-dependencies crates features)))
+       (make-directory (file-name-directory toml) t)
     (with-temp-file toml
       (condition-case nil
           (insert-file-contents toml)
@@ -231,7 +251,7 @@ directory DIR."
       (let ((s (nth 0 (split-string (buffer-string) "\\[dependencies]"))))
         (erase-buffer)
         (insert s)
-        (insert dependencies)))))
+        (insert dependencies))))))
 
 (defun org-babel-execute:rustic (body params)
   "Execute a block of Rust code with org-babel.
