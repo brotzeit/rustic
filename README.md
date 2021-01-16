@@ -441,7 +441,7 @@ View help buffer containing a command's flags with `h`:
 To run the tests, you will need [Cask](https://github.com/cask/cask).
 
 ``` bash
-make test
+cask exec ert-runner
 ```
 
 ## Contributing
