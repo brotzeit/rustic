@@ -218,10 +218,8 @@ directory DIR."
         (dependencies ""))
     (dolist (crate crates)
       (let ((name (symbol-name (car crate)))
-            (version (cdr crate)))
-        (when (numberp version)
-          (setq version (number-to-string version)))
-        (setq dependencies (concat dependencies name " = " "\"" version "\"" "\n"))))
+            (version (rustic-babel-generate-version-toml (cdr crate))))
+        (setq dependencies (concat dependencies name " = " version "\n"))))
     (setq dependencies (concat "[dependencies]\n" dependencies) )
     (make-directory (file-name-directory toml) t)
     (with-temp-file toml
@@ -232,6 +230,44 @@ directory DIR."
         (erase-buffer)
         (insert s)
         (insert dependencies)))))
+
+(defun rustic-babel-generate-version-toml (version)
+  "Generates the crate version from the header arg VERSION.
+
+This allows for a string version, a numerical version and
+a list.
+
+If a list it should look like:
+((version . <number>) (features . <feature-or-list>))
+"
+  (if (listp version)
+      (concat
+       "{"
+       (mapconcat
+        (lambda (setting)
+          (message "%s" setting)
+          (pcase (car setting)
+            ('version
+             (format "version = \"%s\"" (cdr setting)))
+            ('features
+             (format "features = [%s]"
+                     (mapconcat
+                      (lambda (feature)
+                        (concat "\"" (symbol-name feature) "\""))
+                      (if (listp (cdr setting))
+                          (cdr setting)
+                        (list (cdr setting)))
+                      ", ")))
+            (_ "")))
+        version
+        ", ")
+       "}")
+    (concat
+     "\""
+     (if (numberp version)
+         (number-to-string version)
+       version)
+     "\"")))
 
 (defun org-babel-execute:rustic (body params)
   "Execute a block of Rust code with org-babel.
