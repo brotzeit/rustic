@@ -150,3 +150,36 @@
     (with-current-buffer buf
       (rustic-test-babel-execute-block buf)
       (should (eq (rustic-test-babel-check-results buf) nil)))))
+
+(ert-deftest rustic-test-babel-crate-with-single-feature ()
+  (let* ((string "extern crate serde;
+                  extern crate serde_json;
+                  #[derive(serde::Serialize)]
+                  pub struct Point {
+                      x: u32,
+                      y: u32,
+                  }
+                  fn main() {
+                      let point = Point {x: 0, y: 0};
+                      let _json = serde_json::to_string(&point);
+                  }")
+         (params ":crates '((serde . 1.0) (serde_json . 1.0)) :features '((serde . \"derive\"))")
+         (buf (rustic-test-get-babel-block string params)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (should (eq (rustic-test-babel-check-results buf) nil)))))
+
+(ert-deftest rustic-test-babel-crate-with-multiple-features ()
+  (let* ((string "extern crate tokio;
+                  fn main() {
+                      tokio::runtime::Runtime::new()
+                          .unwrap()
+                          .block_on(async {
+                              tokio::time::sleep(tokio::time::Duration::from_millis(10)).await;
+                          });
+                  }")
+         (params ":crates '((tokio . 1.0)) :features '((tokio . (\"rt-multi-thread\" \"time\")))")
+         (buf (rustic-test-get-babel-block string params)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (should (eq (rustic-test-babel-check-results buf) nil)))))
