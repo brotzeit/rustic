@@ -24,6 +24,7 @@
                     - [Applying code actions](#applying-code-actions)
                     - [Auto import](#auto-import)
                 - [Macro expansion](#macro-expansion)
+        - [TRAMP](#lsp--tramp)
     - [Cargo](#cargo)
         - [Edit](#edit)
         - [Test](#test)
@@ -275,6 +276,54 @@ your own function by customizing
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/macro_expansion.png)
 
+### LSP + TRAMP
+
+`rust-analyzer` does work over TRAMP, but you have to register the client
+manually:
+
+``` elisp
+(with-eval-after-load "lsp-rust"
+ (lsp-register-client
+  (make-lsp-client
+   :new-connection (lsp-stdio-connection
+                    (lambda ()
+                      `(,(or (executable-find
+                              (cl-first lsp-rust-analyzer-server-command))
+                             (lsp-package-path 'rust-analyzer)
+                             "rust-analyzer")
+                        ,@(cl-rest lsp-rust-analyzer-server-args))))
+   :remote? t
+   :major-modes '(rust-mode rustic-mode)
+   :initialization-options 'lsp-rust-analyzer--make-init-options
+   :notification-handlers (ht<-alist lsp-rust-notification-handlers)
+   :action-handlers (ht ("rust-analyzer.runSingle" #'lsp-rust--analyzer-run-single))
+   :library-folders-fn (lambda (_workspace) lsp-rust-library-directories)
+   :after-open-fn (lambda ()
+                    (when lsp-rust-analyzer-server-display-inlay-hints
+                      (lsp-rust-analyzer-inlay-hints-mode)))
+   :ignore-messages nil
+   :server-id 'rust-analyzer-remote)))
+```
+
+*(based on https://github.com/emacs-lsp/lsp-mode/blob/68fddd5d9c5506b2adf6a3f67bbe568f44563dd4/clients/lsp-rust.el#L644)*
+
+If you have Emacs 28, due to some [compatibility issues](https://github.com/emacs-lsp/lsp-mode/issues/2514#issuecomment-759452037),
+you might have to additionally use:
+
+``` elisp
+(defun start-file-process-shell-command@around (start-file-process-shell-command name buffer &rest args)
+  "Start a program in a subprocess.  Return the process object for it. Similar to `start-process-shell-command', but calls `start-file-process'."
+  ;; On remote hosts, the local `shell-file-name' might be useless.
+  (let ((command (mapconcat 'identity args " ")))
+    (funcall start-file-process-shell-command name buffer command)))
+
+(advice-add 'start-file-process-shell-command :around #'start-file-process-shell-command@around)
+```
+
+*(thanks to https://github.com/emacs-lsp/lsp-mode/issues/2514#issuecomment-759452037)*
+
+You'll have to have `rust-analyzer` already installed on the target machine.
+
 ## Cargo
 
 ### Edit
@@ -394,7 +443,7 @@ In case you want to use a different spinner type you can modify `rustic-spinner-
 
 ## inline-documentation
 
-With some setup, it is possible to read rust documentation inside Emacs!
+With some setup, it is possible to read rust documentation inside Emacs! This currently requires LSP-mode.
 
 ### Prequisites
 
@@ -441,7 +490,7 @@ View help buffer containing a command's flags with `h`:
 To run the tests, you will need [Cask](https://github.com/cask/cask).
 
 ``` bash
-make test
+cask exec ert-runner
 ```
 
 ## Contributing
