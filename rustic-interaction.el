@@ -103,7 +103,7 @@
         (cond
          ;; foo.bar(...)
          ((or (rustic-looking-back-str ")")
-             (rustic-looking-back-str "?"))
+              (rustic-looking-back-str "?"))
           (backward-list 1)
           (funcall skip-dot-identifier))
 
