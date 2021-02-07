@@ -102,7 +102,8 @@
                 (- (current-column) rustic-indent-offset)))))
         (cond
          ;; foo.bar(...)
-         ((rustic-looking-back-str ")")
+         ((or (rustic-looking-back-str ")")
+             (rustic-looking-back-str "?"))
           (backward-list 1)
           (funcall skip-dot-identifier))
 
