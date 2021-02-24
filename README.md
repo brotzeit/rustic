@@ -463,14 +463,14 @@ In case you want to use a different spinner type you can modify `rustic-spinner-
 ## inline-documentation
 
 With some setup, it is possible to read rust documentation inside Emacs! This currently requires LSP-mode.
-![](img/rustic-doc.png)
+![Rustic-doc example](img/rustic-doc.png)
 
 ### Prequisites
 
 * Install Pandoc https://pandoc.org/installing.html
 * Install cargo https://doc.rust-lang.org/cargo/getting-started/installation.html
 * Install helm-ag https://github.com/emacsorphanage/helm-ag (Optional, but highly recommended)
-* If you do not have them, you will be prompted to install `fd-find`, `ripgrep` and `cargo-makedocs` when you run `rustic-doc-setup`. 
+* If you do not have them, you will be prompted to install `fd-find`, `ripgrep` and `cargo-makedocs` when you run `rustic-doc-setup`.
     * `ripgrep` is optional but highly recommended.
     * If helm-ag and ripgrep is installed, those will be used by default.
     * If only ripgrep is installed, it will be used with the emacs `grep` command.
