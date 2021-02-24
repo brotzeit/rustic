@@ -277,7 +277,7 @@ If the user has not visited a project, returns the main doc directory."
   (message "Setup is converting the standard library")
   (delete-directory (concat rustic-doc-save-loc "/std")
                     t)
-  (rustic-doc--start-process "*rustic-doc-std-conversion*"
+  (rustic-doc--start-process "rustic-doc-std-conversion"
                              rustic-doc-convert-prog
                              (lambda (_p)
                                (message "Finished converting docs for std"))
