@@ -291,7 +291,7 @@ If the user has not visited a project, returns the main doc directory."
      proc (lambda (proc event)
             (let ((buf (process-buffer proc)))
               (if (string-match-p (regexp-quote "abnormally") event)
-                  (message "Could not finish process: %s. See *Messages* or a *rustic-*...* buffer for more info." event)
+                  (message "Could not finish process: %s. See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
                 (when finish-func
                   (funcall finish-func proc))
                 (when (buffer-live-p buf)
