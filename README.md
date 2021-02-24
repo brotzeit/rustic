@@ -463,7 +463,6 @@ In case you want to use a different spinner type you can modify `rustic-spinner-
 ## inline-documentation
 
 With some setup, it is possible to read rust documentation inside Emacs! This currently requires LSP-mode.
-![Demo with helm ag](imgs/demo_rustdoc.gif)
 
 ### Prequisites
 
