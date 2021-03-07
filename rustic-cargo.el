@@ -353,26 +353,41 @@ Execute process in PATH."
 
 ;;; New project
 
+(defun rustic-create-project (project-path is-new &optional bin)
+  "Run either 'cargo new' if IS-NEW is non-nil, or 'cargo init' otherwise.
+Creates or initializes the directory at the path specified by PROJECT-PATH. If
+BIN is not nil, create a binary application, otherwise a library."
+  (let* ((cmd (if is-new "new" "init"))
+         (bin (if (or bin (y-or-n-p "Create new binary package? "))
+                 "--bin"
+                "--lib"))
+         (new-sentinel (lambda (_process signal)
+                        (when (equal signal "finished\n")
+                          (message (format "Created new package: %s"
+                                           (file-name-base project-path)))
+                          (when rustic-cargo-open-new-project
+                            (find-file
+                             (concat project-path (if (string= bin "--bin") "/src/main.rs" "/src/lib.rs")))))))
+         (proc (format "rustic-cargo-%s-process" cmd))
+         (buf (format "*cargo-%s*" cmd)))
+    (make-process :name proc
+                  :buffer buf
+                  :command (list rustic-cargo-bin cmd bin project-path)
+                  :sentinel new-sentinel)))
+
 ;;;###autoload
 (defun rustic-cargo-new (project-path &optional bin)
   "Run 'cargo new' to start a new package in the path specified by PROJECT-PATH.
 If BIN is not nil, create a binary application, otherwise a library."
   (interactive "DProject path: ")
-  (let ((bin (if (or bin (y-or-n-p "Create new binary package? "))
-                 "--bin"
-               "--lib"))
-        (new-sentinel (lambda (_process signal)
-                        (when (equal signal "finished\n")
-                          (message (format "Created new package: %s"
-                                           (file-name-base project-path)))
-                          (if rustic-cargo-open-new-project
-                              (find-file (concat project-path "/src/main.rs"))))))
-        (proc "rustic-cargo-new-process")
-        (buf "*cargo-new*"))
-    (make-process :name proc
-                  :buffer buf
-                  :command (list rustic-cargo-bin "new" bin project-path)
-                  :sentinel new-sentinel)))
+  (rustic-create-project project-path t bin))
+
+;;;###autoload
+(defun rustic-cargo-init (project-path &optional bin)
+  "Run 'cargo init' to initialize a directory in the path specified by PROJECT-PATH.
+If BIN is not nil, create a binary application, otherwise a library."
+  (interactive "DProject path: ")
+  (rustic-create-project project-path nil bin))
 
 ;;; Cargo commands
 
