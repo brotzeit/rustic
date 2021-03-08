@@ -241,6 +241,7 @@ If the user has not visited a project, returns the main doc directory."
                  ;;        strings out of cargo, or just parse the Cargo.toml file, but
                  ;;        then we'd have to review different parsing solutions.
                  (finish-func (lambda (_p)
+
                                 (message (format "Finished converting docs for %s"
                                                  rustic-doc-current-project)))))
             (rustic-doc-create-project-dir)
@@ -276,7 +277,7 @@ If the user has not visited a project, returns the main doc directory."
   (message "Setup is converting the standard library")
   (delete-directory (concat rustic-doc-save-loc "/std")
                     t)
-  (rustic-doc--start-process "*rustic-doc-std-conversion*"
+  (rustic-doc--start-process "rustic-doc-std-conversion"
                              rustic-doc-convert-prog
                              (lambda (_p)
                                (message "Finished converting docs for std"))
@@ -287,13 +288,16 @@ If the user has not visited a project, returns the main doc directory."
          (proc (let ((process-connection-type nil))
                  (apply #'start-process name buf program program-args))))
     (set-process-sentinel
-     proc (lambda (proc _event)
+     proc (lambda (proc event)
             (let ((buf (process-buffer proc)))
-              (when finish-func
-                (funcall finish-func proc))
-              (when (buffer-live-p buf)
-                (kill-buffer buf)))))
+              (if (string-match-p (regexp-quote "abnormally") event)
+                  (message "Could not finish process: %s. See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
+                (when finish-func
+                  (funcall finish-func proc))
+                (when (buffer-live-p buf)
+                  (kill-buffer buf))))))
     proc))
+
 
 (defun rustic-doc--thing-at-point ()
   "Return info about `thing-at-point'. If `thing-at-point' is nil, return defaults."

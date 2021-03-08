@@ -47,11 +47,16 @@ BEGIN { m = length(PRE)
 ' \
     > "$ignore_file"
 
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    cores=$(eval "$sysctl -n hw.logicalcpu")
+else
+   cores=$(nproc)
+fi
 ## Convert files
 fd . \
     -ehtml \
     --ignore-file "$ignore_file" \
-    -j"$(nproc)" \
+    -j"$cores" \
     -x pandoc '{}' \
     --lua-filter "$LUA_FILTER" \
     -o "$DEST_DIR/{.}.org"
