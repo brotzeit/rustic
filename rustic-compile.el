@@ -486,13 +486,14 @@ use `rustic-compile-command'.
 
 In either store the used command in `compilation-arguments'."
   (interactive "P")
-  (let* ((command (setq compilation-arguments
-                        (if (or compilation-read-command arg)
-                            (read-from-minibuffer "Compile command: ")
-                          rustic-compile-command)))
-         (dir (setq compilation-directory (rustic-buffer-workspace))))
-    (rustic-compilation-process-live)
-    (rustic-compilation-start (split-string command) (list :directory dir))))
+  (setq compilation-arguments
+        (if (or compilation-read-command arg)
+            (read-from-minibuffer "Compile command: ")
+          rustic-compile-command))
+  (setq compilation-directory (rustic-buffer-workspace))
+  (rustic-compilation-process-live)
+  (rustic-compilation-start (split-string compilation-arguments)
+                            (list :directory compilation-directory)))
 
 ;;;###autoload
 (defun rustic-recompile ()
