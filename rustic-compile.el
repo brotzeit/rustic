@@ -479,10 +479,12 @@ buffer."
 ;;;###autoload
 (defun rustic-compile (&optional arg)
   "Compile rust project.
-If called without arguments use `rustic-compile-command'.
 
-Otherwise use provided argument ARG and store it in
-`compilation-arguments'."
+If `compilation-read-command' is non-nil or if called with prefix
+argument ARG then read the command in the minibuffer.  Otherwise
+use `rustic-compile-command'.
+
+In either store the used command in `compilation-arguments'."
   (interactive "P")
   (let* ((command (setq compilation-arguments
                         (if (or compilation-read-command arg)
