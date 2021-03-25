@@ -5,7 +5,6 @@
 
 (development
  (depends-on "spinner")
- (depends-on "async")
  (depends-on "ert-runner")
  (depends-on "lsp-mode")
  (depends-on "flycheck")
