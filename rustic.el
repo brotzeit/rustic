@@ -952,7 +952,6 @@ should be considered a paired angle bracket."
    ;; Don't treat the > in -> or => as an angle bracket
    ((and (= (following-char) ?>) (memq (preceding-char) '(?- ?=))) t)
 
-
    ;; We don't take < or > in strings or comments to be angle brackets
    ((rustic-in-str-or-cmnt) t)
 
