@@ -6,6 +6,9 @@
 ;; of a kludge and it may become unnecessary over time.
 
 ;;; Code:
+
+(require 'cl-lib)
+
 ;;; Customization
 
 (defgroup rustic nil
