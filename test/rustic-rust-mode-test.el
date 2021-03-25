@@ -1575,7 +1575,7 @@ extern \"rustic-intrinsic\" fn five() {
   )
 
 (ert-deftest indent-return-type-non-visual ()
-  (let ((rust-indent-return-type-to-arguments nil))
+  (let ((rustic-indent-return-type-to-arguments nil))
     (test-indent
      "
 fn imagine_long_enough_to_wrap_at_arrow(a:i32, b:char)

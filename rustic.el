@@ -76,11 +76,11 @@ When nil, `where' will be aligned with `fn' or `trait'."
   :type 'boolean
   :group 'rustic)
 
-(defcustom rust-indent-return-type-to-arguments t
+(defcustom rustic-indent-return-type-to-arguments t
   "Indent a line starting with the `->' (RArrow) following a function, aligning
 to the function arguments.  When nil, `->' will be indented one level."
   :type 'boolean
-  :group 'rust-mode
+  :group 'rustic
   :safe #'booleanp)
 
 ;;; Faces

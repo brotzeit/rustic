@@ -184,7 +184,7 @@
 
               ;; A function return type is indented to the corresponding
               ;; function arguments, if -to-arguments is selected.
-              ((and rust-indent-return-type-to-arguments
+              ((and rustic-indent-return-type-to-arguments
                     (looking-at "->"))
                (save-excursion
                  (backward-list)
