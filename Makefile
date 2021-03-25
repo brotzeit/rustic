@@ -24,7 +24,6 @@ ELCS  = $(ELS:.el=.elc)
 ## Without Cask
 ifdef WITHOUT_CASK
 
-DEPS  = async
 DEPS  = dash
 DEPS += f
 DEPS += flycheck
