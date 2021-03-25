@@ -30,9 +30,8 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'rx)
-                   (require 'compile)
-                   (require 'url-vars))
+(eval-when-compile (require 'rx))
+(eval-when-compile (require 'url-vars))
 
 (require 'json)
 
