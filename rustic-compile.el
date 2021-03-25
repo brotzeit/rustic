@@ -488,7 +488,9 @@ In either store the used command in `compilation-arguments'."
   (interactive "P")
   (setq compilation-arguments
         (if (or compilation-read-command arg)
-            (read-from-minibuffer "Compile command: ")
+            (read-from-minibuffer "Compile command: "
+                                  (or compilation-arguments
+                                      rustic-compile-command))
           rustic-compile-command))
   (setq compilation-directory (rustic-buffer-workspace))
   (rustic-compilation-process-live)
