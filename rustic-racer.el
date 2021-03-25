@@ -289,14 +289,14 @@ Return a list (exit-code stdout stderr)."
   "Convert STRING, a rust string literal, to an elisp string."
   (when string
     (->> string
-         ;; Remove outer double quotes.
-         (s-chop-prefix "\"")
-         (s-chop-suffix "\"")
-         ;; Replace escaped characters.
-         (s-replace "\\n" "\n")
-         (s-replace "\\\"" "\"")
-         (s-replace "\\'" "'")
-         (s-replace "\\;" ";"))))
+      ;; Remove outer double quotes.
+      (s-chop-prefix "\"")
+      (s-chop-suffix "\"")
+      ;; Replace escaped characters.
+      (s-replace "\\n" "\n")
+      (s-replace "\\\"" "\"")
+      (s-replace "\\'" "'")
+      (s-replace "\\;" ";"))))
 
 (defun rustic-racer-url-p (target)
   "Return t if TARGET looks like a fully qualified URL."
@@ -327,12 +327,12 @@ Return a list (exit-code stdout stderr)."
          (lambda (whole-match)
            (rustic-racer-syntax-highlight (match-string 1 whole-match)))))
     (->> markdown
-         (replace-regexp-in-string
-          (rx "[`" (group (+? anything)) "`]")
-          highlight-group)
-         (replace-regexp-in-string
-          (rx "`" (group (+? anything)) "`")
-          highlight-group))))
+      (replace-regexp-in-string
+       (rx "[`" (group (+? anything)) "`]")
+       highlight-group)
+      (replace-regexp-in-string
+       (rx "`" (group (+? anything)) "`")
+       highlight-group))))
 
 (defun rustic-racer-indent-block (str)
   "Indent every line in STR."
@@ -341,16 +341,16 @@ Return a list (exit-code stdout stderr)."
 (defun rustic-racer-trim-newlines (str)
   "Remove newlines from the start and end of STR."
   (->> str
-       (s-chop-prefix "\n")
-       (s-chop-suffix "\n")))
+    (s-chop-prefix "\n")
+    (s-chop-suffix "\n")))
 
 (defun rustic-racer-remove-footnote-links (str)
   "Remove footnote links from markdown STR."
   (->> (s-lines str)
-       (--remove (string-match-p (rx bol "[`" (+? anything) "`]: ") it))
-       (s-join "\n")
-       ;; Collapse consecutive blank lines caused by removing footnotes.
-       (s-replace "\n\n\n" "\n\n")))
+    (--remove (string-match-p (rx bol "[`" (+? anything) "`]: ") it))
+    (s-join "\n")
+    ;; Collapse consecutive blank lines caused by removing footnotes.
+    (s-replace "\n\n\n" "\n\n")))
 
 (defun rustic-racer-docstring-sections (docstring)
   "Split DOCSTRING into text, code and heading sections."
@@ -392,11 +392,11 @@ Return a list (exit-code stdout stderr)."
   "Given a SECTION, a markdown code block, remove
 fenced code delimiters and code annotations."
   (->> (s-lines section)
-       (-drop 1)
-       (-drop-last 1)
-       ;; Ignore annotations like # #[allow(dead_code)]
-       (--remove (s-starts-with-p "# " it))
-       (s-join "\n")))
+    (-drop 1)
+    (-drop-last 1)
+    ;; Ignore annotations like # #[allow(dead_code)]
+    (--remove (s-starts-with-p "# " it))
+    (s-join "\n")))
 
 (defun rustic-racer-propertize-docstring (docstring)
   "Replace markdown syntax in DOCSTRING with text properties."
