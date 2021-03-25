@@ -359,15 +359,17 @@ Creates or initializes the directory at the path specified by PROJECT-PATH. If
 BIN is not nil, create a binary application, otherwise a library."
   (let* ((cmd (if is-new "new" "init"))
          (bin (if (or bin (y-or-n-p "Create new binary package? "))
-                 "--bin"
+                  "--bin"
                 "--lib"))
          (new-sentinel (lambda (_process signal)
-                        (when (equal signal "finished\n")
-                          (message (format "Created new package: %s"
-                                           (file-name-base project-path)))
-                          (when rustic-cargo-open-new-project
-                            (find-file
-                             (concat project-path (if (string= bin "--bin") "/src/main.rs" "/src/lib.rs")))))))
+                         (when (equal signal "finished\n")
+                           (message (format "Created new package: %s"
+                                            (file-name-base project-path)))
+                           (when rustic-cargo-open-new-project
+                             (find-file (concat project-path
+                                                (if (string= bin "--bin")
+                                                    "/src/main.rs"
+                                                  "/src/lib.rs")))))))
          (proc (format "rustic-cargo-%s-process" cmd))
          (buf (format "*cargo-%s*" cmd)))
     (make-process :name proc

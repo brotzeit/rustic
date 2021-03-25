@@ -120,9 +120,9 @@ description of the conventional Cargo project layout."
       ;; If target is 'custom-build', we pick another target from the same package (see GH-62)
       (when (string= "custom-build" (let-alist target (car .kind)))
         (setq target (->> packages
-                          ;; find the same package as current build-script buffer
-                          (--find (--any? (equal target it) it))
-                          (--find (not (equal target it))))))
+                       ;; find the same package as current build-script buffer
+                       (--find (--any? (equal target it) it))
+                       (--find (not (equal target it))))))
       (when target
         (let-alist target
           (seq-filter (lambda (kv) (cdr kv))

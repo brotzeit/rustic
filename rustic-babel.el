@@ -212,10 +212,10 @@ Otherwise create it with `rustic-babel-generate-project'."
 (defun crate-dependencies (name version features)
   "Generate a Cargo.toml [dependencies] entry for a crate given a version and features."
   (let ((version-string (concat "version = \"" version "\""))
-	(features-string
+        (features-string
          (if features
-	     (concat "features = [" (mapconcat (lambda (s) (concat "\"" s "\"")) features ", ") "]")
-	   nil)))
+             (concat "features = [" (mapconcat (lambda (s) (concat "\"" s "\"")) features ", ") "]")
+           nil)))
     (let ((toml-entry (string-join (remove nil (list version-string features-string)) ", ")))
       (concat name " = {" toml-entry "}"))))
 
@@ -224,15 +224,15 @@ Otherwise create it with `rustic-babel-generate-project'."
   (let ((dependencies ""))
     (dolist (crate-and-version crate-versions)
       (let ((name (car crate-and-version))
-	    (version (cdr crate-and-version)))
-	(let ((features (cdr (assoc name crate-features))))
+            (version (cdr crate-and-version)))
+        (let ((features (cdr (assoc name crate-features))))
           (setq name (symbol-name name))
           (when (numberp version)
             (setq version (number-to-string version)))
           (when (not (listp features))
             (setq features (list features)))
-	  (let ((cargo-toml-entry (crate-dependencies name version features)))
-	    (setq dependencies (concat dependencies cargo-toml-entry "\n"))))))
+          (let ((cargo-toml-entry (crate-dependencies name version features)))
+            (setq dependencies (concat dependencies cargo-toml-entry "\n"))))))
     (setq dependencies (concat "[dependencies]\n" dependencies))))
 
 (defun rustic-babel-cargo-toml (dir params)
@@ -243,15 +243,15 @@ directory DIR."
         (features (cdr (assq :features params)))
         (toml (expand-file-name "Cargo.toml" dir)))
     (let ((dependencies (cargo-toml-dependencies crates features)))
-       (make-directory (file-name-directory toml) t)
-    (with-temp-file toml
-      (condition-case nil
-          (insert-file-contents toml)
-        (file-missing))
-      (let ((s (nth 0 (split-string (buffer-string) "\\[dependencies]"))))
-        (erase-buffer)
-        (insert s)
-        (insert dependencies))))))
+      (make-directory (file-name-directory toml) t)
+      (with-temp-file toml
+        (condition-case nil
+            (insert-file-contents toml)
+          (file-missing))
+        (let ((s (nth 0 (split-string (buffer-string) "\\[dependencies]"))))
+          (erase-buffer)
+          (insert s)
+          (insert dependencies))))))
 
 (defun org-babel-execute:rustic (body params)
   "Execute a block of Rust code with org-babel.
