@@ -45,7 +45,8 @@
 
   "Path to the rust source tree.
 If nil, we will query $RUST_SRC_PATH at runtime.
-If $RUST_SRC_PATH is not set, look for rust source in rustup's install directory."
+If $RUST_SRC_PATH is not set, look for rust source
+in rustup's install directory."
   :type 'file
   :group 'racer)
 
