@@ -1,20 +1,20 @@
 ;; -*- lexical-binding: t -*-
 
-(require 'cl)
+(require 'cl-lib)
 (require 'imenu)
 (require 'f)
 
 (defun rustic-test-group-str-by-face (str)
   "Fontify `STR' in rust-mode and group it by face, returning a
 list of substrings of `STR' each followed by its face."
-  (loop with fontified = (rustic-test-fontify-string str)
-        for start = 0 then end
-        while start
-        for end   = (next-single-property-change start 'face fontified)
-        for prop  = (get-text-property start 'face fontified)
-        for text  = (substring-no-properties fontified start end)
-        if prop
-        append (list text prop)))
+  (cl-loop with fontified = (rustic-test-fontify-string str)
+           for start = 0 then end
+           while start
+           for end   = (next-single-property-change start 'face fontified)
+           for prop  = (get-text-property start 'face fontified)
+           for text  = (substring-no-properties fontified start end)
+           if prop
+           append (list text prop)))
 
 (defun rustic-get-buffer-pos (pos-symbol)
   "Get buffer position from POS-SYMBOL.
@@ -211,14 +211,14 @@ fn indented_already() {
      `(goto-char ,point-pos)
      'expected `(insert ,expected)
      'got `(insert ,got)
-     (loop for i from 0 to (max (length original) (length expected))
-           for oi = (if (< i (length got)) (elt got i))
-           for ei = (if (< i (length expected)) (elt expected i))
-           while (equal oi ei)
-           finally return `(first-difference-at
-                            (goto-char ,(+ 1 i))
-                            expected ,(char-to-string ei)
-                            got ,(char-to-string oi))))))
+     (cl-loop for i from 0 to (max (length original) (length expected))
+              for oi = (if (< i (length got)) (elt got i))
+              for ei = (if (< i (length expected)) (elt expected i))
+              while (equal oi ei)
+              finally return `(first-difference-at
+                               (goto-char ,(+ 1 i))
+                               expected ,(char-to-string ei)
+                               got ,(char-to-string oi))))))
 (put 'rustic-compare-code-after-manip 'ert-explainer
      'rustic-test-explain-bad-manip)
 
@@ -230,27 +230,29 @@ Also, the result should be the same regardless of whether the code is at the beg
          (end-pos (or end-pos (length unfilled)))
          (padding "\n     \n")
          (padding-len (length padding)))
-    (loop
+    (cl-loop
      for pad-at-beginning from 0 to 1
-     do (loop for pad-at-end from 0 to 1
-              with padding-beginning = (if (= 0 pad-at-beginning) "" padding)
-              with padding-end = (if (= 0 pad-at-end) "" padding)
-              with padding-adjust = (* padding-len pad-at-beginning)
-              with padding-beginning = (if (= 0 pad-at-beginning) "" padding)
-              with padding-end = (if (= 0 pad-at-end) "" padding)
-              ;; If we're adding space to the beginning, and our start position
-              ;; is at the very beginning, we want to test within the added space.
-              ;; Otherwise adjust the start and end for the beginning padding.
-              with start-pos = (if (= 1 start-pos) 1 (+ padding-adjust start-pos))
-              with end-pos = (+ end-pos padding-adjust)
-              do (loop for pos from start-pos to end-pos
-                       do (rustic-test-manip-code
-                           (concat padding-beginning unfilled padding-end)
-                           pos
-                           (lambda ()
-                             (let ((fill-column rustic-test-fill-column))
-                               (fill-paragraph)))
-                           (concat padding-beginning expected padding-end)))))
+     do (cl-loop
+         for pad-at-end from 0 to 1
+         with padding-beginning = (if (= 0 pad-at-beginning) "" padding)
+         with padding-end = (if (= 0 pad-at-end) "" padding)
+         with padding-adjust = (* padding-len pad-at-beginning)
+         with padding-beginning = (if (= 0 pad-at-beginning) "" padding)
+         with padding-end = (if (= 0 pad-at-end) "" padding)
+         ;; If we're adding space to the beginning, and our start position
+         ;; is at the very beginning, we want to test within the added space.
+         ;; Otherwise adjust the start and end for the beginning padding.
+         with start-pos = (if (= 1 start-pos) 1 (+ padding-adjust start-pos))
+         with end-pos = (+ end-pos padding-adjust)
+         do (cl-loop
+             for pos from start-pos to end-pos
+             do (rustic-test-manip-code
+                 (concat padding-beginning unfilled padding-end)
+                 pos
+                 (lambda ()
+                   (let ((fill-column rustic-test-fill-column))
+                     (fill-paragraph)))
+                 (concat padding-beginning expected padding-end)))))
     ;; In addition to all the fill-paragraph tests, check that it works using fill-region
     (rustic-test-manip-code
      unfilled
@@ -844,22 +846,23 @@ impl Foo for Bar {
                   ("print!\(\"abcd {0} efgh\"\);" 9 23 ((14 17)))
                   ("print!\(\"{1} abcd {0} efgh\"\);" 9 27 ((9 12) (18 21)))
                   ("print!\(\"{{{1} abcd }} {0}}} {{efgh}}\"\);" 9 33 ((11 14) (23 26)))))
-    (destructuring-bind (text cursor limit matches) test
-                        (with-temp-buffer
-                          ;; make sure we have a clean slate
-                          (save-match-data
-                            (set-match-data nil)
-                            (insert text)
-                            (goto-char cursor)
-                            (if (null matches)
-                                (should (equal (progn
-                                                 (rustic-string-interpolation-matcher limit)
-                                                 (match-data))
-                                               nil))
-                              (dolist (pair matches)
-                                (rustic-string-interpolation-matcher limit)
-                                (should (equal (match-beginning 0) (car pair)))
-                                (should (equal (match-end 0) (cadr pair))))))))))
+    (cl-destructuring-bind
+        (text cursor limit matches) test
+      (with-temp-buffer
+        ;; make sure we have a clean slate
+        (save-match-data
+          (set-match-data nil)
+          (insert text)
+          (goto-char cursor)
+          (if (null matches)
+              (should (equal (progn
+                               (rustic-string-interpolation-matcher limit)
+                               (match-data))
+                             nil))
+            (dolist (pair matches)
+              (rustic-string-interpolation-matcher limit)
+              (should (equal (match-beginning 0) (car pair)))
+              (should (equal (match-end 0) (cadr pair))))))))))
 
 (ert-deftest rustic-test-basic-paren-matching ()
   (rustic-test-matching-parens
