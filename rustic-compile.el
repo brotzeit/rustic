@@ -312,7 +312,9 @@ Translate STRING with `xterm-color-filter'."
           (set-window-point win (point-min)))))))
 
 (defun rustic-compilation-process-live (&optional nosave)
-  "List live rustic processes."
+  "Ask to kill live rustic process if any and call `rustic-save-some-buffers'.
+If optional NOSAVE is non-nil, then do not do the latter.
+Return non-nil if there was a live process."
   (let ((procs (list rustic-compilation-process-name
                      rustic-format-process-name
                      rustic-clippy-process-name
