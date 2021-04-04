@@ -176,28 +176,6 @@ with `lsp-rust-switch-server'."
             (delete-region (line-beginning-position) (point-max))))))
     (display-buffer buf)))
 
-;;; Rustix
-
-(defvar rustic-rustfix-process-name "rustic-rustfix-process"
-  "Process name for rustfix processes.")
-
-(defvar rustic-rustfix-buffer-name "*cargo-rustfix*"
-  "Buffer name for rustfix buffers.")
-
-(define-derived-mode rustic-rustfix-mode rustic-compilation-mode "rustfix"
-  :group 'rustic)
-
-;;;###autoload
-(defun rustic-rustfix ()
-  "Run 'cargo fix'."
-  (interactive)
-  (let* ((command (list rustic-cargo-bin "fix" "--allow-dirty"))
-         (err-buf rustic-rustfix-buffer-name)
-         (proc rustic-rustfix-process-name)
-         (mode 'rustic-rustfix-mode))
-    (rustic-compilation-process-live)
-    (rustic-compilation-start command (list :buffer err-buf :process proc :mode mode))))
-
 ;;; Interactive
 
 ;;;###autoload
