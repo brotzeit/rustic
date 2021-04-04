@@ -6,7 +6,6 @@
 
 ;;; Code:
 
-(require 'rustic-common)
 (require 'rustic-cargo)
 
 ;;; Customization

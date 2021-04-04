@@ -14,7 +14,6 @@
 
 (require 'compile)
 
-(require 'rustic-common)
 (require 'rustic)
 
 (defvar rustic-format-trigger)

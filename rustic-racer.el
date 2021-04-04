@@ -10,7 +10,6 @@
 (require 'help-mode)
 (require 'thingatpt)
 
-(require 'rustic-common)
 (require 'rustic)
 
 (defvar rustic-racer-args nil)
