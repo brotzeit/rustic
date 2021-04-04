@@ -1,15 +1,17 @@
 ;; -*- lexical-binding: t -*-
 
 (require 'ert)
-(require 'f)
 
+(require 'f)
 (let ((rustic-dir (f-parent (f-dirname (f-this-file)))))
   (add-to-list 'load-path rustic-dir))
-(require 'rustic)
-(custom-set-variables '(indent-tabs-mode nil))
 
 ;; don't start LSP server for every test
 (setq rustic-lsp-setup-p nil)
+
+(require 'rustic)
+
+(custom-set-variables '(indent-tabs-mode nil))
 
 ;; variable doesn't exist in noninteractive emacs sessions
 (when noninteractive
