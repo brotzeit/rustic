@@ -2,12 +2,13 @@
 
 ;;; Code:
 
-(require 'etags)
-(require 's)
 (require 'f)
-(require 'thingatpt)
+(require 's)
+
 (require 'button)
+(require 'etags)
 (require 'help-mode)
+(require 'thingatpt)
 
 (require 'rustic-common)
 (require 'rustic)
