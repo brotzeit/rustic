@@ -1217,7 +1217,6 @@ This handles multi-line comments with a * prefix on each line."
 
 (provide 'rustic)
 
-(require 'rustic-util)
 (require 'rustic-compile)
 (require 'rustic-popup)
 (require 'rustic-cargo)

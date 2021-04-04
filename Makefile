@@ -13,7 +13,6 @@ EMACS_ARGS ?=
 
 ELS   = rustic-common.el
 ELS  += rustic.el
-ELS  += rustic-util.el
 ELS  += rustic-compile.el
 ELS  += rustic-popup.el
 ELS  += rustic-cargo.el
