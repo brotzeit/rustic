@@ -316,9 +316,9 @@ Translate STRING with `xterm-color-filter'."
 If optional NOSAVE is non-nil, then do not do the latter.
 Return non-nil if there was a live process."
   (let ((procs (list rustic-compilation-process-name
-                     rustic-format-process-name
-                     rustic-clippy-process-name
-                     rustic-test-process-name))
+                     (bound-and-true-p rustic-format-process-name)
+                     (bound-and-true-p rustic-clippy-process-name)
+                     (bound-and-true-p rustic-test-process-name)))
         live)
     (setq live (-non-nil (cl-loop for proc in procs
                                   collect (let ((p (get-process proc)))
