@@ -503,6 +503,38 @@ In either store the used command in `compilation-arguments'."
     (rustic-compilation-process-live)
     (rustic-compilation (split-string command) (list :directory dir))))
 
+;;; Spinner
+
+(require 'spinner)
+
+(defcustom rustic-display-spinner t
+  "Display spinner."
+  :type 'boolean
+  :group 'rustic)
+
+(defcustom rustic-spinner-type 'horizontal-moving
+  "Holds the type of spinner to be used in the mode-line.
+Takes a value accepted by `spinner-start'."
+  :type `(choice (choice :tag "Choose a spinner by name"
+                         ,@(mapcar (lambda (c) (list 'const (car c)))
+                                   spinner-types))
+                 (const :tag "A random spinner" random)
+                 (repeat :tag "A list of symbols from `spinner-types' to randomly choose from"
+                         (choice :tag "Choose a spinner by name"
+                                 ,@(mapcar (lambda (c) (list 'const (car c)))
+                                           spinner-types)))
+                 (vector :tag "A user defined vector"
+                         (repeat :inline t string))))
+
+(defmacro rustic-with-spinner (spinner val mode-line &rest body)
+  (declare (indent defun))
+  `(when rustic-display-spinner
+     (when (spinner-p ,spinner)
+       (spinner-stop ,spinner))
+     (setq ,spinner ,val)
+     (setq mode-line-process ,mode-line)
+     ,@body))
+
 ;;; _
 (provide 'rustic-compile)
 ;;; rustic-compile.el ends here
