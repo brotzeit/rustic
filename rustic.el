@@ -105,30 +105,22 @@ to the function arguments.  When nil, `->' will be indented one level."
 
 ;;; Workspace
 
-(defvar-local rustic-buffer-workspace-dir nil)
+(defvar-local rustic--buffer-workspace nil
+  "Use function `rustic-buffer-workspace' instead.")
 
 (defun rustic-buffer-workspace (&optional nodefault)
-  "Get the workspace root.
-If NODEFAULT is t, return nil instead of `default-directory' if directory is
-not in a rust project."
-  (let ((dir (locate-dominating-file
-              (or buffer-file-name default-directory) "Cargo.toml")))
-    (if dir
-        (expand-file-name dir)
-      (if nodefault
-          nil default-directory))))
-
-(defcustom rustic-always-locate-project-on-open nil
-  "Whether to run `cargo locate-project' every time `rustic-mode' is activated."
-  :type 'boolean
-  :group 'rustic)
-
-(defun rust-maybe-initialize-buffer-project ()
-  (setq-local rustic-buffer-workspace-dir nil)
-  (when rustic-always-locate-project-on-open
-    (setq-local rustic-buffer-workspace-dir (rustic-buffer-workspace))))
-
-(add-hook 'rustic-mode-hook 'rust-maybe-initialize-buffer-project)
+  "Return the Rust workspace for the current buffer.
+This is the directory containing the file \"Cargo.lock\".  When
+called outside a Rust project, then return `default-directory',
+or if NODEFAULT is non-nil, then fall back to returning nil."
+  (or rustic--buffer-workspace
+      (let ((dir (locate-dominating-file default-directory "Cargo.toml")))
+        (when dir
+          (setq dir (expand-file-name dir)))
+        (setq rustic--buffer-workspace dir)
+        (or dir
+            (and (not nodefault)
+                 default-directory)))))
 
 ;;; Syntax
 
