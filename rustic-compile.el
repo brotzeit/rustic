@@ -15,7 +15,7 @@
 (require 'compile)
 
 (require 'rustic-common)
-(require 'rustic-cargo)
+(require 'rustic)
 
 (defvar rustic-format-trigger)
 (defvar rustic-format-on-save)
