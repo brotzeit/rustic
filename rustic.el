@@ -38,9 +38,6 @@
 (defvar electric-pair-skip-self)
 (defvar electric-indent-chars)
 
-(defvar rustic-buffer-workspace-dir nil)
-(make-variable-buffer-local 'rustic-buffer-workspace-dir)
-
 ;;; Customization
 
 (defcustom rustic-indent-offset 4
@@ -66,11 +63,6 @@ When nil, `where' will be aligned with `fn' or `trait'."
   "Whether to enable angle bracket (`<' and `>') matching where appropriate."
   :type 'boolean
   :safe #'booleanp
-  :group 'rustic)
-
-(defcustom rustic-always-locate-project-on-open nil
-  "Whether to run `cargo locate-project' every time `rustic-mode' is activated."
-  :type 'boolean
   :group 'rustic)
 
 (defcustom rustic-indent-return-type-to-arguments t
@@ -110,6 +102,33 @@ to the function arguments.  When nil, `->' will be indented one level."
   '((t :slant italic :inherit font-lock-string-face))
   "Face for interpolating braces in builtin formatting macro strings."
   :group 'rustic)
+
+;;; Workspace
+
+(defvar-local rustic-buffer-workspace-dir nil)
+
+(defun rustic-buffer-workspace (&optional nodefault)
+  "Get the workspace root.
+If NODEFAULT is t, return nil instead of `default-directory' if directory is
+not in a rust project."
+  (let ((dir (locate-dominating-file
+              (or buffer-file-name default-directory) "Cargo.toml")))
+    (if dir
+        (expand-file-name dir)
+      (if nodefault
+          nil default-directory))))
+
+(defcustom rustic-always-locate-project-on-open nil
+  "Whether to run `cargo locate-project' every time `rustic-mode' is activated."
+  :type 'boolean
+  :group 'rustic)
+
+(defun rust-maybe-initialize-buffer-project ()
+  (setq-local rustic-buffer-workspace-dir nil)
+  (when rustic-always-locate-project-on-open
+    (setq-local rustic-buffer-workspace-dir (rustic-buffer-workspace))))
+
+(add-hook 'rustic-mode-hook 'rust-maybe-initialize-buffer-project)
 
 ;;; Syntax
 
@@ -261,12 +280,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
 
   (when (fboundp 'rustic-before-save-hook)
     (add-hook 'before-save-hook 'rustic-before-save-hook nil t)
-    (add-hook 'after-save-hook 'rustic-after-save-hook nil t))
-
-  (setq-local rustic-buffer-workspace-dir nil)
-
-  (when rustic-always-locate-project-on-open
-    (setq-local rustic-buffer-workspace-dir (rustic-buffer-workspace))))
+    (add-hook 'after-save-hook 'rustic-after-save-hook nil t)))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
