@@ -9,7 +9,7 @@
 (require 'ob-ref)
 (require 'ob-core)
 
-(require 'rustic-common)
+(require 'rustic)
 (require 'rustic-compile)
 (require 'rustic-rustfmt)
 

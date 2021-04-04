@@ -5,7 +5,6 @@
 
 ;;; Code:
 
-(require 'rustic-common)
 (require 'rustic)
 (require 'rustic-rustfmt)
 
