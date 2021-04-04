@@ -12,19 +12,33 @@ EMACS ?= emacs
 EMACS_ARGS ?=
 
 ELS   = rustic.el
-ELS  += rustic-compile.el
-ELS  += rustic-popup.el
-ELS  += rustic-cargo.el
-ELS  += rustic-babel.el
 ELS  += rustic-racer.el
+ELS  += rustic-flycheck.el
 ELS  += rustic-interaction.el
-ELS  += rustic-rustfmt.el
+ELS  += rustic-compile.el
+ELS  += rustic-cargo.el
+ELS  += rustic-popup.el
 ELS  += rustic-rustfix.el
-ELS  += rustic-playpen.el
+ELS  += rustic-rustfmt.el
+ELS  += rustic-babel.el
 ELS  += rustic-lsp.el
 ELS  += rustic-flycheck.el
 ELS  += rustic-doc.el
 ELCS  = $(ELS:.el=.elc)
+
+rustic.elc:
+rustic-racer.elc:       rustic.elc
+rustic-flycheck.elc:    rustic.elc
+rustic-interaction.elc: rustic.elc
+rustic-compile.elc:     rustic.elc
+rustic-cargo.elc:       rustic-compile.elc rustic-interaction.elc
+rustic-popup.elc:       rustic-cargo.elc
+rustic-rustfix.elc:     rustic-cargo.elc
+rustic-rustfmt.elc:     rustic-cargo.elc
+rustic-babel.elc:       rustic-rustfmt.elc
+rustic-lsp.elc:         rustic-rustfmt.elc
+rustic-playpen.elc:
+rustic-doc.elc:
 
 ## Without Cask
 ifdef WITHOUT_CASK

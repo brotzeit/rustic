@@ -7,7 +7,6 @@
 
 (require 'tabulated-list)
 
-(require 'rustic)
 (require 'rustic-compile)
 (require 'rustic-interaction) ; for rustic-beginning-of-function
 

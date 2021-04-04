@@ -9,8 +9,6 @@
 (require 'ob-ref)
 (require 'ob-core)
 
-(require 'rustic)
-(require 'rustic-compile)
 (require 'rustic-rustfmt)
 
 ;; FIXME This variable doesn't exist in noninteractive emacs sessions,
