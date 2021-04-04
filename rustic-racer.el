@@ -2,7 +2,6 @@
 
 ;;; Code:
 
-(require 'dash)
 (require 'etags)
 (require 's)
 (require 'f)

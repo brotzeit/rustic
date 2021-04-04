@@ -9,12 +9,8 @@
 
 ;;; Code:
 
-(require 'xterm-color)
 (require 'markdown-mode)
-
-(require 'cl-lib)
-(require 'dash)
-(require 'subr-x)
+(require 'xterm-color)
 
 (require 'compile)
 

@@ -2,14 +2,9 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'pcase)
-  (require 'let-alist)
-  (require 'subr-x))
+(eval-when-compile (require 'let-alist))
 
-(require 'dash)
 (require 'flycheck)
-(require 'seq)
 (require 'json)
 
 (require 'rustic-common)
