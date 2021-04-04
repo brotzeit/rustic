@@ -22,6 +22,9 @@
 (require 'rustic-util)
 (require 'rustic-cargo)
 
+(defvar rustic-format-trigger)
+(defvar rustic-format-on-save)
+
 ;;; Customization
 
 (defgroup rustic-compilation nil
@@ -225,19 +228,16 @@ Set environment variables for rust process."
           (set (make-local-variable 'compilation-auto-jump-to-next) t))
       (sit-for 0))))
 
+(defvar rustic-before-compilation-hook nil)
+
 (defun rustic-compilation-start (command &optional args)
-  "Format crate before running actual compile command when `rustic-format-trigger'
-is set to 'on-compile. If rustfmt fails, don't start compilation."
-  (let ((compile-p t))
-    (when (and (eq rustic-format-trigger 'on-compile))
-      (let ((proc (rustic-cargo-fmt)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.1))
-        (when (not (zerop (process-exit-status proc)))
-          (funcall rustic-compile-display-method (process-buffer proc))
-          (setq compile-p nil))))
-    (when compile-p
-      (rustic-compilation command args))))
+  "Start a compilation process COMMAND with ARGS.
+ARGS is a plist that affects how the process is run,
+see `rustic-compilation' for details.  First run
+`rustic-before-compilation-hook' and if any of these
+functions fails, then do not start compilation."
+  (when (run-hook-with-args-until-failure 'rustic-before-compilation-hook)
+    (rustic-compilation command args)))
 
 (defun rustic-compilation (command &optional args)
   "Start a compilation process with COMMAND.
@@ -357,7 +357,7 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
                   (if (fboundp rustic-list-project-buffers-function)
                       (funcall rustic-list-project-buffers-function)
                     (buffer-list))))
-        (b (get-buffer rustic-format-buffer-name)))
+        (b (get-buffer (bound-and-true-p rustic-format-buffer-name))))
     (when (buffer-live-p b)
       (kill-buffer b))
     (dolist (buffer buffers)
@@ -375,22 +375,10 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
                                                (buffer-file-name buffer)))
                           (progn (save-buffer) t)
                         nil))))
-            (when (and saved-p (rustic-format-on-save-p) (eq major-mode 'rustic-mode))
-              (let* ((file (buffer-file-name buffer))
-                     (proc (rustic-format-start-process
-                            'rustic-format-file-sentinel
-                            :buffer buffer
-                            :files file)))
-                (while (eq (process-status proc) 'run)
-                  (sit-for 0.1))))))))))
-
-;; disable formatting for `save-some-buffers'
-(defun rustic-save-some-buffers-advice (orig-fun &rest args)
-  (let ((rustic-format-trigger nil)
-        (rustic-format-on-save nil))
-    (apply orig-fun args)))
-
-(advice-add 'save-some-buffers :around #'rustic-save-some-buffers-advice)
+            (when (and saved-p
+                       (eq major-mode 'rustic-mode)
+                       (fboundp 'rustic-maybe-format-after-save))
+              (rustic-maybe-format-after-save buffer))))))))
 
 (defun rustic-compile-goto-error-hook (orig-fun &rest args)
   "Provide possibility use `compile-goto-error' on line numbers in compilation buffers.

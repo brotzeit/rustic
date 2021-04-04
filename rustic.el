@@ -260,8 +260,9 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
               'rustic-electric-pair-inhibit-predicate-wrap)
   (setq-local electric-pair-skip-self 'rustic-electric-pair-skip-self-wrap)
 
-  (add-hook 'before-save-hook 'rustic-before-save-hook nil t)
-  (add-hook 'after-save-hook 'rustic-after-save-hook nil t)
+  (when (fboundp 'rustic-before-save-hook)
+    (add-hook 'before-save-hook 'rustic-before-save-hook nil t)
+    (add-hook 'after-save-hook 'rustic-after-save-hook nil t))
 
   (setq-local rustic-buffer-workspace-dir nil)
 
@@ -1206,21 +1207,6 @@ This handles multi-line comments with a * prefix on each line."
   (rustic-with-comment-fill-prefix
    (lambda () (comment-indent-new-line arg))))
 
-(defun rustic-before-save-hook ()
-  "Don't throw error if rustfmt isn't installed, as it makes saving impossible."
-  (when (and (rustic-format-on-save-p) (not (rustic-compilation-process-live t)))
-    (condition-case nil
-        (progn
-          (rustic-format-file)
-          (sit-for 0.1))
-      (error nil))))
-
-(defun rustic-after-save-hook ()
-  "Check if rustfmt is installed after saving the file."
-  (when (rustic-format-on-save-p)
-    (unless (executable-find rustic-rustfmt-bin)
-      (error "Could not locate executable \"%s\"" rustic-rustfmt-bin))))
-
 ;;; _
 
 (defun rustic-reload ()
@@ -1238,6 +1224,7 @@ This handles multi-line comments with a * prefix on each line."
 (require 'rustic-cargo)
 (require 'rustic-babel)
 (require 'rustic-racer)
+(require 'rustic-rustfmt)
 (require 'rustic-interaction)
 
 (with-eval-after-load 'flycheck
