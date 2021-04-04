@@ -441,6 +441,13 @@ Does not match type annotations of the form \"foo::<\"."
              ("use" . font-lock-constant-face)
              ("fn" . font-lock-function-name-face)))))
 
+(defun rustic-end-of-string ()
+  "Skip to the end of the current string."
+  (save-excursion
+    (skip-syntax-forward "^\"|")
+    (skip-syntax-forward "\"|")
+    (point)))
+
 (defun rustic-looking-back-str (str)
   "Return non-nil if there's a match on the text before point and STR.
 Like `looking-back' but for fixed strings rather than regexps (so
@@ -1198,13 +1205,6 @@ This handles multi-line comments with a * prefix on each line."
 (defun rustic-comment-indent-new-line (&optional arg)
   (rustic-with-comment-fill-prefix
    (lambda () (comment-indent-new-line arg))))
-
-(defun rustic-end-of-string ()
-  "Skip to the end of the current string."
-  (save-excursion
-    (skip-syntax-forward "^\"|")
-    (skip-syntax-forward "\"|")
-    (point)))
 
 (defun rustic-before-save-hook ()
   "Don't throw error if rustfmt isn't installed, as it makes saving impossible."
