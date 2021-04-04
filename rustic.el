@@ -30,15 +30,25 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'rx))
+(require 'cl-lib)
+(require 'pcase)
+(require 'seq)
+(require 'subr-x)
 
-(require 'rustic-common)
+(require 'dash)
+
+(eval-when-compile (require 'rx))
 
 (defvar electric-pair-inhibit-predicate)
 (defvar electric-pair-skip-self)
 (defvar electric-indent-chars)
 
 ;;; Customization
+
+(defgroup rustic nil
+  "Support for Rust code."
+  :link '(url-link "https://www.rustic-lang.org/")
+  :group 'languages)
 
 (defcustom rustic-indent-offset 4
   "Indent Rust code by this number of spaces."

@@ -7,7 +7,7 @@
 (require 'flycheck)
 (require 'json)
 
-(require 'rustic-common)
+(require 'rustic)
 
 (defcustom rustic-flycheck-clippy-params "--message-format=json -Zunstable-options"
   "Parameters for the flycheck clippy checker `rustic-clippy'."

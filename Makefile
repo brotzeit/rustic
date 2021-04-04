@@ -11,8 +11,7 @@ PKG = rustic
 EMACS ?= emacs
 EMACS_ARGS ?=
 
-ELS   = rustic-common.el
-ELS  += rustic.el
+ELS   = rustic.el
 ELS  += rustic-compile.el
 ELS  += rustic-popup.el
 ELS  += rustic-cargo.el
