@@ -22,6 +22,7 @@ ELS  += rustic-racer.el
 ELS  += rustic-interaction.el
 ELS  += rustic-rustfmt.el
 ELS  += rustic-rustfix.el
+ELS  += rustic-playpen.el
 ELS  += rustic-flycheck.el
 ELS  += rustic-doc.el
 ELCS  = $(ELS:.el=.elc)

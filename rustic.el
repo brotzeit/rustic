@@ -31,7 +31,6 @@
 ;;; Code:
 
 (eval-when-compile (require 'rx))
-(eval-when-compile (require 'url-vars))
 
 (require 'rustic-common)
 
@@ -1226,6 +1225,7 @@ This handles multi-line comments with a * prefix on each line."
 (require 'rustic-racer)
 (require 'rustic-rustfmt)
 (require 'rustic-rustfix)
+(require 'rustic-playpen)
 (require 'rustic-interaction)
 
 (with-eval-after-load 'flycheck
