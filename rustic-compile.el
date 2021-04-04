@@ -323,7 +323,8 @@ Return non-nil if there was a live process."
     (setq live (-non-nil (cl-loop for proc in procs
                                   collect (let ((p (get-process proc)))
                                             (if (process-live-p p) p nil)))))
-    (cl-assert (<= (length live) 1))
+    (when (> (length procs) 1)
+      (error "BUG: Multiple live rustic processes: %s" procs))
     (when live
       (rustic-process-kill-p (car live)))
     (unless nosave
