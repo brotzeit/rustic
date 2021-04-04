@@ -1215,18 +1215,23 @@ This handles multi-line comments with a * prefix on each line."
 
 (provide 'rustic)
 
-(require 'rustic-compile)
-(require 'rustic-popup)
-(require 'rustic-cargo)
-(require 'rustic-babel)
-(require 'rustic-racer)
-(require 'rustic-rustfmt)
-(require 'rustic-rustfix)
-(require 'rustic-playpen)
-(require 'rustic-lsp)
 (require 'rustic-interaction)
 
-(with-eval-after-load 'flycheck
-  (require 'rustic-flycheck))
+(defvar rustic-load-optional-libraries t
+  "Whether loading `rustic' also loads optional libraries.
+This variable might soon be remove again.")
+
+(when rustic-load-optional-libraries
+  (require 'rustic-compile)
+  (require 'rustic-popup)
+  (require 'rustic-cargo)
+  (require 'rustic-babel)
+  (require 'rustic-racer)
+  (require 'rustic-rustfmt)
+  (require 'rustic-rustfix)
+  (require 'rustic-playpen)
+  (require 'rustic-lsp)
+  (with-eval-after-load 'flycheck
+    (require 'rustic-flycheck)))
 
 ;;; rustic.el ends here

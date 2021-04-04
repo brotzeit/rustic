@@ -6,8 +6,8 @@
 (let ((rustic-dir (f-parent (f-dirname (f-this-file)))))
   (add-to-list 'load-path rustic-dir))
 
-;; don't start LSP server for every test
-(setq rustic-lsp-setup-p nil)
+(setq rustic-load-optional-libraries t)
+(setq rustic-lsp-setup-p nil) ; don't start LSP server for every test
 
 (require 'rustic)
 
