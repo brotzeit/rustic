@@ -1226,12 +1226,10 @@ This handles multi-line comments with a * prefix on each line."
 (require 'rustic-rustfmt)
 (require 'rustic-rustfix)
 (require 'rustic-playpen)
+(require 'rustic-lsp)
 (require 'rustic-interaction)
 
 (with-eval-after-load 'flycheck
   (require 'rustic-flycheck))
-
-(with-eval-after-load 'eglot
-  (rustic-setup-eglot))
 
 ;;; rustic.el ends here
