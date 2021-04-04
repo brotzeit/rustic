@@ -5,7 +5,6 @@
 
 ;;; Code:
 
-(require 'dash)
 (require 'tabulated-list)
 
 (require 'rustic-common)

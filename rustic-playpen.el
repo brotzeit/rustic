@@ -2,8 +2,6 @@
 ;;; Commentary:
 ;;; Code:
 
-(require 'dash)
-
 (require 'org-element)
 (require 'url)
 

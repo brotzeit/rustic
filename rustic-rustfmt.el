@@ -6,9 +6,6 @@
 
 ;;; Code:
 
-(require 'cl-lib)
-(require 'dash)
-
 (require 'rustic-common)
 (require 'rustic-cargo)
 
