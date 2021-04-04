@@ -266,9 +266,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
   (setq-local rustic-buffer-workspace-dir nil)
 
   (when rustic-always-locate-project-on-open
-    (setq-local rustic-buffer-workspace-dir (rustic-buffer-workspace)))
-  (when rustic-lsp-setup-p
-    (rustic-setup-lsp)))
+    (setq-local rustic-buffer-workspace-dir (rustic-buffer-workspace))))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))

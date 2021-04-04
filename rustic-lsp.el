@@ -13,11 +13,19 @@
 
 ;;; Options
 
+;; FIXME This is non-idomatic.  This option should be replaced with
+;; documentation that instructs the user to add the setup function
+;; themselves, iff so desired.
 (defcustom rustic-lsp-setup-p t
-  "Setup LSP related stuff automatically."
+  "Setup LSP related stuff automatically.
+If this is non-nil (the default), then loading `rustic-lsp' adds
+`rustic-setup-lsp' to `rustic-mode-hook'.  If you don't want that
+then you must set this to nil before loading `rustic-lsp'."
   :type 'boolean
   :safe #'booleanp
   :group 'rustic)
+(when rustic-lsp-setup-p
+  (add-hook 'rustic-mode-hook 'rustic-setup-lsp))
 
 (defcustom rustic-lsp-server 'rust-analyzer
   "Choose your LSP server."
