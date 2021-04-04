@@ -16,12 +16,6 @@
   :link '(url-link "https://www.rustic-lang.org/")
   :group 'languages)
 
-(defcustom rustic-lsp-setup-p t
-  "Setup LSP related stuff automatically."
-  :type 'boolean
-  :safe #'booleanp
-  :group 'rustic)
-
 (defun rustic-buffer-workspace (&optional nodefault)
   "Get the workspace root.
 If NODEFAULT is t, return nil instead of `default-directory' if directory is
