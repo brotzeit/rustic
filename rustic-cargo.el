@@ -8,6 +8,7 @@
 (require 'tabulated-list)
 
 (require 'rustic-common)
+(require 'rustic-compile)
 (require 'rustic-interaction) ; for rustic-beginning-of-function
 
 ;;; Customization
