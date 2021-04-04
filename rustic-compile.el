@@ -315,21 +315,22 @@ Translate STRING with `xterm-color-filter'."
   "Ask to kill live rustic process if any and call `rustic-save-some-buffers'.
 If optional NOSAVE is non-nil, then do not do the latter.
 Return non-nil if there was a live process."
-  (let ((procs (list rustic-compilation-process-name
-                     (bound-and-true-p rustic-format-process-name)
-                     (bound-and-true-p rustic-clippy-process-name)
-                     (bound-and-true-p rustic-test-process-name)))
-        live)
-    (setq live (-non-nil (cl-loop for proc in procs
-                                  collect (let ((p (get-process proc)))
-                                            (if (process-live-p p) p nil)))))
+  (let ((procs (mapcan (lambda (proc)
+                         (and proc
+                              (let ((proc (get-process proc)))
+                                (and (process-live-p proc)
+                                     (list proc)))))
+                       (list rustic-compilation-process-name
+                             (bound-and-true-p rustic-format-process-name)
+                             (bound-and-true-p rustic-clippy-process-name)
+                             (bound-and-true-p rustic-test-process-name)))))
     (when (> (length procs) 1)
       (error "BUG: Multiple live rustic processes: %s" procs))
-    (when live
-      (rustic-process-kill-p (car live)))
+    (when procs
+      (rustic-process-kill-p (car procs)))
     (unless nosave
       (rustic-save-some-buffers))
-    live))
+    procs))
 
 (defun rustic-process-kill-p (proc &optional no-error)
   "Don't allow two rust processes at once.
