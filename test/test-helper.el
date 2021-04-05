@@ -29,7 +29,7 @@ Emacs shutdown.")
 
   (add-hook 'kill-emacs-hook 'remove-temporary-babel-directory))
 
-(defsubst rustic-compare-code-after-manip (original point-pos manip-func expected got)
+(defsubst rustic-compare-code-after-manip (_original _point-pos _manip-func expected got)
   (equal expected got))
 
 (defun rustic-test-manip-code (original point-pos manip-func expected)

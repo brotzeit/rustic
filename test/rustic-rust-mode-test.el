@@ -5,18 +5,6 @@
 (require 'imenu)
 (require 'f)
 
-(defun rustic-test-group-str-by-face (str)
-  "Fontify `STR' in rust-mode and group it by face, returning a
-list of substrings of `STR' each followed by its face."
-  (cl-loop with fontified = (rustic-test-fontify-string str)
-           for start = 0 then end
-           while start
-           for end   = (next-single-property-change start 'face fontified)
-           for prop  = (get-text-property start 'face fontified)
-           for text  = (substring-no-properties fontified start end)
-           if prop
-           append (list text prop)))
-
 (defun rustic-get-buffer-pos (pos-symbol)
   "Get buffer position from POS-SYMBOL.
 
@@ -195,13 +183,12 @@ fn indented_already() {
    'nonblank-line-indented-already-middle-target
    #'indent-for-tab-command))
 
+(defvar rustic-test-fill-column 32)
 
-(setq rustic-test-fill-column 32)
-
-(defun rustic-compare-code-after-manip (original point-pos manip-func expected got)
+(defun rustic-compare-code-after-manip (_original _point-pos _manip-func expected got)
   (equal expected got))
 
-(defun rustic-test-explain-bad-manip (original point-pos manip-func expected got)
+(defun rustic-test-explain-bad-manip (original point-pos _manip-func expected got)
   (if (equal expected got)
       nil
     (list
@@ -236,8 +223,6 @@ Also, the result should be the same regardless of whether the code is at the beg
      for pad-at-beginning from 0 to 1
      do (cl-loop
          for pad-at-end from 0 to 1
-         with padding-beginning = (if (= 0 pad-at-beginning) "" padding)
-         with padding-end = (if (= 0 pad-at-end) "" padding)
          with padding-adjust = (* padding-len pad-at-beginning)
          with padding-beginning = (if (= 0 pad-at-beginning) "" padding)
          with padding-end = (if (= 0 pad-at-end) "" padding)
@@ -664,7 +649,7 @@ fn test4();")
     (rustic-mode)
     (insert "fn main() {\n    let x = 1;")
     ;; Insert 150 separate comments on the same line
-    (dotimes (i 150)
+    (dotimes (_ 150)
       (insert "/* foo */ "))
     ;; Rewinding from the last comment to the end of the let needs at least
     ;; 150 iterations, but if we limit the stack depth to 100 (this appears to
