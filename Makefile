@@ -1,5 +1,7 @@
 ## Common
 
+.PHONY: test
+
 -include config.mk
 
 all: lisp
@@ -46,12 +48,21 @@ DEPS += yasnippet
 LOAD_PATH  ?= $(addprefix -L ../,$(DEPS))
 LOAD_PATH  += -L .
 
+TEST_ELS  = test/test-helper.el
+TEST_ELS += $(wildcard test/rustic-*-test.el)
+
 lisp: $(ELCS) loaddefs
 
 %.elc: %.el
 	@printf "Compiling $<\n"
 	@$(EMACS) -Q --batch $(EMACS_ARGS) \
 	$(LOAD_PATH) --funcall batch-byte-compile $<
+
+test:
+	@$(EMACS) -Q --batch $(EMACS_ARGS) $(LOAD_PATH) -L test \
+	--load $(CURDIR)/test/test-helper \
+	$(addprefix -l ,$(TEST_ELS)) \
+	--funcall ert-run-tests-batch-and-exit
 
 ## With Cask
 else
@@ -69,6 +80,10 @@ cask-build: loaddefs
 
 lisp: cask-build
 
+test: lisp
+	if [ -f "$(HOME)/.cargo/env" ] ; then . "$(HOME)/.cargo/env" ; fi ; \
+	EMACS=$(EMACS) cask exec ert-runners
+
 ## Common
 endif
 
@@ -77,10 +92,6 @@ CLEAN  = $(ELCS) $(PKG)-autoloads.el
 clean:
 	@printf "Cleaning...\n"
 	@rm -rf $(CLEAN)
-
-test: lisp
-	if [ -f "$(HOME)/.cargo/env" ] ; then . "$(HOME)/.cargo/env" ; fi ; \
-	EMACS=$(EMACS) cask exec ert-runner
 
 loaddefs: $(PKG)-autoloads.el
 
