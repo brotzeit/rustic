@@ -5,39 +5,7 @@
 (require 'imenu)
 (require 'f)
 
-(defun rustic-get-buffer-pos (pos-symbol)
-  "Get buffer position from POS-SYMBOL.
-
-POS-SYMBOL is a symbol found in `rust-test-positions-alist'.
-Convert the line-column information from that list into a buffer position value."
-  (interactive "P")
-  (let* (
-         (line-and-column (cadr (assoc pos-symbol rustic-test-positions-alist)))
-         (line (nth 0 line-and-column))
-         (column (nth 1 line-and-column)))
-    (save-excursion
-      (goto-char (point-min))
-      (forward-line (1- line))
-      (move-to-column column)
-      (point))))
-
-;;; FIXME: Maybe add an ERT explainer function (something that shows the
-;;; surrounding code of the final point, not just the position).
-(defun rustic-test-motion (source-code init-pos final-pos manip-func &rest args)
-  "Test that MANIP-FUNC moves point from INIT-POS to FINAL-POS.
-
-If ARGS are provided, send them to MANIP-FUNC.
-
-INIT-POS, FINAL-POS are position symbols found in `rust-test-positions-alist'."
-  (with-temp-buffer
-    (rustic-mode)
-    (insert source-code)
-    (goto-char (rustic-get-buffer-pos init-pos))
-    (apply manip-func args)
-    (should (equal (point) (rustic-get-buffer-pos final-pos)))))
-
-(setq rustic-test-motion-string
-      "
+(defvar rustic-test-motion-string "
 fn fn1(arg: i32) -> bool {
     let x = 5;
     let y = b();
@@ -59,10 +27,11 @@ pub fn fn3(arg: i32) -> bool {
 struct Foo {
     x: i32
 }
-"
-      rustic-test-region-string rustic-test-motion-string
-      rustic-test-indent-motion-string
-      "
+")
+
+(defvar rustic-test-region-string rustic-test-motion-string)
+
+(defvar rustic-test-indent-motion-string "
 fn blank_line(arg:i32) -> bool {
 
 }
@@ -84,41 +53,72 @@ fn indented_already() {
 
     // The previous line already has its spaces
 }
-"
+")
 
-      ;; Symbol -> (line column)
-      rustic-test-positions-alist '((start-of-fn1 (2 0))
-                                    (start-of-fn1-middle-of-line (2 15))
-                                    (middle-of-fn1 (3 7))
-                                    (end-of-fn1 (6 0))
-                                    (between-fn1-fn2 (7 0))
-                                    (start-of-fn2 (8 0))
-                                    (middle-of-fn2 (10 4))
-                                    (before-start-of-fn1 (1 0))
-                                    (after-end-of-fn2 (13 0))
-                                    (beginning-of-fn3 (14 0))
-                                    (middle-of-fn3 (16 4))
-                                    (middle-of-struct (21 10))
-                                    (before-start-of-struct (19 0))
-                                    (after-end-of-struct (23 0))
-                                    (blank-line-indent-start (3 0))
-                                    (blank-line-indent-target (3 4))
-                                    (closing-brace-indent-start (8 1))
-                                    (closing-brace-indent-target (8 5))
-                                    (middle-push-indent-start (13 2))
-                                    (middle-push-indent-target (13 9))
-                                    (after-whitespace-indent-start (13 1))
-                                    (after-whitespace-indent-target (13 8))
-                                    (middle-pull-indent-start (15 19))
-                                    (middle-pull-indent-target (15 12))
-                                    (blank-line-indented-already-bol-start (20 0))
-                                    (blank-line-indented-already-bol-target (20 4))
-                                    (blank-line-indented-already-middle-start (20 2))
-                                    (blank-line-indented-already-middle-target (20 4))
-                                    (nonblank-line-indented-already-bol-start (21 0))
-                                    (nonblank-line-indented-already-bol-target (21 4))
-                                    (nonblank-line-indented-already-middle-start (21 2))
-                                    (nonblank-line-indented-already-middle-target (21 4))))
+;; Symbol -> (line column)
+(defvar rustic-test-positions-alist
+  '((start-of-fn1 (2 0))
+    (start-of-fn1-middle-of-line (2 15))
+    (middle-of-fn1 (3 7))
+    (end-of-fn1 (6 0))
+    (between-fn1-fn2 (7 0))
+    (start-of-fn2 (8 0))
+    (middle-of-fn2 (10 4))
+    (before-start-of-fn1 (1 0))
+    (after-end-of-fn2 (13 0))
+    (beginning-of-fn3 (14 0))
+    (middle-of-fn3 (16 4))
+    (middle-of-struct (21 10))
+    (before-start-of-struct (19 0))
+    (after-end-of-struct (23 0))
+    (blank-line-indent-start (3 0))
+    (blank-line-indent-target (3 4))
+    (closing-brace-indent-start (8 1))
+    (closing-brace-indent-target (8 5))
+    (middle-push-indent-start (13 2))
+    (middle-push-indent-target (13 9))
+    (after-whitespace-indent-start (13 1))
+    (after-whitespace-indent-target (13 8))
+    (middle-pull-indent-start (15 19))
+    (middle-pull-indent-target (15 12))
+    (blank-line-indented-already-bol-start (20 0))
+    (blank-line-indented-already-bol-target (20 4))
+    (blank-line-indented-already-middle-start (20 2))
+    (blank-line-indented-already-middle-target (20 4))
+    (nonblank-line-indented-already-bol-start (21 0))
+    (nonblank-line-indented-already-bol-target (21 4))
+    (nonblank-line-indented-already-middle-start (21 2))
+    (nonblank-line-indented-already-middle-target (21 4))))
+
+(defun rustic-get-buffer-pos (pos-symbol)
+  "Get buffer position from POS-SYMBOL.
+
+POS-SYMBOL is a symbol found in `rust-test-positions-alist'.
+Convert the line-column information from that list into a buffer position value."
+  (interactive "P")
+  (let* ((line-and-column (cadr (assoc pos-symbol rustic-test-positions-alist)))
+         (line (nth 0 line-and-column))
+         (column (nth 1 line-and-column)))
+    (save-excursion
+      (goto-char (point-min))
+      (forward-line (1- line))
+      (move-to-column column)
+      (point))))
+
+;; FIXME: Maybe add an ERT explainer function (something that shows
+;; the surrounding code of the final point, not just the position).
+(defun rustic-test-motion (source-code init-pos final-pos manip-func &rest args)
+  "Test that MANIP-FUNC moves point from INIT-POS to FINAL-POS.
+
+If ARGS are provided, send them to MANIP-FUNC.
+
+INIT-POS, FINAL-POS are position symbols found in `rust-test-positions-alist'."
+  (with-temp-buffer
+    (rustic-mode)
+    (insert source-code)
+    (goto-char (rustic-get-buffer-pos init-pos))
+    (apply manip-func args)
+    (should (equal (point) (rustic-get-buffer-pos final-pos)))))
 
 (ert-deftest indent-line-blank-line-motion ()
   (rustic-test-motion
