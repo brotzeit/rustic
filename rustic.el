@@ -112,7 +112,7 @@ to the function arguments.  When nil, `->' will be indented one level."
   "Face for interpolating braces in builtin formatting macro strings."
   :group 'rustic)
 
-;;; Rust-mode
+;;; Syntax
 
 (defconst rustic-re-ident "[[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*")
 (defconst rustic-re-lc-ident "[[:lower:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*")
@@ -182,6 +182,8 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
 
     table)
   "Syntax definitions and helpers.")
+
+;;; Mode
 
 (defvar rustic-mode-map
   (let ((map (make-sparse-keymap)))
@@ -478,6 +480,8 @@ seen as a macro."
         (and (= ?! (char-after))
              (rustic-looking-back-ident)))))
 
+;;; Syntax definitions and helpers
+
 (defun rustic-paren-level () (nth 0 (syntax-ppss)))
 (defun rustic-in-str () (nth 3 (syntax-ppss)))
 (defun rustic-in-str-or-cmnt () (nth 8 (syntax-ppss)))
@@ -598,6 +602,8 @@ buffer."
 (defconst rustic-re-pre-expression-operators "[-=!%&*/:<>[{(|.^;}]")
 
 (defconst rustic-re-special-types (regexp-opt rustic-special-types 'symbols))
+
+;;; Font-locking definitions and helpers
 
 (defun rustic-next-string-interpolation (limit)
   "Search forward from point for next Rust interpolation marker before LIMIT.
