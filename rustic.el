@@ -33,8 +33,6 @@
 (eval-when-compile (require 'rx))
 (eval-when-compile (require 'url-vars))
 
-(require 'json)
-
 (require 'rustic-common)
 
 (defvar electric-pair-inhibit-predicate)
