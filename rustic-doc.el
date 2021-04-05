@@ -7,9 +7,14 @@
 
 ;;; Commentary:
 
-;; This package lets you convert rustic-doc html-files to org mode files, and lets you browse them with `rustic-doc-search'.
-;; Run `M-x rustic-doc-setup' to download the required files and convert the rust standard library.
-;; Run `M-x rustic-doc-convert-current-package' to generate and convert docs for the package you are currently visiting.
+;; This package lets you convert rustic-doc html-files to org mode
+;; files, and lets you browse them with `rustic-doc-search'.
+
+;; Run `M-x rustic-doc-setup' to download the required files and
+;;   convert the rust standard library.
+
+;; Run `M-x rustic-doc-convert-current-package' to generate and
+;; convert docs for the package you are currently visiting.
 
 ;;; Code:
 
@@ -34,26 +39,30 @@
                                         ".local/bin/rustic-doc-convert.sh")
   "Save location for the rustic-doc conversion script.")
 
-(defvar rustic-doc-source-repo "https://raw.githubusercontent.com/brotzeit/rustic/master/rustic-doc/")
+(defvar rustic-doc-source-repo
+  "https://raw.githubusercontent.com/brotzeit/rustic/master/rustic-doc/")
 
-(defvar rustic-doc-current-project nil "Location to search for documentation.
+(defvar rustic-doc-current-project nil
+  "Location to search for documentation.
 All projects and std by default, otherwise last open project and std.")
 
 (defvar rustic-doc-save-loc (concat (rustic-doc--xdg-data-home)
                                     "/emacs/rustic-doc"))
 
-(defvar rustic-doc-resources `((,rustic-doc-convert-prog
-                                (:exec)
-                                ,(concat rustic-doc-source-repo "convert.sh"))
-                               (,rustic-doc-lua-filter
-                                ()
-                                ,(concat rustic-doc-source-repo "filter.lua"))))
+(defvar rustic-doc-resources
+  `((,rustic-doc-convert-prog
+     (:exec)
+     ,(concat rustic-doc-source-repo "convert.sh"))
+    (,rustic-doc-lua-filter
+     ()
+     ,(concat rustic-doc-source-repo "filter.lua"))))
 
 (defun rustic-doc-default-rg-search-command ()
   "The default search command when using helm-ag.
 Needs to be a function because of its reliance on
 `rustic-doc-current-project'"
-  (concat "rg --smart-case --no-heading --color=never --line-number " (if rustic-doc-current-project " -L" "")))
+  (concat "rg --smart-case --no-heading --color=never --line-number "
+          (if rustic-doc-current-project " -L" "")))
 
 (defcustom rustic-doc-rg-search-command 'rustic-doc-default-rg-search-command
   "The default command string to pass helm-ag when searching."
@@ -74,10 +83,16 @@ Search for SEARCH-TERM inside SEARCH-DIR"
            (helm-ag-success-exit-status '(0 2)))
       (condition-case nil
           (helm-ag search-dir search-term)
-        ;; If the search didn't turn anything up we re-run the search in the top level searchdir.
+        ;; If the search didn't turn anything up we re-run the search
+        ;; in the top level searchdir.
         (error (helm-ag rustic-doc-save-loc search-term)))))
-   ((executable-find "rg") (grep (format "%s '%s' %s" (rustic-doc-default-rg-search-command) search-term search-dir)))
-   (t (grep (format "grep -RPIni '%s' %s" search-term search-dir)))))
+   ((executable-find "rg")
+    (grep (format "%s '%s' %s"
+                  (rustic-doc-default-rg-search-command)
+                  search-term
+                  search-dir)))
+   (t
+    (grep (format "grep -RPIni '%s' %s" search-term search-dir)))))
 
 
 (defcustom rustic-doc-search-function 'rustic-doc-default-search-function
@@ -146,33 +161,44 @@ it doesn't manage to find what you're looking for, try `rustic-doc-dumb-search'.
   (rustic-doc--update-current-project)
   (let* ((thing-at-point (rustic-doc--thing-at-point))
          (short-name (alist-get 'short-name thing-at-point))
-         ;; If the user did not accept the default search suggestion, we should not search in that suggestion's directory.
+         ;; If the user did not accept the default search suggestion,
+         ;; we should not search in that suggestion's directory.
          (search-dir
           (cond
            (root rustic-doc-save-loc)
-           ((string-equal short-name search-term) (alist-get 'search-dir thing-at-point))
+           ((string-equal short-name search-term)
+            (alist-get 'search-dir thing-at-point))
            (t (rustic-doc--project-doc-dest))))
-         ;; If the prefix arg is provided, we only search for level 1 headers by making sure that there is only one * at the beginning of the line.
+         ;; If the prefix arg is provided, we only search for level 1
+         ;; headers by making sure that there is only one * at the
+         ;; beginning of the line.
          (regex (if current-prefix-arg
                     (progn
                       (setq current-prefix-arg nil)
                       "^\\*")
                   "^\\*+"))
-         ;; This seq-reduce turns `enum option' into (kind of) `enum.*option', which lets there be chars between the searched words
-         (regexed-search-term (concat regex
-                                        ; Regex explanation
-                                        ; `-' => Do not match if a return type. A search for Option should not show is_some -> Option
-                                        ; `(' => Do not match if it's an argument name.
-                                        ; `<' => Do not match if it's a generic type arg
-                                      (seq-reduce (lambda (acc s)
-                                                    (concat acc "[^-\*(<]*" s))
-                                                  (split-string search-term " ")
-                                                  ""))))
+         ;; This seq-reduce turns `enum option' into (kind of)
+         ;; `enum.*option', which lets there be chars between the
+         ;; searched words
+         (regexed-search-term
+          (concat regex
+                  ;; Regex explanation
+                  ;; `-' => Do not match if a return type.  A search
+                  ;;        for Option should not show is_some -> Option
+                  ;; `(' => Do not match if it's an argument name.
+                  ;; `<' => Do not match if it's a generic type arg
+                  (seq-reduce (lambda (acc s)
+                                (concat acc "[^-\*(<]*" s))
+                              (split-string search-term " ")
+                              ""))))
     (unless (file-directory-p rustic-doc-save-loc)
       (rustic-doc-setup)
-      (message "Running first time setup. Please re-run your search once conversion has completed.")
+      (message "Running first time setup. Please re-run your search\
+ once conversion has completed.")
       (sleep-for 3))
-    ;; If the user has not run `rustic-doc-convert-current-package' in the current project, we create a default directory that only contains a symlink to std.
+    ;; If the user has not run `rustic-doc-convert-current-package' in
+    ;; the current project, we create a default directory that only
+    ;; contains a symlink to std.
     (unless (file-directory-p (rustic-doc--project-doc-dest))
       (rustic-doc-create-project-dir))
     (funcall rustic-doc-search-function search-dir regexed-search-term)))
@@ -218,7 +244,6 @@ If the user has not visited a project, returns the main doc directory."
           (make-symbolic-link link-tgt link-name t))
       (message "Couldn't create project doc directory."))))
 
-
 ;;;###autoload
 (defun rustic-doc-convert-current-package ()
   "Convert the documentation for a project and its dependencies."
@@ -232,25 +257,28 @@ If the user has not visited a project, returns the main doc directory."
         (message "Converting documentation for %s "
                  rustic-doc-current-project)
         (if (/= 0 (call-process "cargo" nil "*cargo-makedocs*" nil "makedocs"))
-            (message "cargo makedocs could not generate docs for the current package. See buffer *cargo-makedocs* for more info")
-          (let* ((docs-src (concat (file-name-as-directory rustic-doc-current-project)
-                                   "target/doc"))
+            (message "\
+cargo makedocs could not generate docs for the current package. \
+See buffer *cargo-makedocs* for more info")
+          (let* ((docs-src
+                  (concat (file-name-as-directory rustic-doc-current-project)
+                          "target/doc"))
                  ;; FIXME: Many projects could share the same docs.
-                 ;;        *However* that would have to be versioned, so
-                 ;;        we'll have to figure out a way to coerce `<crate>-<version>`
-                 ;;        strings out of cargo, or just parse the Cargo.toml file, but
-                 ;;        then we'd have to review different parsing solutions.
+                 ;; *However* that would have to be versioned, so
+                 ;; we'll have to figure out a way to coerce `<crate>-<version>`
+                 ;; strings out of cargo, or just parse the Cargo.toml file, but
+                 ;; then we'd have to review different parsing solutions.
                  (finish-func (lambda (_p)
-
-                                (message (format "Finished converting docs for %s"
-                                                 rustic-doc-current-project)))))
+                                (message "Finished converting docs for %s"
+                                         rustic-doc-current-project))))
             (rustic-doc-create-project-dir)
             (rustic-doc--start-process "rustic-doc-convert"
                                        rustic-doc-convert-prog
                                        finish-func
                                        docs-src
                                        (rustic-doc--project-doc-dest)))))
-    (message "Could not find project to convert. Visit a rust project first! (Or activate rustic-doc-mode if you are in one)")))
+    (message "Could not find project to convert. Visit a rust project first! \
+\(Or activate rustic-doc-mode if you are in one)")))
 
 (defun rustic-doc-install-deps ()
   "Install dependencies with Cargo."
@@ -259,14 +287,15 @@ If the user has not visited a project, returns the main doc directory."
     (let ((missing-rg (not (executable-find "rg")))
           (missing-fd (not (executable-find "fd")))
           (missing-makedocs (not (executable-find "cargo-makedocs"))))
-      (when (and  (or missing-fd missing-makedocs missing-rg) (y-or-n-p "Missing some dependencies for rustic doc, install them? "))
+      (when (and (or missing-fd missing-makedocs missing-rg)
+                 (y-or-n-p "Missing some dependencies for rustic doc, install them? "))
         (when missing-fd
           (rustic-doc--start-process "install-fd" "cargo" nil "install" "fd-find"))
         (when missing-rg
           (rustic-doc--start-process "install-rg" "cargo" nil "install" "ripgrep"))
         (when missing-makedocs
-          (rustic-doc--start-process "install-makedocs" "cargo" nil "install" "cargo-makedocs"))))))
-
+          (rustic-doc--start-process "install-makedocs" "cargo" nil
+                                     "install" "cargo-makedocs"))))))
 
 ;;;###autoload
 (defun rustic-doc-setup ()
@@ -291,13 +320,13 @@ If the user has not visited a project, returns the main doc directory."
      proc (lambda (proc event)
             (let ((buf (process-buffer proc)))
               (if (string-match-p (regexp-quote "abnormally") event)
-                  (message "Could not finish process: %s. See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
+                  (message "Could not finish process: %s. \
+See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
                 (when finish-func
                   (funcall finish-func proc))
                 (when (buffer-live-p buf)
                   (kill-buffer buf))))))
     proc))
-
 
 (defun rustic-doc--thing-at-point ()
   "Return info about `thing-at-point'. If `thing-at-point' is nil, return defaults."
@@ -306,14 +335,17 @@ If the user has not visited a project, returns the main doc directory."
                           (lsp--make-request "textDocument/hover")
                           (lsp--send-request)
                           (lsp:hover-contents)))
-           ;; `short-name' is the unqalified of a struct, function etc, like `Option'
+           ;; `short-name' is the unqalified of a struct, function
+           ;; etc, like `Option'
            (short-name (thing-at-point 'symbol t))
-           ;; If symbol at point is a primitive, the `value' key is different than in most cases.
-           ;; If it is a primitive, we concat the name with primitive for searching.
+           ;; If symbol at point is a primitive, the `value' key is
+           ;; different than in most cases.  If it is a primitive, we
+           ;; concat the name with primitive for searching.
            (lsp-info (or (nth 1
                               (split-string (gethash "value" lsp-content)))
-                         (setq short-name (concat "primitive "
-                                                  (gethash "value" lsp-content)))))
+                         (setq short-name
+                               (concat "primitive "
+                                       (gethash "value" lsp-content)))))
            ;; If short-name was `Option', long-name would be `std::option::Option'
            (long-name (concat (cond
                                ((string-prefix-p "core" lsp-info)
@@ -325,11 +357,13 @@ If the user has not visited a project, returns the main doc directory."
                                (t lsp-info))
                               "::"
                               short-name))
-           (search-dir (rustic-doc--deepest-dir (concat (rustic-doc--project-doc-dest)
-                                                        "/"
-                                                        (seq-reduce (lambda (path p)
-                                                                      (concat path "/" p))
-                                                                    (split-string long-name "::") "")))))
+           (search-dir (rustic-doc--deepest-dir
+                        (concat (rustic-doc--project-doc-dest)
+                                "/"
+                                (seq-reduce (lambda (path p)
+                                              (concat path "/" p))
+                                            (split-string long-name "::")
+                                            "")))))
       `((search-dir . ,search-dir)
         (short-name . ,short-name))
     `((search-dir . ,(rustic-doc--project-doc-dest))
