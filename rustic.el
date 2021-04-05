@@ -36,6 +36,7 @@
 (require 'rustic-common)
 
 (defvar electric-pair-inhibit-predicate)
+(defvar electric-pair-skip-self)
 (defvar electric-indent-chars)
 
 (defvar rustic-buffer-workspace-dir nil)
@@ -251,6 +252,7 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
   (setq-local end-of-defun-function 'rustic-end-of-defun)
   (setq-local parse-sexp-lookup-properties t)
   (setq-local electric-pair-inhibit-predicate 'rustic-electric-pair-inhibit-predicate-wrap)
+  (setq-local electric-pair-skip-self 'rustic-electric-pair-skip-self-wrap)
 
   (add-hook 'before-save-hook 'rustic-before-save-hook nil t)
   (add-hook 'after-save-hook 'rustic-after-save-hook nil t)
@@ -939,6 +941,13 @@ This wraps the default defined by `electric-pair-inhibit-predicate'."
        (backward-char)
        (rustic-is-lt-char-operator)))
    (funcall (default-value 'electric-pair-inhibit-predicate) char)))
+
+(defun rustic-electric-pair-skip-self-wrap (char)
+  "Skip CHAR instead of inserting a second closing character.
+This wraps the default defined by `electric-pair-skip-self'."
+  (or
+   (= ?> char)
+   (funcall (default-value 'electric-pair-skip-self) char)))
 
 (defun rustic-ordinary-lt-gt-p ()
   "Test whether the `<' or `>' at point is an ordinary operator of some kind.
