@@ -28,7 +28,8 @@ Convert the line-column information from that list into a buffer position value.
          (line (nth 0 line-and-column))
          (column (nth 1 line-and-column)))
     (save-excursion
-      (goto-line line)
+      (goto-char (point-min))
+      (forward-line (1- line))
       (move-to-column column)
       (point))))
 
@@ -714,7 +715,8 @@ fn indented_already() {
 ")
     (font-lock-ensure)
     (font-lock-flush)
-    (goto-line 11)
+    (goto-char (point-min))
+    (forward-line (1- 11))
     (move-to-column 0)
     (indent-for-tab-command)
     (should (equal (current-column) 4))
