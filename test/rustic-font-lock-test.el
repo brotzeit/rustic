@@ -5,7 +5,8 @@
   (with-temp-buffer
     (rustic-mode)
     (insert str)
-    (font-lock-fontify-buffer)
+    (font-lock-ensure)
+    (font-lock-flush)
     (buffer-string)))
 
 (ert-deftest rustic-test-font-lock-fontify-angle-brackets ()
@@ -225,7 +226,8 @@ fn g() {
   (with-temp-buffer
     (rustic-mode)
     (insert "const foo = \"foo bar\"")
-    (font-lock-fontify-buffer)
+    (font-lock-ensure)
+    (font-lock-flush)
     ;; right-word should move the point to the end of the words.
     (goto-char 14)
     (right-word)
@@ -284,7 +286,8 @@ this_is_not_a_string();)"
 1......................500......................50
 \"#;
 ")
-    (font-lock-fontify-buffer)
+    (font-lock-ensure)
+    (font-lock-flush)
     (goto-char 530)
     (insert "#")
     ;; We have now closed the raw string.  Check that the whole string is
