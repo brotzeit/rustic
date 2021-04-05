@@ -1,4 +1,5 @@
 ;; -*- lexical-binding: t -*-
+;; Before editing, eval (load-file "test-helper.el")
 
 (ert-deftest rust-test-workspace-location ()
   (should (equal (rustic-buffer-workspace) default-directory))

@@ -1,4 +1,5 @@
 ;; -*- lexical-binding: t -*-
+;; Before editing, eval (load-file "test-helper.el")
 
 (defun test-indent (indented &optional deindented)
   (let ((deindented (or deindented (replace-regexp-in-string "^[[:blank:]]*" "      " indented))))

@@ -1,4 +1,5 @@
 ;; -*- lexical-binding: t -*-
+;; Before editing, eval (load-file "test-helper.el")
 
 (ert-deftest rustic-test-cargo-test ()
   (let* ((string "#[test]
