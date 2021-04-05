@@ -1,21 +1,6 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
 
-(defun test-indent (indented &optional deindented)
-  (let ((deindented
-         (or deindented
-             (replace-regexp-in-string "^[[:blank:]]*" "      " indented))))
-    (rustic-test-manip-code
-     deindented
-     1
-     (lambda ()
-       (rustic-test-silence
-        '("%s %s"   ; "Indenting..." progress-reporter-do-update
-          "%sdone") ; "Indenting...done"  progress-reporter-done
-        (indent-region 1 (+ 1 (buffer-size)))))
-     indented)))
-
-
 (ert-deftest indent-struct-fields-aligned ()
   (test-indent
    "
