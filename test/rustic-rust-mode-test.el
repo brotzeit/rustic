@@ -712,7 +712,8 @@ fn indented_already() {
     \n    // The previous line already has its spaces
 }
 ")
-    (font-lock-fontify-buffer)
+    (font-lock-ensure)
+    (font-lock-flush)
     (goto-line 11)
     (move-to-column 0)
     (indent-for-tab-command)
@@ -787,7 +788,8 @@ impl Foo for Bar {
   (with-temp-buffer
     (rustic-mode)
     (insert content)
-    (font-lock-fontify-buffer)
+    (font-lock-ensure)
+    (font-lock-flush)
     (dolist (pair pairs)
       (let* ((open-pos (nth 0 pair))
              (close-pos (nth 1 pair)))
@@ -820,7 +822,8 @@ impl Foo for Bar {
 (ert-deftest rustic-test-two-character-quotes-in-a-row ()
   (with-temp-buffer
     (rustic-mode)
-    (font-lock-fontify-buffer)
+    (font-lock-ensure)
+    (font-lock-flush)
     (insert "'\\n','a', fn")
     (font-lock-after-change-function 1 12 0)
 
@@ -1550,8 +1553,8 @@ extern \"rustic-intrinsic\" fn five() {
           (with-temp-buffer
             (rustic-mode)
             (insert original)
-            (font-lock-fontify-buffer)
-
+            (font-lock-ensure)
+            (font-lock-flush)
             (goto-char point-pos)
             (deactivate-mark)
             (let ((last-command-event char)) (self-insert-command 1))
