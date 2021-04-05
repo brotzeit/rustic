@@ -24,14 +24,24 @@ ELCS  = $(ELS:.el=.elc)
 ## Without Cask
 ifdef WITHOUT_CASK
 
-DEPS  = dash
+DEPS  = company
+DEPS += dash
 DEPS += f
 DEPS += flycheck
+DEPS += eglot
+DEPS += helm-ag
+DEPS += ht
+DEPS += hydra
+DEPS += lsp-mode
+DEPS += lsp-mode/clients
+DEPS += lv
 DEPS += markdown-mode
+DEPS += org/lisp
 DEPS += projectile
 DEPS += s
 DEPS += spinner
 DEPS += xterm-color
+DEPS += yasnippet
 
 LOAD_PATH  ?= $(addprefix -L ../,$(DEPS))
 LOAD_PATH  += -L .
