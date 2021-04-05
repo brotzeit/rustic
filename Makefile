@@ -48,6 +48,11 @@ LOAD_PATH  += -L .
 
 lisp: $(ELCS) loaddefs
 
+%.elc: %.el
+	@printf "Compiling $<\n"
+	@$(EMACS) -Q --batch $(EMACS_ARGS) \
+	$(LOAD_PATH) --funcall batch-byte-compile $<
+
 ## With Cask
 else
 
@@ -68,11 +73,6 @@ lisp: cask-install $(ELCS) loaddefs
 
 ## Common
 endif
-
-%.elc: %.el
-	@printf "Compiling $<\n"
-	@$(EMACS) -Q --batch $(EMACS_ARGS) \
-	$(LOAD_PATH) --funcall batch-byte-compile $<
 
 CLEAN  = $(ELCS) $(PKG)-autoloads.el
 
