@@ -1525,63 +1525,56 @@ extern \"rustic-intrinsic\" fn five() {
       "four"
       "five"))))
 
-;; If electric-pair-mode is available, load it and run the tests that use it.  If not,
-;; no error--the tests will be skipped.
-(require 'elec-pair nil t)
+(require 'elec-pair)
 
-;; The emacs 23 and 24 versions of ERT do not have test skipping
-;; functionality.  So don't even define these tests if elec-pair is
-;; not available.
-(when (featurep 'elec-pair)
-  (defun test-electric-pair-insert (original point-pos char closer)
-    (let ((old-electric-pair-mode electric-pair-mode))
-      (electric-pair-mode 1)
-      (unwind-protect
-          (with-temp-buffer
-            (rustic-mode)
-            (insert original)
-            (font-lock-ensure)
-            (font-lock-flush)
-            (goto-char point-pos)
-            (deactivate-mark)
-            (let ((last-command-event char)) (self-insert-command 1))
-            (should (equal (char-after)
-                           (or closer (aref original point-pos)))))
-        (electric-pair-mode (or old-electric-pair-mode 1)))))
+(defun test-electric-pair-insert (original point-pos char closer)
+  (let ((old-electric-pair-mode electric-pair-mode))
+    (electric-pair-mode 1)
+    (unwind-protect
+        (with-temp-buffer
+          (rustic-mode)
+          (insert original)
+          (font-lock-ensure)
+          (font-lock-flush)
+          (goto-char point-pos)
+          (deactivate-mark)
+          (let ((last-command-event char)) (self-insert-command 1))
+          (should (equal (char-after)
+                         (or closer (aref original point-pos)))))
+      (electric-pair-mode (or old-electric-pair-mode 1)))))
 
-  (ert-deftest rustic-test-electric-pair-generic-fn ()
-    (test-electric-pair-insert "fn foo() { }" 7 ?< ?>))
+(ert-deftest rustic-test-electric-pair-generic-fn ()
+  (test-electric-pair-insert "fn foo() { }" 7 ?< ?>))
 
-  (ert-deftest rustic-test-electric-pair-impl-param ()
-    (test-electric-pair-insert "impl Foo<T> for Bar<T>" 5 ?< ?>))
+(ert-deftest rustic-test-electric-pair-impl-param ()
+  (test-electric-pair-insert "impl Foo<T> for Bar<T>" 5 ?< ?>))
 
-  (ert-deftest rustic-test-electric-pair-impl-for-type-param ()
-    (test-electric-pair-insert "impl<T> Foo<T> for Bar" 22 ?< ?>))
+(ert-deftest rustic-test-electric-pair-impl-for-type-param ()
+  (test-electric-pair-insert "impl<T> Foo<T> for Bar" 22 ?< ?>))
 
-  (ert-deftest rustic-test-electric-pair-lt-expression ()
-    (test-electric-pair-insert "fn foo(bar:i32) -> bool { bar  }" 30 ?< nil))
+(ert-deftest rustic-test-electric-pair-lt-expression ()
+  (test-electric-pair-insert "fn foo(bar:i32) -> bool { bar  }" 30 ?< nil))
 
-  (ert-deftest rustic-test-electric-pair-lt-expression-in-struct-literal ()
-    (test-electric-pair-insert "fn foo(x:i32) -> Bar { Bar { a:(bleh() + whatever::<X>()), b:x   }  }" 63 ?< nil))
+(ert-deftest rustic-test-electric-pair-lt-expression-in-struct-literal ()
+  (test-electric-pair-insert "fn foo(x:i32) -> Bar { Bar { a:(bleh() + whatever::<X>()), b:x   }  }" 63 ?< nil))
 
-  (ert-deftest rustic-test-electric-pair-lt-expression-capitalized-keyword ()
-    (test-electric-pair-insert "fn foo() -> Box" 16 ?< ?>))
+(ert-deftest rustic-test-electric-pair-lt-expression-capitalized-keyword ()
+  (test-electric-pair-insert "fn foo() -> Box" 16 ?< ?>))
 
-  (ert-deftest rustic-test-electric-pair-<-> ()
-    (let ((old-electric-pair-mode electric-pair-mode))
-      (electric-pair-mode 1)
-      (unwind-protect
-          (with-temp-buffer
-            (electric-pair-mode 1)
-            (rustic-mode)
-            (mapc (lambda (c)
-                    (let ((last-command-event c)) (self-insert-command 1)))
-                  "tmp<T>")
-            (should
-             (equal "tmp<T>" (buffer-substring-no-properties (point-min)
-                                                             (point-max)))))
-        (electric-pair-mode (or old-electric-pair-mode 1)))))
-  )
+(ert-deftest rustic-test-electric-pair-<-> ()
+  (let ((old-electric-pair-mode electric-pair-mode))
+    (electric-pair-mode 1)
+    (unwind-protect
+        (with-temp-buffer
+          (electric-pair-mode 1)
+          (rustic-mode)
+          (mapc (lambda (c)
+                  (let ((last-command-event c)) (self-insert-command 1)))
+                "tmp<T>")
+          (should
+           (equal "tmp<T>" (buffer-substring-no-properties (point-min)
+                                                           (point-max)))))
+      (electric-pair-mode (or old-electric-pair-mode 1)))))
 
 (ert-deftest indent-return-type-non-visual ()
   (let ((rustic-indent-return-type-to-arguments nil))
