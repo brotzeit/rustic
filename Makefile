@@ -82,7 +82,7 @@ lisp: cask-build
 
 test: lisp
 	if [ -f "$(HOME)/.cargo/env" ] ; then . "$(HOME)/.cargo/env" ; fi ; \
-	EMACS=$(EMACS) cask exec ert-runners
+	EMACS=$(EMACS) cask exec ert-runner --reporter ert
 
 ## Common
 endif
