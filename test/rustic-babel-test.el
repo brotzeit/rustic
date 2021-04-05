@@ -25,9 +25,12 @@
 (defun rustic-test-babel-execute-block (buf &optional nowait)
   "Execute babel block in BUF."
   (with-current-buffer buf
-    (call-interactively 'org-ctrl-c-ctrl-c)
-    (unless nowait
-      (rustic-test-babel-wait))))
+    (rustic-test-silence
+     '("executing %s code block%s..."
+       "Code block evaluation complete.")
+     (call-interactively 'org-ctrl-c-ctrl-c)
+     (unless nowait
+       (rustic-test-babel-wait)))))
 
 (defun rustic-test-babel-check-results (buf)
   "Return babel result block contents in BUF."
