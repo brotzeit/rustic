@@ -113,38 +113,6 @@
     map)
   "Keymap for rust compilation log buffers.")
 
-(define-compilation-mode rustic-compilation-mode "rust-compilation"
-  "Rust compilation mode.
-
-Error matching regexes from compile.el are removed."
-  (setq-local compilation-message-face 'rustic-message)
-  (setq-local compilation-error-face   'rustic-compilation-error)
-  (setq-local compilation-warning-face 'rustic-compilation-warning)
-  (setq-local compilation-info-face    'rustic-compilation-info)
-  (setq-local compilation-column-face  'rustic-compilation-column)
-  (setq-local compilation-line-face    'rustic-compilation-line)
-
-  (setq-local xterm-color-names-bright rustic-ansi-faces)
-  (setq-local xterm-color-names rustic-ansi-faces)
-
-  (setq-local compilation-error-regexp-alist-alist nil)
-  (add-to-list 'compilation-error-regexp-alist-alist
-               (cons 'rustic-error rustic-compilation-error))
-  (add-to-list 'compilation-error-regexp-alist-alist
-               (cons 'rustic-warning rustic-compilation-warning))
-  (add-to-list 'compilation-error-regexp-alist-alist
-               (cons 'rustic-info rustic-compilation-info))
-  (add-to-list 'compilation-error-regexp-alist-alist
-               (cons 'rustic-panic rustic-compilation-panic))
-
-  (setq-local compilation-error-regexp-alist nil)
-  (add-to-list 'compilation-error-regexp-alist 'rustic-error)
-  (add-to-list 'compilation-error-regexp-alist 'rustic-warning)
-  (add-to-list 'compilation-error-regexp-alist 'rustic-info)
-  (add-to-list 'compilation-error-regexp-alist 'rustic-panic)
-
-  (add-hook 'compilation-filter-hook #'rustic-insert-errno-button nil t))
-
 (defvar rustic-compilation-error
   (let ((err "^error[^:]*:[^\n]*\n\s*-->\s")
         (file "\\([^\n]+\\)")
@@ -179,6 +147,38 @@ Error matching regexes from compile.el are removed."
     (let ((re (concat panic file ":" start-line ":" start-col)))
       (cons re '(1 2 3))))
   "Match thread panics.")
+
+(define-compilation-mode rustic-compilation-mode "rust-compilation"
+  "Rust compilation mode.
+
+Error matching regexes from compile.el are removed."
+  (setq-local compilation-message-face 'rustic-message)
+  (setq-local compilation-error-face   'rustic-compilation-error)
+  (setq-local compilation-warning-face 'rustic-compilation-warning)
+  (setq-local compilation-info-face    'rustic-compilation-info)
+  (setq-local compilation-column-face  'rustic-compilation-column)
+  (setq-local compilation-line-face    'rustic-compilation-line)
+
+  (setq-local xterm-color-names-bright rustic-ansi-faces)
+  (setq-local xterm-color-names rustic-ansi-faces)
+
+  (setq-local compilation-error-regexp-alist-alist nil)
+  (add-to-list 'compilation-error-regexp-alist-alist
+               (cons 'rustic-error rustic-compilation-error))
+  (add-to-list 'compilation-error-regexp-alist-alist
+               (cons 'rustic-warning rustic-compilation-warning))
+  (add-to-list 'compilation-error-regexp-alist-alist
+               (cons 'rustic-info rustic-compilation-info))
+  (add-to-list 'compilation-error-regexp-alist-alist
+               (cons 'rustic-panic rustic-compilation-panic))
+
+  (setq-local compilation-error-regexp-alist nil)
+  (add-to-list 'compilation-error-regexp-alist 'rustic-error)
+  (add-to-list 'compilation-error-regexp-alist 'rustic-warning)
+  (add-to-list 'compilation-error-regexp-alist 'rustic-info)
+  (add-to-list 'compilation-error-regexp-alist 'rustic-panic)
+
+  (add-hook 'compilation-filter-hook #'rustic-insert-errno-button nil t))
 
 ;;; Compilation Process
 
