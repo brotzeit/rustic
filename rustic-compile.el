@@ -241,13 +241,13 @@ is set to 'on-compile. If rustfmt fails, don't start compilation."
 (defun rustic-compilation (command &optional args)
   "Start a compilation process with COMMAND.
 
-:no-display - don't display buffer when starting compilation process
-:buffer - name for process buffer
-:process - name for compilation process
-:mode - mode for process buffer
-:directory - set `default-directory'
-:sentinel - process sentinel
-"
+ARGS is a plist that affects how the process is run.
+- `:no-display' don't display buffer when starting compilation process
+- `:buffer' name for process buffer
+- `:process' name for compilation process
+- `:mode' mode for process buffer
+- `:directory' set `default-directory'
+- `:sentinel' process sentinel"
   (let ((buf (get-buffer-create
               (or (plist-get args :buffer) rustic-compilation-buffer-name)))
         (process (or (plist-get args :process) rustic-compilation-process-name))
