@@ -64,3 +64,42 @@ Emacs shutdown.")
 	         (unless (member format-string ,messages)
 	           (apply 'm format-string args)))))
      ,@body))
+
+(defun test-indent (indented &optional deindented)
+  (let ((deindented
+         (or deindented
+             (replace-regexp-in-string "^[[:blank:]]*" "      " indented))))
+    (rustic-test-manip-code
+     deindented
+     1
+     (lambda ()
+       (rustic-test-silence
+        '("%s %s"   ; "Indenting..." progress-reporter-do-update
+          "%sdone") ; "Indenting...done"  progress-reporter-done
+        (indent-region 1 (+ 1 (buffer-size)))))
+     indented)))
+
+(defun rustic-test-group-str-by-face (str)
+  "Fontify `STR' in rust-mode and group it by face, returning a
+list of substrings of `STR' each followed by its face."
+  (cl-loop with fontified = (rustic-test-fontify-string str)
+           for start = 0 then end
+           while start
+           for end   = (next-single-property-change start 'face fontified)
+           for prop  = (get-text-property start 'face fontified)
+           for text  = (substring-no-properties fontified start end)
+           if prop
+           append (list text prop)))
+
+(defun rustic-test-font-lock (source face-groups)
+  "Test that `SOURCE' fontifies to the expected `FACE-GROUPS'"
+  (should (equal (rustic-test-group-str-by-face source)
+                 face-groups)))
+
+(defun rustic-test-fontify-string (str)
+  (with-temp-buffer
+    (rustic-mode)
+    (insert str)
+    (font-lock-ensure)
+    (font-lock-flush)
+    (buffer-string)))

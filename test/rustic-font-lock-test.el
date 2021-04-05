@@ -1,14 +1,6 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
 
-(defun rustic-test-fontify-string (str)
-  (with-temp-buffer
-    (rustic-mode)
-    (insert str)
-    (font-lock-ensure)
-    (font-lock-flush)
-    (buffer-string)))
-
 (ert-deftest rustic-test-font-lock-fontify-angle-brackets ()
     "Test that angle bracket fontify."
     (should (equal (rustic-test-fontify-string "<>") "<>"))
@@ -16,23 +8,6 @@
     (should (equal (rustic-test-fontify-string "<<>>") "<<>>"))
     (should (equal (rustic-test-fontify-string "<>>") "<>>"))
     (should (equal (rustic-test-fontify-string "<<>") "<<>")))
-
-(defun rustic-test-group-str-by-face (str)
-  "Fontify `STR' in rust-mode and group it by face, returning a
-list of substrings of `STR' each followed by its face."
-  (cl-loop with fontified = (rustic-test-fontify-string str)
-           for start = 0 then end
-           while start
-           for end   = (next-single-property-change start 'face fontified)
-           for prop  = (get-text-property start 'face fontified)
-           for text  = (substring-no-properties fontified start end)
-           if prop
-           append (list text prop)))
-
-(defun rustic-test-font-lock (source face-groups)
-  "Test that `SOURCE' fontifies to the expected `FACE-GROUPS'"
-  (should (equal (rustic-test-group-str-by-face source)
-                 face-groups)))
 
 (ert-deftest font-lock-attribute-simple ()
   (rustic-test-font-lock
