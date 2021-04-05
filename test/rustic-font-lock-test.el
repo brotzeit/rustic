@@ -1,4 +1,5 @@
 ;; -*- lexical-binding: t -*-
+;; Before editing, eval (load-file "test-helper.el")
 
 (defun rustic-test-fontify-string (str)
   (with-temp-buffer

@@ -50,15 +50,24 @@ LOAD_PATH  += -L .
 
 TEST_ELS  = test/test-helper.el
 TEST_ELS += $(wildcard test/rustic-*-test.el)
+TEST_ELCS = $(TEST_ELS:.el=.elc)
 
 lisp: $(ELCS) loaddefs
 
 %.elc: %.el
 	@printf "Compiling $<\n"
-	@$(EMACS) -Q --batch $(EMACS_ARGS) \
-	$(LOAD_PATH) --funcall batch-byte-compile $<
+	@$(EMACS) -Q --batch $(EMACS_ARGS) $(LOAD_PATH) \
+	--funcall batch-byte-compile $<
 
-test:
+test-lisp: $(TEST_ELCS)
+
+test/%.elc: test/%.el
+	@printf "Compiling $<\n"
+	@$(EMACS) -Q --batch $(EMACS_ARGS) $(LOAD_PATH) -L test \
+	--load $(CURDIR)/test/test-helper \
+	--funcall batch-byte-compile $<
+
+test: $(TEST_ELCS)
 	@$(EMACS) -Q --batch $(EMACS_ARGS) $(LOAD_PATH) -L test \
 	--load $(CURDIR)/test/test-helper \
 	$(addprefix -l ,$(TEST_ELS)) \
@@ -87,7 +96,7 @@ test: lisp
 ## Common
 endif
 
-CLEAN  = $(ELCS) $(PKG)-autoloads.el
+CLEAN  = $(ELCS) $(PKG)-autoloads.el $(TEST_ELCS)
 
 clean:
 	@printf "Cleaning...\n"
