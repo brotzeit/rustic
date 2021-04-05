@@ -26,6 +26,7 @@
 
 (defgroup rustic-compilation nil
   "Rust Compilation."
+  :group 'rustic
   :group 'processes)
 
 (defcustom rustic-compile-command (purecopy "cargo build")
