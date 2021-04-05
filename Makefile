@@ -27,7 +27,6 @@ ifdef WITHOUT_CASK
 DEPS  = dash
 DEPS += f
 DEPS += flycheck
-DEPS += ht
 DEPS += markdown-mode
 DEPS += projectile
 DEPS += s
