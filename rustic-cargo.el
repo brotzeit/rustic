@@ -1,4 +1,7 @@
 ;;; rustic-cargo.el --- Cargo based commands -*-lexical-binding: t-*-
+;;; Commentary:
+
+;; This library implements support for `cargo'.
 
 ;;; Code:
 
