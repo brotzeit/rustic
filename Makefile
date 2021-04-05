@@ -67,9 +67,7 @@ cask-install: $(CASK_DIR)
 cask-build: loaddefs
 	EMACS=$(EMACS) cask build
 
-LOAD_PATH  += -L $(subst :, -L ,$(shell cask load-path))
-
-lisp: cask-install $(ELCS) loaddefs
+lisp: cask-build
 
 ## Common
 endif
