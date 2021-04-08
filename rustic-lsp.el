@@ -127,7 +127,7 @@ with `lsp-rust-switch-server'."
 (with-eval-after-load 'eglot
   (rustic-setup-eglot))
 
-;;; lsp-mode support
+;;; rustic-macro-expansion-mode
 
 (setq lsp-rust-analyzer-macro-expansion-method 'rustic-analyzer-macro-expand)
 
