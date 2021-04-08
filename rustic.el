@@ -1189,17 +1189,20 @@ This handles multi-line comments with a * prefix on each line."
 (defun rustic-before-save-hook ()
   "Don't throw error if rustfmt isn't installed, as it makes saving impossible."
   (when (and (rustic-format-on-save-p) (not (rustic-compilation-process-live t)))
-    (condition-case nil
-        (progn
-          (rustic-format-file)
-          (sit-for 0.1))
-      (error nil))))
+    (if (file-remote-p (buffer-file-name))
+        (rustic-format-buffer)
+      (condition-case nil
+          (progn
+            (rustic-format-file)
+            (sit-for 0.1))
+        (error nil)))))
 
 (defun rustic-after-save-hook ()
   "Check if rustfmt is installed after saving the file."
-  (when (rustic-format-on-save-p)
-    (unless (executable-find rustic-rustfmt-bin)
-      (error "Could not locate executable \"%s\"" rustic-rustfmt-bin))))
+  (unless (file-remote-p (buffer-file-name))
+    (when (rustic-format-on-save-p)
+      (unless (executable-find rustic-rustfmt-bin)
+        (error "Could not locate executable \"%s\"" rustic-rustfmt-bin)))))
 
 ;;; _
 
