@@ -30,7 +30,7 @@ jobs:
               id: cache-cask-executable
               with:
                 path: ~/.cask
-                key: cache-cask-executable-000
+                key: cache-cask-executable-001
 
             - uses: conao3/setup-cask@master
               if: steps.cache-cask-executable.outputs.cache-hit != 'true'
