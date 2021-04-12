@@ -50,7 +50,7 @@ $(CASK_DIR): Cask
 
 cask-install: $(CASK_DIR)
 
-cask-build: cask-install loaddefs
+cask-build: loaddefs
 	EMACS=$(EMACS) cask build
 
 LOAD_PATH  += -L $(subst :, -L ,$(shell cask load-path))
