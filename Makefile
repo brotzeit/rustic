@@ -42,7 +42,13 @@ lisp: $(ELCS) loaddefs
 ## With Cask
 else
 
-cask-install:
+CASK_DIR := $(shell EMACS=$(EMACS) cask package-directory)
+
+$(CASK_DIR): Cask
+	$(CASK) install
+	touch $(CASK_DIR)
+
+cask-install: $(CASK_DIR)
 	EMACS=$(EMACS) cask install
 
 cask-build: cask-install loaddefs
@@ -99,4 +105,3 @@ $(PKG)-autoloads.el: $(ELS)
 	(setq generated-autoload-file (expand-file-name \"$@\"))\
 	(setq find-file-visit-truename t)\
 	(update-directory-autoloads default-directory))"
-

@@ -22,7 +22,7 @@ jobs:
 
             - uses: conao3/setup-cask@master
               with:
-                  version: 0.8.4
+                  version: snapshot
 
             - name: Install requirements
               run: |
@@ -40,16 +40,6 @@ jobs:
                   source $HOME/.cargo/env
                   rustup component add rustfmt-preview
 
-            - name: Prepare Cask
-              run: |
-                  mkdir -p $HOME/.emacs.d/elpa/gnupg || true
-                  chmod 700 $HOME/.emacs.d/elpa/gnupg
-                  gpg2 --keyserver hkp://pool.sks-keyservers.net:80 --homedir $HOME/.emacs.d/elpa/gnupg --recv-keys 066DAFCB81E42C40 || true
-                  mkdir -p $(cask package-directory) || true
-                  rsync -azSH $HOME/.emacs.d/elpa/gnupg $(cask package-directory)
-                  cask build
-                  cask install
-
             - name: Run tests
               run: |
-                cask exec ert-runner
+                make test
