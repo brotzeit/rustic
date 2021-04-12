@@ -72,7 +72,7 @@ clean:
 	@rm -rf $(CLEAN)
 
 test: lisp
-	if [ -f "$(HOME)/.cargo/env" ] ; then source "$(HOME)/.cargo/env" ; fi ; \
+	if [ -f "$(HOME)/.cargo/env" ] ; then . "$(HOME)/.cargo/env" ; fi ; \
 	EMACS=$(EMACS) cask exec ert-runner
 
 loaddefs: $(PKG)-autoloads.el
