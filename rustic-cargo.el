@@ -31,6 +31,11 @@ but you need to install polymode separately."
   :type 'boolean
   :group 'rustic-cargo)
 
+(defcustom rustic-cargo-always-prompt-for-arguments nil
+  "TODO"
+  :type 'boolean
+  :group 'rustic-cargo)
+
 (defvar rustic-cargo-outdated-face nil)
 (make-obsolete-variable 'rustic-cargo-outdated-face
                         "use the face `rustic-cargo-outdated' instead."
@@ -451,20 +456,27 @@ As a byproduct, you can run any shell command in your project like `pwd'"
   (setq command (read-from-minibuffer "Command to execute: " (car compile-history) nil nil 'compile-history))
   (rustic-run-cargo-command command (list :mode 'rustic-cargo-run-mode)))
 
-;;;###autoload
-(defun rustic-cargo-run (&optional arg)
+;;;###autoload (autoload 'rustic-cargo-run "rustic-cargo" nil t)
+(transient-define-prefix rustic-cargo-run (&optional transient)
   "Run 'cargo run' for the current project.
-If running with prefix command `C-u', read whole command from minibuffer."
-  (interactive "P")
-  (let* ((command (if arg
-                      (read-from-minibuffer "Cargo run command: " "cargo run ")
-                    (concat rustic-cargo-bin " run "
-                            (read-from-minibuffer
-                             "Run arguments: "
-                             (car compile-history)
-                             nil nil
-                             'compile-history)))))
-    (rustic-run-cargo-command command (list :mode 'rustic-cargo-run-mode))))
+When `rustic-cargo-always-prompt-for-arguments' is non-nil
+or with a prefix argument, then prompt for arguments."
+  ["Arguments"
+   ;; TODO add the useful ones here.
+   ]
+  ["" ("r" "run" rustic-cargo-run)]
+  (interactive
+   (list (and (not (eq transient-current-command 'rustic-cargo-run))
+              (or rustic-cargo-always-prompt-for-arguments
+                  current-prefix-arg))))
+  (if transient
+      (transient-setup 'rustic-cargo-run)
+    (rustic-run-cargo-command
+     (concat "cargo run "
+             (mapconcat #'shell-quote-argument
+                        (transient-args 'rustic-cargo-run)
+                        " "))
+     (list :mode 'rustic-cargo-run-mode))))
 
 (defun rustic-cargo-run-mode ()
   (interactive)

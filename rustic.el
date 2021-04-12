@@ -32,6 +32,7 @@
 (require 'pcase)
 (require 'seq)
 (require 'subr-x)
+(require 'transient)
 
 (require 'dash)
 
@@ -100,7 +101,7 @@ this variable."
 
 (defvar rustic-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-p") 'rustic-popup)
+    (define-key map (kbd "C-c C-p") 'rustic-cargo)
 
     (define-key map (kbd "C-c C-c C-u") 'rustic-compile)
     (define-key map (kbd "C-c C-c C-i") 'rustic-recompile)
