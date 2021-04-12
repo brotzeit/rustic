@@ -8,5 +8,4 @@
  (depends-on "ert-runner")
  (depends-on "lsp-mode")
  (depends-on "flycheck")
- (depends-on "f")
- (depends-on "project" "0.3.0"))
+ (depends-on "f"))

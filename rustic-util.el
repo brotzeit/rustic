@@ -247,7 +247,7 @@ This is basically a wrapper around `project--buffer-list'."
     (if (fboundp 'project--buffer-list)
         (project--buffer-list pr)
       ;; Like the above function but releases before Emacs 28.
-      (let ((root (car (project-roots pr)))
+      (let ((root (project-root pr))
             bufs)
         (dolist (buf (buffer-list))
           (let ((filename (or (buffer-file-name buf)
