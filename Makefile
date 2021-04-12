@@ -44,12 +44,9 @@ else
 
 CASK_DIR := $(shell EMACS=$(EMACS) cask package-directory)
 
-$(CASK_DIR): Cask
-	$(CASK) install
-	touch $(CASK_DIR)
-
-cask-install: $(CASK_DIR)
+cask-install: $(CASK_DIR) Cask
 	EMACS=$(EMACS) cask install
+	touch $(CASK_DIR)
 
 cask-build: cask-install loaddefs
 	EMACS=$(EMACS) cask build
