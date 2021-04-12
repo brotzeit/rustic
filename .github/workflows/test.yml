@@ -39,8 +39,8 @@ jobs:
 
             - name: Install requirements
               run: |
-                  # Configure $PATH: Executables are installed to $HOME/bin
-                  export PATH="$HOME/bin:$PATH"
+                  echo "$HOME/.cask/bin" >> $GITHUB_PATH
+                  echo "$HOME/bin" >> $GITHUB_PATH
 
                   sudo apt update
                   sudo apt install -y gnutls-bin gnupg2 dirmngr
