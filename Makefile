@@ -21,6 +21,7 @@ ELS  += rustic-babel.el
 ELS  += rustic-racer.el
 ELS  += rustic-interaction.el
 ELS  += rustic-flycheck.el
+ELS  += rustic-doc.el
 ELCS  = $(ELS:.el=.elc)
 
 ## Without Cask
