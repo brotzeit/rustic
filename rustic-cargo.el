@@ -103,7 +103,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   (interactive "P")
   (rustic-cargo-test-run
    (cond (arg
-          (setq rustic-test-arguments (read-from-minibuffer "Cargo test arguments: ")))
+          (setq rustic-test-arguments (read-from-minibuffer "Cargo test arguments: " rustic-test-arguments)))
          ((eq major-mode 'rustic-popup-mode)
           rustic-test-arguments)
          (t ""))))
@@ -121,10 +121,11 @@ When calling this function from `rustic-popup-mode', always use the value of
   (rustic-compilation-process-live)
   (-if-let (func-name (rustic-cargo--get-current-fn-fullname))
       (let* ((command (list rustic-cargo-bin "test" func-name))
+             (c (append command (split-string rustic-test-arguments)))
              (buf rustic-test-buffer-name)
              (proc rustic-test-process-name)
              (mode 'rustic-cargo-test-mode))
-        (rustic-compilation command (list :buffer buf :process proc :mode mode)))
+        (rustic-compilation c (list :buffer buf :process proc :mode mode)))
     (message "Could not find test at point.")))
 
 (defconst rustic-cargo-mod-regexp
