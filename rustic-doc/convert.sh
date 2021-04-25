@@ -48,7 +48,7 @@ BEGIN { m = length(PRE)
     > "$ignore_file"
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    cores=$(eval "$sysctl -n hw.logicalcpu")
+    cores=$(eval "sysctl -n hw.logicalcpu")
 else
    cores=$(nproc)
 fi
