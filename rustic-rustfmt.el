@@ -8,7 +8,9 @@
 
 (require 'rustic-cargo)
 
-(declare-function project-root "project")
+(if (version<= emacs-version "28.0")
+    (declare-function project-roots "project")
+  (declare-function project-root "project"))
 
 ;;; Options
 
@@ -226,7 +228,9 @@ This is basically a wrapper around `project--buffer-list'."
     (if (fboundp 'project--buffer-list)
         (project--buffer-list pr)
       ;; Like the above function but for releases before Emacs 28.
-      (let ((root (project-root pr))
+      (let ((root (if (version<= emacs-version "28.0")
+                      (car (project-roots pr))
+                    (project-root pr)))
             bufs)
         (dolist (buf (buffer-list))
           (let ((filename (or (buffer-file-name buf)
