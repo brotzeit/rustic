@@ -105,6 +105,12 @@ and it's `cdr' is a list of arguments."
         (push (format "%s=%s" key (if (booleanp val) (if val "true" "false") val)) args)
         (push "--config" args)))))
 
+(defun rustic-compute-rustfmt-file-lines-args (file start end)
+  "Compute the arguments to rustfmt to modify a particular region."
+  (list "--unstable-features"
+    "--file-lines"
+    (format "[{\"file\":\"%s\",\"range\":[%d,%d]}]" file start end)))
+
 (defun rustic-format-sentinel (proc output)
   "Sentinel for rustfmt processes when using stdin."
   (ignore-errors
@@ -189,6 +195,29 @@ and it's `cdr' is a list of arguments."
                 (revert-buffer t t)))))
         (kill-buffer proc-buffer)
         (message "Workspace formatted with cargo-fmt.")))))
+
+;;;###autoload
+(defun rustic-format-region ()
+  "Format the current active region using rustfmt.
+
+This operation requires a nightly version of rustfmt.
+"
+  (interactive)
+  (unless (or (eq major-mode 'rustic-mode)
+              (eq major-mode 'rustic-macro-expansion-mode))
+    (error "Not a rustic-mode buffer."))
+  (let ((file (buffer-file-name (current-buffer)))
+        (start (+ 1 (count-lines 1 (region-beginning))))
+        (len (- (count-lines (region-beginning) (region-end)) 1)))
+    (rustic-compilation-process-live t)
+    (rustic-format-start-process
+     'rustic-format-file-sentinel
+     :buffer (current-buffer)
+     :command
+     (append (list rustic-cargo-bin "+nightly" "fmt" "--")
+             (rustic-compute-rustfmt-file-lines-args file
+                                                     start
+                                                     (+ start len))))))
 
 ;;;###autoload
 (defun rustic-format-buffer ()
