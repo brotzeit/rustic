@@ -214,7 +214,7 @@ the value of `lsp-rust-server`.
 Change rust-analyzer path.
 
 ``` emacs-lisp
-(setq lsp-rust-analyzer-server-command '("~/.cargo/bin/rust-analyzer"))
+(setq rustic-analyzer-command '("~/.cargo/bin/rust-analyzer"))
 ```
 
 ### Client
