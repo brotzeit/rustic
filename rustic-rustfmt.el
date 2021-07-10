@@ -207,6 +207,8 @@ This operation requires a nightly version of rustfmt.
               (eq major-mode 'rustic-macro-expansion-mode))
     (error "Not a rustic-mode buffer."))
   (if (not (region-active-p)) (rustic-format-buffer)
+    (unless (equal (call-process "cargo" nil nil nil "+nightly") 0)
+      (error "Need nightly toolchain to format region."))
     (let* ((buf (current-buffer))
            (file (buffer-file-name buf)))
       (let ((start (+ 1 (count-lines 1 begin)))
