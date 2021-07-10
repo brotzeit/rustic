@@ -206,27 +206,20 @@ This operation requires a nightly version of rustfmt.
   (unless (or (eq major-mode 'rustic-mode)
               (eq major-mode 'rustic-macro-expansion-mode))
     (error "Not a rustic-mode buffer."))
-  (let* ((buf (current-buffer))
-         (file (buffer-file-name buf))
-         (r-begin)
-         (r-end))
-    (cond ((region-active-p)
-           (setq r-begin begin)
-           (setq r-end end))
-          (t
-           (setq r-begin (region-beginning))
-           (setq r-end (region-end))))
-    (let ((start (+ 1 (count-lines 1 r-begin)))
-          (len (- (count-lines r-begin r-end) 1)))
-      (rustic-compilation-process-live t)
-      (rustic-format-start-process
-       'rustic-format-file-sentinel
-       :buffer buf
-       :command
-       (append (list rustic-cargo-bin "+nightly" "fmt" "--")
-               (rustic-compute-rustfmt-file-lines-args file
-                                                       start
-                                                       (+ start len)))))))
+  (if (not (region-active-p)) (rustic-format-buffer)
+    (let* ((buf (current-buffer))
+           (file (buffer-file-name buf)))
+      (let ((start (+ 1 (count-lines 1 begin)))
+            (len (- (count-lines begin end) 1)))
+        (rustic-compilation-process-live t)
+        (rustic-format-start-process
+         'rustic-format-file-sentinel
+         :buffer buf
+         :command
+         (append (list rustic-cargo-bin "+nightly" "fmt" "--")
+                 (rustic-compute-rustfmt-file-lines-args file
+                                                         start
+                                                         (+ start len))))))))
 
 ;;;###autoload
 (defun rustic-format-buffer ()
