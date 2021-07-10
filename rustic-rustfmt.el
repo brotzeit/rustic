@@ -196,6 +196,13 @@ and it's `cdr' is a list of arguments."
         (kill-buffer proc-buffer)
         (message "Workspace formatted with cargo-fmt.")))))
 
+(defun rustic--get-line-number (pos)
+  (let ((line-number 0))
+    (save-excursion
+      (goto-char pos)
+      (setq line-number (string-to-number (format-mode-line "%l"))))
+    line-number))
+
 ;;;###autoload
 (defun rustic-format-region (begin end)
   "Format the current active region using rustfmt.
@@ -211,8 +218,8 @@ This operation requires a nightly version of rustfmt.
       (error "Need nightly toolchain to format region."))
     (let* ((buf (current-buffer))
            (file (buffer-file-name buf))
-           (start (+ 1 (count-lines 1 begin)))
-           (len (- (count-lines begin end) 1)))
+           (start (rustic--get-line-number begin))
+           (finish (rustic--get-line-number end)))
       (rustic-compilation-process-live t)
       (rustic-format-start-process
        'rustic-format-file-sentinel
@@ -221,7 +228,7 @@ This operation requires a nightly version of rustfmt.
        (append (list rustic-cargo-bin "+nightly" "fmt" "--")
                (rustic-compute-rustfmt-file-lines-args file
                                                        start
-                                                       (+ start len))))))))
+                                                       finish))))))
 
 ;;;###autoload
 (defun rustic-format-buffer ()
