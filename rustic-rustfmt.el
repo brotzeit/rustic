@@ -210,18 +210,18 @@ This operation requires a nightly version of rustfmt.
     (unless (equal (call-process "cargo" nil nil nil "+nightly") 0)
       (error "Need nightly toolchain to format region."))
     (let* ((buf (current-buffer))
-           (file (buffer-file-name buf)))
-      (let ((start (+ 1 (count-lines 1 begin)))
-            (len (- (count-lines begin end) 1)))
-        (rustic-compilation-process-live t)
-        (rustic-format-start-process
-         'rustic-format-file-sentinel
-         :buffer buf
-         :command
-         (append (list rustic-cargo-bin "+nightly" "fmt" "--")
-                 (rustic-compute-rustfmt-file-lines-args file
-                                                         start
-                                                         (+ start len))))))))
+           (file (buffer-file-name buf))
+           (start (+ 1 (count-lines 1 begin)))
+           (len (- (count-lines begin end) 1)))
+      (rustic-compilation-process-live t)
+      (rustic-format-start-process
+       'rustic-format-file-sentinel
+       :buffer buf
+       :command
+       (append (list rustic-cargo-bin "+nightly" "fmt" "--")
+               (rustic-compute-rustfmt-file-lines-args file
+                                                       start
+                                                       (+ start len))))))))
 
 ;;;###autoload
 (defun rustic-format-buffer ()
