@@ -8,7 +8,9 @@
 
 (require 'rustic-cargo)
 
-(declare-function project-root "project")
+(if (version<= emacs-version "28.0")
+    (declare-function project-roots "project")
+  (declare-function project-root "project"))
 
 ;;; Options
 
@@ -103,6 +105,12 @@ and it's `cdr' is a list of arguments."
         (push (format "%s=%s" key (if (booleanp val) (if val "true" "false") val)) args)
         (push "--config" args)))))
 
+(defun rustic-compute-rustfmt-file-lines-args (file start end)
+  "Compute the arguments to rustfmt to modify a particular region."
+  (list "--unstable-features"
+    "--file-lines"
+    (format "[{\"file\":\"%s\",\"range\":[%d,%d]}]" file start end)))
+
 (defun rustic-format-sentinel (proc output)
   "Sentinel for rustfmt processes when using stdin."
   (ignore-errors
@@ -188,6 +196,40 @@ and it's `cdr' is a list of arguments."
         (kill-buffer proc-buffer)
         (message "Workspace formatted with cargo-fmt.")))))
 
+(defun rustic--get-line-number (pos)
+  (let ((line-number 0))
+    (save-excursion
+      (goto-char pos)
+      (setq line-number (string-to-number (format-mode-line "%l"))))
+    line-number))
+
+;;;###autoload
+(defun rustic-format-region (begin end)
+  "Format the current active region using rustfmt.
+
+This operation requires a nightly version of rustfmt.
+"
+  (interactive "r")
+  (unless (or (eq major-mode 'rustic-mode)
+              (eq major-mode 'rustic-macro-expansion-mode))
+    (error "Not a rustic-mode buffer."))
+  (if (not (region-active-p)) (rustic-format-buffer)
+    (unless (equal (call-process "cargo" nil nil nil "+nightly") 0)
+      (error "Need nightly toolchain to format region."))
+    (let* ((buf (current-buffer))
+           (file (buffer-file-name buf))
+           (start (rustic--get-line-number begin))
+           (finish (rustic--get-line-number end)))
+      (rustic-compilation-process-live t)
+      (rustic-format-start-process
+       'rustic-format-file-sentinel
+       :buffer buf
+       :command
+       (append (list rustic-cargo-bin "+nightly" "fmt" "--")
+               (rustic-compute-rustfmt-file-lines-args file
+                                                       start
+                                                       finish))))))
+
 ;;;###autoload
 (defun rustic-format-buffer ()
   "Format the current buffer using rustfmt.
@@ -226,7 +268,9 @@ This is basically a wrapper around `project--buffer-list'."
     (if (fboundp 'project--buffer-list)
         (project--buffer-list pr)
       ;; Like the above function but for releases before Emacs 28.
-      (let ((root (project-root pr))
+      (let ((root (if (version<= emacs-version "28.0")
+                      (car (project-roots pr))
+                    (project-root pr)))
             bufs)
         (dolist (buf (buffer-list))
           (let ((filename (or (buffer-file-name buf)
