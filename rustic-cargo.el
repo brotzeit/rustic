@@ -428,6 +428,15 @@ If BIN is not nil, create a binary application, otherwise a library."
   (interactive)
   (rustic-run-cargo-command "cargo build"))
 
+;;;###autolod
+(defun rustic-run-shell-command (&optional arg)
+  "Run an arbitrary shell command for the current project.
+Example: use it to provide an environment variable to your application like this `evn MYVAR=1 cargo run' so that it can read it at the runtime.
+As a byproduct you can run any shell command in you project like `pwd'"
+  (interactive "P")
+  (setq command (read-from-minibuffer "Command to execute: " (car compile-history) nil nil 'compile-history))
+  (rustic-run-cargo-command command (list :mode 'rustic-cargo-run-mode)))
+
 ;;;###autoload
 (defun rustic-cargo-run (&optional arg)
   "Run 'cargo run' for the current project.
