@@ -254,7 +254,6 @@ directory DIR."
 
 (defun org-babel-execute:rustic (body params)
   "Execute a block of Rust code with org-babel.
-
 If called while there's a live Rust babel process, ask user whether to
 kill the running process."
   (let ((p (get-process rustic-babel-process-name)))
@@ -265,6 +264,9 @@ kill the running process."
       (let* ((default-directory org-babel-temporary-directory)
              (project (rustic-babel-project))
              (dir (setq rustic-babel-dir (expand-file-name project)))
+             (wrapped-body (if (string-match-p "fn main()" body)
+                               body
+							 (concat "fn main() {\n" body "\n}")))
              (main (expand-file-name "main.rs" (concat dir "/src"))))
         (make-directory (file-name-directory main) t)
         (rustic-babel-cargo-toml dir params)
@@ -278,7 +280,7 @@ kill the running process."
 
         (let ((default-directory dir))
           (write-region
-           (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
+           (concat "#![allow(non_snake_case)]\n" wrapped-body) nil main nil 0)
           (rustic-babel-eval dir)
           (setq rustic-babel-src-location
                 (set-marker (make-marker) (point) (current-buffer)))
