@@ -266,7 +266,7 @@ kill the running process."
              (dir (setq rustic-babel-dir (expand-file-name project)))
              (wrapped-body (if (string-match-p "fn main()" body)
                                body
-							 (concat "fn main() {\n" body "\n}")))
+                             (concat "fn main() {\n" body "\n}")))
              (main (expand-file-name "main.rs" (concat dir "/src"))))
         (make-directory (file-name-directory main) t)
         (rustic-babel-cargo-toml dir params)
