@@ -140,8 +140,8 @@ When calling this function from `rustic-popup-mode', always use the value of
   "Run 'cargo test' for the test near point."
   (interactive)
   (rustic-compilation-process-live)
-  (-if-let (func-name (rustic-cargo--get-current-fn-fullname))
-      (let* ((command (list rustic-cargo-bin "test" func-name))
+  (-if-let (test-to-run (rustic-cargo--get-test-target))
+      (let* ((command (list rustic-cargo-bin "test" test-to-run))
              (c (append command (split-string rustic-test-arguments)))
              (buf rustic-test-buffer-name)
              (proc rustic-test-process-name)
@@ -154,26 +154,34 @@ When calling this function from `rustic-popup-mode', always use the value of
 (defconst rustic-cargo-fn-regexp
   "^\s*\\(?:async\s+\\)?\s*fn\s+\\([^(]+\\)\s*(")
 
-(defun rustic-cargo--get-current-fn-fullname()
-  "Return full name of the fn around point including module name if any."
-  (let ((mod (rustic-cargo--get-current-mod))
-        (fn (rustic-cargo--get-current-fn-name)))
-    (if mod
-        (concat mod "::" fn)
-      fn)))
+(defun rustic-cargo--get-test-target()
+  "Return either a full fn name or a mod name, whatever is closer to the point."
+  (let ((mod-cons (rustic-cargo--get-current-mod))
+        (fn-cons (rustic-cargo--get-current-fn-name)))
+    (cond ((and mod-cons fn-cons)
+           ;; both conses contain (location . name)
+           (if (> (car mod-cons) (car fn-cons))
+               (cdr mod-cons)
+             (concat (cdr mod-cons) "::" (cdr fn-cons))))
+          (fn-cons (cdr fn-cons))
+          (t (cdr mod-cons)))))
 
 (defun rustic-cargo--get-current-mod ()
-  "Return mod name around point or nil."
+  "Return cons with location and mod name around point or nil."
   (save-excursion
-    (when (search-backward-regexp rustic-cargo-mod-regexp nil t)
-      (match-string 1))))
+    (progn
+      (goto-char (line-end-position))
+      (let ((location (search-backward-regexp rustic-cargo-mod-regexp nil t)))
+        (when location
+          (cons location (match-string 1)))))))
 
 (defun rustic-cargo--get-current-line-fn-name()
-  "Return fn name from the current line or nil."
+  "Return cons with location and fn name from the current line or nil."
   (save-excursion
     (goto-char (line-beginning-position))
-    (when (search-forward-regexp rustic-cargo-fn-regexp (line-end-position) t)
-      (match-string 1))))
+    (let ((location (search-forward-regexp rustic-cargo-fn-regexp (line-end-position) t)))
+      (when location
+        (cons location (match-string 1))))))
 
 (defun rustic-cargo--get-current-fn-name()
   "Return fn name around point or nil."

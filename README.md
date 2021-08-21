@@ -345,7 +345,7 @@ arguments in `rustic-test-arguments`
 `rustic-cargo-test-rerun` rerun 'cargo test' with arguments stored in
 `rustic-test-arguments`
 
-`rustic-cargo-current-test` run test at point
+`rustic-cargo-current-test` run test at point, whether it's a function or a module
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/cargo_current_test.png)
 
