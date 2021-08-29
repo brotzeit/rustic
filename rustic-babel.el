@@ -269,7 +269,7 @@ kill the running process."
                                body
                              (concat "fn main(){\n  let result = {\n"
                                      body
-                                     "  };\n   println!(\"{:?}\",result)\n}")))
+                                     "\n};\n   println!(\"{:?}\",result)\n}")))
              (main (expand-file-name "main.rs" (concat dir "/src"))))
         (make-directory (file-name-directory main) t)
         (rustic-babel-cargo-toml dir params)
