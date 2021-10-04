@@ -276,9 +276,9 @@ kill the running process."
         (setq rustic-babel-params params)
 
         (rustic-with-spinner rustic-babel-spinner
-                             (make-spinner rustic-spinner-type t 10)
-                             '(rustic-babel-spinner (":Executing " (:eval (spinner-print rustic-babel-spinner))))
-                             (spinner-start rustic-babel-spinner))
+          (make-spinner rustic-spinner-type t 10)
+          '(rustic-babel-spinner (":Executing " (:eval (spinner-print rustic-babel-spinner))))
+          (spinner-start rustic-babel-spinner))
 
         (let ((default-directory dir))
           (write-region
