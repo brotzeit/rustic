@@ -50,11 +50,14 @@
 
 (defvar rustic-babel-spinner nil)
 
-(defun rustic-babel-eval (dir)
+(defun rustic-babel-eval (dir toolchain-kw)
   "Start a rust babel compilation process in directory DIR."
   (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
          (default-directory dir)
-         (params '("cargo" "build" "--quiet"))
+         (toolchain (cond ((eq toolchain-kw 'nightly) "+nightly")
+                          ((eq toolchain-kw 'beta) "+beta")
+                          (t "+stable")))
+         (params (list "cargo" toolchain "build" "--quiet"))
          (inhibit-read-only t))
     (rustic-compilation-setup-buffer err-buff dir 'rustic-compilation-mode)
     (when rustic-babel-display-compilation-buffer
@@ -64,9 +67,9 @@
      :buffer err-buff
      :command params
      :filter #'rustic-compilation-filter
-     :sentinel #'rustic-babel-build-sentinel)))
+     :sentinel (lambda (proc output) (rustic-babel-build-sentinel toolchain proc output)))))
 
-(defun rustic-babel-build-sentinel (proc _output)
+(defun rustic-babel-build-sentinel (toolchain proc _output)
   "Sentinel for rust babel compilation process PROC.
 If `rustic-babel-format-src-block' is t, format src-block after successful
 execution with rustfmt."
@@ -94,7 +97,7 @@ execution with rustfmt."
 
           ;; run project
           (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
-                 (params '("cargo" "run" "--quiet"))
+                 (params (list "cargo" toolchain "run" "--quiet"))
                  (inhibit-read-only t))
             (rustic-make-process
              :name rustic-babel-process-name
@@ -280,10 +283,11 @@ kill the running process."
           '(rustic-babel-spinner (":Executing " (:eval (spinner-print rustic-babel-spinner))))
           (spinner-start rustic-babel-spinner))
 
-        (let ((default-directory dir))
+        (let ((default-directory dir)
+              (toolchain (cdr (assq :toolchain params))))
           (write-region
            (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
-          (rustic-babel-eval dir)
+          (rustic-babel-eval dir toolchain)
           (setq rustic-babel-src-location
                 (set-marker (make-marker) (point) (current-buffer)))
           project)))))
