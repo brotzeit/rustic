@@ -26,7 +26,7 @@
         (string-dummy "can't format this string")
         (buf (get-buffer-create "test"))
         (buffer-read-only nil))
-    (kill-buffer rustic-format-buffer-name)
+    (ignore-error (kill-buffer rustic-format-buffer-name))
     (with-current-buffer buf
       (erase-buffer)
       (insert string)
