@@ -431,7 +431,6 @@ If specific crate features are required then these can be specified
 with the `:features` argument. Note that if it is just a single feature
 then a string, instead of a list, will also be accepted:
 
-
 ```
 #+BEGIN_SRC rust :crates '((tokio . 1.0)) :features '((tokio . ("rt-multi-thread" "time")))
   extern crate tokio;
@@ -442,6 +441,18 @@ then a string, instead of a list, will also be accepted:
           .block_on(async {
               tokio::time::sleep(tokio::time::Duration::from_millis(10)).await;
           });
+  }
+#+END_SRC
+```
+
+Similarly, to depend on local Rust crates, you can set the `:paths` argument:
+
+```
+#+BEGIN_SRC rust :crates '((foo . 1.0)) :paths '((foo . "/home/you/code/foo"))
+  use foo::Foo;
+
+  fn main() {
+    // Your code.
   }
 #+END_SRC
 ```

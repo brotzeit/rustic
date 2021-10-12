@@ -208,30 +208,33 @@ Otherwise create it with `rustic-babel-generate-project'."
           (put-text-property beg end 'project (make-symbol new))
           new)))))
 
-(defun crate-dependencies (name version features)
+(defun crate-dependencies (name version features path)
   "Generate a Cargo.toml [dependencies] entry for a crate given a version and features."
-  (let ((version-string (concat "version = \"" version "\""))
-        (features-string
-         (if features
-             (concat "features = [" (mapconcat (lambda (s) (concat "\"" s "\"")) features ", ") "]")
-           nil)))
-    (let ((toml-entry (string-join (remove nil (list version-string features-string)) ", ")))
-      (concat name " = {" toml-entry "}"))))
+  (let* ((version-string (concat "version = \"" version "\""))
+         (features-string
+          (when features
+            (concat "features = [" (mapconcat (lambda (s) (concat "\"" s "\"")) features ", ") "]")))
+         (path-string
+          (when path
+            (concat "path = \"" path "\"")))
+         (toml-entry (string-join (remove nil (list version-string features-string path-string)) ", ")))
+    (concat name " = {" toml-entry "}")))
 
-(defun cargo-toml-dependencies (crate-versions crate-features)
+(defun cargo-toml-dependencies (crate-versions crate-features crate-paths)
   "Generate the [dependencies] section of a Cargo.toml file given crates and their versions & features."
   (let ((dependencies ""))
     (dolist (crate-and-version crate-versions)
-      (let ((name (car crate-and-version))
-            (version (cdr crate-and-version)))
-        (let ((features (cdr (assoc name crate-features))))
-          (setq name (symbol-name name))
-          (when (numberp version)
-            (setq version (number-to-string version)))
-          (when (not (listp features))
-            (setq features (list features)))
-          (let ((cargo-toml-entry (crate-dependencies name version features)))
-            (setq dependencies (concat dependencies cargo-toml-entry "\n"))))))
+      (let* ((name (car crate-and-version))
+             (version (cdr crate-and-version))
+             (features (cdr (assoc name crate-features)))
+             (path (cdr (assoc name crate-paths))))
+        (setq name (symbol-name name))
+        (when (numberp version)
+          (setq version (number-to-string version)))
+        (when (not (listp features))
+          (setq features (list features)))
+        (let ((cargo-toml-entry (crate-dependencies name version features path)))
+          (setq dependencies (concat dependencies cargo-toml-entry "\n")))))
     (setq dependencies (concat "[dependencies]\n" dependencies))))
 
 (defun rustic-babel-cargo-toml (dir params)
@@ -240,8 +243,9 @@ Use org-babel parameter crates from PARAMS and add them to the project in
 directory DIR."
   (let ((crates (cdr (assq :crates params)))
         (features (cdr (assq :features params)))
+        (paths (cdr (assq :paths params)))
         (toml (expand-file-name "Cargo.toml" dir)))
-    (let ((dependencies (cargo-toml-dependencies crates features)))
+    (let ((dependencies (cargo-toml-dependencies crates features paths)))
       (make-directory (file-name-directory toml) t)
       (with-temp-file toml
         (condition-case nil
