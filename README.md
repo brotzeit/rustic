@@ -457,7 +457,22 @@ Similarly, to depend on local Rust crates, you can set the `:paths` argument:
 #+END_SRC
 ```
 
-Supported org babel parameters:
+You can also specify the `:toolchain`. Remember to quote the value!
+
+```
+#+begin_src rust :toolchain 'nightly
+fn main() {
+    let foo: String = vec!["a", "b", "c"].into_iter().intersperse(",").collect();
+
+    println!("{}", foo);
+}
+#+end_src
+
+#+RESULTS:
+: a,b,c
+```
+
+Other supported org babel parameters:
 
 Write to file `:results file :file ~/babel-output`
 
