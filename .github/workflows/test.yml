@@ -9,8 +9,7 @@ jobs:
             max-parallel: 6
             matrix:
                 emacs-version:
-                    - 26.3
-                    - 27.1
+                    - 27.2
                     - snapshot
 
         steps:
