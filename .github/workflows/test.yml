@@ -9,8 +9,7 @@ jobs:
             max-parallel: 6
             matrix:
                 emacs-version:
-                    - 26.3
-                    - 27.1
+                    - 27.2
                     - snapshot
 
         steps:
@@ -20,22 +19,9 @@ jobs:
               with:
                   version: ${{ matrix.emacs-version }}
 
-            - uses: actions/cache@v2
-              id: cache-cask-packages
-              with:
-                path: .cask
-                key: cache-cask-packages-000
-
-            - uses: actions/cache@v2
-              id: cache-cask-executable
-              with:
-                path: ~/.cask
-                key: cache-cask-executable-001
-
             - uses: conao3/setup-cask@master
-              if: steps.cache-cask-executable.outputs.cache-hit != 'true'
               with:
-                  version: snapshot
+                  version: 0.8.4
 
             - name: Install requirements
               run: |
