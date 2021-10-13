@@ -130,7 +130,8 @@ Commands:
 Customization:
 
 - `rustic-compile-display-method` choose function that displays the
-  compilation buffer
+  compilation buffer (use the function `ignore`, if you don't want the
+  buffer to be displayed)
 - `rustic-compile-backtrace` change backtrace verbosity
 - `rustic-compile-command` default command for rust compilation
 
