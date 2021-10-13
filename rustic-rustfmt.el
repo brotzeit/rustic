@@ -35,6 +35,13 @@ VALUE is a string, an integer or a boolean."
                  (const :tag "Don't format automatically." nil))
   :group 'rustic)
 
+(defcustom rustic-format-on-save-method 'rustic-format-file
+  "Default function used for formatting before saving.
+This function will only be used when `rustic-format-trigger' is set
+to 'on-save."
+  :type 'function
+  :group 'rustic)
+
 (defcustom rustic-format-display-method 'pop-to-buffer
   "Default function used for displaying rustfmt buffer."
   :type 'function
@@ -302,7 +309,7 @@ This is basically a wrapper around `project--buffer-list'."
              (not (rustic-compilation-process-live t)))
     (condition-case nil
         (progn
-          (rustic-format-file)
+          (funcall rustic-format-on-save-method)
           (sit-for 0.1))
       (error nil))))
 

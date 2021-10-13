@@ -188,10 +188,16 @@ Customization:
 - `rustic-format-display-method` default function used for displaying
   rustfmt buffer (use the function `ignore`, if you don't want the
   buffer to be displayed)
+- `rustic-format-on-save-method` function to use for on-save formatting
 - `rustic-format-trigger`
   * `'on-save` format buffer before saving
   * `'on-compile` run 'cargo fmt' before compilation
   * `nil` don't format automatically
+
+
+known issues:
+
+in case you are using hideshow you might want to set `rustic-format-on-save-method` to `rustic-format-buffer`(#274)
 
 ### edition 2018
 
