@@ -540,6 +540,8 @@ To run the tests, you will need [Cask](https://github.com/cask/cask).
 cask exec ert-runner
 ```
 
+alternatively you can use `make test`
+
 ## Contributing
 
 PRs, feature requests and bug reports are very welcome.
