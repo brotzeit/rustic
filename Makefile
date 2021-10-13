@@ -104,7 +104,7 @@ cask-install: $(CASK_DIR)
 cask-build: loaddefs
 	EMACS=$(EMACS) cask build
 
-lisp: cask-build
+lisp: clean cask-install cask-build
 
 test: lisp
 	if [ -f "$(HOME)/.cargo/env" ] ; then . "$(HOME)/.cargo/env" ; fi ; \
