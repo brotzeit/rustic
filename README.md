@@ -172,8 +172,9 @@ Additional faces:
 You can format your code with:
 
 - `rustic-format-buffer` format buffer with stdin
-- `rustic-format-file`   form file and revert buffer
+- `rustic-format-file`   format file and revert buffer
 - `rustic-cargo-fmt`     run cargo-fmt on workspace
+- `rustic-format-region` format active region
 
 Rustic uses the function `rustic-save-some-buffers` for saving buffers before
 compilation. To save buffers automatically, you can change the value of
