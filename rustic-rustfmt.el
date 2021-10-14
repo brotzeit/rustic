@@ -6,11 +6,9 @@
 
 ;;; Code:
 
-(require 'rustic-cargo)
+(require 'project)
 
-(if (version<= emacs-version "28.0")
-    (declare-function project-roots "project")
-  (declare-function project-root "project"))
+(require 'rustic-cargo)
 
 ;;; Options
 
@@ -270,6 +268,13 @@ were issues when using stdin for formatting."
       (while (eq (process-status proc) 'run)
         (sit-for 0.05)))))
 
+(defun rustic-project-root (project)
+  "Runs the correct version of project-root function for
+different emacs versions."
+  (if (version<= emacs-version "28.0")
+      (car (funcall 'project-roots project))
+    (funcall 'project-root project)))
+
 (defun rustic-project-buffer-list ()
   "Return a list of the buffers belonging to the current project.
 This is basically a wrapper around `project--buffer-list'."
@@ -277,9 +282,7 @@ This is basically a wrapper around `project--buffer-list'."
     (if (fboundp 'project--buffer-list)
         (project--buffer-list pr)
       ;; Like the above function but for releases before Emacs 28.
-      (let ((root (if (version<= emacs-version "28.0")
-                      (car (project-roots pr))
-                    (project-root pr)))
+      (let ((root (rustic-project-root pr))
             bufs)
         (dolist (buf (buffer-list))
           (let ((filename (or (buffer-file-name buf)

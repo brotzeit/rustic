@@ -6,3 +6,7 @@
   (let* ((test-workspace (expand-file-name "test/test-project/test-workspace/" default-directory))
          (default-directory test-workspace))
     (should (equal (rustic-buffer-workspace) test-workspace))))
+
+;; just test if project-root function works for different versions
+(ert-deftest rust-test-project-root ()
+  (should (equal (rustic-project-root (project-current)) default-directory)))
