@@ -170,9 +170,6 @@ See URL `https://github.com/rust-lang-nursery/rust-clippy'."
   :error-explainer flycheck-rust-error-explainer
   :modes rustic-mode
   :predicate flycheck-buffer-saved-p
-  :enabled (lambda ()
-             (and (flycheck-rust-cargo-has-command-p "clippy")
-                  (flycheck-rust-manifest-directory)))
   :working-directory (lambda (_) (flycheck-rust-manifest-directory))
   :verify
   (lambda (_)
