@@ -40,81 +40,12 @@
 (setq rust-load-optional-libraries nil)
 (require 'rust-mode)
 
-(eval-when-compile (require 'rx))
-
-(defvar electric-pair-inhibit-predicate)
-(defvar electric-pair-skip-self)
-(defvar electric-indent-chars)
-
 ;;; Customization
 
 (defgroup rustic nil
   "Support for Rust code."
   :link '(url-link "https://www.rustic-lang.org/")
   :group 'languages)
-
-(defcustom rustic-indent-offset 4
-  "Indent Rust code by this number of spaces."
-  :type 'integer
-  :group 'rustic
-  :safe #'integerp)
-
-(defcustom rustic-indent-method-chain nil
-  "Indent Rust method chains, aligned by the `.' operators."
-  :type 'boolean
-  :group 'rustic
-  :safe #'booleanp)
-
-(defcustom rustic-indent-where-clause nil
-  "Indent lines starting with the `where' keyword following a function or trait.
-When nil, `where' will be aligned with `fn' or `trait'."
-  :type 'boolean
-  :group 'rustic
-  :safe #'booleanp)
-
-(defcustom rustic-match-angle-brackets t
-  "Whether to enable angle bracket (`<' and `>') matching where appropriate."
-  :type 'boolean
-  :safe #'booleanp
-  :group 'rustic)
-
-(defcustom rustic-indent-return-type-to-arguments t
-  "Indent a line starting with the `->' (RArrow) following a function, aligning
-to the function arguments.  When nil, `->' will be indented one level."
-  :type 'boolean
-  :group 'rustic
-  :safe #'booleanp)
-
-;;; Faces
-
-(define-obsolete-face-alias 'rustic-unsafe-face
-  'rustic-unsafe "1.2")
-(define-obsolete-face-alias 'rustic-question-mark-face
-  'rustic-question-mark "1.2")
-(define-obsolete-face-alias 'rustic-builtin-formatting-macro-face
-  'rustic-builtin-formatting-macro "1.2")
-(define-obsolete-face-alias 'rustic-string-interpolation-face
-  'rustic-string-interpolation "1.2")
-
-(defface rustic-unsafe
-  '((t :inherit font-lock-warning-face))
-  "Face for the `unsafe' keyword."
-  :group 'rustic)
-
-(defface rustic-question-mark
-  '((t :weight bold :inherit font-lock-builtin-face))
-  "Face for the question mark operator."
-  :group 'rustic)
-
-(defface rustic-builtin-formatting-macro
-  '((t :inherit font-lock-builtin-face))
-  "Face for builtin formatting macros (print! &c.)."
-  :group 'rustic)
-
-(defface rustic-string-interpolation
-  '((t :slant italic :inherit font-lock-string-face))
-  "Face for interpolating braces in builtin formatting macro strings."
-  :group 'rustic)
 
 ;;; Workspace
 
@@ -134,52 +65,6 @@ or if NODEFAULT is non-nil, then fall back to returning nil."
         (or dir
             (and (not nodefault)
                  default-directory)))))
-
-;;; Syntax
-
-(defconst rustic-re-ident "[[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*")
-(defconst rustic-re-lc-ident "[[:lower:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*")
-(defconst rustic-re-uc-ident "[[:upper:]][[:word:][:multibyte:]_[:digit:]]*")
-(defconst rustic-re-vis "pub")
-(defconst rustic-re-unsafe "unsafe")
-(defconst rustic-re-extern "extern")
-(defconst rustic-re-generic
-  (concat "<[[:space:]]*'" rustic-re-ident "[[:space:]]*>"))
-(defconst rustic-re-union
-  (rx-to-string
-   `(seq
-     (or space line-start)
-     (group symbol-start "union" symbol-end)
-     (+ space) (regexp ,rustic-re-ident))))
-
-(defun rustic-re-shy (inner) (concat "\\(?:" inner "\\)"))
-(defun rustic-re-grab (inner) (concat "\\(" inner "\\)"))
-(defun rustic-re-item-def (itype)
-  (concat (rustic-re-word itype)
-          (rustic-re-shy rustic-re-generic) "?"
-          "[[:space:]]+" (rustic-re-grab rustic-re-ident)))
-(defun rustic-re-word (inner) (concat "\\<" inner "\\>"))
-
-(defun rustic-re-item-def-imenu (itype)
-  (concat "^[[:space:]]*"
-          (rustic-re-shy (concat (rustic-re-word rustic-re-vis) "[[:space:]]+")) "?"
-          (rustic-re-shy (concat (rustic-re-word "default") "[[:space:]]+")) "?"
-          (rustic-re-shy (concat (rustic-re-word rustic-re-unsafe) "[[:space:]]+")) "?"
-          (rustic-re-shy (concat (rustic-re-word rustic-re-extern) "[[:space:]]+"
-                                 (rustic-re-shy "\"[^\"]+\"[[:space:]]+") "?")) "?"
-          (rustic-re-item-def itype)))
-
-(defvar rustic-imenu-generic-expression
-  (append (mapcar #'(lambda (x)
-                      (list (capitalize x) (rustic-re-item-def-imenu x) 1))
-                  '("async fn" "enum" "struct" "union" "type" "mod" "fn" "trait" "impl"))
-          `(("Macro" ,(rustic-re-item-def-imenu "macro_rules!") 1)))
-  "Value for `imenu-generic-expression' in Rust mode.
-
-Create a hierarchical index of the item definitions in a Rust file.
-
-Imenu will show all the enums, structs, etc. in their own subheading.
-Use idomenu (imenu with `ido-mode') for best mileage.")
 
 ;;; Mode
 
@@ -236,76 +121,6 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
              "extern" "trait" "async"))
           "\\_>")
   "Start of a Rust item.")
-
-(defconst rustic-re-type-or-constructor
-  (rx symbol-start
-      (group upper (0+ (any word nonascii digit "_")))
-      symbol-end))
-
-(defconst rustic-keywords
-  '("as" "async" "await"
-    "box" "break"
-    "const" "continue" "crate"
-    "do" "dyn"
-    "else" "enum" "extern" "existential"
-    "false" "fn" "for"
-    "if" "impl" "in"
-    "let" "loop"
-    "match" "mod" "move" "mut"
-    "priv" "pub"
-    "ref" "return"
-    "self" "static" "struct" "super"
-    "true" "trait" "type" "try"
-    "use"
-    "virtual"
-    "where" "while"
-    "yield")
-  "Font-locking definitions and helpers.")
-
-(defconst rustic-special-types
-  '("u8" "i8"
-    "u16" "i16"
-    "u32" "i32"
-    "u64" "i64"
-    "u128" "i128"
-
-    "f32" "f64"
-    "isize" "usize"
-    "bool"
-    "str" "char"))
-
-(defvar rustic-builtin-formatting-macros
-  '("eprint"
-    "eprintln"
-    "format"
-    "print"
-    "println")
-  "List of builtin Rust macros for string formatting.
-This is used by `rust-font-lock-keywords'.
-\(`write!' is handled separately).")
-
-(defvar rustic-formatting-macro-opening-re
-  "[[:space:]]*[({[][[:space:]]*"
-  "Regular expression to match the opening delimiter of a Rust formatting macro.")
-
-(defvar rustic-start-of-string-re
-  "\\(?:r#*\\)?\""
-  "Regular expression to match the start of a Rust raw string.")
-
-(eval-and-compile
-  (defconst rustic--char-literal-rx
-    (rx (seq
-         (group "'")
-         (or
-          (seq
-           "\\"
-           (or
-            (: "u{" (** 1 6 xdigit) "}")
-            (: "x" (= 2 xdigit))
-            (any "'nrt0\"\\")))
-          (not (any "'\\")))
-         (group "'")))
-    "A regular expression matching a character literal."))
 
 ;;; _
 
