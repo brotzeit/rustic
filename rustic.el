@@ -38,6 +38,7 @@
 (require 'dash)
 
 (setq rust-load-optional-libraries nil)
+
 (require 'rust-mode)
 
 ;;; Customization
@@ -46,6 +47,17 @@
   "Support for Rust code."
   :link '(url-link "https://www.rustic-lang.org/")
   :group 'languages)
+
+;;; Define aliases for removed rustic functions
+
+(defvaralias 'rustic-indent-offset 'rust-indent-offset)
+(defvaralias 'rustic-indent-method-chain 'rust-indent-method-chain)
+(defvaralias 'rustic-indent-where-clause 'rust-indent-where-clause)
+(defvaralias 'rustic-match-angle-brackets 'rust-match-angle-brackets)
+(defvaralias 'rustic-indent-return-type-to-arguments 'rust-indent-return-type-to-arguments)
+(defalias 'rustic-indent-line #'rust-mode-indent-line)
+(defalias 'rustic-beginning-of-defun #'rust-beginning-of-defun)
+(defalias 'rustic-end-of-defun #'rust-end-of-defun)
 
 ;;; Workspace
 
