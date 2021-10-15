@@ -214,6 +214,9 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
   (remove-hook 'before-save-hook 'rust-before-save-hook t)
   (remove-hook 'after-save-hook 'rust-after-save-hook t)
 
+  ;; TODO: find out which function is up-to-date
+  (setq rust-top-item-beg-re rustic-top-item-beg-re)
+
   (when (fboundp 'rustic-before-save-hook)
     (add-hook 'before-save-hook 'rustic-before-save-hook nil t)
     (add-hook 'after-save-hook 'rustic-after-save-hook nil t)))
@@ -306,88 +309,6 @@ Does not match type annotations of the form \"foo::<\"."
             ;; match, so a return it!
             ((not (looking-at (rx (0+ space) "<")))
              (throw 'rustic-path-font-lock-matcher match))))))))
-
-(defvar rustic-font-lock-keywords
-  (append
-   `(
-     ;; Keywords proper
-     (,(regexp-opt rustic-keywords 'symbols) . font-lock-keyword-face)
-
-     ;; Contextual keywords
-     ("\\_<\\(default\\)[[:space:]]+fn\\_>" 1 font-lock-keyword-face)
-     (,rustic-re-union 1 font-lock-keyword-face)
-
-     ;; Special types
-     (,(regexp-opt rustic-special-types 'symbols) . font-lock-type-face)
-
-     ;; The unsafe keyword
-     ("\\_<unsafe\\_>" . 'rustic-unsafe)
-
-     ;; Attributes like `#[bar(baz)]` or `#![bar(baz)]` or `#[bar = "baz"]`
-     (,(rustic-re-grab (concat "#\\!?\\[" rustic-re-ident "[^]]*\\]"))
-      1 font-lock-preprocessor-face keep)
-
-     ;; Builtin formatting macros
-     (,(concat (rustic-re-grab (concat (regexp-opt rustic-builtin-formatting-macros) "!"))
-               rustic-formatting-macro-opening-re
-               rustic-start-of-string-re)
-      (1 'rustic-builtin-formatting-macro)
-      (rustic-string-interpolation-matcher
-       (rustic-end-of-string)
-       nil
-       (0 'rustic-string-interpolation t nil)))
-
-     ;; write! macro
-     (,(concat (rustic-re-grab "write\\(ln\\)?!")
-               rustic-formatting-macro-opening-re
-               "[[:space:]]*[^\"]+,[[:space:]]*"
-               rustic-start-of-string-re)
-      (1 'rustic-builtin-formatting-macro)
-      (rustic-string-interpolation-matcher
-       (rustic-end-of-string)
-       nil
-       (0 'rustic-string-interpolation t nil)))
-
-     ;; Syntax extension invocations like `foo!`, highlight including the !
-     (,(concat (rustic-re-grab (concat rustic-re-ident "!")) "[({[:space:][]")
-      1 font-lock-preprocessor-face)
-
-     ;; Field names like `foo:`, highlight excluding the :
-     (,(concat (rustic-re-grab rustic-re-ident) ":[^:]") 1 font-lock-variable-name-face)
-
-     ;; CamelCase Means Type Or Constructor
-     (,rustic-re-type-or-constructor 1 font-lock-type-face)
-
-     ;; Type-inferred binding
-     (,(concat "\\_<\\(?:let\\s-+ref\\|let\\|ref\\)\\s-+\\(?:mut\\s-+\\)?"
-               (rustic-re-grab rustic-re-ident)
-               "\\_>")
-      1 font-lock-variable-name-face)
-
-     ;; Type names like `Foo::`, highlight excluding the ::
-     (,(rustic-path-font-lock-matcher rustic-re-uc-ident) 1 font-lock-type-face)
-
-     ;; Module names like `foo::`, highlight excluding the ::
-     (,(rustic-path-font-lock-matcher rustic-re-lc-ident) 1 font-lock-constant-face)
-
-     ;; Lifetimes like `'foo`
-     (,(concat "'" (rustic-re-grab rustic-re-ident) "[^']") 1 font-lock-variable-name-face)
-
-     ;; Question mark operator
-     ("\\?" . 'rustic-question-mark)
-     )
-
-   ;; Ensure we highlight `Foo` in `struct Foo` as a type.
-   (mapcar #'(lambda (x)
-               (list (rustic-re-item-def (car x))
-                     1 (cdr x)))
-           '(("enum" . font-lock-type-face)
-             ("struct" . font-lock-type-face)
-             ("union" . font-lock-type-face)
-             ("type" . font-lock-type-face)
-             ("mod" . font-lock-constant-face)
-             ("use" . font-lock-constant-face)
-             ("fn" . font-lock-function-name-face)))))
 
 (defun rustic-end-of-string ()
   "Skip to the end of the current string."
@@ -897,74 +818,6 @@ Otherwise, if it is an opening angle bracket, then return nil."
        ;; Otherwise, assume it's an angle bracket
        ))))
 
-(defun rustic-electric-pair-inhibit-predicate-wrap (char)
-  "Prevent \"matching\" with a `>' when CHAR is the less-than operator.
-This wraps the default defined by `electric-pair-inhibit-predicate'."
-  (or
-   (when (= ?< char)
-     (save-excursion
-       (backward-char)
-       (rustic-is-lt-char-operator)))
-   (funcall (default-value 'electric-pair-inhibit-predicate) char)))
-
-(defun rustic-electric-pair-skip-self-wrap (char)
-  "Skip CHAR instead of inserting a second closing character.
-This wraps the default defined by `electric-pair-skip-self'."
-  (or
-   (= ?> char)
-   (funcall (default-value 'electric-pair-skip-self) char)))
-
-(defun rustic-ordinary-lt-gt-p ()
-  "Test whether the `<' or `>' at point is an ordinary operator of some kind.
-
-This returns t if the `<' or `>' is an ordinary operator (like
-less-than) or part of one (like `->'); and nil if the character
-should be considered a paired angle bracket."
-  (cond
-   ;; If matching is turned off suppress all of them
-   ((not rustic-match-angle-brackets) t)
-
-   ;; This is a cheap check so we do it early.
-   ;; Don't treat the > in -> or => as an angle bracket
-   ((and (= (following-char) ?>) (memq (preceding-char) '(?- ?=))) t)
-
-   ;; We don't take < or > in strings or comments to be angle brackets
-   ((rustic-in-str-or-cmnt) t)
-
-   ;; Inside a macro we don't really know the syntax.  Any < or > may be an
-   ;; angle bracket or it may not.  But we know that the other braces have
-   ;; to balance regardless of the < and >, so if we don't treat any < or >
-   ;; as angle brackets it won't mess up any paren balancing.
-   ((rustic-in-macro) t)
-
-   ((looking-at "<")
-    (rustic-is-lt-char-operator))
-
-   ((looking-at ">")
-    (cond
-     ;; Don't treat the > in -> or => as an angle bracket
-     ((member (char-before (point)) '(?- ?=)) t)
-
-     ;; If we are at top level and not in any list, it can't be a closing
-     ;; angle bracket
-     ((>= 0 (rustic-paren-level)) t)
-
-     ;; Otherwise, treat the > as a closing angle bracket if it would
-     ;; match an opening one
-     ((save-excursion
-        (backward-up-list)
-        (not (looking-at "<"))))))))
-
-(defun rustic-syntactic-face-function (state)
-  "Return face that distinguishes doc and normal comments in given syntax STATE."
-  (if (nth 3 state)
-      'font-lock-string-face
-    (save-excursion
-      (goto-char (nth 8 state))
-      (if (looking-at "/\\([*][*!][^*!]\\|/[/!][^/!]\\)")
-          'font-lock-doc-face
-        'font-lock-comment-face))))
-
 (eval-and-compile
   (defconst rustic--char-literal-rx
     (rx (seq
@@ -1064,45 +917,6 @@ should be considered a paired angle bracket."
         (or line-comment-start
             fill-prefix)))
     (funcall body)))
-
-(defun rustic-find-fill-prefix ()
-  (rustic-in-comment-paragraph
-   (lambda ()
-     (rustic-with-comment-fill-prefix
-      (lambda ()
-        fill-prefix)))))
-
-(defun rustic-fill-paragraph (&rest args)
-  "Special wrapping for `fill-paragraph'.
-This handles multi-line comments with a * prefix on each line."
-  (rustic-in-comment-paragraph
-   (lambda ()
-     (rustic-with-comment-fill-prefix
-      (lambda ()
-        (let
-            ((fill-paragraph-function
-              (if (not (eq fill-paragraph-function 'rustic-fill-paragraph))
-                  fill-paragraph-function))
-             (fill-paragraph-handle-comment t))
-          (apply 'fill-paragraph args)
-          t))))))
-
-(defun rustic-do-auto-fill (&rest args)
-  "Special wrapping for `do-auto-fill'.
-This handles multi-line comments with a * prefix on each line."
-  (rustic-with-comment-fill-prefix
-   (lambda ()
-     (apply 'do-auto-fill args)
-     t)))
-
-(defun rustic-fill-forward-paragraph (arg)
-  ;; This is to work around some funny behavior when a paragraph separator is
-  ;; at the very top of the file and there is a fill prefix.
-  (let ((fill-prefix nil)) (forward-paragraph arg)))
-
-(defun rustic-comment-indent-new-line (&optional arg)
-  (rustic-with-comment-fill-prefix
-   (lambda () (comment-indent-new-line arg))))
 
 ;;; _
 
