@@ -47,10 +47,7 @@
 
 ## Intro
 
-This package is a fork of
-[rust-mode](https://github.com/rust-lang/rust-mode)
-
-Differences with rust-mode:
+This package is based on [rust-mode](https://github.com/rust-lang/rust-mode) and provides additional features:
 
 - flycheck integration
 - cargo popup
@@ -68,7 +65,13 @@ Differences with rust-mode:
 - requires emacs 26
 - etc.
 
-[Why fork](https://github.com/brotzeit/rustic/issues/92) ?
+rustic only shares the rust-mode code from rust-mode.el and rust-utils.el.
+The other files provide functionality that is similar to some of the features
+of rustic, however can be considered light-weight compared to some rustic's
+functionality.
+
+The shared functions and options exist as aliases in the rust-mode and 
+rustic namespace for backwards compatability reasons(rustic has been a fork).
 
 ## Installation
 
