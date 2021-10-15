@@ -4,7 +4,7 @@
 ;; Author: Mozilla
 ;;
 ;; Keywords: languages
-;; Package-Requires: ((emacs "26.1") (dash "2.13.0") (f "0.18.2") (let-alist "1.0.4") (markdown-mode "2.3") (project "0.3.0") (s "1.10.0") (seq "2.3") (spinner "1.7.3") (xterm-color "1.6"))
+;; Package-Requires: ((emacs "26.1") (rust-mode "0.5.0") (dash "2.13.0") (f "0.18.2") (let-alist "1.0.4") (markdown-mode "2.3") (project "0.3.0") (s "1.10.0") (seq "2.3") (spinner "1.7.3") (xterm-color "1.6"))
 
 ;; This file is distributed under the terms of both the MIT license and the
 ;; Apache License (version 2.0).
@@ -36,6 +36,9 @@
 (require 'subr-x)
 
 (require 'dash)
+
+(setq rust-load-optional-libraries nil)
+(require 'rust-mode)
 
 (eval-when-compile (require 'rx))
 
@@ -178,31 +181,6 @@ Create a hierarchical index of the item definitions in a Rust file.
 Imenu will show all the enums, structs, etc. in their own subheading.
 Use idomenu (imenu with `ido-mode') for best mileage.")
 
-(defvar rustic-mode-syntax-table
-  (let ((table (make-syntax-table)))
-
-    ;; Operators
-    (dolist (i '(?+ ?- ?* ?/ ?% ?& ?| ?^ ?! ?< ?> ?~ ?@))
-      (modify-syntax-entry i "." table))
-
-    ;; Strings
-    (modify-syntax-entry ?\" "\"" table)
-    (modify-syntax-entry ?\\ "\\" table)
-
-    ;; Angle brackets.  We suppress this with syntactic propertization
-    ;; when needed
-    (modify-syntax-entry ?< "(>" table)
-    (modify-syntax-entry ?> ")<" table)
-
-    ;; Comments
-    (modify-syntax-entry ?/  ". 124b" table)
-    (modify-syntax-entry ?*  ". 23n"  table)
-    (modify-syntax-entry ?\n "> b"    table)
-    (modify-syntax-entry ?\^m "> b"   table)
-
-    table)
-  "Syntax definitions and helpers.")
-
 ;;; Mode
 
 (defvar rustic-mode-map
@@ -227,58 +205,14 @@ Use idomenu (imenu with `ido-mode') for best mileage.")
   "Keymap for Rust major mode.")
 
 ;;;###autoload
-(define-derived-mode rustic-mode prog-mode "Rustic"
+(define-derived-mode rustic-mode rust-mode "Rustic"
   "Major mode for Rust code.
 
 \\{rustic-mode-map}"
   :group 'rustic
-  :syntax-table rustic-mode-syntax-table
 
-  ;; Syntax
-  (setq-local syntax-propertize-function #'rustic-syntax-propertize)
-
-  ;; Indentation
-  (setq-local indent-line-function 'rustic-indent-line)
-
-  ;; Fonts
-  (setq-local font-lock-defaults
-              '(rustic-font-lock-keywords
-                nil nil nil nil
-                (font-lock-syntactic-face-function
-                 . rustic-syntactic-face-function)))
-
-  ;; Misc
-  (setq-local comment-start "// ")
-  (setq-local comment-end   "")
-  (setq-local open-paren-in-column-0-is-defun-start nil)
-
-  ;; Auto indent on }
-  (setq-local electric-indent-chars
-              (cons ?} (and (boundp 'electric-indent-chars)
-                            electric-indent-chars)))
-
-  ;; Allow paragraph fills for comments
-  (setq-local comment-start-skip "\\(?://[/!]*\\|/\\*[*!]?\\)[[:space:]]*")
-  (setq-local paragraph-start
-              (concat "[[:space:]]*\\(?:"
-                      comment-start-skip
-                      "\\|\\*/?[[:space:]]*\\|\\)$"))
-  (setq-local paragraph-separate paragraph-start)
-  (setq-local normal-auto-fill-function 'rustic-do-auto-fill)
-  (setq-local fill-paragraph-function 'rustic-fill-paragraph)
-  (setq-local fill-forward-paragraph-function 'rustic-fill-forward-paragraph)
-  (setq-local adaptive-fill-function 'rustic-find-fill-prefix)
-  (setq-local adaptive-fill-first-line-regexp "")
-  (setq-local comment-multi-line t)
-  (setq-local comment-line-break-function 'rustic-comment-indent-new-line)
-  (setq-local imenu-generic-expression rustic-imenu-generic-expression)
-  (setq-local imenu-syntax-alist '((?! . "w"))) ; For macro_rules!
-  (setq-local beginning-of-defun-function 'rustic-beginning-of-defun)
-  (setq-local end-of-defun-function 'rustic-end-of-defun)
-  (setq-local parse-sexp-lookup-properties t)
-  (setq-local electric-pair-inhibit-predicate
-              'rustic-electric-pair-inhibit-predicate-wrap)
-  (setq-local electric-pair-skip-self 'rustic-electric-pair-skip-self-wrap)
+  (remove-hook 'before-save-hook 'rust-before-save-hook t)
+  (remove-hook 'after-save-hook 'rust-after-save-hook t)
 
   (when (fboundp 'rustic-before-save-hook)
     (add-hook 'before-save-hook 'rustic-before-save-hook nil t)
