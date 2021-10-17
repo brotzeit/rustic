@@ -68,13 +68,26 @@ This is the directory containing the file \"Cargo.lock\".  When
 called outside a Rust project, then return `default-directory',
 or if NODEFAULT is non-nil, then fall back to returning nil."
   (or rustic--buffer-workspace
-      (let ((dir (locate-dominating-file default-directory "Cargo.toml")))
+      (let ((dir (locate-dominating-file default-directory "Cargo.lock")))
         (when dir
           (setq dir (expand-file-name dir)))
         (setq rustic--buffer-workspace dir)
         (or dir
             (and (not nodefault)
                  default-directory)))))
+
+(defcustom rustic-compile-directory-method 'rust-buffer-project
+  "Choose function that returns the directory used when calling
+ cargo commands.
+
+If you want to use the project root you can use `rustic-buffer-workspace'.
+Note that there may exist functionality that has higher priority than
+this variable.
+
+rustfmt doesn't apply this option. Look at `rustic-cargo-fmt' if you
+always want to run rustfmt from the project root."
+  :type 'function
+  :group 'rustic-compilation)
 
 ;;; Mode
 
