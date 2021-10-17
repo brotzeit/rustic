@@ -143,6 +143,12 @@ Supported compile.el variables:
 - compilation-arguments
 - compilation-scroll-output
 
+### default directory
+
+`rustic-compile-directory-method` allows you to set the directory that
+is used for compilation commands. The default is the current crate.
+(FTR #174 #179 #236)
+
 ### Faces
 
 The colors that are displayed in compilation buffers come from cargo

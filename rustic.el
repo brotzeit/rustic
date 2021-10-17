@@ -62,30 +62,29 @@
 (defvar-local rustic--buffer-workspace nil
   "Use function `rustic-buffer-workspace' instead.")
 
+;; TODO: update rust-mode rust-buffer-project function to accept
+;;       args for cargo locate-project
 (defun rustic-buffer-workspace (&optional nodefault)
-  "Return the Rust workspace for the current buffer.
-This is the directory containing the file \"Cargo.lock\".  When
-called outside a Rust project, then return `default-directory',
-or if NODEFAULT is non-nil, then fall back to returning nil."
-  (or rustic--buffer-workspace
-      (let ((dir (locate-dominating-file default-directory "Cargo.lock")))
-        (when dir
-          (setq dir (expand-file-name dir)))
+  "Get project root if possible."
+  (with-temp-buffer
+    (let ((ret (call-process rustic-cargo-bin nil t nil "locate-project" "--workspace")))
+      (when (/= ret 0)
+        (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
+      (goto-char 0)
+      (let* ((output (json-read))
+             (dir (cdr (assoc-string "root" output))))
         (setq rustic--buffer-workspace dir)
         (or dir
             (and (not nodefault)
-                 default-directory)))))
+                 default-directory))))))
 
 (defcustom rustic-compile-directory-method 'rust-buffer-project
   "Choose function that returns the directory used when calling
  cargo commands.
 
-If you want to use the project root you can use `rustic-buffer-workspace'.
+If you want to use the workspace you can use `rustic-buffer-workspace'.
 Note that there may exist functionality that has higher priority than
-this variable.
-
-rustfmt doesn't apply this option. Look at `rustic-cargo-fmt' if you
-always want to run rustfmt from the project root."
+this variable."
   :type 'function
   :group 'rustic-compilation)
 
