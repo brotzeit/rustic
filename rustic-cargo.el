@@ -228,7 +228,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   "Use 'cargo outdated' to list outdated packages in `tabulated-list-mode'.
 Execute process in PATH."
   (interactive)
-  (let* ((dir (or path (rustic-buffer-workspace)))
+  (let* ((dir (or path (rustic-buffer-crate)))
          (buf (get-buffer-create rustic-cargo-oudated-buffer-name))
          (default-directory dir)
          (inhibit-read-only t))

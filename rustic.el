@@ -21,10 +21,10 @@
 ;; - async org babel
 ;; - custom compilation process
 ;; - rustfmt errors in a rust compilation mode
-;; - automatic RLS configuration with eglot or lsp-mode
+;; - automatic rust-analyzer configuration with eglot or lsp-mode
 ;; - cask for testing
 ;; - requires emacs 26
-;; - etc.
+;; - and more
 
 ;;; Code:
 
@@ -62,23 +62,31 @@
 (defvar-local rustic--buffer-workspace nil
   "Use function `rustic-buffer-workspace' instead.")
 
-;; TODO: update rust-mode rust-buffer-project function to accept
-;;       args for cargo locate-project
 (defun rustic-buffer-workspace (&optional nodefault)
-  "Get project root if possible."
-  (with-temp-buffer
-    (let ((ret (call-process rustic-cargo-bin nil t nil "locate-project" "--workspace")))
-      (when (/= ret 0)
-        (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
-      (goto-char 0)
-      (let* ((output (json-read))
-             (dir (cdr (assoc-string "root" output))))
-        (setq rustic--buffer-workspace dir)
-        (or dir
-            (and (not nodefault)
-                 default-directory))))))
+  "Get workspace for the current buffer."
+  (if rustic--buffer-workspace
+      rustic--buffer-workspace
+    (with-temp-buffer
+      (let ((ret (call-process rustic-cargo-bin nil t nil "locate-project" "--workspace")))
+        (when (and (/= ret 0) (not nodefault))
+          (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
+        (goto-char 0)
+        (let* ((output (json-read))
+               (dir (cdr (assoc-string "root" output))))
+          (setq rustic--buffer-workspace dir))))))
 
-(defcustom rustic-compile-directory-method 'rust-buffer-project
+(defun rustic-buffer-crate (&optional nodefault)
+  "Return the crate for the current buffer.
+When called outside a Rust project, then return `default-directory',
+or if NODEFAULT is non-nil, then fall back to returning nil."
+  (let ((dir (locate-dominating-file default-directory "Cargo.toml")))
+    (when dir
+      (setq dir (expand-file-name dir)))
+    (or dir
+        (and (not nodefault)
+             default-directory))))
+
+(defcustom rustic-compile-directory-method 'rustic-buffer-crate
   "Choose function that returns the directory used when calling
  cargo commands.
 
@@ -86,7 +94,7 @@ If you want to use the workspace you can use `rustic-buffer-workspace'.
 Note that there may exist functionality that has higher priority than
 this variable."
   :type 'function
-  :group 'rustic-compilation)
+  :group 'rustic)
 
 ;;; Mode
 

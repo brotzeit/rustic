@@ -87,7 +87,7 @@ the closest matching target, or nil if no targets could be found.
 
 See http://doc.crates.io/manifest.html#the-project-layout for a
 description of the conventional Cargo project layout."
-  (-when-let* ((workspace (rustic-buffer-workspace t))
+  (-when-let* ((workspace (rustic-buffer-crate t))
                (manifest (file-local-name (concat workspace "Cargo.toml")))
                (packages (rustic-flycheck-get-cargo-targets manifest))
                (targets (-flatten-n 1 packages)))

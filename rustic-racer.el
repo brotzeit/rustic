@@ -158,7 +158,7 @@ error."
     (unless (file-exists-p rust-src-path)
       (user-error "No such directory: %s. Please set `rustic-racer-rust-src-path' or `RUST_SRC_PATH'"
                   rust-src-path))
-    (let ((default-directory (funcall 'rustic-compile-directory-method))
+    (let ((default-directory (funcall rustic-compile-directory-method))
           (process-environment (append (list
                                         (format "RUST_SRC_PATH=%s" (expand-file-name rust-src-path))
                                         (format "CARGO_HOME=%s" (expand-file-name cargo-home)))
