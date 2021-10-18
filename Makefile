@@ -61,6 +61,7 @@ DEPS += s
 DEPS += spinner
 DEPS += xterm-color
 DEPS += yasnippet
+DEPS += rust-mode
 
 LOAD_PATH  ?= $(addprefix -L ../,$(DEPS))
 LOAD_PATH  += -L .
