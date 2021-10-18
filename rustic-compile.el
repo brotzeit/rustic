@@ -53,6 +53,7 @@
                  function)
   :group 'rustic)
 
+
 ;;; Faces
 
 (define-obsolete-face-alias 'rustic-message-face
@@ -257,7 +258,7 @@ ARGS is a plist that affects how the process is run.
               (or (plist-get args :buffer) rustic-compilation-buffer-name)))
         (process (or (plist-get args :process) rustic-compilation-process-name))
         (mode (or (plist-get args :mode) 'rustic-compilation-mode))
-        (directory (or (plist-get args :directory) (rustic-buffer-workspace)))
+        (directory (or (plist-get args :directory) (funcall rustic-compile-directory-method)))
         (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
     (rustic-compilation-setup-buffer buf directory mode)
     (setq next-error-last-buffer buf)
@@ -489,7 +490,7 @@ In either store the used command in `compilation-arguments'."
                                   (or compilation-arguments
                                       rustic-compile-command))
           rustic-compile-command))
-  (setq compilation-directory (rustic-buffer-workspace))
+  (setq compilation-directory (funcall rustic-compile-directory-method))
   (rustic-compilation-process-live)
   (rustic-compilation-start (split-string compilation-arguments)
                             (list :directory compilation-directory)))

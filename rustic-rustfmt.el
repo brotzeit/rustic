@@ -75,7 +75,7 @@ When COMMAND is a list, it's `car' is the program file name
 and it's `cdr' is a list of arguments."
   (let* ((err-buf (get-buffer-create rustic-format-buffer-name))
          (inhibit-read-only t)
-         (dir (rustic-buffer-workspace))
+         (dir (funcall rustic-compile-directory-method))
          (buffer (plist-get args :buffer))
          (string (plist-get args :stdin))
          (files  (plist-get args :files))
