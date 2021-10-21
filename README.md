@@ -531,6 +531,10 @@ Customization:
   of babel process
 - `rustic-babel-auto-wrap-main` wrap body into main function
 
+### lsp-mode
+
+You can use lsp in babel blocks with `lsp-org`.
+
 ### Commands
 
 - `rustic-babel-format-block` format block at point
@@ -540,10 +544,15 @@ Customization:
 
 #### :crates
 
-```
-#+BEGIN_SRC rust :crates '((regex . "*"))
-  extern crate regex;
+This block shows how to use crates with the latest version for both
+serde and regex.
 
+The "*" will be added automatically for serde.
+
+```
+#+BEGIN_SRC rust :crates '(serde (regex . *))
+  extern crate regex;
+  extern crate serde;
   use regex::Regex;
 
   fn main() {
