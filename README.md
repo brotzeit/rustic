@@ -8,6 +8,7 @@
 
 - [Rustic](#rustic)
     - [Intro](#intro)
+    - [Known issues](#known-issues)
     - [Installation](#installation)
         - [straight](#straight)
     - [Compilation](#compilation)
@@ -72,6 +73,11 @@ functionality.
 
 The shared functions and options exist as aliases in the rust-mode and 
 rustic namespace for backwards compatability reasons(rustic has been a fork).
+
+## Known issues
+
+- `rust-syntax-propertize` and `adaptive-wrap-prefix-mode` can lead to
+  severe lag when editing larger files (#107)
 
 ## Installation
 
