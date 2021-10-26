@@ -5,6 +5,7 @@
 
 ;;; Code:
 
+(require 'comint)
 (require 'tabulated-list)
 
 (require 'rustic-compile)
@@ -463,7 +464,14 @@ If running with prefix command `C-u', read whole command from minibuffer."
 the keymap of `comint-mode' so user input is possible."
   (buffer-disable-undo)
   (setq buffer-read-only nil)
-  (use-local-map comint-mode-map))
+  (use-local-map comint-mode-map)
+
+  (define-key (current-local-map) (kbd "RET")
+    '(lambda ()
+       (interactive)
+       (when (eq major-mode 'rustic-cargo-run-mode)
+         (process-send-string
+          (get-buffer-process (current-buffer)) "\n")))))
 
 ;;;###autoload
 (defun rustic-cargo-clean ()
