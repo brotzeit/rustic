@@ -136,7 +136,7 @@ with `lsp-rust-switch-server'."
   :group 'rustic
   :syntax-table rustic-mode-syntax-table
   ;; Fonts
-  (setq-local font-lock-defaults '(rustic-font-lock-keywords
+  (setq-local font-lock-defaults '(rust-font-lock-keywords
                                    nil nil nil nil
                                    (font-lock-syntactic-face-function
                                     . rustic-syntactic-face-function))))
