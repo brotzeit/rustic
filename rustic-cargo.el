@@ -481,14 +481,7 @@ To send input to the compiled program, use
 `rustic-cargo-run-use-comint' (which see)."
   (buffer-disable-undo)
   (setq buffer-read-only nil)
-  (use-local-map comint-mode-map)
-
-  (define-key (current-local-map) (kbd "RET")
-    '(lambda ()
-       (interactive)
-       (when (eq major-mode 'rustic-cargo-run-mode)
-         (process-send-string
-          (get-buffer-process (current-buffer)) "\n")))))
+  (use-local-map comint-mode-map))
 
 (defun rustic-cargo-comint-run-mode ()
   "Mode for 'cargo run' that combines `rustic-compilation-mode' with `comint-mode',
