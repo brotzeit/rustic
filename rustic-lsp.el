@@ -139,7 +139,7 @@ with `lsp-rust-switch-server'."
   (setq-local font-lock-defaults '(rust-font-lock-keywords
                                    nil nil nil nil
                                    (font-lock-syntactic-face-function
-                                    . rustic-syntactic-face-function))))
+                                    . rust-mode-syntactic-face-function))))
 
 ;;;###autoload
 (defun rustic-analyzer-macro-expand (result)
