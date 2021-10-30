@@ -482,8 +482,10 @@ If running with prefix command `C-u', read whole command from minibuffer."
   "Mode for 'cargo run' that derives from `rustic-compilation-mode'.
 
 To send input to the compiled program, use
-`rustic-compile-send-input'.  Alternatively, consider enabling
-`rustic-cargo-run-use-comint' (which see)."
+`rustic-compile-send-input'.  If you set
+`rustic-cargo-run-use-comint' to t, you can also just type in a
+string and hit RET to send it to the program.  The latter
+approach requires installing polymode."
   (buffer-disable-undo)
   (setq buffer-read-only nil)
   (use-local-map comint-mode-map))
