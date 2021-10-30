@@ -469,7 +469,13 @@ If running with prefix command `C-u', read whole command from minibuffer."
 (defun rustic-cargo-run-mode ()
   (interactive)
   (if rustic-cargo-run-use-comint
-      (rustic-cargo-comint-run-mode)
+      ;; rustic-cargo-comint-run-mode toggles the mode; we want to
+      ;; always enable.
+      (unless (and (boundp 'polymode-mode)
+                   polymode-mode
+                   (memq major-mode '(rustic-cargo-plain-run-mode
+                                      comint-mode)))
+        (rustic-cargo-comint-run-mode))
     (rustic-cargo-plain-run-mode)))
 
 (define-derived-mode rustic-cargo-plain-run-mode rustic-compilation-mode "Cargo run"
