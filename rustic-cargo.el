@@ -508,15 +508,25 @@ and the latter for interacting with the compiled program."
     (define-polymode rustic-cargo-comint-run-mode
       :hostmode 'poly-rustic-cargo-compilation-hostmode
       :innermodes '(poly-rustic-cargo-comint-innermode)
-      :switch-buffer-functions '(poly-rustic-cargo-comint-switch-buffer-hook))
+      :switch-buffer-functions '(poly-rustic-cargo-comint-switch-buffer-hook)
+
+      ;; See comments in poly-rustic-cargo-comint-switch-buffer-hook below.
+      (set (make-local-variable 'pm-hide-implementation-buffers) nil)
+      )
     (put 'rustic-cargo-comint-run-mode 'function-documentation docstr)
     (rustic-cargo-comint-run-mode)))
 
 (defun poly-rustic-cargo-comint-switch-buffer-hook (old-buffer new-buffer)
   "Housekeeping for `rustic-cargo-comint-run-mode'."
+  ;; Keep inferior process attached to the visible buffer.
   (let ((proc (get-buffer-process old-buffer)))
     (when proc
-      (set-process-buffer proc new-buffer))))
+      (set-process-buffer proc new-buffer)))
+  ;; Prevent polymode from constantly renaming the
+  ;; "*rustic-compilation*" buffer.  A note in case this undocumented
+  ;; variable stops working: if that happens, you'll see
+  ;; *rustic-compilatin*[comint]<2>, <3>, etc. keep popping up.
+  (set (make-local-variable 'pm-hide-implementation-buffers) nil))
 
 ;;;###autoload
 (defun rustic-cargo-clean ()
