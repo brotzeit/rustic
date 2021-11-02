@@ -496,7 +496,7 @@ the former for highlighting and interacting with compiler errors,
 and the latter for interacting with the compiled program."
   ;; First time around, define the mode and invoke it.  Next time, the
   ;; symbol will have been overwritten so this runs only once.
-  (unless (require 'polymode)
+  (unless (require 'polymode nil 'noerr)
     (error "polymode not found; polymode must be installed for `rustic-cargo-run-use-comint' to work"))
   (let ((docstr (documentation 'rustic-cargo-comint-run-mode)))
     (define-hostmode poly-rustic-cargo-compilation-hostmode
