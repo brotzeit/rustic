@@ -129,9 +129,6 @@ this variable."
   (remove-hook 'before-save-hook 'rust-before-save-hook t)
   (remove-hook 'after-save-hook 'rust-after-save-hook t)
 
-  ;; TODO: find out which function is up-to-date
-  (setq rust-top-item-beg-re rustic-top-item-beg-re)
-
   (when (fboundp 'rustic-before-save-hook)
     (add-hook 'before-save-hook 'rustic-before-save-hook nil t)
     (add-hook 'after-save-hook 'rustic-after-save-hook nil t)))
@@ -143,14 +140,6 @@ this variable."
 (let ((mode '("\\.rs\\'" . rust-mode)))
   (when (member mode auto-mode-alist)
     (setq auto-mode-alist (remove mode auto-mode-alist))))
-
-(defvar rustic-top-item-beg-re
-  (concat "\\s-*\\(?:priv\\|pub\\)?\\s-*"
-          (regexp-opt
-           '("enum" "struct" "union" "type" "mod" "use" "fn" "static" "impl"
-             "extern" "trait" "async"))
-          "\\_>")
-  "Start of a Rust item.")
 
 ;;; _
 
