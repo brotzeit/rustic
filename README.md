@@ -12,6 +12,7 @@
     - [Installation](#installation)
         - [straight](#straight)
     - [Compilation](#compilation)
+        - [default directory](#default-directory)
         - [Faces](#faces)
         - [rustc errors](#rustc-errors)
     - [Rustfmt](#rustfmt)
@@ -25,7 +26,7 @@
                     - [Applying code actions](#applying-code-actions)
                     - [Auto import](#auto-import)
                 - [Macro expansion](#macro-expansion)
-        - [TRAMP](#lsp--tramp)
+        - [LSP + TRAMP](#lsp--tramp)
     - [Cargo](#cargo)
         - [Edit](#edit)
         - [Test](#test)
@@ -34,6 +35,12 @@
         - [Flycheck](#flycheck)
         - [lsp-mode](#lsp-mode-1)
     - [Org-babel](#org-babel)
+        - [Intro](#intro-1)
+        - [Parameters](#parameters)
+            - [:crates](#crates)
+            - [:features](#features)
+            - [:paths](#paths)
+            - [:toolchain](#toolchain)
     - [Spinner](#spinner)
     - [inline-documentation](#inline-documentation)
         - [Prequisites](#prequisites)
@@ -152,8 +159,14 @@ Supported compile.el variables:
 ### default directory
 
 `rustic-compile-directory-method` allows you to set the directory that
-is used for compilation commands. The default is the current crate.
-(FTR #174 #179 #236)
+is used for compilation commands. The default is the current crate
+which is returned by `rustic-buffer-crate`(there's also
+`rustic-buffer-workspace`).
+
+If you want to use the project root you can use `rustic-project-root`
+instead.
+
+FTR #174 #179 #236
 
 ### Faces
 
@@ -431,11 +444,25 @@ activating the checker `rustic-clippy`.
 
 ## Org-babel
 
+### Intro
+
 Blocks run asynchronously and a running babel process is indicated by
 a spinner in the mode-line. It's possible to use crates in babel
-blocks.
+blocks. Execute babel block with `org-babel-execute-src-block`.
 
-Execute babel block with `org-babel-execute-src-block`
+Supported org babel parameters:
+
+Write to file `:results file :file ~/babel-output`
+
+Customization:
+
+- `rustic-babel-format-src-block` format block after successful build
+- `rustic-babel-display-compilation-buffer` display compilation buffer
+  of babel process
+
+### Parameters
+
+#### :crates
 
 ```
 #+BEGIN_SRC rust :crates '((regex . "0.2"))
@@ -449,6 +476,8 @@ Execute babel block with `org-babel-execute-src-block`
   }
 #+END_SRC
 ```
+
+#### :features
 
 If specific crate features are required then these can be specified
 with the `:features` argument. Note that if it is just a single feature
@@ -468,6 +497,8 @@ then a string, instead of a list, will also be accepted:
 #+END_SRC
 ```
 
+#### :paths
+
 Similarly, to depend on local Rust crates, you can set the `:paths` argument:
 
 ```
@@ -479,6 +510,8 @@ Similarly, to depend on local Rust crates, you can set the `:paths` argument:
   }
 #+END_SRC
 ```
+
+#### :toolchain
 
 You can also specify the `:toolchain`. Remember to quote the value!
 
@@ -495,15 +528,6 @@ fn main() {
 : a,b,c
 ```
 
-Other supported org babel parameters:
-
-Write to file `:results file :file ~/babel-output`
-
-Customization:
-
-- `rustic-babel-format-src-block` format block after successful build
-- `rustic-babel-display-compilation-buffer` display compilation buffer
-  of babel process
 
 ## Spinner
 
