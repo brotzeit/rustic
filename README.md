@@ -30,6 +30,7 @@
     - [Cargo](#cargo)
         - [Edit](#edit)
         - [Test](#test)
+        - [Run](#run)
         - [Outdated](#outdated)
     - [Clippy](#clippy)
         - [Flycheck](#flycheck)
@@ -384,6 +385,18 @@ arguments in `rustic-test-arguments`
 `rustic-cargo-current-test` run test at point, whether it's a function or a module
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/cargo_current_test.png)
+
+### Run
+
+`rustic-cargo-run` run 'cargo run'.  Input can be sent to the program
+in one of two ways:
+
+- `rustic-compile-send-input`, which reads the input from the
+  minibuffer.
+- `rustic-cargo-run-use-comint`: when this variable is set to t, the
+  input can be typed directly into the output buffer of 'cargo run'
+  and sent off with `RET`, just like in `comint-mode`.  You need
+  [polymode](https://polymode.github.io) installed for this to work.
 
 ### Outdated
 
