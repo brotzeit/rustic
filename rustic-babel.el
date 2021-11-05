@@ -26,6 +26,11 @@
   :type 'boolean
   :group 'rustic-babel)
 
+(defcustom rustic-babel-auto-wrap-main t
+  "Whether to auto wrap body in 'fn main' to function call if none exists."
+  :type 'boolean
+  :group 'rustic-babel)
+
 (defcustom rustic-babel-format-src-block t
   "Whether to format a src block automatically after successful execution."
   :type 'boolean
@@ -259,6 +264,12 @@ directory DIR."
           (insert s)
           (insert dependencies))))))
 
+(defun rustic-babel-ensure-main-wrap (body)
+  "Wrap BODY in a 'fn main' function call if none exists."
+  (if (string-match "^[ \t]*[fn]+[ \t\n\r]*main[ \t]*(.*)" body)
+      body
+    (format "fn main() {\n%s\n}\n" body)))
+
 (defun org-babel-execute:rustic (body params)
   "Execute a block of Rust code with org-babel.
 
@@ -272,7 +283,12 @@ kill the running process."
       (let* ((default-directory org-babel-temporary-directory)
              (project (rustic-babel-project))
              (dir (setq rustic-babel-dir (expand-file-name project)))
-             (main (expand-file-name "main.rs" (concat dir "/src"))))
+             (main-p (cdr (assq :main params)))
+             (main (expand-file-name "main.rs" (concat dir "/src")))
+             (wrap-main (cond ((string= main-p "yes") t)
+                              ((string= main-p "no") nil)
+                              (t rustic-babel-auto-wrap-main))))
+
         (make-directory (file-name-directory main) t)
         (rustic-babel-cargo-toml dir params)
         (setq rustic-info (org-babel-get-src-block-info))
@@ -286,7 +302,8 @@ kill the running process."
         (let ((default-directory dir)
               (toolchain (cdr (assq :toolchain params))))
           (write-region
-           (concat "#![allow(non_snake_case)]\n" body) nil main nil 0)
+           (concat "#![allow(non_snake_case)]\n"
+                   (if wrap-main (rustic-babel-ensure-main-wrap body) body)) nil main nil 0)
           (rustic-babel-eval dir toolchain)
           (setq rustic-babel-src-location
                 (set-marker (make-marker) (point) (current-buffer)))
