@@ -42,6 +42,7 @@
             - [:features](#features)
             - [:paths](#paths)
             - [:toolchain](#toolchain)
+            - [:main](#main)
     - [Spinner](#spinner)
     - [inline-documentation](#inline-documentation)
         - [Prequisites](#prequisites)
@@ -79,7 +80,7 @@ The other files provide functionality that is similar to some of the features
 of rustic, however can be considered light-weight compared to some rustic's
 functionality.
 
-The shared functions and options exist as aliases in the rust-mode and 
+The shared functions and options exist as aliases in the rust-mode and
 rustic namespace for backwards compatability reasons(rustic has been a fork).
 
 ## Known issues
@@ -499,7 +500,7 @@ then a string, instead of a list, will also be accepted:
 ```
 #+BEGIN_SRC rust :crates '((tokio . 1.0)) :features '((tokio . ("rt-multi-thread" "time")))
   extern crate tokio;
-  
+
   fn main() {
       tokio::runtime::Runtime::new()
           .unwrap()
@@ -539,6 +540,45 @@ fn main() {
 
 #+RESULTS:
 : a,b,c
+```
+
+#### :main
+
+Auto wrap whole block body in a "fn main" function call if none exists.
+
+Since this is very handy in most code snippets, so the default value is "yes".
+"no" if you don't want this feature(for example if you don't want regex search slow things down).
+
+You can also set a default value by:
+``` elisp
+;; By setq this default to `nil`, you'll have to explict set params to ":main yes" in each block
+(setq rustic-babel-auto-wrap-main nil)
+```
+
+```
+#+begin_src rust
+let x = vec![1, 2, 3].iter().map(|&x| x + 1).collect::<Vec<_>>();
+println!("{:?}", x);
+#+end_src
+
+#+results:
+: [2, 3, 4]
+```
+
+NOTE: the regex match would unable to /understand/ `fn main()` within a raw string.
+
+```
+#+begin_src rust :exports both :main yes
+// won't work
+let r = "
+fn main() {
+  let x = "within raw";
+}
+";
+
+// but this works
+printlnt!("fn main{{}}")
+#+end_src
 ```
 
 
