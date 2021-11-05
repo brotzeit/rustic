@@ -187,3 +187,35 @@
     (with-current-buffer buf
       (rustic-test-babel-execute-block buf)
       (should (eq (rustic-test-babel-check-results buf) nil)))))
+
+(ert-deftest rustic-test-babel-ensure-main-wrap-no()
+  (let* ((string "let x = \"fn main(){}\";")
+         (params ":main no")
+         (buf (rustic-test-get-babel-block string params)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (let ((re (format "error: Could not compile `%s`.\n"
+                        (car (reverse (split-string rustic-babel-dir "/"))))))
+        (should (string= re (rustic-test-babel-check-results buf)))))))
+
+(ert-deftest rustic-test-babel-ensure-main-wrap-yes-with-main()
+  (let* ((string "
+                fn main() {
+let x = \"rustic\";
+                  }")
+         (params ":main yes")
+         (buf (rustic-test-get-babel-block string params)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (should (eq (rustic-test-babel-check-results buf) nil)))))
+
+(ert-deftest rustic-test-babel-ensure-main-wrap-no-with-main()
+  (let* ((string "
+                fn main() {
+let x = \"rustic\";
+                  }")
+         (params ":main no")
+         (buf (rustic-test-get-babel-block string params)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (should (eq (rustic-test-babel-check-results buf) nil)))))
