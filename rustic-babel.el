@@ -277,10 +277,28 @@ executed with the parameter `:include'."
     (with-current-buffer (current-buffer)
       (save-excursion
         (dolist (b blocks)
-          (org-babel-goto-named-src-block b)
-          (when-let ((c (org-element-property :value (org-element-at-point))))
+          (when-let ((c (rustic-babel-block-contents b)))
             (setq contents (concat contents c))))))
     contents))
+
+(defun rustic-babel-block-contents (block-name)
+  (with-current-buffer (current-buffer)
+   (save-excursion
+     (org-babel-goto-named-src-block block-name)
+     (org-element-property :value (org-element-at-point)))))
+
+(defun rustic-babel-insert-mod (mods)
+  (let ((c ""))
+    (dolist (m mods)
+      (setq c (concat c (format "mod %s;\n" m))))
+    c))
+
+(defun rustic-babel-generate-modules (root blocks)
+  (dolist (b blocks)
+    (let* ((contents (rustic-babel-block-contents b))
+           (src-dir (concat root "/src/"))
+           (module (expand-file-name (format "%s.rs" b) src-dir)))
+      (write-region contents nil module nil 0))))
 
 (defun org-babel-execute:rustic (body params)
   "Execute a block of Rust code with org-babel.
@@ -300,9 +318,12 @@ kill the running process."
              (wrap-main (cond ((string= main-p "yes") t)
                               ((string= main-p "no") nil)
                               (t rustic-babel-auto-wrap-main)))
-             (include-blocks (cdr (assq :include params))))
+             (include-blocks (cdr (assq :include params)))
+             (use-blocks (cdr (assq :use params))))
         (make-directory (file-name-directory main) t)
         (rustic-babel-cargo-toml dir params)
+        (when use-blocks
+         (rustic-babel-generate-modules dir use-blocks))
         (setq rustic-info (org-babel-get-src-block-info))
         (setq rustic-babel-params params)
 
@@ -315,6 +336,7 @@ kill the running process."
               (toolchain (cdr (assq :toolchain params))))
           (write-region
            (concat "#![allow(non_snake_case)]\n"
+                   (if use-blocks (rustic-babel-insert-mod use-blocks) "")
                    (if include-blocks (rustic-babel-include-blocks include-blocks) "")
                    (if wrap-main (rustic-babel-ensure-main-wrap body) body))
            nil main nil 0)
