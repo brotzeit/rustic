@@ -606,6 +606,31 @@ pub fn b2_func() -> String {
 : "b2 function called"
 ```
 
+#### :use
+
+When using this keyword blocks are treated as modules. The files are
+generated automatically.
+
+```
+#+name: mymodule
+#+begin_src rust
+pub fn myfunc() -> String {
+    String::from("mymodule function called")
+}
+#+end_src
+
+#+begin_src rust :use '("mymodule")
+use mymodule::myfunc;
+
+fn main() {
+    println!("{:?}", myfunc());
+}
+#+end_src
+
+#+RESULTS:
+: "mymodule function called"
+```
+
 ## Spinner
 
 In case you want to use a different spinner type you can modify `rustic-spinner-type` or turn it off completely with `rustic-display-spinner`.([Available spinner types](https://github.com/Malabarba/spinner.el/blob/master/spinner.el#L104)).
