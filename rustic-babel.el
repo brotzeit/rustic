@@ -270,6 +270,18 @@ directory DIR."
       body
     (format "fn main() {\n%s\n}\n" body)))
 
+(defun rustic-babel-include-blocks (blocks)
+  "Insert contents of BLOCKS to the 'main block' that is being
+executed with the parameter `:include'."
+  (let ((contents ""))
+    (with-current-buffer (current-buffer)
+      (save-excursion
+        (dolist (b blocks)
+          (org-babel-goto-named-src-block b)
+          (when-let ((c (org-element-property :value (org-element-at-point))))
+            (setq contents (concat contents c))))))
+    contents))
+
 (defun org-babel-execute:rustic (body params)
   "Execute a block of Rust code with org-babel.
 
@@ -287,8 +299,8 @@ kill the running process."
              (main (expand-file-name "main.rs" (concat dir "/src")))
              (wrap-main (cond ((string= main-p "yes") t)
                               ((string= main-p "no") nil)
-                              (t rustic-babel-auto-wrap-main))))
-
+                              (t rustic-babel-auto-wrap-main)))
+             (include-blocks (cdr (assq :include params))))
         (make-directory (file-name-directory main) t)
         (rustic-babel-cargo-toml dir params)
         (setq rustic-info (org-babel-get-src-block-info))
@@ -303,7 +315,9 @@ kill the running process."
               (toolchain (cdr (assq :toolchain params))))
           (write-region
            (concat "#![allow(non_snake_case)]\n"
-                   (if wrap-main (rustic-babel-ensure-main-wrap body) body)) nil main nil 0)
+                   (if include-blocks (rustic-babel-include-blocks include-blocks) "")
+                   (if wrap-main (rustic-babel-ensure-main-wrap body) body))
+           nil main nil 0)
           (rustic-babel-eval dir toolchain)
           (setq rustic-babel-src-location
                 (set-marker (make-marker) (point) (current-buffer)))

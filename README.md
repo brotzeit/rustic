@@ -43,6 +43,7 @@
             - [:paths](#paths)
             - [:toolchain](#toolchain)
             - [:main](#main)
+            - [:include](#include)
     - [Spinner](#spinner)
     - [inline-documentation](#inline-documentation)
         - [Prequisites](#prequisites)
@@ -369,10 +370,11 @@ You'll have to have `rust-analyzer` already installed on the target machine.
 [cargo-edit](https://github.com/killercup/cargo-edit) provides commands to edit
 your dependencies quickly.
 
-The rustic commands can be called with prefix `C-u` if you want to modify the parameters of a command.
+The rustic commands can be called with prefix `C-u` if you want to
+modify the parameters of a command.
 
-- `rustic-cargo-add`     Add crate to Cargo.toml using 'cargo add'
-- `rustic-cargo-rm`      Remove crate from Cargo.toml using 'cargo rm'
+- `rustic-cargo-add`      Add crate to Cargo.toml using 'cargo add'
+- `rustic-cargo-rm`       Remove crate from Cargo.toml using 'cargo rm'
 - `rustic-cargo-upgrade`  Upgrade dependencies as specified in the local manifest file using 'cargo upgrade'
 
 ### Test
@@ -513,7 +515,8 @@ then a string, instead of a list, will also be accepted:
 
 #### :paths
 
-Similarly, to depend on local Rust crates, you can set the `:paths` argument:
+Similarly, to depend on local Rust crates, you can set the `:paths`
+argument:
 
 ```
 #+BEGIN_SRC rust :crates '((foo . 1.0)) :paths '((foo . "/home/you/code/foo"))
@@ -544,10 +547,12 @@ fn main() {
 
 #### :main
 
-Auto wrap whole block body in a `fn main` function call if none exists.
+Auto wrap whole block body in a `fn main` function call if none
+exists.
 
-Since this is very handy in most code snippets, so the default value is `yes`.
-`no` if you don't want this feature(for example, you don't want regex search slow things down).
+Since this is very handy in most code snippets, so the default value
+is `yes`.  `no` if you don't want this feature(for example, you don't
+want regex search slow things down).
 
 You can also set a default value by:
 ``` elisp
@@ -563,6 +568,42 @@ println!("{:?}", x);
 
 #+results:
 : [2, 3, 4]
+```
+
+#### :include
+
+This parameter allows you to run code that is located in different
+babel blocks by using named blocks with the `:include` keyword. This
+feature only concats the blocks so you don't need to import the code
+you want to use.
+
+You can still use `:main` to wrap the code of the main block.
+
+```
+#+name: b1
+#+begin_src rust
+pub fn b1_func() -> String {
+    String::from("b1 function called")
+}
+#+end_src
+
+#+name: b2
+#+begin_src rust
+pub fn b2_func() -> String {
+    String::from("b2 function called")
+}
+#+end_src
+
+#+begin_src rust :include '("b1" "b2")
+  fn main() {
+      println!("{:?}", b1_func());
+      println!("{:?}", b2_func());
+  }
+#+end_src
+
+#+RESULTS:
+: "b1 function called"
+: "b2 function called"
 ```
 
 ## Spinner
