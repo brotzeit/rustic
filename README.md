@@ -207,9 +207,9 @@ You can format your code with:
 - `rustic-cargo-fmt`     run cargo-fmt on workspace
 - `rustic-format-region` format active region
 
-Rustic uses the function `rustic-save-some-buffers` for saving buffers before
-compilation. To save buffers automatically, you can change the value of
-`buffer-save-without-query`. In case you prefer using lsp for
+Rustic uses the function `rustic-save-some-buffers` for saving buffers
+before compilation. To save buffers automatically, you can change the
+value of `buffer-save-without-query`. In case you prefer using lsp for
 formatting, turn off `rustic-format-on-save` and set
 `rustic-lsp-format`to `t`.
 
@@ -233,7 +233,12 @@ in case you are using hideshow you might want to set `rustic-format-on-save-meth
 
 ### edition 2018
 
-If you are struggling with errors relating to the rust edition in `cargo.toml`, this may in fact be a problem with `rustfmt` and its default settings. To solve this, *even though the error message mentions `cargo.toml`*, you you have to put `edition = "2018"` in a `rustfmt.toml`. [See here for more info](https://github.com/rust-lang/rustfmt/issues/4454).
+If you are struggling with errors relating to the rust edition in
+`cargo.toml`, this may in fact be a problem with `rustfmt` and its
+default settings. To solve this, *even though the error message
+mentions `cargo.toml`*, you you have to put `edition = "2018"` in a
+`rustfmt.toml`. [See here for more
+info](https://github.com/rust-lang/rustfmt/issues/4454).
 
 ## LSP
 
@@ -633,42 +638,68 @@ fn main() {
 
 ## Spinner
 
-In case you want to use a different spinner type you can modify `rustic-spinner-type` or turn it off completely with `rustic-display-spinner`.([Available spinner types](https://github.com/Malabarba/spinner.el/blob/master/spinner.el#L104)).
+In case you want to use a different spinner type you can modify
+`rustic-spinner-type` or turn it off completely with
+`rustic-display-spinner`.([Available spinner
+types](https://github.com/Malabarba/spinner.el/blob/master/spinner.el#L104)).
 
 ## inline-documentation
 
-With some setup, it is possible to read rust documentation inside Emacs! This currently requires LSP-mode.
-![Rustic-doc example](img/rustic-doc.png)
+With some setup, it is possible to read rust documentation inside
+Emacs! This currently requires LSP-mode.  ![Rustic-doc
+example](img/rustic-doc.png)
 
 ### Prequisites
 
 * Install Pandoc https://pandoc.org/installing.html
-* Install cargo https://doc.rust-lang.org/cargo/getting-started/installation.html
-* Install helm-ag https://github.com/emacsorphanage/helm-ag (Optional, but highly recommended)
-* If you do not have them, you will be prompted to install `fd-find`, `ripgrep` and `cargo-makedocs` when you run `rustic-doc-setup`.
+* Install cargo
+  https://doc.rust-lang.org/cargo/getting-started/installation.html
+* Install helm-ag https://github.com/emacsorphanage/helm-ag (Optional,
+  but highly recommended)
+* If you do not have them, you will be prompted to install `fd-find`,
+  `ripgrep` and `cargo-makedocs` when you run `rustic-doc-setup`.
     * `ripgrep` is optional but highly recommended.
-    * If helm-ag and ripgrep is installed, those will be used by default.
-    * If only ripgrep is installed, it will be used with the emacs `grep` command.
-    * If neither is installed, the emacs `grep` command will use `grep`, like in the good old days.
-    * You can change this by providing your own search function by changing `rustic-doc-search-function`.
+    * If helm-ag and ripgrep is installed, those will be used by
+      default.
+    * If only ripgrep is installed, it will be used with the emacs
+      `grep` command.
+    * If neither is installed, the emacs `grep` command will use
+      `grep`, like in the good old days.
+    * You can change this by providing your own search function by
+      changing `rustic-doc-search-function`.
 
 ### Usage
 
 * Enable `rustic-doc-mode`.
-* Run `M-x rustic-doc-setup` to download files that rustic-doc needs to convert rust documentation and also convert `std`.
-* You can now convert package-specific documentation with `M-x rustic-doc-convert-current-package`
-* Search the org files with `rustic-doc-search` (bound to `C-#` by default) if you are in `Rust mode`, `Rustic mode` or `Org mode`. If you hover over a symbol when you invoke the command, `rustic-doc-search` will insert a default value.
-* Add `universal argument` to only search for level 1 headers like struct or enum names.
+* Run `M-x rustic-doc-setup` to download files that rustic-doc needs
+  to convert rust documentation and also convert `std`.
+* You can now convert package-specific documentation with `M-x
+  rustic-doc-convert-current-package`
+* Search the org files with `rustic-doc-search` (bound to `C-#` by
+  default) if you are in `Rust mode`, `Rustic mode` or `Org mode`. If
+  you hover over a symbol when you invoke the command,
+  `rustic-doc-search` will insert a default value.
+* Add `universal argument` to only search for level 1 headers like
+  struct or enum names.
 
 ### Notes
-* We are waiting for an update to Pandoc that will make the generated documents prettier, it should be available soon https://github.com/jgm/pandoc/issues/6554
-* You should re-run `rustic-doc-setup` once in a while, to update the pandoc filter.
-* If rustic-doc does not find the documentation for something, the first thing to do is check the project's `target/doc` folder for the corresponding `.html-file`. If there is no file there, there is nothing for rustic-doc to convert. If there is a file there, please create an issue!
+
+* We are waiting for an update to Pandoc that will make the generated
+  documents prettier, it should be available soon
+  https://github.com/jgm/pandoc/issues/6554
+* You should re-run `rustic-doc-setup` once in a while, to update the
+  pandoc filter.
+* If rustic-doc does not find the documentation for something, the
+  first thing to do is check the project's `target/doc` folder for the
+  corresponding `.html-file`. If there is no file there, there is
+  nothing for rustic-doc to convert. If there is a file there, please
+  create an issue!
 
 ## Popup
 
-You can execute commands with `rustic-popup`. The list of commands can be customized with `rustic-popup-commands`.
-The command `rustic-popup-default-action` (`RET` or `TAB`) allows you to change:
+You can execute commands with `rustic-popup`. The list of commands can
+be customized with `rustic-popup-commands`.  The command
+`rustic-popup-default-action` (`RET` or `TAB`) allows you to change:
 
 - `RUST_BACKTRACE` environment variable
 - `compilation-arguments` for `recompile`
