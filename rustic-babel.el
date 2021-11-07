@@ -345,5 +345,19 @@ kill the running process."
                 (set-marker (make-marker) (point) (current-buffer)))
           project)))))
 
+(defun rustic-babel-visit-project ()
+  "Open main.rs of babel block at point. The block has to be executed
+at least one time before this command can be used."
+  (interactive)
+  (let* ((beg (org-babel-where-is-src-block-head))
+         (end (save-excursion (goto-char beg)
+                              (line-end-position)))
+         (line (buffer-substring beg end))
+         (project (symbol-name (get-text-property 0 'project line)))
+         (path (concat org-babel-temporary-directory "/" project "/src/main.rs")))
+    (if (file-exists-p path)
+        (find-file path)
+      (message "Run block first to visit generated project."))))
+
 (provide 'rustic-babel)
 ;;; rustic-babel.el ends here

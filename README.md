@@ -37,6 +37,7 @@
         - [lsp-mode](#lsp-mode-1)
     - [Org-babel](#org-babel)
         - [Intro](#intro-1)
+        - [Commands](#commands)
         - [Parameters](#parameters)
             - [:crates](#crates)
             - [:features](#features)
@@ -44,6 +45,7 @@
             - [:toolchain](#toolchain)
             - [:main](#main)
             - [:include](#include)
+            - [:use](#use)
     - [Spinner](#spinner)
     - [inline-documentation](#inline-documentation)
         - [Prequisites](#prequisites)
@@ -480,6 +482,10 @@ Customization:
 - `rustic-babel-format-src-block` format block after successful build
 - `rustic-babel-display-compilation-buffer` display compilation buffer
   of babel process
+  
+### Commands
+
+- `rustic-babel-visit-project` find generated project of block at point
 
 ### Parameters
 
