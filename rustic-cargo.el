@@ -461,10 +461,23 @@ If running with prefix command `C-u', read whole command from minibuffer."
                     (concat rustic-cargo-bin " run "
                             (read-from-minibuffer
                              "Run arguments: "
-                             (car compile-history)
-                             nil nil
-                             'compile-history)))))
+                             (if (rustic-cargo-run-get-relative-example-name)
+                                 (concat "--example " (rustic-cargo-run-get-relative-example-name))
+                               (car compile-history))
+                             nil nil 'compile-history)))))
     (rustic-run-cargo-command command (list :mode 'rustic-cargo-run-mode))))
+
+(defun rustic-cargo-run-get-relative-example-name ()
+  "Run 'cargo run --example' if current buffer within a 'exmaples' directory."
+  (if rustic--buffer-workspace
+      (let ((relative-filenames
+             (split-string (file-relative-name buffer-file-name rustic--buffer-workspace) "/")))
+        (if (string= "examples" (car relative-filenames))
+            (let ((size (length relative-filenames)))
+              (cond ((eq size 2) (file-name-sans-extension(nth 1 relative-filenames))) ;; examples/single-example1.rs
+                    ((> size 2) (car (nthcdr (- size 2) relative-filenames))) ;; examples/example2/main.rs
+                    (t nil))) nil))
+    nil))
 
 (defun rustic-cargo-run-mode ()
   (interactive)
