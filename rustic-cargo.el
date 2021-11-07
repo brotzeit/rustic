@@ -49,6 +49,11 @@ but you need to install polymode separately."
   "Face used for crates marked for upgrade."
   :group 'rustic)
 
+(defcustom rustic-cargo-clippy-fix-args "--allow-dirty"
+  "Default arguments when running 'clippy --fix'."
+  :type 'string
+  :group 'rustic-cargo)
+
 ;;; Clippy
 
 (defvar rustic-clippy-process-name "rustic-cargo-clippy-process"
@@ -95,6 +100,14 @@ When calling this function from `rustic-popup-mode', always use the value of
   "Run 'cargo clippy' with `rustic-clippy-arguments'."
   (interactive)
   (rustic-cargo-clippy-run rustic-clippy-arguments))
+
+(defun rustic-cargo-clippy-fix ()
+  "Run 'clippy fix'."
+  (interactive)
+  (rustic-cargo-clippy-run
+   (concat "--fix "
+           (format "%s" rustic-cargo-clippy-fix-args))))
+
 
 ;;; Test
 

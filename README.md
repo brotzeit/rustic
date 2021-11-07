@@ -429,8 +429,11 @@ Currently cargo does not display the correct installation command for
 some toolchains when clippy isn't installed.  If you have problems try
 it with `rustup component add --toolchain nightly clippy`.
 
-Use `rustic-cargo-clippy` to view the results in a derived compilation
-mode.
+### Commands
+
+- `rustic-cargo-clippy`     to view the results in a derived compilation mode
+- `rustic-cargo-clippy-fix` run 'clippy fix' using `rustic-cargo-clippy-fix-args`
+                            the default value is "--allow-dirty"
 
 ### Flycheck
 
@@ -486,7 +489,7 @@ Customization:
 #### :crates
 
 ```
-#+BEGIN_SRC rust :crates '((regex . "0.2"))
+#+BEGIN_SRC rust :crates '((regex . "*"))
   extern crate regex;
 
   use regex::Regex;
