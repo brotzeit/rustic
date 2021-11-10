@@ -32,12 +32,14 @@
         - [Test](#test)
         - [Run](#run)
         - [Outdated](#outdated)
+        - [More cargo commands](#more-cargo-commands)
     - [Clippy](#clippy)
+        - [Commands](#commands)
         - [Flycheck](#flycheck)
         - [lsp-mode](#lsp-mode-1)
     - [Org-babel](#org-babel)
         - [Intro](#intro-1)
-        - [Commands](#commands)
+        - [Commands](#commands-1)
         - [Parameters](#parameters)
             - [:crates](#crates)
             - [:features](#features)
@@ -424,6 +426,14 @@ before being used.
 - `q` quit window
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
+
+### More cargo commands
+
+- `rustic-cargo-init` run 'cargo init' to initialize a directory
+- `rustic-cargo-new` use 'cargo new' to create a new package
+- `rustic-cargo-bench` run 'cargo bench' for the current project
+- `rustic-cargo-build-doc` build the documentation for the current project
+- `rustic-cargo-doc` open the documentation for the current project in a browser
 
 ## Clippy
 

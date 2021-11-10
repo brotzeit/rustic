@@ -27,7 +27,10 @@ VALUE is a string, an integer or a boolean."
   :group 'rustic)
 
 (defcustom rustic-format-trigger nil
-  "Format future rust buffers before saving using rustfmt."
+  "This option allows you to automatically run rustfmt when saving
+or before using a compilation/cargo command.
+`on-compile' calls 'cargo fmt' in the directory that is returned by
+the function used in `rustic-compile-directory-method'."
   :type '(choice (const :tag "Format buffer before saving." on-save)
                  (const :tag "Run 'cargo fmt' before compilation." on-compile)
                  (const :tag "Don't format automatically." nil))

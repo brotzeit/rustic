@@ -282,18 +282,21 @@ executed with the parameter `:include'."
     contents))
 
 (defun rustic-babel-block-contents (block-name)
+  "Return contents of block with the name BLOCK-NAME"
   (with-current-buffer (current-buffer)
    (save-excursion
      (org-babel-goto-named-src-block block-name)
      (org-element-property :value (org-element-at-point)))))
 
 (defun rustic-babel-insert-mod (mods)
+  "Build string with module declarations for MODS and return it."
   (let ((c ""))
     (dolist (m mods)
       (setq c (concat c (format "mod %s;\n" m))))
     c))
 
 (defun rustic-babel-generate-modules (root blocks)
+  "Create module files for BLOCKS in the project with ROOT."
   (dolist (b blocks)
     (let* ((contents (rustic-babel-block-contents b))
            (src-dir (concat root "/src/"))
@@ -347,7 +350,7 @@ kill the running process."
 
 (defun rustic-babel-visit-project ()
   "Open main.rs of babel block at point. The block has to be executed
-at least one time before this command can be used."
+at least one time in this emacs session before this command can be used."
   (interactive)
   (let* ((beg (org-babel-where-is-src-block-head))
          (end (save-excursion (goto-char beg)
