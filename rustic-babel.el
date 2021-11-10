@@ -72,7 +72,27 @@
      :buffer err-buff
      :command params
      :filter #'rustic-compilation-filter
-     :sentinel (lambda (proc output) (rustic-babel-build-sentinel toolchain proc output)))))
+     :sentinel (lambda (proc output)
+                 (rustic-babel-build-sentinel toolchain proc output)))))
+
+(defun rustic-babel-format-block ()
+  "Format babel block at point."
+  (interactive)
+  (save-excursion
+    (let ((babel-body
+           (org-element-property :value (org-element-at-point)))
+          (proc
+           (make-process :name "rustic-babel-format"
+                         :buffer "rustic-babel-format-buffer"
+                         :command `(,rustic-rustfmt-bin
+                                    ,@(rustic-compute-rustfmt-args))
+                         :filter #'rustic-compilation-filter
+                         :sentinel #'rustic-babel-format-sentinel)))
+      (while (not (process-live-p proc))
+        (sleep-for 0.01))
+      (process-send-string proc babel-body)
+      (process-send-eof proc)
+      proc)))
 
 (defun rustic-babel-build-sentinel (toolchain proc _output)
   "Sentinel for rust babel compilation process PROC.
@@ -82,21 +102,10 @@ execution with rustfmt."
         (inhibit-read-only t))
     (if (zerop (process-exit-status proc))
         (let* ((default-directory rustic-babel-dir))
+
           ;; format babel block
           (when rustic-babel-format-src-block
-            (let ((babel-body
-                   (org-element-property :value (org-element-at-point)))
-                  (proc
-                   (make-process :name "rustic-babel-format"
-                                 :buffer "rustic-babel-format-buffer"
-                                 :command `(,rustic-rustfmt-bin
-                                            ,@(rustic-compute-rustfmt-args))
-                                 :filter #'rustic-compilation-filter
-                                 :sentinel #'rustic-babel-format-sentinel)))
-              (while (not (process-live-p proc))
-                (sleep-for 0.01))
-              (process-send-string proc babel-body)
-              (process-send-eof proc)
+            (let ((proc (rustic-babel-format-block)))
               (while (eq (process-status proc) 'run)
                 (sit-for 0.1))))
 

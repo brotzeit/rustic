@@ -495,9 +495,11 @@ Customization:
 - `rustic-babel-format-src-block` format block after successful build
 - `rustic-babel-display-compilation-buffer` display compilation buffer
   of babel process
-  
+- `rustic-babel-auto-wrap-main` wrap body into main function
+
 ### Commands
 
+- `rustic-babel-format-block` format block at point
 - `rustic-babel-visit-project` find generated project of block at point
 
 ### Parameters
