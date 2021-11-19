@@ -199,20 +199,29 @@
         (should (string= re (rustic-test-babel-check-results buf)))))))
 
 (ert-deftest rustic-test-babel-ensure-main-wrap-yes-with-main()
-  (let* ((string "
-                fn main() {
-let x = \"rustic\";
-                  }")
+  (let* ((string "fn main() {
+                      let x = \"rustic\";
+                 }")
          (params ":main yes")
          (buf (rustic-test-get-babel-block string params)))
     (with-current-buffer buf
       (rustic-test-babel-execute-block buf)
       (should (eq (rustic-test-babel-check-results buf) nil)))))
 
+(ert-deftest rustic-test-babel-ensure--main-wrap-yes-with-async-main()
+  (let* ((string "#[tokio::main]
+                  pub async fn main() {
+                      ()
+                 }")
+         (params ":crates '((tokio . 1.0)) :features '((tokio . (\"rt-multi-thread\" \"macros\"))) :main yes")
+         (buf (rustic-test-get-babel-block string params)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (should (eq (rustic-test-babel-check-results buf) nil)))))
+
 (ert-deftest rustic-test-babel-ensure-main-wrap-no-with-main()
-  (let* ((string "
-                fn main() {
-let x = \"rustic\";
+  (let* ((string "fn main() {
+                      let x = \"rustic\";
                   }")
          (params ":main no")
          (buf (rustic-test-get-babel-block string params)))

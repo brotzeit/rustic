@@ -275,7 +275,7 @@ directory DIR."
 
 (defun rustic-babel-ensure-main-wrap (body)
   "Wrap BODY in a 'fn main' function call if none exists."
-  (if (string-match "^[ \t]*[fn]+[ \t\n\r]*main[ \t]*(.*)" body)
+  (if (string-match "^[ \t]*\\(pub \\)?\\(async \\)?[fn]+[ \t\n\r]*main[ \t]*(.*)" body)
       body
     (format "fn main() {\n%s\n}\n" body)))
 
