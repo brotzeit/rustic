@@ -746,4 +746,6 @@ alternatively you can use `make test`
 
 ## Contributing
 
-PRs, feature requests and bug reports are very welcome.
+PRs, feature requests and bug reports are very welcome. If you want to
+add a new feature please open an issue in advance so we can discuss
+the details.
