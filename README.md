@@ -251,6 +251,10 @@ info](https://github.com/rust-lang/rustfmt/issues/4454).
 Disable LSP support by setting `rustic-lsp-client` to nil. You have to
 restart emacs when you switch lsp clients.
 
+Changes to Cargo.toml triggers reloading of rust-analyzer
+automatically after saving. If you want to disable this feature you
+have to remove `rustic-lsp-toml-reload-hook` from `after-save-hook`.
+
 ### Server
 
 rust-analyzer is the default and can be changed to rls. lsp-mode

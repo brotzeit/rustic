@@ -96,6 +96,16 @@ with `lsp-rust-switch-server'."
         (error err))
     (message "No LSP server running.")))
 
+(defun rustic-lsp-toml-reload-hook ()
+  "Reload workspace with changes from Cargo.toml after save."
+  (when (eq rustic-lsp-server 'rust-analyzer)
+    (if (eq rustic-lsp-client 'lsp-mode)
+        (lsp-rust-analyzer-reload-workspace))))
+
+(add-hook 'conf-toml-mode
+          (lambda ()
+            (add-hook 'after-save-hook 'rustic-lsp-toml-reload-hook nil t)))
+
 ;;; eglot support
 
 (defvar eglot-ignored-server-capabilites)
