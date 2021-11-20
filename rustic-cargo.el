@@ -480,15 +480,14 @@ When calling this function from `rustic-popup-mode', always use the value of
 (defun rustic-cargo-run-get-relative-example-name ()
   "Run 'cargo run --example' if current buffer within a 'exmaples' directory.
 In rust, examples normally runs within single crate or a project member within workspaces."
-  (let* ((buffer-project-root (rustic-buffer-crate))
+  (let* ((buffer-project-root (rustic-buffer-project))
          (relative-filenames
           (if buffer-project-root
-              (split-string (file-relative-name buffer-file-name buffer-project-root) "/")
-            nil)))
+              (split-string (file-relative-name buffer-file-name buffer-project-root) "/") nil)))
     (if (and relative-filenames (string= "examples" (car relative-filenames)))
         (let ((size (length relative-filenames)))
-          (cond ((eq size 2) (file-name-sans-extension(nth 1 relative-filenames))) ;; examples/single-example1.rs
-                ((> size 2) (car (nthcdr (- size 2) relative-filenames))) ;; examples/example2/main.rs
+          (cond ((eq size 2) (file-name-sans-extension (nth 1 relative-filenames))) ;; examples/single-example1.rs
+                ((> size 2) (car (nthcdr (- size 2) relative-filenames)))           ;; examples/example2/main.rs
                 (t nil))) nil)))
 
 ;;;###autoload
