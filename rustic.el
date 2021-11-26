@@ -1,10 +1,10 @@
 ;;; rustic.el --- Rust development environment -*-lexical-binding: t-*-
 
-;; Version: 2.1
+;; Version: 2.2
 ;; Author: Mozilla
 ;;
 ;; Keywords: languages
-;; Package-Requires: ((emacs "26.1") (rust-mode "0.5.0") (dash "2.13.0") (f "0.18.2") (let-alist "1.0.4") (markdown-mode "2.3") (project "0.3.0") (s "1.10.0") (seq "2.3") (spinner "1.7.3") (xterm-color "1.6"))
+;; Package-Requires: ((emacs "26.1") (rust-mode "1.0.2") (dash "2.13.0") (f "0.18.2") (let-alist "1.0.4") (markdown-mode "2.3") (project "0.3.0") (s "1.10.0") (seq "2.3") (spinner "1.7.3") (xterm-color "1.6"))
 
 ;; This file is distributed under the terms of both the MIT license and the
 ;; Apache License (version 2.0).
@@ -36,7 +36,8 @@
 (require 'dash)
 
 (setq rust-load-optional-libraries nil)
-
+(setq rust-before-save-hook #'rustic-before-save-hook)
+(setq rust-after-save-hook #'rustic-after-save-hook)
 (require 'rust-mode)
 
 ;;; Customization
@@ -124,14 +125,7 @@ this variable."
   "Major mode for Rust code.
 
 \\{rustic-mode-map}"
-  :group 'rustic
-
-  (remove-hook 'before-save-hook 'rust-before-save-hook t)
-  (remove-hook 'after-save-hook 'rust-after-save-hook t)
-
-  (when (fboundp 'rustic-before-save-hook)
-    (add-hook 'before-save-hook 'rustic-before-save-hook nil t)
-    (add-hook 'after-save-hook 'rustic-after-save-hook nil t)))
+  :group 'rustic)
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
