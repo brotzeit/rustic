@@ -16,6 +16,7 @@
         - [Faces](#faces)
         - [rustc errors](#rustc-errors)
     - [Rustfmt](#rustfmt)
+        - [Change default arguments](#change-default-arguments)
         - [edition 2018](#edition-2018)
     - [LSP](#lsp)
         - [Server](#server)
