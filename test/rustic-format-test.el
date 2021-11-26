@@ -226,3 +226,23 @@
       (rustic-format-region 16 34)
       (sit-for 1)
       (should (string= (buffer-string) formatted-string)))))
+
+(ert-deftest rustic-test-format-args-and-config-args ()
+  (let* ((string "fn main()      {}")
+         (formatted-string "fn main() {}\n")
+         (rustic-rustfmt-config-alist '((hard_tabs . t) (skip_children . nil)))
+         (rustic-rustfmt-args "+stable")
+         (dir (rustic-babel-generate-project t))
+         (main (expand-file-name "main.rs" (concat dir "/src")))
+         (buf (get-buffer-create "test")))
+    (with-current-buffer buf (write-file main))
+    (write-region string nil main nil 0)
+    (let ((proc (rustic-format-start-process
+                 'rustic-format-file-sentinel
+                 :buffer buf
+                 :files main)))
+      (while (eq (process-status proc) 'run)
+        (sit-for 0.1)))
+    (with-temp-buffer
+      (insert-file-contents main)
+      (should (string= (buffer-string) formatted-string)))))

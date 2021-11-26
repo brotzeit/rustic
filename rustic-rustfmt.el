@@ -17,6 +17,11 @@
   :type 'string
   :group 'rustic)
 
+(defcustom rustic-rustfmt-args ""
+  "String of additional arguments."
+  :type 'string
+  :group 'rustic)
+
 (defcustom rustic-rustfmt-config-alist nil
   "An alist of (KEY . VAL) pairs that are passed to rustfmt.
 
@@ -84,7 +89,7 @@ and it's `cdr' is a list of arguments."
          (files  (plist-get args :files))
          (files (if (listp files) files (list files)))
          (command (or (plist-get args :command)
-                      (cons rustic-rustfmt-bin (rustic-compute-rustfmt-args))))
+                      (rustic-compute-rustfmt-args)))
          (command (if (listp command) command (list command))))
     (setq rustic-save-pos (set-marker (make-marker) (point) (current-buffer)))
     (rustic-compilation-setup-buffer err-buf dir 'rustic-format-mode t)
@@ -92,11 +97,14 @@ and it's `cdr' is a list of arguments."
       (unless (file-exists-p it)
         (error (format "File %s does not exist." it))))
     (with-current-buffer err-buf
-      (let ((proc (rustic-make-process :name rustic-format-process-name
-                                       :buffer err-buf
-                                       :command `(,@command "--" ,@files)
-                                       :filter #'rustic-compilation-filter
-                                       :sentinel sentinel)))
+      (let* ((c `(,rustic-rustfmt-bin
+                  ,rustic-rustfmt-args
+                  ,@command "--" ,@files))
+             (proc (rustic-make-process :name rustic-format-process-name
+                                        :buffer err-buf
+                                        :command (remove "" c)
+                                        :filter #'rustic-compilation-filter
+                                        :sentinel sentinel)))
         (setq next-error-last-buffer buffer)
         (when string
           (while (not (process-live-p proc))
