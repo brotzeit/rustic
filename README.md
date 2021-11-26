@@ -222,6 +222,7 @@ formatting, turn off `rustic-format-on-save` and set
 Customization:
 
 - `rustic-rustfmt-bin` path to rustfmt executable
+- `rustic-rustfmt-args` additional args like +nightly
 - `rustic-rustfmt-config-alist` alist of rustfmt configuration options
 - `rustic-format-display-method` default function used for displaying
   rustfmt buffer (use the function `ignore`, if you don't want the
@@ -236,6 +237,21 @@ Customization:
 known issues:
 
 in case you are using hideshow you might want to set `rustic-format-on-save-method` to `rustic-format-buffer`(#274)
+
+### Change default arguments
+
+If you want to configure the following rustfmt call
+
+```shell
+rustfmt +nightly --config hard_tabs=true --config skip_children=false main.rs
+```
+
+you can use
+
+```elisp
+(setq rustic-rustfmt-args "+nightly")
+(setq rustic-rustfmt-config-alist '((hard_tabs . t) (skip_children . nil)))
+```
 
 ### edition 2018
 
