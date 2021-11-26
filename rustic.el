@@ -72,7 +72,7 @@
           (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
         (goto-char 0)
         (let* ((output (json-read))
-               (dir (cdr (assoc-string "root" output))))
+               (dir (file-name-directory (cdr (assoc-string "root" output)))))
           (setq rustic--buffer-workspace dir))))))
 
 (defun rustic-buffer-crate (&optional nodefault)
