@@ -4,7 +4,7 @@
 (package-file "rustic.el")
 
 (development
- (depends-on "rust-mode")
+ (depends-on "rust-mode" "1.0.2")
  (depends-on "spinner")
  (depends-on "ert-runner")
  (depends-on "lsp-mode")
