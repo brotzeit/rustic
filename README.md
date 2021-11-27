@@ -55,6 +55,7 @@
         - [Usage](#usage)
         - [Notes](#notes)
     - [Popup](#popup)
+    - [rust-mode](#rust-mode)
     - [elisp tests](#elisp-tests)
     - [Contributing](#contributing)
 
@@ -753,6 +754,17 @@ If you want to close the popup after you ran a command you can set
 View help buffer containing a command's flags with `h`:
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup_help.png)
+
+## rust-mode
+
+The rustic mode derives from rust-mode using all of its functionality. However
+we replace default key bindings and some hooks.
+
+There are also some additional commands:
+
+- `rust-dbg-wrap-or-unwrap` Either remove or add the dbg! macro
+- `rustic-toggle-mutability` Toggles the mutability of the variable defined on the current line
+- `rust-promote-module-into-dir` Promote the module file visited by the current buffer into its own directory
 
 ## elisp tests
 
