@@ -25,6 +25,11 @@ The first element of each list contains a command's binding."
   :type 'list
   :group 'rustic-popup)
 
+(defcustom rustic-kill-buffer-and-window nil
+  "Whether to kill popup window and buffer after command execution."
+  :type 'boolean
+  :group 'rustic)
+
 (define-obsolete-face-alias 'rustic-popup-key-face
   'rustic-popup-key "1.2")
 (define-obsolete-face-alias 'rustic-popup-section-face
@@ -141,7 +146,9 @@ If directory is not in a rust project call `read-directory-name'."
            (c (intern (concat "rustic-cargo-" command))))
       (if (commandp c)
           (call-interactively c)
-        (call-interactively 'rustic-compile (concat "cargo " command))))))
+        (call-interactively 'rustic-compile (concat "cargo " command)))))
+  (when rustic-kill-buffer-and-window
+    (kill-buffer-and-window)))
 
 ;;;###autoload
 (defun rustic-popup-default-action ()

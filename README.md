@@ -745,6 +745,9 @@ be customized with `rustic-popup-commands`.  The command
 - `compilation-arguments` for `recompile`
 - arguments for `cargo test`
 
+If you want to close the popup after you ran a command you can set
+`rustic-kill-buffer-and-window` to `t`.
+
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup.png)
 
 View help buffer containing a command's flags with `h`:
