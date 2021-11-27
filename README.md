@@ -763,7 +763,7 @@ we replace default key bindings and some hooks.
 There are also some additional commands:
 
 - `rust-dbg-wrap-or-unwrap` Either remove or add the dbg! macro
-- `rustic-toggle-mutability` Toggles the mutability of the variable defined on the current line
+- `rust-toggle-mutability` Toggles the mutability of the variable defined on the current line
 - `rust-promote-module-into-dir` Promote the module file visited by the current buffer into its own directory
 
 ## elisp tests
