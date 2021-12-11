@@ -263,11 +263,6 @@ See buffer *cargo-makedocs* for more info")
           (let* ((docs-src
                   (concat (file-name-as-directory rustic-doc-current-project)
                           "target/doc"))
-                 ;; FIXME: Many projects could share the same docs.
-                 ;; *However* that would have to be versioned, so
-                 ;; we'll have to figure out a way to coerce `<crate>-<version>`
-                 ;; strings out of cargo, or just parse the Cargo.toml file, but
-                 ;; then we'd have to review different parsing solutions.
                  (finish-func (lambda (_p)
                                 (message "Finished converting docs for %s"
                                          rustic-doc-current-project))))
@@ -277,7 +272,8 @@ See buffer *cargo-makedocs* for more info")
                                        finish-func
                                        docs-src
                                        (rustic-doc--project-doc-dest)))))
-    (message "Could not find project to convert. Visit a rust project first! \
+    (message "If you want to convert the documentation for the dependencies in a project,
+visit the project and run `rustic-doc-convert-current-package'! \
 \(Or activate rustic-doc-mode if you are in one)")))
 
 (defun rustic-doc-install-deps ()
@@ -298,11 +294,15 @@ See buffer *cargo-makedocs* for more info")
                                      "install" "cargo-makedocs"))))))
 
 ;;;###autoload
-(defun rustic-doc-setup ()
-  "Setup or update rustic-doc filter and convert script. Convert std."
+(defun rustic-doc-setup (&optional no-dl)
+  "Setup or update rustic-doc filter and convert script. Convert std.
+If NO-DL is non-nil, will not try to re-download
+the pandoc filter and bash script.
+NO-DL is primarily used for development of the filters."
   (interactive)
-  (rustic-doc--install-resources)
-  (rustic-doc-install-deps)
+  (unless no-dl
+    (rustic-doc--install-resources)
+    (rustic-doc-install-deps))
   (message "Setup is converting the standard library")
   (delete-directory (concat rustic-doc-save-loc "/std")
                     t)
@@ -310,7 +310,8 @@ See buffer *cargo-makedocs* for more info")
                              rustic-doc-convert-prog
                              (lambda (_p)
                                (message "Finished converting docs for std"))
-                             "std"))
+                             "std")
+  (rustic-doc-convert-current-package))
 
 (defun rustic-doc--start-process (name program finish-func &rest program-args)
   (let* ((buf (generate-new-buffer (concat "*" name "*")))
