@@ -18,6 +18,7 @@
     - [Rustfmt](#rustfmt)
         - [Change default arguments](#change-default-arguments)
         - [edition 2018](#edition-2018)
+        - [remote](#remote)
     - [LSP](#lsp)
         - [Server](#server)
         - [Client](#client)
