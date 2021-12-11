@@ -263,11 +263,6 @@ See buffer *cargo-makedocs* for more info")
           (let* ((docs-src
                   (concat (file-name-as-directory rustic-doc-current-project)
                           "target/doc"))
-                 ;; FIXME: Many projects could share the same docs.
-                 ;; *However* that would have to be versioned, so
-                 ;; we'll have to figure out a way to coerce `<crate>-<version>`
-                 ;; strings out of cargo, or just parse the Cargo.toml file, but
-                 ;; then we'd have to review different parsing solutions.
                  (finish-func (lambda (_p)
                                 (message "Finished converting docs for %s"
                                          rustic-doc-current-project))))
@@ -277,7 +272,8 @@ See buffer *cargo-makedocs* for more info")
                                        finish-func
                                        docs-src
                                        (rustic-doc--project-doc-dest)))))
-    (message "Could not find project to convert. Visit a rust project first! \
+    (message "If you want to convert the documentation for the dependencies in a project,
+visit the project and run `rustic-doc-convert-current-package'! \
 \(Or activate rustic-doc-mode if you are in one)")))
 
 (defun rustic-doc-install-deps ()
@@ -314,7 +310,8 @@ NO-DL is primarily used for development of the filters."
                              rustic-doc-convert-prog
                              (lambda (_p)
                                (message "Finished converting docs for std"))
-                             "std"))
+                             "std")
+  (rustic-doc-convert-current-package))
 
 (defun rustic-doc--start-process (name program finish-func &rest program-args)
   (let* ((buf (generate-new-buffer (concat "*" name "*")))
