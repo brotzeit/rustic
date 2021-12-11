@@ -686,13 +686,13 @@ types](https://github.com/Malabarba/spinner.el/blob/master/spinner.el#L104)).
 
 ## inline-documentation
 
-With some setup, it is possible to read rust documentation inside
-Emacs! This currently requires LSP-mode.  ![Rustic-doc
+It is possible to read rust documentation inside
+Emacs! This currently requires LSP-mode and cargo.  ![Rustic-doc
 example](img/rustic-doc.png)
 
 ### Prequisites
 
-* Install Pandoc https://pandoc.org/installing.html
+* Install Pandoc, preferably at least version 2.11, as it will give somewhat nicer generated documentation: https://pandoc.org/installing.html
 * Install cargo
   https://doc.rust-lang.org/cargo/getting-started/installation.html
 * Install helm-ag https://github.com/emacsorphanage/helm-ag (Optional,
@@ -725,9 +725,6 @@ example](img/rustic-doc.png)
 
 ### Notes
 
-* We are waiting for an update to Pandoc that will make the generated
-  documents prettier, it should be available soon
-  https://github.com/jgm/pandoc/issues/6554
 * You should re-run `rustic-doc-setup` once in a while, to update the
   pandoc filter.
 * If rustic-doc does not find the documentation for something, the
