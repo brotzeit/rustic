@@ -269,7 +269,8 @@ ARGS is a plist that affects how the process is run.
                            :buffer buf
                            :command command
                            :filter #'rustic-compilation-filter
-                           :sentinel sentinel))))
+                           :sentinel sentinel
+                           :file-handler t))))
 
 (defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.

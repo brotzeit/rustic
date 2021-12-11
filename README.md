@@ -11,6 +11,7 @@
     - [Known issues](#known-issues)
     - [Installation](#installation)
         - [straight](#straight)
+    - [remote](#remote)
     - [Compilation](#compilation)
         - [default directory](#default-directory)
         - [Faces](#faces)
@@ -136,6 +137,12 @@ clones each of your packages directly from its source. There are good
 additional [installation
 instructions](https://github.crookster.org/switching-to-straight.el-from-emacs-26-builtin-package.el/)
 for moving your package management from package.el to straight.
+
+## remote
+
+rustfmt and most of the common cargo commands should work remotely.
+We are currently updating the code base. If you encounter any command
+that doesn't work remotely, please open an issue.
 
 ## Compilation
 

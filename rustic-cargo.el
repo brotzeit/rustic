@@ -12,7 +12,7 @@
 
 ;;; Customization
 
-(defcustom rustic-cargo-bin "cargo"
+(defcustom rustic-cargo-bin "~/.cargo/bin/cargo"
   "Path to cargo executable."
   :type 'string
   :group 'rustic-cargo)
@@ -447,13 +447,16 @@ If BIN is not nil, create a binary application, otherwise a library."
 (defun rustic-run-cargo-command (command &optional args)
   "Run the specified COMMAND with cargo."
   (rustic-compilation-process-live)
-  (rustic-compilation-start (split-string command) args))
+  (let ((c (if (listp command)
+               command
+             (split-string command))))
+    (rustic-compilation-start c args)))
 
 ;;;###autoload
 (defun rustic-cargo-build ()
   "Run 'cargo build' for the current project."
   (interactive)
-  (rustic-run-cargo-command "cargo build"))
+  (rustic-run-cargo-command (list rustic-cargo-bin "build")))
 
 ;;;###autoload
 (defun rustic-run-shell-command (&optional arg)
@@ -560,19 +563,19 @@ and the latter for interacting with the compiled program."
 (defun rustic-cargo-clean ()
   "Run 'cargo clean' for the current project."
   (interactive)
-  (rustic-run-cargo-command "cargo clean"))
+  (rustic-run-cargo-command (list rustic-cargo-bin "clean")))
 
 ;;;###autoload
 (defun rustic-cargo-check ()
   "Run 'cargo check' for the current project."
   (interactive)
-  (rustic-run-cargo-command "cargo check"))
+  (rustic-run-cargo-command (list rustic-cargo-bin "check")))
 
 ;;;###autoload
 (defun rustic-cargo-bench ()
   "Run 'cargo bench' for the current project."
   (interactive)
-  (rustic-run-cargo-command "cargo bench"))
+  (rustic-run-cargo-command (list rustic-cargo-bin "bench")))
 
 ;;;###autoload
 (defun rustic-cargo-build-doc ()
