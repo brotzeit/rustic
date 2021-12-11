@@ -582,8 +582,8 @@ and the latter for interacting with the compiled program."
   "Build the documentation for the current project."
   (interactive)
   (if (y-or-n-p "Create documentation for dependencies?")
-      (rustic-run-cargo-command "cargo doc")
-    (rustic-run-cargo-command "cargo doc --no-deps")))
+      (rustic-run-cargo-command (list rustic-cargo-bin "doc"))
+    (rustic-run-cargo-command (list rustic-cargo-bin "doc --no-deps"))))
 
 ;; TODO: buffer with cargo output should be in rustic-compilation-mode
 ;;;###autoload
@@ -593,8 +593,8 @@ The documentation is built if necessary."
   (interactive)
   (if (y-or-n-p "Open docs for dependencies as well?")
       ;; open docs only works with synchronous process
-      (shell-command "cargo doc --open")
-    (shell-command "cargo doc --open --no-deps")))
+      (shell-command (list rustic-cargo-bin "doc --open"))
+    (shell-command (list rustic-cargo-bin "doc --open --no-deps"))))
 
 ;;; cargo edit
 
@@ -609,8 +609,10 @@ If running with prefix command `C-u', read whole command from minibuffer."
   (interactive "P")
   (when (rustic-cargo-edit-installed-p)
     (let* ((command (if arg
-                        (read-from-minibuffer "Cargo add command: " "cargo add ")
-                      (concat "cargo add " (read-from-minibuffer "Crate: ")))))
+                        (read-from-minibuffer "Cargo add command: "
+                                              rustic-cargo-bin " add ")
+                      (concat rustic-cargo-bin " add "
+                              (read-from-minibuffer "Crate: ")))))
       (rustic-run-cargo-command command))))
 
 ;;;###autoload
@@ -620,8 +622,10 @@ If running with prefix command `C-u', read whole command from minibuffer."
   (interactive "P")
   (when (rustic-cargo-edit-installed-p)
     (let* ((command (if arg
-                        (read-from-minibuffer "Cargo rm command: " "cargo rm ")
-                      (concat "cargo rm " (read-from-minibuffer "Crate: ")))))
+                        (read-from-minibuffer "Cargo rm command: "
+                                              rustic-cargo-bin " rm ")
+                      (concat rustic-cargo-bin " rm "
+                              (read-from-minibuffer "Crate: ")))))
       (rustic-run-cargo-command command))))
 
 ;;;###autoload
@@ -631,8 +635,9 @@ If running with prefix command `C-u', read whole command from minibuffer."
   (interactive "P")
   (when (rustic-cargo-edit-installed-p)
     (let* ((command (if arg
-                        (read-from-minibuffer "Cargo upgrade command: " "cargo upgrade ")
-                      (concat "cargo upgrade"))))
+                        (read-from-minibuffer "Cargo upgrade command: "
+                                              rustic-cargo-bin " upgrade ")
+                      (concat rustic-cargo-bin " upgrade"))))
       (rustic-run-cargo-command command))))
 
 (provide 'rustic-cargo)
