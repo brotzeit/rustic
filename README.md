@@ -264,6 +264,12 @@ mentions `cargo.toml`*, you you have to put `edition = "2018"` in a
 `rustfmt.toml`. [See here for more
 info](https://github.com/rust-lang/rustfmt/issues/4454).
 
+### remote
+
+Currently only `rustic-format-buffer` works remotely.
+
+`rustic-rustfmt-bin` needs to be an absolute path to work remotely.
+
 ## LSP
 
 Disable LSP support by setting `rustic-lsp-client` to nil. You have to

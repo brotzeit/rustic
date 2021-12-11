@@ -12,7 +12,7 @@
 
 ;;; Options
 
-(defcustom rustic-rustfmt-bin "rustfmt"
+(defcustom rustic-rustfmt-bin "~/.cargo/bin/rustfmt"
   "Path to rustfmt executable."
   :type 'string
   :group 'rustic)
@@ -104,7 +104,8 @@ and it's `cdr' is a list of arguments."
                                         :buffer err-buf
                                         :command (remove "" c)
                                         :filter #'rustic-compilation-filter
-                                        :sentinel sentinel)))
+                                        :sentinel sentinel
+                                        :file-handler t)))
         (setq next-error-last-buffer buffer)
         (when string
           (while (not (process-live-p proc))
@@ -323,7 +324,9 @@ This is basically a wrapper around `project--buffer-list'."
              (not (rustic-compilation-process-live t)))
     (condition-case nil
         (progn
-          (funcall rustic-format-on-save-method)
+          (if (file-remote-p (buffer-file-name))
+              (rustic-format-buffer)
+            (funcall rustic-format-on-save-method))
           (sit-for 0.1))
       (error nil))))
 
