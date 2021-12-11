@@ -298,11 +298,15 @@ See buffer *cargo-makedocs* for more info")
                                      "install" "cargo-makedocs"))))))
 
 ;;;###autoload
-(defun rustic-doc-setup ()
-  "Setup or update rustic-doc filter and convert script. Convert std."
+(defun rustic-doc-setup (&optional no-dl)
+  "Setup or update rustic-doc filter and convert script. Convert std.
+If NO-DL is non-nil, will not try to re-download
+the pandoc filter and bash script.
+NO-DL is primarily used for development of the filters."
   (interactive)
-  (rustic-doc--install-resources)
-  (rustic-doc-install-deps)
+  (unless no-dl
+    (rustic-doc--install-resources)
+    (rustic-doc-install-deps))
   (message "Setup is converting the standard library")
   (delete-directory (concat rustic-doc-save-loc "/std")
                     t)
