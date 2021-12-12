@@ -32,7 +32,9 @@ Span = function(el)
     return pandoc.Null
   end
 end
-
+Image = function(el)
+  return pandoc.Null
+end
 
 cleanblocks = {
   Str = function(el)
@@ -62,6 +64,7 @@ Header = function(el)
       end
     end
 
+    print(dump(el.content[1]))
     return pandoc.Header(1, el.content)
   end
   if el.classes:includes("hidden") then
