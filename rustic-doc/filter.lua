@@ -32,6 +32,8 @@ Span = function(el)
     return pandoc.Null
   elseif tablelength(el.content) == 0 then
     return pandoc.Null
+  elseif tablelength(el.content) == 1 then
+    return el.content
   end
 end
 Image = function(el)
