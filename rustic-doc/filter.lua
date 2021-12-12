@@ -64,7 +64,6 @@ Header = function(el)
       end
     end
 
-    print(dump(el.content[1]))
     return pandoc.Header(1, el.content)
   end
   if el.classes:includes("hidden") then
@@ -112,6 +111,9 @@ Header = function(el)
 end,
 
 Div = function(el)
+  if tablelength(el.content) == 1 then -- Removes one layer of unnecessary nesting.
+    return el.content
+  end
   if el.classes:includes("shortcuts") or el.classes:includes("sidebar-elems") or el.classes:includes("theme-picker") or el.classes:includes("infos") or el.classes:includes("search-container")  or el.classes:includes("sidebar-menu") or el.classes:includes("logo-container") or el.classes:includes("toggle-wrapper") then
     return pandoc.Null
   elseif el.classes:includes("variant") and el.classes:includes("small-section-header") and el.content[1] and tablelength(el.content[1].content) > 1 then
