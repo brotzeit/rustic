@@ -26,7 +26,9 @@ end
 
 
 Span = function(el)
-  if el.classes:includes("since") or el.classes:includes("inner") or tablelength(el.content) == 1 then
+  if tablelength(el.content) >= 3 and el.content[1]["text"] == "Expand" and el.content[3]["text"] == "description" then
+    return pandoc.Null
+  elseif el.classes:includes("since") or el.classes:includes("inner") or tablelength(el.content) == 1 then
     return pandoc.Null
   end
 end
