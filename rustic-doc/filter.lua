@@ -30,6 +30,8 @@ Span = function(el)
     return pandoc.Null
   elseif el.classes:includes("since") or el.classes:includes("inner") or tablelength(el.content) == 1 then
     return pandoc.Null
+  elseif tablelength(el.content) == 0 then
+    return pandoc.Null
   end
 end
 Image = function(el)
