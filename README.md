@@ -50,7 +50,7 @@
             - [:include](#include)
             - [:use](#use)
     - [Spinner](#spinner)
-    - [inline-documentation](#inline-documentation)
+    - [rust docs in org mode](#rust-docs-in-org-mode)
         - [Prequisites](#prequisites)
         - [Usage](#usage)
         - [Notes](#notes)
@@ -684,7 +684,7 @@ In case you want to use a different spinner type you can modify
 `rustic-display-spinner`.([Available spinner
 types](https://github.com/Malabarba/spinner.el/blob/master/spinner.el#L104)).
 
-## inline-documentation
+## rust docs in org-mode
 
 It is possible to read rust documentation inside Emacs! This currently
 requires LSP-mode and cargo.  ![Rustic-doc
@@ -696,8 +696,8 @@ Required:
 
 - [pandoc](https://pandoc.org/installing.html) (preferably at least version 2.11, as it will give somewhat nicer generated documentation)
 - [cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
-- cargo-makedocs
-- fd-find
+- [cargo-makedocs](https://github.com/Bunogi/cargo-makedocs)
+- [fd-find](https://github.com/sharkdp/fd)
 
 Optional:
 
@@ -709,6 +709,9 @@ Optional:
 If only ripgrep is installed, it will be used with the emacs `grep`
 command.  In case neither is available, the emacs `grep` command will
 use `grep`, like in the good old days.
+
+When a required cargo package is missing you will be asked if you want
+to install them when running rustic-doc-setup.
 
 ### Usage
 
