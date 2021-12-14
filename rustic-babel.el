@@ -1,4 +1,4 @@
-;;; rustic-babel.el --- Org babel facilities for cargo -*-lexical-binding: t-*-
+;;; rustic-babel.el --- org-babel facilities for cargo -*-lexical-binding: t-*-
 
 ;;; Code:
 
@@ -36,6 +36,13 @@
   :type 'boolean
   :group 'rustic-babel)
 
+(defcustom rustic-babel-default-toolchain "+stable"
+  "Active toolchain for babel blocks.
+When passing a toolchain to a block as argument, this variable won't be
+considered."
+  :type 'boolean
+  :group 'rustic-babel)
+
 (defvar rustic-babel-buffer-name '((:default . "*rust-babel*")))
 
 (defvar rustic-babel-process-name "rustic-babel-process"
@@ -61,7 +68,7 @@
          (default-directory dir)
          (toolchain (cond ((eq toolchain-kw 'nightly) "+nightly")
                           ((eq toolchain-kw 'beta) "+beta")
-                          (t "+stable")))
+                          (t rustic-babel-default-toolchain)))
          (params (list "cargo" toolchain "build" "--quiet"))
          (inhibit-read-only t))
     (rustic-compilation-setup-buffer err-buff dir 'rustic-compilation-mode)
