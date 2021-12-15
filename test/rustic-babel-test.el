@@ -155,6 +155,20 @@
       (rustic-test-babel-execute-block buf)
       (should (eq (rustic-test-babel-check-results buf) nil)))))
 
+(ert-deftest rustic-test-babel-crate-without-version ()
+  (let* ((string "extern crate rand;
+                  extern crate serde;
+                  extern crate serde_json;
+                  fn main() {
+                      let _rng = rand::thread_rng();
+                  }")
+         ;; also test with strings for crate and version
+         (params ":crates '(rand (serde . *) (\"serde_json\" . \"*\"))")
+         (buf (rustic-test-get-babel-block string params)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (should (eq (rustic-test-babel-check-results buf) nil)))))
+
 (ert-deftest rustic-test-babel-crate-with-single-feature ()
   (let* ((string "extern crate serde;
                   extern crate serde_json;

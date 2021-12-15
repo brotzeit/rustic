@@ -1,4 +1,4 @@
-;;; rustic-babel.el --- Org babel facilities for cargo -*-lexical-binding: t-*-
+;;; rustic-babel.el --- org-babel facilities for cargo -*-lexical-binding: t-*-
 
 ;;; Code:
 
@@ -36,6 +36,13 @@
   :type 'boolean
   :group 'rustic-babel)
 
+(defcustom rustic-babel-default-toolchain "+stable"
+  "Active toolchain for babel blocks.
+When passing a toolchain to a block as argument, this variable won't be
+considered."
+  :type 'boolean
+  :group 'rustic-babel)
+
 (defvar rustic-babel-buffer-name '((:default . "*rust-babel*")))
 
 (defvar rustic-babel-process-name "rustic-babel-process"
@@ -61,7 +68,7 @@
          (default-directory dir)
          (toolchain (cond ((eq toolchain-kw 'nightly) "+nightly")
                           ((eq toolchain-kw 'beta) "+beta")
-                          (t "+stable")))
+                          (t rustic-babel-default-toolchain)))
          (params (list "cargo" toolchain "build" "--quiet"))
          (inhibit-read-only t))
     (rustic-compilation-setup-buffer err-buff dir 'rustic-compilation-mode)
@@ -241,13 +248,23 @@ Otherwise create it with `rustic-babel-generate-project'."
   "Generate the [dependencies] section of a Cargo.toml file given crates and their versions & features."
   (let ((dependencies ""))
     (dolist (crate-and-version crate-versions)
-      (let* ((name (car crate-and-version))
-             (version (cdr crate-and-version))
+      (let* ((name (if (listp crate-and-version)
+                       (car crate-and-version)
+                     crate-and-version))
+             (version (if (listp crate-and-version)
+                          (cdr crate-and-version)
+                        "*"))
              (features (cdr (assoc name crate-features)))
              (path (cdr (assoc name crate-paths))))
-        (setq name (symbol-name name))
+
+        ;; make sure it works with symbols and strings
+        (when (symbolp name)
+          (setq name (symbol-name name)))
         (when (numberp version)
           (setq version (number-to-string version)))
+        (when (symbolp version)
+          (setq version (symbol-name version)))
+
         (when (not (listp features))
           (setq features (list features)))
         (let ((cargo-toml-entry (crate-dependencies name version features path)))
