@@ -52,7 +52,7 @@
             - [:include](#include)
             - [:use](#use)
     - [Spinner](#spinner)
-    - [inline-documentation](#inline-documentation)
+    - [rust docs in org mode](#rust-docs-in-org-mode)
         - [Prequisites](#prequisites)
         - [Usage](#usage)
         - [Notes](#notes)
@@ -698,50 +698,59 @@ In case you want to use a different spinner type you can modify
 `rustic-display-spinner`.([Available spinner
 types](https://github.com/Malabarba/spinner.el/blob/master/spinner.el#L104)).
 
-## inline-documentation
+## rust docs in org-mode
 
-It is possible to read rust documentation inside
-Emacs! This currently requires LSP-mode and cargo.  ![Rustic-doc
+It is possible to read rust documentation inside Emacs! This currently
+requires LSP-mode and cargo.  ![Rustic-doc
 example](img/rustic-doc.png)
 
-### Prequisites
+### Prerequisites
 
-* Install Pandoc, preferably at least version 2.11, as it will give somewhat nicer generated documentation: https://pandoc.org/installing.html
-* Install cargo
-  https://doc.rust-lang.org/cargo/getting-started/installation.html
-* Install helm-ag https://github.com/emacsorphanage/helm-ag (Optional,
-  but highly recommended)
-* If you do not have them, you will be prompted to install `fd-find`,
-  `ripgrep` and `cargo-makedocs` when you run `rustic-doc-setup`.
-    * `ripgrep` is optional but highly recommended.
-    * If helm-ag and ripgrep is installed, those will be used by
-      default.
-    * If only ripgrep is installed, it will be used with the emacs
-      `grep` command.
-    * If neither is installed, the emacs `grep` command will use
-      `grep`, like in the good old days.
-    * You can change this by providing your own search function by
-      changing `rustic-doc-search-function`.
+Required:
+
+- [pandoc](https://pandoc.org/installing.html) (preferably at least version 2.11, as it will give somewhat nicer generated documentation)
+- [cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
+- [cargo-makedocs](https://github.com/Bunogi/cargo-makedocs)
+- [fd-find](https://github.com/sharkdp/fd)
+
+Optional:
+
+- [helm-ag](https://github.com/emacsorphanage/helm-ag)
+- [ripgrep](https://github.com/BurntSushi/ripgrep)
+
+`ripgrep` and `helm-ag` are optional but highly recommended.
+
+If only ripgrep is installed, it will be used with the emacs `grep`
+command.  In case neither is available, the emacs `grep` command will
+use `grep`, like in the good old days.
+
+When a required cargo package is missing you will be asked if you want
+to install them when running rustic-doc-setup.
 
 ### Usage
 
-* Enable `rustic-doc-mode`.
-* Run `M-x rustic-doc-setup` to download files that rustic-doc needs
-  to convert rust documentation and also convert `std`.
-* You can now convert package-specific documentation with `M-x
-  rustic-doc-convert-current-package`
-* Search the org files with `rustic-doc-search` (bound to `C-#` by
+- Enable `rustic-doc-mode`.
+- Run `rustic-doc-setup` to download files that rustic-doc needs to
+  convert rust documentation and also convert `std`.
+- You can now convert package-specific documentation with
+  `rustic-doc-convert-current-package`
+- Search the org files with `rustic-doc-search` (bound to `C-#` by
   default) if you are in `Rust mode`, `Rustic mode` or `Org mode`. If
   you hover over a symbol when you invoke the command,
   `rustic-doc-search` will insert a default value.
-* Add `universal argument` to only search for level 1 headers like
+- Add `universal argument` to only search for level 1 headers like
   struct or enum names.
+
+You can change the defaults by modifying
+
+- `rustic-doc-rg-search-command`
+- `rustic-doc-search-function`
 
 ### Notes
 
-* You should re-run `rustic-doc-setup` once in a while, to update the
+- You should re-run `rustic-doc-setup` once in a while, to update the
   pandoc filter.
-* If rustic-doc does not find the documentation for something, the
+- If rustic-doc does not find the documentation for something, the
   first thing to do is check the project's `target/doc` folder for the
   corresponding `.html-file`. If there is no file there, there is
   nothing for rustic-doc to convert. If there is a file there, please
