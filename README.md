@@ -483,7 +483,7 @@ it with `rustup component add --toolchain nightly clippy`.
 
 ### Flycheck
 
-In case you want to see clippy lints with flycheck, you can activate
+In case you want to use clippy with flycheck but without LSP, you can activate
 this checker and use the command `flycheck-list-errors`
 
 ```elisp
@@ -496,15 +496,12 @@ Turn off flycheck.
 (remove-hook 'rustic-mode-hook 'flycheck-mode)
 ```
 
-The parameters of the checker can be modified with `rustic-flycheck-clippy-params`
-and are by default configured for using unstable options that are only available
-on the nightly toolchains.
+The checker automatically detects the active toolchain and applies the
+correct parameters You can set a default value for both stable and
+nightly toolchains. These are the default values.
 
-If you are using the stable toolchain you have to change the value:
-
-```elisp
-(setq rustic-flycheck-clippy-params "--message-format=json")
-```
+- `rustic-flycheck-clippy-params-stable` "--message-format=json"
+- `rustic-flycheck-clippy-params-nightly` "--message-format=json -Zunstable-options"
 
 ### lsp-mode
 
