@@ -510,7 +510,7 @@ Turn off flycheck.
 ```
 
 The checker automatically detects the active toolchain and applies the
-correct parameters You can set a default value for both stable and
+correct parameters. You can set a default value for both stable and
 nightly toolchains. These are the default values.
 
 - `rustic-flycheck-clippy-params-stable` "--message-format=json"
