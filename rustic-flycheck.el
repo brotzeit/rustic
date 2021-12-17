@@ -9,8 +9,13 @@
 
 (require 'rustic)
 
-(defcustom rustic-flycheck-clippy-params "--message-format=json -Zunstable-options"
-  "Parameters for the flycheck clippy checker `rustic-clippy'."
+(defcustom rustic-flycheck-clippy-params-stable "--message-format=json"
+  "Parameters for the flycheck clippy checker `rustic-clippy' when active toolchain is stable."
+  :type 'string
+  :group 'rustic-flycheck)
+
+(defcustom rustic-flycheck-clippy-params-nightly "--message-format=json -Zunstable-options"
+  "Parameters for the flycheck clippy checker `rustic-clippy' when active toolchain is nightly."
   :type 'string
   :group 'rustic-flycheck)
 
@@ -160,11 +165,22 @@ Flycheck according to the Cargo project layout."
         (setq-local flycheck-rust-crate-type .kind)
         (setq-local flycheck-rust-binary-name .name)))))
 
+(defun rustic-flycheck-nightly-p ()
+  "Check if active toolchain is a nightly toolchain."
+  (let ((tc (shell-command-to-string "rustup show active-toolchain")))
+    (string-match-p "^nightly" (car (split-string tc)))))
+
+(defun rustic-flycheck-clippy-params ()
+  "Return clippy parameters for flycheck depending on the active toolchain."
+  (if (rustic-flycheck-nightly-p)
+      rustic-flycheck-clippy-params-nightly
+    rustic-flycheck-clippy-params-stable))
+
 (flycheck-define-checker rustic-clippy
   "A Rust syntax checker using clippy.
 
 See URL `https://github.com/rust-lang-nursery/rust-clippy'."
-  :command ("cargo" "clippy" (eval (split-string rustic-flycheck-clippy-params)))
+  :command ("cargo" "clippy" (eval (split-string (rustic-flycheck-clippy-params))))
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
