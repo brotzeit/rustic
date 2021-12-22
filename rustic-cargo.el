@@ -12,10 +12,20 @@
 
 ;;; Customization
 
-(defcustom rustic-cargo-bin "~/.cargo/bin/cargo"
+(defcustom rustic-cargo-bin "cargo"
   "Path to cargo executable."
   :type 'string
   :group 'rustic-cargo)
+
+(defcustom rustic-cargo-bin-remote "~/.cargo/bin/cargo"
+  "Path to remote cargo executable."
+  :type 'string
+  :group 'rustic-cargo)
+
+(defun rustic-cargo-bin ()
+  (if (file-remote-p (or (buffer-file-name) ""))
+      rustic-cargo-bin-remote
+    rustic-cargo-bin))
 
 (defcustom rustic-cargo-open-new-project t
   "If t then any project created with cargo-new will be opened automatically.
@@ -72,7 +82,7 @@ but you need to install polymode separately."
 (defun rustic-cargo-clippy-run (&optional args)
   "Run `cargo clippy' with optional ARGS."
   (interactive)
-  (let* ((command (list rustic-cargo-bin "clippy"))
+  (let* ((command (list (rustic-cargo-bin) "clippy"))
          (c (append command (split-string (if args args ""))))
          (buf rustic-clippy-buffer-name)
          (proc rustic-clippy-process-name)
@@ -128,7 +138,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   "Start compilation process for 'cargo test' with optional TEST-ARGS."
   (interactive)
   (rustic-compilation-process-live)
-  (let* ((command (list rustic-cargo-bin "test"))
+  (let* ((command (list (rustic-cargo-bin) "test"))
          (c (append command (split-string (if test-args test-args ""))))
          (buf rustic-test-buffer-name)
          (proc rustic-test-process-name)
@@ -162,7 +172,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   (interactive)
   (rustic-compilation-process-live)
   (-if-let (test-to-run (rustic-cargo--get-test-target))
-      (let* ((command (list rustic-cargo-bin "test" test-to-run))
+      (let* ((command (list (rustic-cargo-bin) "test" test-to-run))
              (c (append command (split-string rustic-test-arguments)))
              (buf rustic-test-buffer-name)
              (proc rustic-test-process-name)
@@ -425,7 +435,7 @@ BIN is not nil, create a binary application, otherwise a library."
          (buf (format "*cargo-%s*" cmd)))
     (make-process :name proc
                   :buffer buf
-                  :command (list rustic-cargo-bin cmd bin project-path)
+                  :command (list (rustic-cargo-bin) cmd bin project-path)
                   :sentinel new-sentinel)))
 
 ;;;###autoload
@@ -456,7 +466,7 @@ If BIN is not nil, create a binary application, otherwise a library."
 (defun rustic-cargo-build ()
   "Run 'cargo build' for the current project."
   (interactive)
-  (rustic-run-cargo-command (list rustic-cargo-bin "build")))
+  (rustic-run-cargo-command (list (rustic-cargo-bin) "build")))
 
 ;;;###autoload
 (defun rustic-run-shell-command (&optional arg)
@@ -474,7 +484,7 @@ If running with prefix command `C-u', read whole command from minibuffer."
   (interactive "P")
   (let* ((command (if arg
                       (read-from-minibuffer "Cargo run command: " "cargo run ")
-                    (concat rustic-cargo-bin " run "
+                    (concat (rustic-cargo-bin) " run "
                             (read-from-minibuffer
                              "Run arguments: "
                              (if (rustic-cargo-run-get-relative-example-name)
@@ -563,27 +573,27 @@ and the latter for interacting with the compiled program."
 (defun rustic-cargo-clean ()
   "Run 'cargo clean' for the current project."
   (interactive)
-  (rustic-run-cargo-command (list rustic-cargo-bin "clean")))
+  (rustic-run-cargo-command (list (rustic-cargo-bin) "clean")))
 
 ;;;###autoload
 (defun rustic-cargo-check ()
   "Run 'cargo check' for the current project."
   (interactive)
-  (rustic-run-cargo-command (list rustic-cargo-bin "check")))
+  (rustic-run-cargo-command (list (rustic-cargo-bin) "check")))
 
 ;;;###autoload
 (defun rustic-cargo-bench ()
   "Run 'cargo bench' for the current project."
   (interactive)
-  (rustic-run-cargo-command (list rustic-cargo-bin "bench")))
+  (rustic-run-cargo-command (list (rustic-cargo-bin) "bench")))
 
 ;;;###autoload
 (defun rustic-cargo-build-doc ()
   "Build the documentation for the current project."
   (interactive)
   (if (y-or-n-p "Create documentation for dependencies?")
-      (rustic-run-cargo-command (list rustic-cargo-bin "doc"))
-    (rustic-run-cargo-command (list rustic-cargo-bin "doc --no-deps"))))
+      (rustic-run-cargo-command (list (rustic-cargo-bin) "doc"))
+    (rustic-run-cargo-command (list (rustic-cargo-bin) "doc --no-deps"))))
 
 ;; TODO: buffer with cargo output should be in rustic-compilation-mode
 ;;;###autoload
@@ -593,8 +603,8 @@ The documentation is built if necessary."
   (interactive)
   (if (y-or-n-p "Open docs for dependencies as well?")
       ;; open docs only works with synchronous process
-      (shell-command (list rustic-cargo-bin "doc --open"))
-    (shell-command (list rustic-cargo-bin "doc --open --no-deps"))))
+      (shell-command (list (rustic-cargo-bin) "doc --open"))
+    (shell-command (list (rustic-cargo-bin) "doc --open --no-deps"))))
 
 ;;; cargo edit
 
@@ -610,8 +620,8 @@ If running with prefix command `C-u', read whole command from minibuffer."
   (when (rustic-cargo-edit-installed-p)
     (let* ((command (if arg
                         (read-from-minibuffer "Cargo add command: "
-                                              rustic-cargo-bin " add ")
-                      (concat rustic-cargo-bin " add "
+                                              (rustic-cargo-bin) " add ")
+                      (concat (rustic-cargo-bin) " add "
                               (read-from-minibuffer "Crate: ")))))
       (rustic-run-cargo-command command))))
 
@@ -623,8 +633,8 @@ If running with prefix command `C-u', read whole command from minibuffer."
   (when (rustic-cargo-edit-installed-p)
     (let* ((command (if arg
                         (read-from-minibuffer "Cargo rm command: "
-                                              rustic-cargo-bin " rm ")
-                      (concat rustic-cargo-bin " rm "
+                                              (rustic-cargo-bin) " rm ")
+                      (concat (rustic-cargo-bin) " rm "
                               (read-from-minibuffer "Crate: ")))))
       (rustic-run-cargo-command command))))
 
@@ -636,8 +646,8 @@ If running with prefix command `C-u', read whole command from minibuffer."
   (when (rustic-cargo-edit-installed-p)
     (let* ((command (if arg
                         (read-from-minibuffer "Cargo upgrade command: "
-                                              rustic-cargo-bin " upgrade ")
-                      (concat rustic-cargo-bin " upgrade"))))
+                                              (rustic-cargo-bin) " upgrade ")
+                      (concat (rustic-cargo-bin) " upgrade"))))
       (rustic-run-cargo-command command))))
 
 (provide 'rustic-cargo)

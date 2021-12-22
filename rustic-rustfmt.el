@@ -12,10 +12,20 @@
 
 ;;; Options
 
-(defcustom rustic-rustfmt-bin "~/.cargo/bin/rustfmt"
+(defcustom rustic-rustfmt-bin "rustfmt"
   "Path to rustfmt executable."
   :type 'string
   :group 'rustic)
+
+(defcustom rustic-rustfmt-bin-remote "~/.cargo/bin/rustfmt"
+  "Path to remote rustfmt executable."
+  :type 'string
+  :group 'rustic)
+
+(defun rustic-rustfmt-bin ()
+  (if (file-remote-p (or (buffer-file-name) ""))
+      rustic-rustfmt-bin-remote
+    rustic-rustfmt-bin))
 
 (defcustom rustic-rustfmt-args ""
   "String of additional arguments."
@@ -97,7 +107,7 @@ and it's `cdr' is a list of arguments."
       (unless (file-exists-p it)
         (error (format "File %s does not exist." it))))
     (with-current-buffer err-buf
-      (let* ((c `(,rustic-rustfmt-bin
+      (let* ((c `(,(rustic-rustfmt-bin)
                   ,rustic-rustfmt-args
                   ,@command "--" ,@files))
              (proc (rustic-make-process :name rustic-format-process-name
@@ -185,7 +195,7 @@ and it's `cdr' is a list of arguments."
 (defun rustic-cargo-fmt ()
   "Use rustfmt via cargo."
   (interactive)
-  (let ((command (list rustic-cargo-bin "fmt"))
+  (let ((command (list (rustic-cargo-bin) "fmt"))
         (buffer rustic-format-buffer-name)
         (proc rustic-format-process-name)
         (mode 'rustic-cargo-fmt-mode))
@@ -244,7 +254,7 @@ This operation requires a nightly version of rustfmt.
        'rustic-format-file-sentinel
        :buffer buf
        :command
-       (append (list rustic-cargo-bin "+nightly" "fmt" "--")
+       (append (list (rustic-cargo-bin) "+nightly" "fmt" "--")
                (rustic-compute-rustfmt-file-lines-args file
                                                        start
                                                        finish))))))
@@ -333,8 +343,8 @@ This is basically a wrapper around `project--buffer-list'."
 (defun rustic-after-save-hook ()
   "Check if rustfmt is installed after saving the file."
   (when (rustic-format-on-save-p)
-    (unless (executable-find rustic-rustfmt-bin)
-      (error "Could not locate executable \"%s\"" rustic-rustfmt-bin))))
+    (unless (executable-find (rustic-rustfmt-bin))
+      (error "Could not locate executable \"%s\"" (rustic-rustfmt-bin)))))
 
 (defun rustic-maybe-format-after-save (buffer)
   (when (rustic-format-on-save-p)
