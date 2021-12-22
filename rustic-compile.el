@@ -31,6 +31,16 @@
   :type 'string
   :group 'rustic-compilation)
 
+(defcustom rustic-compile-command-remote "~/.cargo/bin/cargo"
+  "Default command for remote rust compilation."
+  :type 'string
+  :group 'rustic-compilation)
+
+(defun rustic-compile-command ()
+  (if (file-remote-p (or (buffer-file-name) ""))
+      rustic-compile-command-remote
+    rustic-compile-command))
+
 (defcustom rustic-compile-display-method 'display-buffer
   "Default function used for displaying compilation buffer."
   :type 'function
