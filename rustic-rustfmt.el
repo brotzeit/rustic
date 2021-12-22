@@ -12,7 +12,12 @@
 
 ;;; Options
 
-(defcustom rustic-rustfmt-bin "~/.cargo/bin/rustfmt"
+(defcustom rustic-rustfmt-bin "rustfmt"
+  "Path to rustfmt executable."
+  :type 'string
+  :group 'rustic)
+
+(defcustom rustic-rustfmt-bin-remote "~/.cargo/bin/rustfmt"
   "Path to rustfmt executable."
   :type 'string
   :group 'rustic)
@@ -185,7 +190,7 @@ and it's `cdr' is a list of arguments."
 (defun rustic-cargo-fmt ()
   "Use rustfmt via cargo."
   (interactive)
-  (let ((command (list rustic-cargo-bin "fmt"))
+  (let ((command (list (rustic-cargo-bin) "fmt"))
         (buffer rustic-format-buffer-name)
         (proc rustic-format-process-name)
         (mode 'rustic-cargo-fmt-mode))
@@ -244,7 +249,7 @@ This operation requires a nightly version of rustfmt.
        'rustic-format-file-sentinel
        :buffer buf
        :command
-       (append (list rustic-cargo-bin "+nightly" "fmt" "--")
+       (append (list (rustic-cargo-bin) "+nightly" "fmt" "--")
                (rustic-compute-rustfmt-file-lines-args file
                                                        start
                                                        finish))))))

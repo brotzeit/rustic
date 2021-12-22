@@ -68,7 +68,7 @@
   (if rustic--buffer-workspace
       rustic--buffer-workspace
     (with-temp-buffer
-      (let ((ret (call-process rustic-cargo-bin nil t nil "locate-project" "--workspace")))
+      (let ((ret (call-process (rustic-cargo-bin) nil t nil "locate-project" "--workspace")))
         (when (and (/= ret 0) (not nodefault))
           (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
         (goto-char 0)
