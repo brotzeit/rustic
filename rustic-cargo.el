@@ -18,12 +18,12 @@
   :group 'rustic-cargo)
 
 (defcustom rustic-cargo-bin-remote "~/.cargo/bin/cargo"
-  "Path to cargo executable."
+  "Path to remote cargo executable."
   :type 'string
   :group 'rustic-cargo)
 
 (defun rustic-cargo-bin ()
-  (if (file-remote-p (buffer-file-name (current-buffer)))
+  (if (file-remote-p (or (buffer-file-name) ""))
       rustic-cargo-bin-remote
     rustic-cargo-bin))
 
@@ -646,7 +646,7 @@ If running with prefix command `C-u', read whole command from minibuffer."
   (when (rustic-cargo-edit-installed-p)
     (let* ((command (if arg
                         (read-from-minibuffer "Cargo upgrade command: "
-                                              rustic-cargo-bin " upgrade ")
+                                              (rustic-cargo-bin) " upgrade ")
                       (concat (rustic-cargo-bin) " upgrade"))))
       (rustic-run-cargo-command command))))
 

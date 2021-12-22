@@ -99,7 +99,7 @@
     (let ((proc (rustic-format-start-process
                  'rustic-format-file-sentinel
                  :buffer buf
-                 :command `(,rustic-rustfmt-bin ,main))))
+                 :command `(,(rustic-rustfmt-bin) ,main))))
       (while (eq (process-status proc) 'run)
         (sit-for 0.1)))
     (with-temp-buffer
