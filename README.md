@@ -169,6 +169,7 @@ Customization:
   buffer to be displayed)
 - `rustic-compile-backtrace` change backtrace verbosity
 - `rustic-compile-command` default command for rust compilation
+- `rustic-compile-command-remote` default command for remote rust compilation
 
 Supported compile.el variables:
 
@@ -232,6 +233,7 @@ formatting, turn off `rustic-format-on-save` and set
 Customization:
 
 - `rustic-rustfmt-bin` path to rustfmt executable
+- `rustic-rustfmt-bin-remote` default path to remote rustfmt executable
 - `rustic-rustfmt-args` additional args like +nightly
 - `rustic-rustfmt-config-alist` alist of rustfmt configuration options
 - `rustic-format-display-method` default function used for displaying
@@ -407,6 +409,11 @@ you might have to additionally use:
 You'll have to have `rust-analyzer` already installed on the target machine.
 
 ## Cargo
+
+Customization:
+
+- `rustic-cargo-bin` Path to cargo executable
+- `rustic-cargo-bin-remote` Path to remote cargo executable
 
 ### Edit
 
