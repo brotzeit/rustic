@@ -31,6 +31,16 @@
   :type 'string
   :group 'rustic-compilation)
 
+(defcustom rustic-compile-command-remote "~/.cargo/bin/cargo"
+  "Default command for remote rust compilation."
+  :type 'string
+  :group 'rustic-compilation)
+
+(defun rustic-compile-command ()
+  (if (file-remote-p (or (buffer-file-name) ""))
+      rustic-compile-command-remote
+    rustic-compile-command))
+
 (defcustom rustic-compile-display-method 'display-buffer
   "Default function used for displaying compilation buffer."
   :type 'function
@@ -489,8 +499,8 @@ In either store the used command in `compilation-arguments'."
         (if (or compilation-read-command arg)
             (read-from-minibuffer "Compile command: "
                                   (or compilation-arguments
-                                      rustic-compile-command))
-          rustic-compile-command))
+                                      (rustic-compile-command)))
+          (rustic-compile-command)))
   (setq compilation-directory (funcall rustic-compile-directory-method))
   (rustic-compilation-process-live)
   (rustic-compilation-start (split-string compilation-arguments)
@@ -500,7 +510,7 @@ In either store the used command in `compilation-arguments'."
 (defun rustic-recompile ()
   "Re-compile the program using `compilation-arguments'."
   (interactive)
-  (let* ((command (or compilation-arguments rustic-compile-command))
+  (let* ((command (or compilation-arguments (rustic-compile-command)))
          (dir compilation-directory))
     (rustic-compilation-process-live)
     (rustic-compilation (split-string command) (list :directory dir))))
