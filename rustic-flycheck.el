@@ -180,7 +180,7 @@ Flycheck according to the Cargo project layout."
   "A Rust syntax checker using clippy.
 
 See URL `https://github.com/rust-lang-nursery/rust-clippy'."
-  :command ("cargo" "clippy" (eval (split-string (rustic-flycheck-clippy-params))))
+  :command ((eval (rustic-cargo-bin)) "clippy" (eval (split-string (rustic-flycheck-clippy-params))))
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
