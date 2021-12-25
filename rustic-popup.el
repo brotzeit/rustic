@@ -124,9 +124,7 @@ If directory is not in a rust project call `read-directory-name'."
         (funcall func)
       (let ((dir (read-directory-name "Rust project:")))
         (let ((default-directory dir))
-          (if (rustic-buffer-crate t)
-              (funcall func)
-            (message "Not a rust project.")))))))
+          (funcall func))))))
 
 ;;; Interactive
 
