@@ -249,7 +249,7 @@ Execute process in PATH."
          (inhibit-read-only t))
     (make-process :name rustic-cargo-outdated-process-name
                   :buffer buf
-                  :command '("cargo" "outdated" "--depth" "1")
+                  :command `(,(rustic-cargo-bin) "outdated" "--depth" "1")
                   :filter #'rustic-cargo-outdated-filter
                   :sentinel #'rustic-cargo-outdated-sentinel
                   :file-handler t)
@@ -301,7 +301,7 @@ Execute process in PATH."
   "Ask whether to install crate CRATE."
   (let ((cmd (format "cargo install cargo-%s" crate)))
     (when (yes-or-no-p (format "Cargo-%s missing. Install ? " crate))
-      (async-shell-command cmd "cargo" "cargo-error"))))
+      (async-shell-command cmd (rustic-cargo-bin) "cargo-error"))))
 
 (defun rustic-cargo-outdated-generate-menu (packages)
   "Re-populate the `tabulated-list-entries' with PACKAGES."
