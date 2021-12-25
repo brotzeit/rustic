@@ -146,14 +146,6 @@ that doesn't work remotely, please open an issue.
 
 ## Compilation
 
-Rustic defines a derived compilation-mode. Colors can be customized
-with several defcustoms.  You can use `next-error` and
-`compilation-next-error` as for any other compilation buffer.
-
-However it's possible to also jump to line numbers that are displayed
-at the beginning of a line.  This feature is provided by a hook around
-`compile-goto-error`(`RET`).
-
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/compilation_buffer.png)
 
 Commands:
@@ -175,6 +167,16 @@ Supported compile.el variables:
 
 - compilation-arguments
 - compilation-scroll-output
+
+### Navigating errors
+
+Rustic defines a derived compilation-mode. Colors can be customized
+with several defcustoms.  You can use `next-error` and
+`compilation-next-error` as for any other compilation buffer.
+
+However it's possible to also jump to line numbers that are displayed
+at the beginning of a line.  This feature is provided by a hook around
+`compile-goto-error`(`RET`).
 
 ### default directory
 
@@ -409,6 +411,9 @@ you might have to additionally use:
 You'll have to have `rust-analyzer` already installed on the target machine.
 
 ## Cargo
+
+Since the cargo commands also use the derived compilation mode, you can use
+the commands that are mentioned in the "compilation" section.
 
 Customization:
 
