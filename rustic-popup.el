@@ -25,7 +25,7 @@ The first element of each list contains a command's binding."
   :type 'list
   :group 'rustic-popup)
 
-(defcustom rustic-kill-buffer-and-window nil
+(defcustom rustic-kill-buffer-and-window t
   "Whether to kill popup window and buffer after command execution."
   :type 'boolean
   :group 'rustic)
