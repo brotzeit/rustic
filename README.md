@@ -771,8 +771,9 @@ You can change the defaults by modifying
 
 ## Popup
 
-You can execute commands with `rustic-popup`. The list of commands can
-be customized with `rustic-popup-commands`.  The command
+You can execute commands with `rustic-popup`(call it with optional
+argument `C-u` to choose a directory). The list of commands can be
+customized with `rustic-popup-commands`.  The command
 `rustic-popup-default-action` (`RET` or `TAB`) allows you to change:
 
 - `RUST_BACKTRACE` environment variable

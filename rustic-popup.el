@@ -107,10 +107,10 @@ The first element of each list contains a command's binding."
       (goto-char (point-min)))))
 
 ;;;###autoload
-(defun rustic-popup ()
+(defun rustic-popup (&optional args)
   "Setup popup.
 If directory is not in a rust project call `read-directory-name'."
-  (interactive)
+  (interactive "P")
   (let ((func (lambda ()
                 (let ((buf (get-buffer-create rustic-popup-buffer-name))
                       (win (split-window-below))
@@ -120,11 +120,11 @@ If directory is not in a rust project call `read-directory-name'."
                   (select-window win)
                   (fit-window-to-buffer)
                   (set-window-text-height win (+ (window-height) 1))))))
-    (if (rustic-buffer-crate t)
-        (funcall func)
-      (let ((dir (read-directory-name "Rust project:")))
-        (let ((default-directory dir))
-          (funcall func))))))
+    (if args
+        (let ((dir (read-directory-name "Rust project:")))
+          (let ((default-directory dir))
+            (funcall func)))
+      (funcall func))))
 
 ;;; Interactive
 
