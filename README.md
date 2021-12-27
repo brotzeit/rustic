@@ -13,6 +13,7 @@
         - [straight](#straight)
     - [remote](#remote)
     - [Compilation](#compilation)
+        - [Navigating errors](#navigating-errors)
         - [default directory](#default-directory)
         - [Faces](#faces)
         - [rustc errors](#rustc-errors)
