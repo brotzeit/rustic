@@ -281,10 +281,7 @@ This operation requires a nightly version of rustfmt.
 
 ;;;###autoload
 (defun rustic-format-buffer ()
-  "Format the current buffer using rustfmt.
-
-Provide optional argument NO-STDIN for `rustic-before-save-hook' since there
-were issues when using stdin for formatting."
+  "Format the current buffer using rustfmt."
   (interactive)
   (unless (or (eq major-mode 'rustic-mode)
               (eq major-mode 'rustic-macro-expansion-mode))
@@ -295,10 +292,7 @@ were issues when using stdin for formatting."
                                :stdin (buffer-string)))
 
 (defun rustic-format-macro-buffer ()
-  "Format the current buffer with macro output using rustfmt.
-
-Provide optional argument NO-STDIN for `rustic-before-save-hook' since there
-were issues when using stdin for formatting."
+  "Format the current buffer using rustfmt, and theh remove first and last lines."
   (interactive)
   (unless (or (eq major-mode 'rustic-mode)
               (eq major-mode 'rustic-macro-expansion-mode))
