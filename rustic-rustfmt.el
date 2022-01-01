@@ -168,6 +168,28 @@ and it's `cdr' is a list of arguments."
           (funcall rustic-format-display-method proc-buffer)
           (message "Rustfmt error."))))))
 
+(defun rustic-format-macro-sentinel (proc output)
+  "Format buffer and remove decorations that we create for rustfmt"
+  (rustic-format-sentinel proc output)
+  (with-current-buffer next-error-last-buffer
+    (save-excursion
+      (read-only-mode -1)
+      ;; remove fn __main() {
+      (goto-char (point-min))
+      (delete-region (point-min) (line-end-position))
+      (delete-blank-lines)
+      (goto-char (point-max))
+      ;; remove } from fn __main()
+      (forward-line -1)
+      (delete-region (line-beginning-position) (point-max))
+      ;; reindent buffer to left
+      (indent-region (point-min) (point-max))
+      (goto-char (point-max))
+      ;; clean blanked line
+      ;; (delete-blank-lines)
+      (delete-trailing-whitespace (point-min) (point-max)))))
+
+
 (defun rustic-format-file-sentinel (proc output)
   "Sentinel for rustfmt processes when formatting a file."
   (ignore-errors
@@ -243,8 +265,6 @@ This operation requires a nightly version of rustfmt.
               (eq major-mode 'rustic-macro-expansion-mode))
     (error "Not a rustic-mode buffer."))
   (if (not (region-active-p)) (rustic-format-buffer)
-    (unless (equal (call-process "cargo" nil nil nil "+nightly") 0)
-      (error "Need nightly toolchain to format region."))
     (let* ((buf (current-buffer))
            (file (buffer-file-name buf))
            (start (rustic--get-line-number begin))
@@ -261,16 +281,24 @@ This operation requires a nightly version of rustfmt.
 
 ;;;###autoload
 (defun rustic-format-buffer ()
-  "Format the current buffer using rustfmt.
-
-Provide optional argument NO-STDIN for `rustic-before-save-hook' since there
-were issues when using stdin for formatting."
+  "Format the current buffer using rustfmt."
   (interactive)
   (unless (or (eq major-mode 'rustic-mode)
               (eq major-mode 'rustic-macro-expansion-mode))
     (error "Not a rustic-mode buffer."))
   (rustic-compilation-process-live t)
   (rustic-format-start-process 'rustic-format-sentinel
+                               :buffer (current-buffer)
+                               :stdin (buffer-string)))
+
+(defun rustic-format-macro-buffer ()
+  "Format the current buffer using rustfmt, and theh remove first and last lines."
+  (interactive)
+  (unless (or (eq major-mode 'rustic-mode)
+              (eq major-mode 'rustic-macro-expansion-mode))
+    (error "Not a rustic-mode buffer."))
+  (rustic-compilation-process-live t)
+  (rustic-format-start-process 'rustic-format-macro-sentinel
                                :buffer (current-buffer)
                                :stdin (buffer-string)))
 
