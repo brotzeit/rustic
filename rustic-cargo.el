@@ -130,6 +130,13 @@ When calling this function from `rustic-popup-mode', always use the value of
 (defvar rustic-test-arguments ""
   "Holds arguments for 'cargo test', similar to `compilation-arguments`.")
 
+(defvar rustic-cargo-test-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map rustic-compilation-mode-map)
+    (define-key map (kbd "g") 'rustic-cargo-test-rerun)
+    map)
+  "Local keymap for `rustic-cargo-test-mode' buffers.")
+
 (define-derived-mode rustic-cargo-test-mode rustic-compilation-mode "cargo-test"
   :group 'rustic)
 
