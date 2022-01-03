@@ -348,9 +348,10 @@ This is basically a wrapper around `project--buffer-list'."
       (let ((proc (rustic-cargo-fmt)))
         (while (eq (process-status proc) 'run)
           (sit-for 0.1))
-        (and (not (zerop (process-exit-status proc)))
-             (funcall rustic-compile-display-method (process-buffer proc))
-             t))
+        (if (zerop (process-exit-status proc))
+            t
+          (funcall rustic-compile-display-method (process-buffer proc))
+          nil))
     t))
 
 (add-hook 'rustic-before-compilation-hook

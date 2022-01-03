@@ -187,6 +187,7 @@
 
 ;; `rustic-format-trigger' is set to 'on-compile
 (ert-deftest rustic-test-trigger-format-on-compile ()
+  (ignore-errors (kill-buffer (get-buffer rustic-compilation-buffer-name)))
   (let* ((buffer1 (get-buffer-create "b1"))
          (string "fn main()      {}")
          (formatted-string "fn main() {}\n")
@@ -204,9 +205,34 @@
       (if-let ((proc (call-interactively 'rustic-compile)))
           (while (eq (process-status proc) 'run)
             (sit-for 0.01)))
+      ;; #352
+      (should (get-buffer rustic-compilation-buffer-name))
       (with-current-buffer buffer1
         (revert-buffer t t)
         (should (string= (buffer-string) formatted-string)))
+      (kill-buffer buffer1))))
+
+;; #352 -> test if compilation doesn't start when format failed
+(ert-deftest rustic-test-trigger-format-on-compile-format-error ()
+  (ignore-errors (kill-buffer (get-buffer rustic-compilation-buffer-name)))
+  (let* ((buffer1 (get-buffer-create "b1"))
+         (string "ffn main()      {}")
+         (formatted-string "fn main() {}\n")
+         (dir (rustic-babel-generate-project t))
+         (compilation-read-command nil))
+    (let* ((default-directory dir)
+           (src (concat dir "/src"))
+           (file1 (expand-file-name "main.rs" src))
+           (rustic-format-trigger 'on-compile))
+      (with-current-buffer buffer1
+        (insert string)
+        (write-file file1))
+
+      ;; run `rustic-compile'
+      (if-let ((proc (call-interactively 'rustic-compile)))
+          (while (eq (process-status proc) 'run)
+            (sit-for 0.01)))
+      (should-not (get-buffer rustic-compilation-buffer-name))
       (kill-buffer buffer1))))
 
 (ert-deftest rustic-test-format-region ()
