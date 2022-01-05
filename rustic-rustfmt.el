@@ -359,15 +359,17 @@ This is basically a wrapper around `project--buffer-list'."
 
 (defun rustic-before-save-hook ()
   "Don't throw error if rustfmt isn't installed, as it makes saving impossible."
-  (when (and (rustic-format-on-save-p)
-             (not (rustic-compilation-process-live t)))
-    (condition-case nil
-        (progn
-          (if (file-remote-p (buffer-file-name))
-              (rustic-format-buffer)
-            (funcall rustic-format-on-save-method))
-          (sit-for 0.1))
-      (error nil))))
+  (save-excursion
+    (save-window-excursion
+      (when (and (rustic-format-on-save-p)
+                 (not (rustic-compilation-process-live t)))
+        (condition-case nil
+            (progn
+              (if (file-remote-p (buffer-file-name))
+                  (rustic-format-buffer)
+                (funcall rustic-format-on-save-method))
+              (sit-for 0.1))
+          (error nil))))))
 
 (defun rustic-after-save-hook ()
   "Check if rustfmt is installed after saving the file."
