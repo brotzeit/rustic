@@ -287,9 +287,11 @@ This operation requires a nightly version of rustfmt.
               (eq major-mode 'rustic-macro-expansion-mode))
     (error "Not a rustic-mode buffer."))
   (rustic-compilation-process-live t)
-  (rustic-format-start-process 'rustic-format-sentinel
-                               :buffer (current-buffer)
-                               :stdin (buffer-string)))
+  (save-excursion
+    (save-window-excursion
+      (rustic-format-start-process 'rustic-format-sentinel
+                                   :buffer (current-buffer)
+                                   :stdin (buffer-string)))))
 
 (defun rustic-format-macro-buffer ()
   "Format the current buffer using rustfmt, and theh remove first and last lines."
