@@ -227,6 +227,7 @@ You can format your code with:
 - `rustic-format-file`   format file and revert buffer
 - `rustic-cargo-fmt`     run cargo-fmt on workspace
 - `rustic-format-region` format active region
+- `rustic-format-dwim`   run format on region,file or cargo fmt
 
 Rustic uses the function `rustic-save-some-buffers` for saving buffers
 before compilation. To save buffers automatically, you can change the

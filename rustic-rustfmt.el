@@ -323,6 +323,17 @@ This operation requires a nightly version of rustfmt.
       (while (eq (process-status proc) 'run)
         (sit-for 0.05)))))
 
+(defun rustic-format-dwim (beg end)
+  "Format region if active, if not check if major mode is rustic
+and format file, or else run 'cargo fmt'."
+  (interactive "r")
+  (cond ((region-active-p)
+         (rustic-format-region beg end))
+        ((eq major-mode 'rustic-mode)
+         (rustic-format-file))
+        (t
+         (rustic-cargo-fmt))))
+
 (defun rustic-project-root (project)
   "Runs the correct version of project-root function for
 different emacs versions."
