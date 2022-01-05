@@ -251,8 +251,10 @@ ARGS is a plist that affects how the process is run,
 see `rustic-compilation' for details.  First run
 `rustic-before-compilation-hook' and if any of these
 functions fails, then do not start compilation."
-  (when (run-hook-with-args-until-failure 'rustic-before-compilation-hook)
-    (rustic-compilation command args)))
+  (save-excursion
+    (save-window-excursion
+      (when (run-hook-with-args-until-failure 'rustic-before-compilation-hook)
+        (rustic-compilation command args)))))
 
 (defun rustic-compilation (command &optional args)
   "Start a compilation process with COMMAND.
