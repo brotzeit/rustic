@@ -514,7 +514,7 @@ In either store the used command in `compilation-arguments'."
   (let* ((command (or compilation-arguments (rustic-compile-command)))
          (dir compilation-directory))
     (rustic-compilation-process-live)
-    (rustic-compilation (split-string command) (list :directory dir))))
+    (rustic-compilation-start (split-string command) (list :directory dir))))
 
 ;;; Spinner
 
