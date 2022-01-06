@@ -232,13 +232,14 @@ formatting, turn off `rustic-format-on-save` and set
 `rustic-lsp-format`to `t`.
 
 To save buffers automatically, you can change the value of
-`buffer-save-without-query`:
+`compilation-ask-about-save`, it has higher precedence than
+`buffer-save-without-query` when compiling.
 
 ```elisp
 (defun rustic-mode-auto-save-hook ()
     "Enable auto-saving in rustic-mode buffers."
     (when buffer-file-name
-      (setq-local buffer-save-without-query t)))
+      (setq-local compilation-ask-about-save nil)))
 (add-hook 'rustic-mode-hook 'rustic-mode-auto-save-hook)
 ```
 

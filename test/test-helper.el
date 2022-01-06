@@ -108,5 +108,5 @@ list of substrings of `STR' each followed by its face."
 (defun rustic-mode-auto-save-hook ()
     "Enable auto-saving in rustic-mode buffers."
     (when buffer-file-name
-      (setq-local buffer-save-without-query t)))
+      (setq-local compilation-ask-about-save nil)))
 (add-hook 'rustic-mode-hook 'rustic-mode-auto-save-hook)

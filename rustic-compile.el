@@ -368,7 +368,7 @@ If NO-ERROR is t, don't throw error if user chooses not to kill running process.
 (defun rustic-save-some-buffers ()
   "Unlike `save-some-buffers', only consider project related files.
 
-The variable `buffer-save-without-query' can be used for customization and
+The variable `compilation-ask-about-save' can be used for customization and
 buffers are formatted after saving if turned on by `rustic-format-trigger'."
   (let ((buffers (cl-remove-if-not
                   #'buffer-file-name
@@ -387,7 +387,7 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
             (let ((rustic-format-trigger nil)
                   (rustic-format-on-save nil))
               (setq saved-p
-                    (if buffer-save-without-query
+                    (if (not compilation-ask-about-save)
                         (progn (save-buffer) t)
                       (if (yes-or-no-p (format "Save file %s ? "
                                                (buffer-file-name buffer)))
