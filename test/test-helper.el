@@ -49,7 +49,6 @@ Emacs shutdown.")
          (dir (rustic-babel-generate-project t))
          (src (concat dir "/src"))
          (file (expand-file-name "main.rs" src))
-         (buffer-save-without-query t)
          (rustic-format-trigger nil))
     (with-current-buffer buffer
       (write-file file)
@@ -105,3 +104,9 @@ list of substrings of `STR' each followed by its face."
     (font-lock-ensure)
     (font-lock-flush)
     (buffer-string)))
+
+(defun rustic-mode-auto-save-hook ()
+    "Enable auto-saving in rustic-mode buffers."
+    (when buffer-file-name
+      (setq-local buffer-save-without-query t)))
+(add-hook 'rustic-mode-hook 'rustic-mode-auto-save-hook)

@@ -229,10 +229,20 @@ You can format your code with:
 - `rustic-format-dwim`   run format on region,file or cargo fmt
 
 Rustic uses the function `rustic-save-some-buffers` for saving buffers
-before compilation. To save buffers automatically, you can change the
-value of `buffer-save-without-query`. In case you prefer using lsp for
+before compilation. In case you prefer using lsp for
 formatting, turn off `rustic-format-on-save` and set
 `rustic-lsp-format`to `t`.
+
+To save buffers automatically, you can change the value of
+`buffer-save-without-query`:
+
+```elisp
+(defun rustic-mode-auto-save-hook ()
+    "Enable auto-saving in rustic-mode buffers."
+    (when buffer-file-name
+      (setq-local buffer-save-without-query t)))
+(add-hook 'rustic-mode-hook 'rustic-mode-auto-save-hook)
+```
 
 Customization:
 
