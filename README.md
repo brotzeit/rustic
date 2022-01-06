@@ -95,8 +95,6 @@ rustic namespace for backwards compatability reasons(rustic has been a fork).
 
 ## Known issues
 
-- `rustic-format-buffer` occasionally sets point to beginning of buffer,
-   use `rustic-format-file` instead
 - `rust-syntax-propertize` and `adaptive-wrap-prefix-mode` can lead to
   severe lag when editing larger files (#107)
 
