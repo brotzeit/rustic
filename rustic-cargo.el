@@ -274,7 +274,8 @@ Execute process in PATH."
                   :buffer buf
                   :command '("cargo" "outdated" "--depth" "1")
                   :filter #'rustic-cargo-outdated-filter
-                  :sentinel #'rustic-cargo-outdated-sentinel)
+                  :sentinel #'rustic-cargo-outdated-sentinel
+                  :file-handler t)
     (with-current-buffer buf
       (setq default-directory dir)
       (erase-buffer)
@@ -443,7 +444,8 @@ BIN is not nil, create a binary application, otherwise a library."
     (make-process :name proc
                   :buffer buf
                   :command (list (rustic-cargo-bin) cmd bin project-path)
-                  :sentinel new-sentinel)))
+                  :sentinel new-sentinel
+                  :file-handler t)))
 
 ;;;###autoload
 (defun rustic-cargo-new (project-path &optional bin)
