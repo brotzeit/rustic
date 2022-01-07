@@ -105,6 +105,10 @@ this variable."
 
     (define-key map (kbd "C-c C-c C-u") 'rustic-compile)
     (define-key map (kbd "C-c C-c C-i") 'rustic-recompile)
+    (define-key map (kbd "C-c C-c C-o") 'rustic-format-buffer)
+    (define-key map (kbd "C-c C-c C-d") 'rustic-racer-describe)
+    (define-key map (kbd "C-c C-c C-,") 'rustic-docstring-dwim)
+
     (define-key map (kbd "C-c C-c C-b") 'rustic-cargo-build)
     (define-key map (kbd "C-c C-c C-k") 'rustic-cargo-check)
     (define-key map (kbd "C-c C-c C-r") 'rustic-cargo-run)
@@ -112,11 +116,18 @@ this variable."
     (define-key map (kbd "C-c C-c C-t") 'rustic-cargo-test)
     (define-key map (kbd "C-c C-c C-c") 'rustic-cargo-current-test)
     (define-key map (kbd "C-c C-c C-l") 'rustic-cargo-clippy)
-    (define-key map (kbd "C-c C-c C-o") 'rustic-format-buffer)
-
-    (define-key map (kbd "C-c C-c C-d") 'rustic-racer-describe)
-    (define-key map (kbd "C-c C-c C-,") 'rustic-docstring-dwim)
     (define-key map (kbd "C-c C-c C-n") 'rustic-cargo-outdated)
+    (define-key map (kbd "C-c C-c n") 'rustic-cargo-new)
+    (define-key map (kbd "C-c C-c i") 'rustic-cargo-init)
+    (define-key map (kbd "C-c C-c b") 'rustic-cargo-bench)
+    (define-key map (kbd "C-c C-c d") 'rustic-cargo-doc)
+    (define-key map (kbd "C-c C-c c") 'rustic-cargo-clean)
+    (define-key map (kbd "C-c C-c k") 'rustic-cargo-clippy)
+    (define-key map (kbd "C-c C-c f") 'rustic-cargo-clippy-fix)
+    ;; cargo edit
+    (define-key map (kbd "C-c C-c a") 'rustic-cargo-add)
+    (define-key map (kbd "C-c C-c r") 'rustic-cargo-rm)
+    (define-key map (kbd "C-c C-c u") 'rustic-cargo-upgrade)
     map)
   "Keymap for Rust major mode.")
 
