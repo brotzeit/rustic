@@ -486,6 +486,9 @@ As a byproduct, you can run any shell command in your project like `pwd'"
   (setq command (read-from-minibuffer "Command to execute: " (car compile-history) nil nil 'compile-history))
   (rustic-run-cargo-command command (list :mode 'rustic-cargo-run-mode)))
 
+(defvar rustic-run-arguments ""
+  "Holds arguments for 'cargo run', similar to `compilation-arguments`.")
+
 ;;;###autoload
 (defun rustic-cargo-run (&optional arg)
   "Run 'cargo run' for the current project.
@@ -494,16 +497,22 @@ If running with prefix command `C-u', read whole command from minibuffer."
   (let* ((command (if arg
                       (read-from-minibuffer "Cargo run command: " "cargo run ")
                     (concat (rustic-cargo-bin) " run "
-                            (read-from-minibuffer
-                             "Run arguments: "
-                             (if (rustic-cargo-run-get-relative-example-name)
-                                 (concat "--example " (rustic-cargo-run-get-relative-example-name))
-                               (car compile-history))
-                             nil nil 'compile-history)))))
+                            (setq rustic-run-arguments (read-from-minibuffer
+                                                        "Run arguments: "
+                                                        (if (rustic-cargo-run-get-relative-example-name)
+                                                            (concat "--example " (rustic-cargo-run-get-relative-example-name))
+                                                          (car compile-history))
+                                                        nil nil 'compile-history)) ))))
     (rustic-run-cargo-command command (list :mode 'rustic-cargo-run-mode))))
 
+;;;###autoload
+(defun rustic-cargo-run-rerun ()
+  "Run 'cargo run' with `rustic-run-arguments'."
+  (interactive)
+  (rustic-run-cargo-command (list (rustic-cargo-bin) "run" rustic-run-arguments) (list :mode 'rustic-cargo-run-mode)))
+
 (defun rustic-cargo-run-get-relative-example-name ()
-  "Run 'cargo run --example' if current buffer within a 'exmaples' directory."
+  "Run 'cargo run --example' if current buffer within a 'examples' directory."
   (if rustic--buffer-workspace
       (let ((relative-filenames
              (split-string (file-relative-name buffer-file-name rustic--buffer-workspace) "/")))
@@ -526,6 +535,14 @@ If running with prefix command `C-u', read whole command from minibuffer."
         (rustic-cargo-comint-run-mode))
     (rustic-cargo-plain-run-mode)))
 
+(defvar rustic-cargo-plain-run-mode-map
+  (let ((map (make-sparse-keymap)))
+    (progn
+      (set-keymap-parent map rustic-compilation-mode-map)
+      (define-key map (kbd "g") 'rustic-cargo-run-rerun))
+    map)
+  "Local keymap for `rustic-cargo-plain-run-mode' buffers.")
+
 (define-derived-mode rustic-cargo-plain-run-mode rustic-compilation-mode "Cargo run"
   "Mode for 'cargo run' that derives from `rustic-compilation-mode'.
 
@@ -535,8 +552,10 @@ To send input to the compiled program, use
 string and hit RET to send it to the program.  The latter
 approach requires installing polymode."
   (buffer-disable-undo)
-  (setq buffer-read-only nil)
-  (use-local-map comint-mode-map))
+  (when rustic-cargo-run-use-comint
+    (progn
+      (setq buffer-read-only nil)
+      (use-local-map comint-mode-map))))
 
 (defun rustic-cargo-comint-run-mode ()
   "Mode for 'cargo run' that combines `rustic-compilation-mode' with `comint-mode',
