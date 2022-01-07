@@ -559,6 +559,7 @@ You can use lsp in babel blocks with `lsp-org`.
 
 - `rustic-babel-format-block` format block at point
 - `rustic-babel-visit-project` find generated project of block at point
+- `rustic-babel-clippy` run clippy on block(currently doesn't honor babel params, you can open a feature request if you miss it)
 
 ### Parameters
 
