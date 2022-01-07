@@ -511,8 +511,7 @@ In either store the used command in `compilation-arguments'."
 ;;       but probably we should
 (defun rustic-set-compilation-arguments (command)
   "Set `compilation-arguments' using COMMAND.
-It's a list that looks like (list command mode name-function highlight-regexp).
-."
+It's a list that looks like (list command mode name-function highlight-regexp)."
   ;; TODO: compile.el uses setq-local, but that does seem weird right ?
   (setq compilation-arguments (list command nil nil nil)))
 
