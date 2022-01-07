@@ -495,14 +495,16 @@ As a byproduct, you can run any shell command in your project like `pwd'"
 If running with prefix command `C-u', read whole command from minibuffer."
   (interactive "P")
   (let* ((command (if arg
-                      (read-from-minibuffer "Cargo run command: " "cargo run ")
+                      (read-from-minibuffer "Cargo run command: " "cargo run -- ")
                     (concat (rustic-cargo-bin) " run "
-                            (setq rustic-run-arguments (read-from-minibuffer
-                                                        "Run arguments: "
-                                                        (if (rustic-cargo-run-get-relative-example-name)
-                                                            (concat "--example " (rustic-cargo-run-get-relative-example-name))
-                                                          (car compile-history))
-                                                        nil nil 'compile-history)) ))))
+                            (setq rustic-run-arguments
+                                  (read-from-minibuffer
+                                   "Run arguments: "
+                                   (if (rustic-cargo-run-get-relative-example-name)
+                                       (concat "--example "
+                                               (rustic-cargo-run-get-relative-example-name))
+                                     (car compile-history))
+                                   nil nil 'compile-history)) ))))
     (rustic-run-cargo-command command (list :mode 'rustic-cargo-run-mode))))
 
 ;;;###autoload
