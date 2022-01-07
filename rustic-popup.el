@@ -92,7 +92,7 @@ The first element of each list contains a command's binding."
       (insert (propertize "Commands: " 'face 'rustic-popup-section) "\n")
       (insert " " (propertize "g" 'face 'rustic-popup-key)
               "      " "recompile" "   " "\""
-              (or compilation-arguments (rustic-compile-command))
+              (or (car compilation-arguments) (rustic-compile-command))
               "\"" "\n\n")
       (dolist (command rustic-popup-commands)
         (insert "\s")
@@ -167,9 +167,10 @@ corresponding line."
           (setq rustic-compile-backtrace "0")))
         (rustic-popup-insert-contents (current-buffer)))
        ((search-forward-regexp "\srecompile\s" (line-end-position) t)
-        (setq compilation-arguments
+        (rustic-set-compilation-arguments
               (read-string "Compilation arguments: "
-                           (or compilation-arguments (rustic-compile-command))))
+                           (or (car compilation-arguments)
+                               (rustic-compile-command))))
         (rustic-popup-insert-contents (current-buffer)))
        ((search-forward-regexp "\stest" (line-end-position) t)
         (setq rustic-test-arguments

@@ -497,21 +497,30 @@ use `rustic-compile-command'.
 
 In either store the used command in `compilation-arguments'."
   (interactive "P")
-  (setq compilation-arguments
+  (rustic-set-compilation-arguments
         (if (or compilation-read-command arg)
-            (compilation-read-command (or compilation-arguments
+            (compilation-read-command (or (car compilation-arguments)
                                           (rustic-compile-command)))
           (rustic-compile-command)))
   (setq compilation-directory (funcall rustic-compile-directory-method))
   (rustic-compilation-process-live)
-  (rustic-compilation-start (split-string compilation-arguments)
+  (rustic-compilation-start (split-string (car compilation-arguments))
                             (list :directory compilation-directory)))
+
+;; TODO: we don't use the other options stored in `compilation-arguments',
+;;       but probably we should
+(defun rustic-set-compilation-arguments (command)
+  "Set `compilation-arguments' using COMMAND.
+It's a list that looks like (list command mode name-function highlight-regexp).
+."
+  ;; TODO: compile.el uses setq-local, but that does seem weird right ?
+  (setq compilation-arguments (list command nil nil nil)))
 
 ;;;###autoload
 (defun rustic-recompile ()
   "Re-compile the program using `compilation-arguments'."
   (interactive)
-  (let* ((command (or compilation-arguments (rustic-compile-command)))
+  (let* ((command (or (car compilation-arguments) (rustic-compile-command)))
          (dir compilation-directory))
     (rustic-compilation-process-live)
     (rustic-compilation-start (split-string command) (list :directory dir))))

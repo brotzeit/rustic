@@ -92,7 +92,7 @@
       (let ((proc (rustic-recompile)))
         (while (eq (process-status proc) 'run)
           (sit-for 0.1)))
-      (should (string= compilation-arguments "cargo build"))
+      (should (string= (car compilation-arguments) "cargo build"))
       (should (string= compilation-directory dir))))
   (setq compilation-directory nil)
   (setq compilation-arguments nil))
