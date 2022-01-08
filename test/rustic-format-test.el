@@ -300,4 +300,26 @@
       (let ((proc (rustic-format-buffer)))
         (while (eq (process-status proc) 'run)
           (sit-for 0.1)))
+      (should (string= (buffer-string) formatted-string)))
+    (kill-buffer buf)))
+
+(ert-deftest rustic-test-rustfmt-toml-file-format-file-with-warning ()
+  (let* ((string "fn main()      {}")
+         (formatted-string "fn main() {}\n")
+         (dir (rustic-babel-generate-project t))
+         (main (expand-file-name "main.rs" (concat dir "/src")))
+         (buf (get-buffer-create "test")))
+    (rustic-test-format-create-rustfmt-toml dir "foo = 1\nbar = 2")
+    (write-region string nil main nil 0)
+
+    (with-current-buffer buf (write-file main))
+    (write-region string nil main nil 0)
+    (let ((proc (rustic-format-start-process
+                 'rustic-format-file-sentinel
+                 :buffer buf
+                 :files main)))
+      (while (eq (process-status proc) 'run)
+        (sit-for 0.1)))
+    (with-temp-buffer
+      (insert-file-contents main)
       (should (string= (buffer-string) formatted-string)))))
