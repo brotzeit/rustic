@@ -288,10 +288,9 @@ This operation requires a nightly version of rustfmt.
     (error "Not a rustic-mode buffer."))
   (rustic-compilation-process-live t)
   (save-excursion
-    (save-window-excursion
-      (rustic-format-start-process 'rustic-format-sentinel
-                                   :buffer (current-buffer)
-                                   :stdin (buffer-string)))))
+    (rustic-format-start-process 'rustic-format-sentinel
+                                 :buffer (current-buffer)
+                                 :stdin (buffer-string))))
 
 (defun rustic-format-macro-buffer ()
   "Format the current buffer using rustfmt, and theh remove first and last lines."
@@ -373,7 +372,6 @@ This is basically a wrapper around `project--buffer-list'."
 (defun rustic-before-save-hook ()
   "Don't throw error if rustfmt isn't installed, as it makes saving impossible."
   (save-excursion
-    (save-window-excursion
       (when (and (rustic-format-on-save-p)
                  (not (rustic-compilation-process-live t)))
         (condition-case nil
@@ -382,7 +380,7 @@ This is basically a wrapper around `project--buffer-list'."
                   (rustic-format-buffer)
                 (funcall rustic-format-on-save-method))
               (sit-for 0.1))
-          (error nil))))))
+          (error nil)))))
 
 (defun rustic-after-save-hook ()
   "Check if rustfmt is installed after saving the file."
