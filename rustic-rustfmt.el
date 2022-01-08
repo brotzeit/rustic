@@ -100,7 +100,8 @@ and it's `cdr' is a list of arguments."
          (files (if (listp files) files (list files)))
          (command (or (plist-get args :command)
                       (rustic-compute-rustfmt-args)))
-         (command (if (listp command) command (list command))))
+         (command (if (listp command) command (list command)))
+         (cur-buf (current-buffer)))
     (setq rustic-save-pos (set-marker (make-marker) (point) (current-buffer)))
     (rustic-compilation-setup-buffer err-buf dir 'rustic-format-mode t)
     (--each files
@@ -118,6 +119,7 @@ and it's `cdr' is a list of arguments."
                                         :file-handler t)))
         (setq next-error-last-buffer buffer)
         (when string
+          (process-put proc 'command-buf cur-buf)
           (while (not (process-live-p proc))
             (sleep-for 0.01))
           (process-send-string proc (concat string "\n"))
@@ -166,7 +168,21 @@ and it's `cdr' is a list of arguments."
           (with-current-buffer next-error-last-buffer
             (goto-char rustic-save-pos))
           (funcall rustic-format-display-method proc-buffer)
-          (message "Rustfmt error."))))))
+          (message "Rustfmt error."))))
+
+    ;; rustfmt warnings
+    (when-let ((b (process-get proc 'command-buf)))
+      (when (process-get proc 'command-buf)
+        (let ((warnings ""))
+          (with-current-buffer b
+            (save-excursion
+              (goto-char (point-min))
+              (while (looking-at "^Warning:")
+                (setq warnings (concat warnings (buffer-substring-no-properties (line-beginning-position) (line-end-position)) "\n"))
+                (kill-line)
+                (delete-char 1)
+                (goto-char (point-min)))))
+          (message warnings))))))
 
 (defun rustic-format-macro-sentinel (proc output)
   "Format buffer and remove decorations that we create for rustfmt"
