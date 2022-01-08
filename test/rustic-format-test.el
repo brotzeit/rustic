@@ -272,3 +272,32 @@
     (with-temp-buffer
       (insert-file-contents main)
       (should (string= (buffer-string) formatted-string)))))
+
+
+;; rustfmt.toml
+
+(defun rustic-test-format-create-rustfmt-toml (dir contents)
+  (let ((rustfmt-toml (expand-file-name "rustfmt.toml" dir)))
+    (with-current-buffer (get-buffer-create "rustfmt-toml")
+      (write-file rustfmt-toml))
+    (write-region contents nil rustfmt-toml nil 0)))
+
+(ert-deftest rustic-test-rustfmt-toml-file ()
+  (let* ((string "fn main()      {}")
+         (formatted-string "fn main() {}\n")
+         (dir (rustic-babel-generate-project t))
+         (main (expand-file-name "main.rs" (concat dir "/src")))
+         (inhibit-read-only t)
+         (buf (get-buffer-create "test")))
+    (rustic-test-format-create-rustfmt-toml dir "foo = 1\nbar = 2")
+    (write-region string nil main nil 0)
+   
+    (with-current-buffer buf
+      (insert string)
+      (rustic-mode)
+      (write-file main))
+    (with-current-buffer buf
+      (let ((proc (rustic-format-buffer)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.1)))
+      (should (string= (buffer-string) formatted-string)))))

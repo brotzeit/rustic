@@ -8,6 +8,7 @@
 
 (setq rustic-load-optional-libraries t)
 (setq rustic-lsp-setup-p nil) ; don't start LSP server for every test
+(setq auto-save-default nil)
 
 (require 'rustic)
 
