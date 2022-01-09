@@ -151,7 +151,6 @@ Commands:
 
 - `rustic-compile`            compile project using `rustic-compile-command`
 - `rustic-recompile`          recompile using `compilation-arguments`
-- `rustic-compile-send-input` send string to process of current buffer
 
 Customization:
 
@@ -463,15 +462,20 @@ arguments in `rustic-test-arguments`
 
 ### Run
 
-`rustic-cargo-run` run 'cargo run'.  Input can be sent to the program
-in one of two ways:
+Based on the usecase, we provide two variants of it:
 
-- `rustic-compile-send-input`, which reads the input from the
-  minibuffer.
-- `rustic-cargo-run-use-comint`: when this variable is set to t, the
-  input can be typed directly into the output buffer of 'cargo run'
-  and sent off with `RET`, just like in `comint-mode`.  You need
-  [polymode](https://polymode.github.io) installed for this to work.
+- `rustic-cargo-run`
+
+This is meant for non interactive programs. It's creates a new mode
+which is built on top of `rustic-compilation-mode`. You can press `g`
+in this mode's buffer to make it re-run.
+
+- `rustic-cargo-comint-run`
+
+This is meant for interactive programs when you might need to pass
+data to it via stdin.  It's creates a new mode which is built on top
+of `comint-mode`. You can press `C-c C-g` in this mode's buffer to
+make it re-run.
 
 ### Outdated
 

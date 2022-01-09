@@ -34,19 +34,6 @@ If nil then the project is simply created."
   :type 'boolean
   :group 'rustic-cargo)
 
-(defcustom rustic-cargo-run-use-comint nil
-  "If t then interact with programs in `rustic-cargo-run' using
-comint-mode.  This creates a dependency on the polymode package.
-No special configuration of polymode is needed for this to work,
-but you need to install polymode separately."
-  :type 'boolean
-  :group 'rustic-cargo)
-
-(defcustom rustic-cargo-test-disable-warnings nil
-  "Don't show warnings when running 'cargo test'."
-  :type 'boolean
-  :group 'rustic-cargo)
-
 (defvar rustic-cargo-outdated-face nil)
 (make-obsolete-variable 'rustic-cargo-outdated-face
                         "use the face `rustic-cargo-outdated' instead."
@@ -434,7 +421,11 @@ If BIN is not nil, create a binary application, otherwise a library."
 (defvar rustic-run-arguments ""
   "Holds arguments for 'cargo run', similar to `compilation-arguments`.")
 
-;; todo add keymap
+(defvar rustic-cargo-run-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "g") 'rustic-cargo-run-rerun)
+    map)
+  "Local keymap for `rustic-cargo-test-mode' buffers.")
 
 (define-derived-mode rustic-cargo-run-mode rustic-compilation-mode "cargo-run"
   :group 'rustic)
@@ -474,6 +465,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   (rustic-cargo-run-command rustic-run-arguments))
 
 (defun rustic--get-run-arguments ()
+  "Helper utility for getting arguments related to 'examples' directory."
   (if (rustic-cargo-run-get-relative-example-name)
       (concat "--example " (rustic-cargo-run-get-relative-example-name))
     (car compile-history)))
@@ -492,9 +484,11 @@ When calling this function from `rustic-popup-mode', always use the value of
 
 ;;;###autoload
 (defun rustic-run-shell-command (&optional arg)
-  "Run an arbitrary shell command for the current project.
-Example: use it to provide an environment variable to your application like this `env MYVAR=1 cargo run' so that it can read it at the runtime.
-As a byproduct, you can run any shell command in your project like `pwd'"
+  "Run an arbitrary shell command using ARG for the current project.
+Example: use it to provide an environment variable to your
+application like this `env MYVAR=1 cargo run' so that it can read
+it at the runtime.  As a byproduct, you can run any shell command
+in your project like `pwd'"
   (interactive "P")
   (setq command (read-from-minibuffer "Command to execute: " (car compile-history) nil nil 'compile-history))
   (rustic-run-cargo-command command (list :mode 'rustic-cargo-run-mode)))
@@ -512,21 +506,17 @@ As a byproduct, you can run any shell command in your project like `pwd'"
 
 (defvar rustic-cargo-run-comint-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c g") 'rustic-cargo-comint-run-rerun)
+    (define-key map (kbd "C-c C-g") 'rustic-cargo-comint-run-rerun)
     map)
-  "Local keymap for `rustic-cargo-test-mode' buffers.")
+  "Local keymap for `rustic-cargo-comint-mode' buffers.")
 
 (define-derived-mode rustic-cargo-run-comint-mode comint-mode "Cargo comint"
   "Mode for 'cargo run' that derives from `comint-mode'.
 
-To send input to the compiled program, use
-`rustic-compile-send-input' from the
-`rustic-run-comint-buffer-name'. You can also just type in a
-string and hit RET to send it to the program.  The latter
-approach requires installing polymode."
+To send input to the compiled program, just type in a string and
+hit RET to send it to the program."
   (buffer-disable-undo)
-  (setq buffer-read-only nil)
-  (use-local-map comint-mode-map))
+  (setq buffer-read-only nil))
 
 ;;;###autoload
 (defun rustic-cargo-comint-run (&optional arg)
@@ -546,12 +536,8 @@ When calling this function from `rustic-popup-mode', always use the value of
                      (setq rustic-run-comint-arguments
                            (read-from-minibuffer "Cargo run arguments: " rustic-run-comint-arguments)))
                     ((rustic--get-run-arguments))
-                    ((eq major-mode 'rustic-popup-mode)
-                     rustic-run-comint-arguments) ; fix me: add this in popup
                     (t ""))))
     (rustic-cargo-run-comint-mode)))
-
-;;; fix docs
 
 ;;;###autoload
 (defun rustic-cargo-comint-run-rerun ()
@@ -560,9 +546,8 @@ When calling this function from `rustic-popup-mode', always use the value of
   (pop-to-buffer-same-window
    (get-buffer-create rustic-run-comint-buffer-name))
   (rustic--cargo-repl-in-buffer
-   (rustic--cargo-repl-in-buffer
-    (current-buffer)
-    (concat "run" rustic-run-comint-arguments))))
+   (current-buffer)
+   (concat "run" rustic-run-comint-arguments)))
 
 (defun rustic--cargo-repl-in-buffer (buffer run-args)
   "Make Cargo comint Repl in BUFFER.
