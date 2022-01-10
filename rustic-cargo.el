@@ -179,13 +179,16 @@ When calling this function from `rustic-popup-mode', always use the value of
   (interactive)
   (rustic-compilation-process-live)
   (-if-let (test-to-run (rustic-cargo--get-test-target))
-      (let* ((command (list (rustic-cargo-bin) "test" test-to-run))
-             (c (append command (split-string rustic-test-arguments)))
-             (buf rustic-test-buffer-name)
-             (proc rustic-test-process-name)
-             (mode 'rustic-cargo-test-mode))
-        (rustic-compilation c (list :buffer buf :process proc :mode mode)))
+      (rustic-cargo-run-test test-to-run)
     (message "Could not find test at point.")))
+
+(defun rustic-cargo-run-test (test)
+  (let* ((command (list (rustic-cargo-bin) "test" test))
+         (c (append command (split-string rustic-test-arguments)))
+         (buf rustic-test-buffer-name)
+         (proc rustic-test-process-name)
+         (mode 'rustic-cargo-test-mode))
+    (rustic-compilation c (list :buffer buf :process proc :mode mode))))
 
 (defconst rustic-cargo-mod-regexp
   "^\s*mod\s+\\([[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*\\)\s*{")
@@ -212,14 +215,14 @@ When calling this function from `rustic-popup-mode', always use the value of
       (when-let ((location (search-backward-regexp rustic-cargo-mod-regexp nil t)))
         (cons location (match-string 1))))))
 
-(defun rustic-cargo--get-current-line-fn-name()
+(defun rustic-cargo--get-current-line-fn-name ()
   "Return cons with location and fn name from the current line or nil."
   (save-excursion
     (goto-char (line-beginning-position))
     (when-let ((location (search-forward-regexp rustic-cargo-fn-regexp (line-end-position) t)))
       (cons location (match-string 1)))))
 
-(defun rustic-cargo--get-current-fn-name()
+(defun rustic-cargo--get-current-fn-name ()
   "Return fn name around point or nil."
   (save-excursion
     (or (rustic-cargo--get-current-line-fn-name)

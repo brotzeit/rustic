@@ -55,7 +55,6 @@
 (defvaralias 'rustic-match-angle-brackets 'rust-match-angle-brackets)
 (defvaralias 'rustic-indent-return-type-to-arguments 'rust-indent-return-type-to-arguments)
 (defalias 'rustic-indent-line #'rust-mode-indent-line)
-(defalias 'rustic-beginning-of-defun #'rust-beginning-of-defun)
 (defalias 'rustic-end-of-defun #'rust-end-of-defun)
 
 ;;; Workspace
