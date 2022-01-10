@@ -17,6 +17,7 @@ ELS  += rustic-flycheck.el
 ELS  += rustic-interaction.el
 ELS  += rustic-compile.el
 ELS  += rustic-cargo.el
+ELS  += rustic-clippy.el
 ELS  += rustic-popup.el
 ELS  += rustic-rustfix.el
 ELS  += rustic-rustfmt.el
@@ -32,6 +33,7 @@ rustic-flycheck.elc:    rustic.elc
 rustic-interaction.elc: rustic.elc
 rustic-compile.elc:     rustic.elc
 rustic-cargo.elc:       rustic-compile.elc rustic-interaction.elc
+rustic-clippy.elc:      rustic-compile.elc
 rustic-popup.elc:       rustic-cargo.elc
 rustic-rustfix.elc:     rustic-cargo.elc
 rustic-rustfmt.elc:     rustic-cargo.elc
