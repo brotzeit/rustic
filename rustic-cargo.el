@@ -182,6 +182,14 @@ When calling this function from `rustic-popup-mode', always use the value of
       (rustic-cargo-run-test test-to-run)
     (message "Could not find test at point.")))
 
+;;;###autoload
+(defun rustic-cargo-test-dwim ()
+  "Run test or mod at point. Otherwise run `rustic-cargo-test'."
+  (interactive)
+  (if-let (test (or (rustic-cargo--get-current-fn-name)
+                    (rustic-cargo--get-current-mod)))
+      (rustic-cargo-test)))
+
 (defun rustic-cargo-run-test (test)
   (let* ((command (list (rustic-cargo-bin) "test" test))
          (c (append command (split-string rustic-test-arguments)))
