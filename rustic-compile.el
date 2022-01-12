@@ -53,7 +53,7 @@
                  (string :tag "full"))
   :group 'rustic-compilation)
 
-(defcustom rustic-compile-rustflags ""
+(defcustom rustic-compile-rustflags (or (getenv "RUSTFLAGS") "")
   "String used for RUSTFLAGS."
   :type 'string
   :group 'rustic-compilation)
