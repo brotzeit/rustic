@@ -438,6 +438,15 @@ current line in an error section."
 
 (advice-add 'compile-goto-error :around #'rustic-compile-goto-error-hook)
 
+(defun rustic-compile-send-input ()
+  "Read string from minibuffer and send it to the rust process of the current
+buffer."
+  (interactive)
+  (let ((input (read-from-minibuffer "Send input to rust process: "))
+        (proc (get-buffer-process (current-buffer)))
+        (inhibit-read-only t))
+    (process-send-string proc (concat input "\n"))))
+
 ;;; Rustc
 
 (defface rustic-errno-face
