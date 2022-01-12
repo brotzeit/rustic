@@ -41,6 +41,11 @@ but you need to install polymode separately."
   :type 'boolean
   :group 'rustic-cargo)
 
+(defcustom rustic-cargo-test-disable-warnings nil
+  "Don't show warnings when running 'cargo test'."
+  :type 'boolean
+  :group 'rustic-cargo)
+
 (defvar rustic-cargo-outdated-face nil)
 (make-obsolete-variable 'rustic-cargo-outdated-face
                         "use the face `rustic-cargo-outdated' instead."
@@ -78,7 +83,11 @@ but you need to install polymode separately."
   "Local keymap for `rustic-cargo-test-mode' buffers.")
 
 (define-derived-mode rustic-cargo-test-mode rustic-compilation-mode "cargo-test"
-  :group 'rustic)
+  :group 'rustic
+
+  ;; TODO: append to rustic-compile-rustflags
+  (when rustic-cargo-test-disable-warnings
+    (setq-local rustic-compile-rustflags "-Awarnings")))
 
 ;;;###autoload
 (defun rustic-cargo-test-run (&optional test-args)

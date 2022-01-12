@@ -111,3 +111,19 @@ use std;
           (should (string-match "test1" (buffer-substring-no-properties (point-min) (point-max)))))
         (kill-buffer proc-buf)))
     (kill-buffer buf)))
+
+(ert-deftest rustic-test-rustic-cargo-test-disable-warnings ()
+  (setq rustic-cargo-test-disable-warnings t)
+  (let* ((string "fn main() {
+use std;
+}
+")
+         (default-directory (rustic-test-count-error-helper string))
+         (proc (call-interactively 'rustic-cargo-test))
+         (buf (process-buffer proc)))
+    (while (eq (process-status proc) 'run)
+      (sit-for 0.1))
+    (with-current-buffer buf
+      (should-not (string-match "^warning:\s" (buffer-substring-no-properties (point-min) (point-max)))))
+    (kill-buffer buf))
+  (setq rustic-cargo-test-disable-warnings nil))

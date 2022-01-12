@@ -53,6 +53,11 @@
                  (string :tag "full"))
   :group 'rustic-compilation)
 
+(defcustom rustic-compile-rustflags ""
+  "String used for RUSTFLAGS."
+  :type 'string
+  :group 'rustic-compilation)
+
 (defcustom rustic-list-project-buffers-function
   (if (fboundp 'projectile-project-buffers)
       'projectile-project-buffers
@@ -217,6 +222,12 @@ Set environment variables for rust process."
                                (format "TERM=%s" "ansi")
                                (format "RUST_BACKTRACE=%s" rustic-compile-backtrace))
                               process-environment)))
+
+    (when (> (length rustic-compile-rustflags) 0)
+      (setq process-environment
+            (nconc (list (format "RUSTFLAGS=%s" rustic-compile-rustflags))
+              process-environment)))
+
     (let ((process (apply
                     #'start-file-process (plist-get args :name)
                     (plist-get args :buffer)

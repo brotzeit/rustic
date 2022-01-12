@@ -159,6 +159,7 @@ Customization:
   compilation buffer (use the function `ignore`, if you don't want the
   buffer to be displayed)
 - `rustic-compile-backtrace` change backtrace verbosity
+- `rustic-compile-rustflags` set RUSTFLAGS
 - `rustic-compile-command` default command for rust compilation
 - `rustic-compile-command-remote` default command for remote rust compilation
 
@@ -444,6 +445,11 @@ modify the parameters of a command.
 - `rustic-cargo-upgrade`  Upgrade dependencies as specified in the local manifest file using 'cargo upgrade'
 
 ### Test
+
+If you want to disable warnings when running cargo-test commands, you can set
+`(setq rustic-cargo-test-disable-warnings t)`.
+
+Commands:
 
 `rustic-cargo-test` run 'cargo test', when called with `C-u` store
 arguments in `rustic-test-arguments`
