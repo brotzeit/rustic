@@ -328,8 +328,53 @@ See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
                   (kill-buffer buf))))))
     proc))
 
-(defun rustic-doc--thing-at-point ()
-  "Return info about `thing-at-point'. If `thing-at-point' is nil, return defaults."
+
+
+(defun rustic-doc--search-dir (lsp-name short-name)
+  "The search directory for documentation.
+If short-name was `Option', long-name would be `std::option::Option'.
+LSP-NAME is given by the language server, and SHORT-NAME by Emacs.
+LSP-NAME is different from the stdlib name.
+For example, the LSP-NAME `core::option::Option'
+is called `std::option::Option' in the docs."
+  (let ((long-name
+         (concat (cond
+                  ((string-prefix-p "core" lsp-name)
+                   (concat "std"
+                           (seq-drop lsp-name 4)))
+                  ((string-prefix-p "alloc" lsp-name)
+                   (concat "std"
+                           (seq-drop lsp-name 5)))
+                  (t lsp-name))
+                 "::"
+                 short-name)))
+    (rustic-doc--deepest-dir
+     (concat (rustic-doc--project-doc-dest)
+             "/"
+             (seq-reduce (lambda (path p)
+                           (concat path "/" p))
+                         (split-string long-name "::")
+                         "")))))
+
+
+(defun rustic-doc--thing-at-point-eglot (default)
+  "Thing-at-point if using eglot.
+If anything goes wrong, return DEFAULT."
+  (interactive)
+  (if-let ((content (jsonrpc-request
+                     (eglot--current-server-or-lose)
+                     :textDocument/hover (eglot--TextDocumentPositionParams)))
+           ;; text-name is the qualified name, but it sometimes doesn't correspond to the folder structure.
+           (text-name (nth 2  (split-string (plist-get  (plist-get content :contents) :value) "\n")))
+           (short-name (thing-at-point 'symbol t))
+           (search-dir (rustic-doc--search-dir text-name short-name)))
+      `((search-dir . ,search-dir)
+        (short-name . ,short-name))
+    default))
+
+(defun rustic-doc--thing-at-point-lsp-mode (default)
+  "Thing at point if using lsp-mode.
+If anything goes wrong, return DEFAULT."
   (if-let ((active (boundp 'lsp-mode))
            (lsp-content (when (alist-get 'lsp-mode minor-mode-alist)
                           (-some->> (lsp--text-document-position-params)
@@ -347,28 +392,18 @@ See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
                          (setq short-name
                                (concat "primitive "
                                        (gethash "value" lsp-content)))))
-           ;; If short-name was `Option', long-name would be `std::option::Option'
-           (long-name (concat (cond
-                               ((string-prefix-p "core" lsp-info)
-                                (concat "std"
-                                        (seq-drop lsp-info 4)))
-                               ((string-prefix-p "alloc" lsp-info)
-                                (concat "std"
-                                        (seq-drop lsp-info 5)))
-                               (t lsp-info))
-                              "::"
-                              short-name))
-           (search-dir (rustic-doc--deepest-dir
-                        (concat (rustic-doc--project-doc-dest)
-                                "/"
-                                (seq-reduce (lambda (path p)
-                                              (concat path "/" p))
-                                            (split-string long-name "::")
-                                            "")))))
+           (search-dir (rustic-doc--search-dir  lsp-info short-name)))
       `((search-dir . ,search-dir)
         (short-name . ,short-name))
-    `((search-dir . ,(rustic-doc--project-doc-dest))
-      (short-name . ,nil))))
+    default))
+
+(defun rustic-doc--thing-at-point ()
+  "Return info about `thing-at-point'. If `thing-at-point' is nil or no language, return defaults."
+  (let ((default `((search-dir . ,(rustic-doc--project-doc-dest))
+                   (short-name . ,nil))))
+    (cond ((boundp 'lsp-mode) (rustic-doc--thing-at-point-lsp-mode default))
+          ((boundp 'eglot) (rustic-doc--thing-at-point-eglot default))
+          (t  default))))
 
 ;;;###autoload
 (define-minor-mode rustic-doc-mode
@@ -378,8 +413,7 @@ See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
             (define-key map (kbd "C-#") 'rustic-doc-search)
             map)
   (dolist (mode '(rust-mode-hook rustic-mode-hook org-mode-hook))
-    (add-hook mode 'rustic-doc-mode))
-  (rustic-doc--update-current-project))
+    (add-hook mode 'rustic-doc-mode)))
 
 (provide 'rustic-doc)
 
