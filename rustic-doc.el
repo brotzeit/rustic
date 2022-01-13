@@ -19,7 +19,6 @@
 ;;; Code:
 
 (require 'url)
-(require 'lsp-mode)
 (require 'f)
 
 (eval-and-compile
@@ -205,7 +204,7 @@ it doesn't manage to find what you're looking for, try `rustic-doc-dumb-search'.
 
 (defun rustic-doc--update-current-project ()
   "Update `rustic-doc-current-project' if editing a rust file, otherwise leave it."
-  (when (and lsp-mode
+  (when (and (boundp 'lsp-mode)
              (derived-mode-p 'rust-mode 'rustic-mode))
     (setq rustic-doc-current-project (lsp-workspace-root))))
 
@@ -331,11 +330,12 @@ See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
 
 (defun rustic-doc--thing-at-point ()
   "Return info about `thing-at-point'. If `thing-at-point' is nil, return defaults."
-  (if-let ((active lsp-mode)
-           (lsp-content (-some->> (lsp--text-document-position-params)
-                          (lsp--make-request "textDocument/hover")
-                          (lsp--send-request)
-                          (lsp:hover-contents)))
+  (if-let ((active (boundp 'lsp-mode))
+           (lsp-content (when (alist-get 'lsp-mode minor-mode-alist)
+                          (-some->> (lsp--text-document-position-params)
+                            (lsp--make-request "textDocument/hover")
+                            (lsp--send-request)
+                            (lsp:hover-contents))))
            ;; `short-name' is the unqalified of a struct, function
            ;; etc, like `Option'
            (short-name (thing-at-point 'symbol t))
