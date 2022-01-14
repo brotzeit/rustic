@@ -127,7 +127,8 @@ When calling this function from `rustic-popup-mode', always use the value of
   "Run 'cargo test' for the test near point."
   (interactive)
   (rustic-compilation-process-live)
-  (-if-let (test-to-run (rustic-cargo--get-test-target))
+  (-if-let (test-to-run (setq rustic-test-arguments
+                              (rustic-cargo--get-test-target)))
       (rustic-cargo-run-test test-to-run)
     (message "Could not find test at point.")))
 
