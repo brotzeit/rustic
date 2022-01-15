@@ -33,19 +33,6 @@ If nil then the project is simply created."
   :type 'boolean
   :group 'rustic-cargo)
 
-(defcustom rustic-cargo-run-use-comint nil
-  "If t then interact with programs in `rustic-cargo-run' using
-comint-mode.  This creates a dependency on the polymode package.
-No special configuration of polymode is needed for this to work,
-but you need to install polymode separately."
-  :type 'boolean
-  :group 'rustic-cargo)
-
-(defcustom rustic-cargo-test-disable-warnings nil
-  "Don't show warnings when running 'cargo test'."
-  :type 'boolean
-  :group 'rustic-cargo)
-
 (defvar rustic-cargo-outdated-face nil)
 (make-obsolete-variable 'rustic-cargo-outdated-face
                         "use the face `rustic-cargo-outdated' instead."
@@ -422,6 +409,89 @@ If BIN is not nil, create a binary application, otherwise a library."
   (interactive "DProject path: ")
   (rustic-create-project project-path nil bin))
 
+;;; Run
+
+(defvar rustic-run-process-name "rustic-cargo-run-process"
+  "Process name for run processes.")
+
+(defvar rustic-run-buffer-name "*cargo-run*"
+  "Buffer name for run buffers.")
+
+(defvar rustic-run-arguments ""
+  "Holds arguments for 'cargo run', similar to `compilation-arguments`.")
+
+(defvar rustic-cargo-run-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "g") 'rustic-cargo-run-rerun)
+    map)
+  "Local keymap for `rustic-cargo-test-mode' buffers.")
+
+(define-derived-mode rustic-cargo-run-mode rustic-compilation-mode "cargo-run"
+  :group 'rustic)
+
+;;;###autoload
+(defun rustic-cargo-run-command (&optional run-args)
+  "Start compilation process for 'cargo run' with optional RUN-ARGS."
+  (interactive)
+  (rustic-compilation-process-live)
+  (let* ((command (list (rustic-cargo-bin) "run"))
+         (c (append command (split-string (if run-args run-args ""))))
+         (buf rustic-run-buffer-name)
+         (proc rustic-run-process-name)
+         (mode 'rustic-cargo-run-mode))
+    (rustic-compilation c (list :buffer buf :process proc :mode mode))))
+
+;;;###autoload
+(defun rustic-cargo-run (&optional arg)
+  "Run 'cargo run'.
+
+If ARG is not nil, use value as argument and store it in `rustic-run-arguments'.
+When calling this function from `rustic-popup-mode', always use the value of
+`rustic-run-arguments'."
+  (interactive "P")
+  (rustic-cargo-run-command
+   (cond (arg
+          (setq rustic-run-arguments (read-from-minibuffer "Cargo run arguments: " rustic-run-arguments)))
+         ((rustic--get-run-arguments))
+         ((eq major-mode 'rustic-popup-mode)
+          rustic-run-arguments)
+         (t ""))))
+
+;;;###autoload
+(defun rustic-cargo-run-rerun ()
+  "Run 'cargo run' with `rustic-run-arguments'."
+  (interactive)
+  (rustic-cargo-run-command rustic-run-arguments))
+
+(defun rustic--get-run-arguments ()
+  "Helper utility for getting arguments related to 'examples' directory."
+  (if (rustic-cargo-run-get-relative-example-name)
+      (concat "--example " (rustic-cargo-run-get-relative-example-name))
+    (car compile-history)))
+
+(defun rustic-cargo-run-get-relative-example-name ()
+  "Run 'cargo run --example' if current buffer within a 'examples' directory."
+  (if rustic--buffer-workspace
+      (let ((relative-filenames
+             (split-string (file-relative-name buffer-file-name rustic--buffer-workspace) "/")))
+        (if (string= "examples" (car relative-filenames))
+            (let ((size (length relative-filenames)))
+              (cond ((eq size 2) (file-name-sans-extension(nth 1 relative-filenames))) ;; examples/single-example1.rs
+                    ((> size 2) (car (nthcdr (- size 2) relative-filenames))) ;; examples/example2/main.rs
+                    (t nil))) nil))
+    nil))
+
+;;;###autoload
+(defun rustic-run-shell-command (&optional arg)
+  "Run an arbitrary shell command using ARG for the current project.
+Example: use it to provide an environment variable to your
+application like this `env MYVAR=1 cargo run' so that it can read
+it at the runtime.  As a byproduct, you can run any shell command
+in your project like `pwd'"
+  (interactive "P")
+  (setq command (read-from-minibuffer "Command to execute: " (car compile-history) nil nil 'compile-history))
+  (rustic-run-cargo-command command (list :mode 'rustic-cargo-plainrun-mode)))
+
 ;;; Cargo commands
 
 (defun rustic-run-cargo-command (command &optional args)
@@ -437,128 +507,6 @@ If BIN is not nil, create a binary application, otherwise a library."
   "Run 'cargo build' for the current project."
   (interactive)
   (rustic-run-cargo-command (list (rustic-cargo-bin) "build")))
-
-;;;###autoload
-(defun rustic-run-shell-command (&optional arg)
-  "Run an arbitrary shell command for the current project.
-Example: use it to provide an environment variable to your application like this `env MYVAR=1 cargo run' so that it can read it at the runtime.
-As a byproduct, you can run any shell command in your project like `pwd'"
-  (interactive "P")
-  (setq command (read-from-minibuffer "Command to execute: " (car compile-history) nil nil 'compile-history))
-  (rustic-run-cargo-command command (list :mode 'rustic-cargo-run-mode)))
-
-(defvar rustic-run-arguments ""
-  "Holds arguments for 'cargo run', similar to `compilation-arguments`.")
-
-;;;###autoload
-(defun rustic-cargo-run (&optional arg)
-  "Run 'cargo run' for the current project.
-If running with prefix command `C-u', read whole command from minibuffer."
-  (interactive "P")
-  (let* ((command (if arg
-                      (read-from-minibuffer "Cargo run command: " "cargo run -- ")
-                    (concat (rustic-cargo-bin) " run "
-                            (setq rustic-run-arguments
-                                  (read-from-minibuffer
-                                   "Run arguments: "
-                                   (if (rustic-cargo-run-get-relative-example-name)
-                                       (concat "--example "
-                                               (rustic-cargo-run-get-relative-example-name))
-                                     (car compile-history))
-                                   nil nil 'compile-history)) ))))
-    (rustic-run-cargo-command command (list :mode 'rustic-cargo-run-mode))))
-
-;;;###autoload
-(defun rustic-cargo-run-rerun ()
-  "Run 'cargo run' with `rustic-run-arguments'."
-  (interactive)
-  (rustic-run-cargo-command (list (rustic-cargo-bin) "run" rustic-run-arguments) (list :mode 'rustic-cargo-run-mode)))
-
-(defun rustic-cargo-run-get-relative-example-name ()
-  "Run 'cargo run --example' if current buffer within a 'examples' directory."
-  (if rustic--buffer-workspace
-      (let ((relative-filenames
-             (split-string (file-relative-name buffer-file-name rustic--buffer-workspace) "/")))
-        (if (string= "examples" (car relative-filenames))
-            (let ((size (length relative-filenames)))
-              (cond ((eq size 2) (file-name-sans-extension(nth 1 relative-filenames))) ;; examples/single-example1.rs
-                    ((> size 2) (car (nthcdr (- size 2) relative-filenames))) ;; examples/example2/main.rs
-                    (t nil))) nil))
-    nil))
-
-(defun rustic-cargo-run-mode ()
-  (interactive)
-  (if rustic-cargo-run-use-comint
-      ;; rustic-cargo-comint-run-mode toggles the mode; we want to
-      ;; always enable.
-      (unless (and (boundp 'polymode-mode)
-                   polymode-mode
-                   (memq major-mode '(rustic-cargo-plain-run-mode
-                                      comint-mode)))
-        (rustic-cargo-comint-run-mode))
-    (rustic-cargo-plain-run-mode)))
-
-(defvar rustic-cargo-plain-run-mode-map
-  (let ((map (make-sparse-keymap)))
-    (progn
-      (set-keymap-parent map rustic-compilation-mode-map)
-      (define-key map (kbd "g") 'rustic-cargo-run-rerun))
-    map)
-  "Local keymap for `rustic-cargo-plain-run-mode' buffers.")
-
-(define-derived-mode rustic-cargo-plain-run-mode rustic-compilation-mode "Cargo run"
-  "Mode for 'cargo run' that derives from `rustic-compilation-mode'.
-
-To send input to the compiled program, use
-`rustic-compile-send-input'.  If you set
-`rustic-cargo-run-use-comint' to t, you can also just type in a
-string and hit RET to send it to the program.  The latter
-approach requires installing polymode."
-  (buffer-disable-undo)
-  (when rustic-cargo-run-use-comint
-    (progn
-      (setq buffer-read-only nil)
-      (use-local-map comint-mode-map))))
-
-(defun rustic-cargo-comint-run-mode ()
-  "Mode for 'cargo run' that combines `rustic-compilation-mode' with `comint-mode',
-the former for highlighting and interacting with compiler errors,
-and the latter for interacting with the compiled program."
-  ;; First time around, define the mode and invoke it.  Next time, the
-  ;; symbol will have been overwritten so this runs only once.
-  (unless (require 'polymode nil 'noerr)
-    (error "polymode not found; polymode must be installed for `rustic-cargo-run-use-comint' to work"))
-  (let ((docstr (documentation 'rustic-cargo-comint-run-mode)))
-    (define-hostmode poly-rustic-cargo-compilation-hostmode
-      :mode 'rustic-cargo-plain-run-mode)
-    (define-innermode poly-rustic-cargo-comint-innermode
-      :mode 'comint-mode
-      :head-matcher "^ *Running `.+`$"
-      :head-mode 'host
-      :tail-matcher "\\'"
-      :tail-mode 'host)
-    (define-polymode rustic-cargo-comint-run-mode
-      :hostmode 'poly-rustic-cargo-compilation-hostmode
-      :innermodes '(poly-rustic-cargo-comint-innermode)
-      :switch-buffer-functions '(poly-rustic-cargo-comint-switch-buffer-hook)
-
-      ;; See comments in poly-rustic-cargo-comint-switch-buffer-hook below.
-      (set (make-local-variable 'pm-hide-implementation-buffers) nil)
-      )
-    (put 'rustic-cargo-comint-run-mode 'function-documentation docstr)
-    (rustic-cargo-comint-run-mode)))
-
-(defun poly-rustic-cargo-comint-switch-buffer-hook (old-buffer new-buffer)
-  "Housekeeping for `rustic-cargo-comint-run-mode'."
-  ;; Keep inferior process attached to the visible buffer.
-  (let ((proc (get-buffer-process old-buffer)))
-    (when proc
-      (set-process-buffer proc new-buffer)))
-  ;; Prevent polymode from constantly renaming the
-  ;; "*rustic-compilation*" buffer.  A note in case this undocumented
-  ;; variable stops working: if that happens, you'll see
-  ;; *rustic-compilatin*[comint]<2>, <3>, etc. keep popping up.
-  (set (make-local-variable 'pm-hide-implementation-buffers) nil))
 
 ;;;###autoload
 (defun rustic-cargo-clean ()

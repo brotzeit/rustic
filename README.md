@@ -463,8 +463,26 @@ arguments in `rustic-test-arguments`
 
 ### Run
 
-`rustic-cargo-run` run 'cargo run'.  Input can be sent to the program
-in one of two ways:
+Based on the usecase, we provide three variants of it:
+
+- `rustic-cargo-run`
+
+This is meant for non interactive programs. It's creates a new mode
+which is built on top of `rustic-compilation-mode`. You can press `g`
+in this mode's buffer to make it re-run.
+
+- `rustic-cargo-comint-run`
+
+This is meant for both interactive and non interactive programs. For
+non interactive programs, you would need to pass data to it via stdin.
+It's creates a new mode which is built on top of `comint-mode`. You
+can press `C-c C-g` in this mode's buffer to make it re-run.  You can
+pass input to the program directly in it's output buffer and press `RET`.
+
+- `rustic-cargo-plain-run`
+
+This is similar to the above `rustic-cargo-comint-run`. Input can be
+sent to the program in one of two ways:
 
 - `rustic-compile-send-input`, which reads the input from the
   minibuffer.
