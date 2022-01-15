@@ -21,6 +21,12 @@
 (defvar rustic-clippy-arguments ""
   "Holds arguments for 'cargo clippy', similar to `compilation-arguments`.")
 
+(defvar rustic-cargo-clippy-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "g") 'rustic-cargo-clippy-rerun)
+    map)
+  "Local keymap for `rustic-cargo-clippy-mode' buffers.")
+
 (define-derived-mode rustic-cargo-clippy-mode rustic-compilation-mode "cargo-clippy"
   :group 'rustic)
 
