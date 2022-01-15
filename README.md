@@ -54,7 +54,7 @@
             - [:use](#use)
     - [Spinner](#spinner)
     - [rust docs in org mode](#rust-docs-in-org-mode)
-        - [Prequisites](#prequisites)
+        - [Prerequisites](#prerequisites)
         - [Usage](#usage)
         - [Notes](#notes)
     - [Popup](#popup)
