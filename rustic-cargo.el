@@ -33,6 +33,11 @@ If nil then the project is simply created."
   :type 'boolean
   :group 'rustic-cargo)
 
+(defcustom rustic-cargo-test-disable-warnings nil
+  "Don't show warnings when running 'cargo test'."
+  :type 'boolean
+  :group 'rustic-cargo)
+
 (defvar rustic-cargo-outdated-face nil)
 (make-obsolete-variable 'rustic-cargo-outdated-face
                         "use the face `rustic-cargo-outdated' instead."
