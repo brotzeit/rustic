@@ -75,17 +75,6 @@
                (dir (file-name-directory (cdr (assoc-string "root" output)))))
           (setq rustic--buffer-workspace dir))))))
 
-(defun rustic-buffer-project ()
-  "Locate project(crate) root."
-  (with-temp-buffer
-    (let ((ret (call-process rustic-cargo-bin nil t nil "locate-project")))
-      (when (/= ret 0)
-        (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
-      (goto-char 0)
-      (let* ((output (json-read))
-             (dir (cdr (assoc-string "root" output))))
-        (file-name-directory (directory-file-name dir))))))
-
 (defun rustic-buffer-crate (&optional nodefault)
   "Return the crate for the current buffer.
 When called outside a Rust project, then return `default-directory',
