@@ -32,6 +32,7 @@
                 - [Macro expansion](#macro-expansion)
         - [LSP + TRAMP](#lsp--tramp)
     - [Cargo](#cargo)
+        - [auto-fixing before compilation](#auto-fixing-before-compilation)
         - [Edit](#edit)
         - [Test](#test)
         - [Run](#run)
@@ -521,6 +522,19 @@ before being used.
 Currently cargo does not display the correct installation command for
 some toolchains when clippy isn't installed.  If you have problems try
 it with `rustup component add --toolchain nightly clippy`.
+
+### auto-fixing before compilation
+
+It's possible to run 'clippy --fix' automatically when starting a compile
+process by setting `rustic-cargo-clippy-fix-on-compile` to `t`.
+
+This feature can be used in combination with auto-formatting.
+
+Works for:
+
+- `rustic-cargo-build`
+- `rustic-compile`
+- `rustic-recompile`
 
 ### Commands
 
