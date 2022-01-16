@@ -63,6 +63,11 @@ to 'on-save."
   :type 'function
   :group 'rustic)
 
+(defcustom rustic-cargo-clippy-fix-on-compile nil
+  "Whether to run 'clippy --fix' before build or run."
+  :type 'boolean
+  :group 'rustic)
+
 ;;; _
 
 (defvar rustic-format-process-name "rustic-rustfmt-process"
@@ -371,16 +376,28 @@ This is basically a wrapper around `project--buffer-list'."
 
 ;;; Hooks
 
-(defun rustic-maybe-format-before-compilation ()
-  (if (eq rustic-format-trigger 'on-compile)
-      (let ((proc (rustic-cargo-fmt)))
+(defun rustic-maybe-format-before-compilation (&optional clippy-fix)
+  "Will be executed before running `rustic-compilation'."
+  (let ((compile-ready-p t))
+    ;; run clippy --fix, but only for "build" or "run"
+    (when (and clippy-fix rustic-cargo-clippy-fix-on-compile)
+      (let* ((proc (rustic-cargo-clippy-fix :silent t)))
         (while (eq (process-status proc) 'run)
           (sit-for 0.1))
-        (if (zerop (process-exit-status proc))
-            t
+        (when (not (zerop (process-exit-status proc)))
           (funcall rustic-compile-display-method (process-buffer proc))
-          nil))
-    t))
+          (setq compile-ready-p nil))))
+
+    ;; cargo fmt
+    (when compile-ready-p
+      (when (eq rustic-format-trigger 'on-compile)
+        (let ((proc (rustic-cargo-fmt)))
+          (while (eq (process-status proc) 'run)
+            (sit-for 0.1))
+          (when (not (zerop (process-exit-status proc)))
+            (funcall rustic-compile-display-method (process-buffer proc))
+            (setq compile-ready-p nil)))))
+    compile-ready-p))
 
 (add-hook 'rustic-before-compilation-hook
           #'rustic-maybe-format-before-compilation)

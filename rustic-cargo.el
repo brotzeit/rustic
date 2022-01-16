@@ -511,7 +511,8 @@ in your project like `pwd'"
 (defun rustic-cargo-build ()
   "Run 'cargo build' for the current project."
   (interactive)
-  (rustic-run-cargo-command (list (rustic-cargo-bin) "build")))
+  (rustic-run-cargo-command (list (rustic-cargo-bin) "build")
+                            (list :clippy-fix t)))
 
 ;;;###autoload
 (defun rustic-cargo-clean ()

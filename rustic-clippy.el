@@ -31,16 +31,21 @@
   :group 'rustic)
 
 ;;;###autoload
-(defun rustic-cargo-clippy-run (&optional args)
+(defun rustic-cargo-clippy-run (&rest args)
   "Run `cargo clippy' with optional ARGS."
   (interactive)
-  (let* ((command (list (rustic-cargo-bin) "clippy"))
-         (c (append command (split-string (if args args ""))))
+  (let* ((command (list rustic-cargo-bin "clippy"))
+         (params (plist-get args :params))
+         (c (append command (split-string (if params params ""))))
          (buf rustic-clippy-buffer-name)
          (proc rustic-clippy-process-name)
          (mode 'rustic-cargo-clippy-mode))
     (rustic-compilation-process-live)
-    (rustic-compilation c (list :buffer buf :process proc :mode mode))))
+    (rustic-compilation c (list :buffer buf
+                                :process proc
+                                :mode mode
+                                :sentinel (plist-get args :sentinel)
+                                :no-display (plist-get args :silent)))))
 
 ;;;###autoload
 (defun rustic-cargo-clippy (&optional arg)
@@ -63,12 +68,20 @@ When calling this function from `rustic-popup-mode', always use the value of
   (interactive)
   (rustic-cargo-clippy-run rustic-clippy-arguments))
 
-(defun rustic-cargo-clippy-fix ()
+(defun rustic-cargo-clippy-fix (&rest args)
   "Run 'clippy fix'."
   (interactive)
+  (let ((a (plist-get args :args))
+        (silent (plist-get args :silent))))
   (rustic-cargo-clippy-run
-   (concat "--fix "
-           (format "%s" rustic-cargo-clippy-fix-args))))
+   :params (concat "--fix "
+                   (format "%s" rustic-cargo-clippy-fix-args))
+   :silent t
+   :sentinel (lambda (proc msg)
+               (while (eq (process-status proc) 'run)
+                 (sit-for 0.1))
+               (if (zerop (process-exit-status proc))
+                   (kill-buffer (get-buffer rustic-clippy-buffer-name))))))
 
 (provide 'rustic-clippy)
 ;;; rustic-clippy.el ends here

@@ -263,7 +263,7 @@ see `rustic-compilation' for details.  First run
 `rustic-before-compilation-hook' and if any of these
 functions fails, then do not start compilation."
   (save-excursion
-    (when (run-hook-with-args-until-failure 'rustic-before-compilation-hook)
+    (when (run-hook-with-args-until-failure 'rustic-before-compilation-hook (plist-get args :clippy-fix))
       (rustic-compilation command args))))
 
 (defun rustic-compilation (command &optional args)
@@ -515,7 +515,8 @@ In either store the used command in `compilation-arguments'."
   (setq compilation-directory (funcall rustic-compile-directory-method))
   (rustic-compilation-process-live)
   (rustic-compilation-start (split-string (car compilation-arguments))
-                            (list :directory compilation-directory)))
+                            (list :directory compilation-directory
+                                  :clippy-fix t)))
 
 ;; TODO: we don't use the other options stored in `compilation-arguments',
 ;;       but probably we should
@@ -532,7 +533,8 @@ It's a list that looks like (list command mode name-function highlight-regexp)."
   (let* ((command (or (car compilation-arguments) (rustic-compile-command)))
          (dir compilation-directory))
     (rustic-compilation-process-live)
-    (rustic-compilation-start (split-string command) (list :directory dir))))
+    (rustic-compilation-start (split-string command)
+                              (list :directory dir :clippy-fix t))))
 
 ;;; Spinner
 
