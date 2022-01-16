@@ -134,7 +134,7 @@ When calling this function from `rustic-popup-mode', always use the value of
 
 (defun rustic-cargo-run-test (test)
   (let* ((command (list (rustic-cargo-bin) "test" test))
-         (c (append command (split-string rustic-test-arguments)))
+         (c (append command))
          (buf rustic-test-buffer-name)
          (proc rustic-test-process-name)
          (mode 'rustic-cargo-test-mode))
