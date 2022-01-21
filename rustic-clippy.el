@@ -81,7 +81,8 @@ When calling this function from `rustic-popup-mode', always use the value of
                (while (eq (process-status proc) 'run)
                  (sit-for 0.1))
                (if (zerop (process-exit-status proc))
-                   (kill-buffer (get-buffer rustic-clippy-buffer-name))))))
+                   (kill-buffer (get-buffer rustic-clippy-buffer-name))
+                 (funcall rustic-compile-display-method (process-buffer proc))))))
 
 (provide 'rustic-clippy)
 ;;; rustic-clippy.el ends here

@@ -526,7 +526,7 @@ it with `rustup component add --toolchain nightly clippy`.
 ### auto-fixing before compilation
 
 It's possible to run 'clippy --fix' automatically when starting a compile
-process by setting `rustic-cargo-clippy-fix-on-compile` to `t`.
+process by setting `rustic-cargo-clippy-trigger-fix` to `'on-compile`.
 
 This feature can be used in combination with auto-formatting.
 

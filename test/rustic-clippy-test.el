@@ -10,7 +10,7 @@
     (let* ((default-directory dir)
            (src (concat dir "/src"))
            (file1 (expand-file-name "main.rs" src))
-           (rustic-cargo-clippy-fix-on-compile t)
+           (rustic-cargo-clippy-trigger-fix 'on-compile)
            (rustic-format-trigger 'on-compile))
       (with-current-buffer buffer1
         (insert string)
@@ -38,7 +38,7 @@
     (let* ((default-directory dir)
            (src (concat dir "/src"))
            (file1 (expand-file-name "main.rs" src))
-           ;; (rustic-cargo-clippy-fix-on-compile t)
+           ;; (rustic-cargo-clippy-trigger-fix 'on-compile)
            (rustic-format-trigger 'on-compile))
       (with-current-buffer buffer1
         (insert string)
@@ -64,7 +64,7 @@
     (let* ((default-directory dir)
            (src (concat dir "/src"))
            (file1 (expand-file-name "main.rs" src))
-           (rustic-cargo-clippy-fix-on-compile t)
+           (rustic-cargo-clippy-trigger-fix 'on-compile)
            (rustic-format-trigger 'on-compile))
       (with-current-buffer buffer1
         (insert string)

@@ -63,9 +63,10 @@ to 'on-save."
   :type 'function
   :group 'rustic)
 
-(defcustom rustic-cargo-clippy-fix-on-compile nil
+(defcustom rustic-cargo-clippy-trigger-fix nil
   "Whether to run 'clippy --fix' before build or run."
-  :type 'boolean
+  :type '(choice (const :tag "Run 'clippy --fix' before compilation." on-compile)
+                 (const :tag "Don't fix automatically." nil))
   :group 'rustic)
 
 ;;; _
@@ -379,13 +380,13 @@ This is basically a wrapper around `project--buffer-list'."
 (defun rustic-maybe-format-before-compilation (&optional clippy-fix)
   "Will be executed before running `rustic-compilation'."
   (let ((compile-ready-p t))
-    ;; run clippy --fix, but only for "build" or "run"
-    (when (and clippy-fix rustic-cargo-clippy-fix-on-compile)
+    ;; run clippy --fix, but only for "build" or "run" and rustic-compile
+    (when (and clippy-fix
+               (eq rustic-cargo-clippy-trigger-fix 'on-compile))
       (let* ((proc (rustic-cargo-clippy-fix :silent t)))
         (while (eq (process-status proc) 'run)
           (sit-for 0.1))
-        (when (not (zerop (process-exit-status proc)))
-          (funcall rustic-compile-display-method (process-buffer proc))
+        (unless (zerop (process-exit-status proc))
           (setq compile-ready-p nil))))
 
     ;; cargo fmt
@@ -394,8 +395,7 @@ This is basically a wrapper around `project--buffer-list'."
         (let ((proc (rustic-cargo-fmt)))
           (while (eq (process-status proc) 'run)
             (sit-for 0.1))
-          (when (not (zerop (process-exit-status proc)))
-            (funcall rustic-compile-display-method (process-buffer proc))
+          (unless (zerop (process-exit-status proc))
             (setq compile-ready-p nil)))))
     compile-ready-p))
 
