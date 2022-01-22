@@ -345,8 +345,7 @@ Turn off flymake.
 - `lsp-describe-thing-at-point` display documentation
 - `lsp-find-definition` makes use of xref
 
-You can find more information in the [lsp-mode
-wiki](https://emacs-lsp.github.io/lsp-mode/page/lsp-rust/).
+You can find more information in the [lsp-mode documentation for Rust](https://emacs-lsp.github.io/lsp-mode/page/lsp-rust-analyzer/).
 
 ##### `lsp-execute-code-action`
 
