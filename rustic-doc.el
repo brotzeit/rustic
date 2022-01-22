@@ -103,6 +103,7 @@ The function should take search-dir and search-term as arguments."
 
 (defun rustic-doc--install-resources ()
   "Install or update the rustic-doc resources."
+  (executable-find "chmod")
   (dolist (resource rustic-doc-resources)
     (pcase resource
       (`(,dst ,opts ,src)
@@ -110,7 +111,8 @@ The function should take search-dir and search-term as arguments."
            (progn
              (unless (f-exists? (f-dirname dst))
                (f-mkdir (f-dirname dst)))
-             (url-copy-file src dst t)
+             (print (f-exists? (f-dirname dst)))
+             (print  (url-copy-file src dst t))
              (when (memq :exec opts)
                (call-process (executable-find "chmod")
                              nil
@@ -276,15 +278,16 @@ See buffer *cargo-makedocs* for more info")
 visit the project and run `rustic-doc-convert-current-package'! \
 \(Or activate rustic-doc-mode if you are in one)")))
 
-(defun rustic-doc-install-deps ()
-  "Install dependencies with Cargo."
+(defun rustic-doc-install-deps (&optional noconfirm)
+  "Install dependencies with Cargo.
+If NOCONFIRM is non-nil, install all dependencies without prompting user."
   (if (not (executable-find "cargo"))
       (message "You need to have cargo installed to use rustic-doc")
     (let ((missing-rg (not (executable-find "rg")))
           (missing-fd (not (executable-find "fd")))
           (missing-makedocs (not (executable-find "cargo-makedocs"))))
       (when (and (or missing-fd missing-makedocs missing-rg)
-                 (y-or-n-p "Missing some dependencies for rustic doc, install them? "))
+                 (or noconfirm (y-or-n-p "Missing some dependencies for rustic doc, install them? ")))
         (when missing-fd
           (rustic-doc--start-process "install-fd" "cargo" nil "install" "fd-find"))
         (when missing-rg
@@ -294,15 +297,16 @@ visit the project and run `rustic-doc-convert-current-package'! \
                                      "install" "cargo-makedocs"))))))
 
 ;;;###autoload
-(defun rustic-doc-setup (&optional no-dl)
+(defun rustic-doc-setup (&optional no-dl noconfirm)
   "Setup or update rustic-doc filter and convert script. Convert std.
 If NO-DL is non-nil, will not try to re-download
 the pandoc filter and bash script.
-NO-DL is primarily used for development of the filters."
+NO-DL is primarily used for development of the filters.
+If NOCONFIRM is non-nil, install all dependencies without prompting user."
   (interactive)
   (unless no-dl
     (rustic-doc--install-resources)
-    (rustic-doc-install-deps))
+    (rustic-doc-install-deps noconfirm))
   (message "Setup is converting the standard library")
   (delete-directory (concat rustic-doc-save-loc "/std")
                     t)
@@ -311,6 +315,7 @@ NO-DL is primarily used for development of the filters."
                              (lambda (_p)
                                (message "Finished converting docs for std"))
                              "std")
+  (sleep-for 3)
   (rustic-doc-convert-current-package))
 
 (defun rustic-doc--start-process (name program finish-func &rest program-args)
