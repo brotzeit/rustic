@@ -161,3 +161,33 @@ fn test2() {
   (setq rustic-test-arguments "")
   (kill-buffer buf)))
 
+(ert-deftest rustic-test-cargo-run-test-with-mod ()
+  (let* ((string "
+mod tests1 {
+#[test]
+fn test11() {
+}
+}
+
+mod tests2 {
+#[test]
+fn test21() {
+}
+}")
+         (default-directory (rustic-test-count-error-helper string))
+         (buf (get-buffer-create "test-current-test")))
+    (with-current-buffer buf
+      (insert string)
+      (goto-char (point-min))
+      (forward-line 1)
+      (let* ((proc (rustic-cargo-run-test "tests1"))
+             (proc-buf (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.1))
+        (with-current-buffer proc-buf
+          (should (string-match "tests1::test1" (buffer-substring-no-properties (point-min) (point-max))))
+          (should-not (string-match "test21" (buffer-substring-no-properties (point-min) (point-max)))))
+        (kill-buffer proc-buf)))
+    (should (= 0 (length (split-string rustic-test-arguments))))
+    (kill-buffer buf)))
+

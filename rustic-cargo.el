@@ -133,6 +133,7 @@ When calling this function from `rustic-popup-mode', always use the value of
       (rustic-cargo-test)))
 
 (defun rustic-cargo-run-test (test)
+  "Run TEST which can be a single test or mod name."
   (let* ((command (list (rustic-cargo-bin) "test" test))
          (c (append command))
          (buf rustic-test-buffer-name)
