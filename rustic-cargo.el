@@ -65,7 +65,9 @@ If nil then the project is simply created."
   "Buffer name for test buffers.")
 
 (defvar rustic-test-arguments ""
-  "Holds arguments for 'cargo test', similar to `compilation-arguments`.")
+  "Holds arguments for 'cargo test', similar to `compilation-arguments`.
+Tests that are executed by `rustic-cargo-current-test' will also be
+stored in this variable.")
 
 (defvar rustic-cargo-test-mode-map
   (let ((map (make-sparse-keymap)))
