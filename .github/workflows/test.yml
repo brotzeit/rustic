@@ -30,7 +30,6 @@ jobs:
 
                   sudo apt update
                   sudo apt install -y gnutls-bin gnupg2 dirmngr
-                  sudo apt install -y pandoc
                   sudo apt install -y texinfo libgif-dev libxpm-dev
 
             - name: Install needed rust stuff
@@ -39,8 +38,9 @@ jobs:
                   source $HOME/.cargo/env
                   rustup component add rustfmt-preview
 
-            - name: Create rustic-doc prerequisites
+            - name: rustic-doc prerequisites
               run: |
+                   sudo apt install -y pandoc fd-find ripgrep
                    mkdir -p ~/.local/bin
                    mkdir -p ~/.local/share/emacs/rustic-doc
                    rustup component add rust-docs

@@ -6,6 +6,14 @@ function get_toolchain {
     rustup show | sed -nr 's/(.*) \(default\)/\1/p' | head -n 1
 }
 
+if [ -f "/etc/debian_version" ]
+then
+    fdfind="fdfind"
+else
+    fdfind="fd"
+fi
+echo "fd executable: $fdfind"
+
 if [ "$1" = "" ] || [ "$1" = "--help"  ]; then
     MY_NAME="$(basename "$0")"
     echo "Usage:"
@@ -34,7 +42,7 @@ mkdir -p "$DEST_DIR" || exit 1
 cd "$DOC_PATH" || exit 1
 
 ## Copy directory structure
-fd . -td -x mkdir -p "$DEST_DIR/{}"
+$fdind . -td -x mkdir -p "$DEST_DIR/{}"
 
 ## Find redirect files (removes $DOC_PATH prefix)
 ignore_file="$(mktemp)"
@@ -53,7 +61,7 @@ else
    cores=$(nproc)
 fi
 ## Convert files
-fd . \
+$fdfind . \
     -ehtml \
     --ignore-file "$ignore_file" \
     -j"$cores" \
