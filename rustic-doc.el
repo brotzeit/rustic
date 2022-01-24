@@ -66,7 +66,7 @@ All projects and std by default, otherwise last open project and std.")
      "https://raw.githubusercontent.com/samhedin/rustic/rustic-doc-tests/rustic-doc/convert.sh")
     (,rustic-doc-lua-filter
      ()
-     ,(concat rustic-doc-source-repo "filter.lua"))))
+     "https://raw.githubusercontent.com/samhedin/rustic/rustic-doc-tests/rustic-doc/filter.lua")))
 
 (defun rustic-doc-default-rg-search-command ()
   "The default search command when using helm-ag.

@@ -12,7 +12,9 @@ then
 else
     fdfind="fd"
 fi
-echo "fd executable: $fdfind"
+version=$($fdfind --version)
+echo "fd version: $version"
+echo "pandoc version: $(pandoc -v)"
 
 if [ "$1" = "" ] || [ "$1" = "--help"  ]; then
     MY_NAME="$(basename "$0")"

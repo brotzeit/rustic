@@ -54,11 +54,11 @@ Header = function(el)
   if el.classes:includes("section-header") then
     return {}
   end
-  if el.classes:includes("small-section-header") then
-    return pandoc.Header(1, pandoc.List:new({el.content[1]}))
+  if el.classes:includes("small-section-header") and el.content and tablelength(el.content) > 0 then
+    return pandoc.Header(1, pandoc.List(el.content[1]))
   end
   if el.classes:includes("impl") and el.content then
-    return pandoc.Header(2, pandoc.List:new{el.content[1]})
+    return pandoc.Header(2, pandoc.List(el.content[1]))
   end
   if el.classes:includes("fqn") and el.level == 1 and el.content and el.content[1].content then
     crate = ""
@@ -106,9 +106,9 @@ Header = function(el)
     end
 
     if contains_must_use then
-      return pandoc.List:new({pandoc.Header(3, pandoc.List:new({pandoc.Code(methodname)})), pandoc.Plain(must_use_text:sub(1, -3))})
+      return pandoc.List({pandoc.Header(3, pandoc.List({pandoc.Code(methodname)})), pandoc.Plain(must_use_text:sub(1, -3))})
     end
-    return pandoc.Header(3, pandoc.List:new({pandoc.Code(methodname)}))
+    return pandoc.Header(3, pandoc.List({pandoc.Code(methodname)}))
   end
 
   return pandoc.Header(el.level - 1, el.content)
@@ -121,7 +121,7 @@ Div = function(el)
   if el.classes:includes("shortcuts") or el.classes:includes("sidebar-elems") or el.classes:includes("theme-picker") or el.classes:includes("infos") or el.classes:includes("search-container")  or el.classes:includes("sidebar-menu") or el.classes:includes("logo-container") or el.classes:includes("toggle-wrapper") then
     return {}
   elseif el.classes:includes("variant") and el.classes:includes("small-section-header") and el.content[1] and tablelength(el.content[1].content) > 1 then
-    return pandoc.List:new({pandoc.Header(2, pandoc.Code(el.content[1].content[2].text))})
+    return pandoc.List({pandoc.Header(2, pandoc.Code(el.content[1].content[2].text))})
     else
     return pandoc.Div(el.content)
   end
