@@ -122,8 +122,8 @@ The function should take search-dir and search-term as arguments."
            (progn
              (unless (f-exists? (f-dirname dst))
                (f-mkdir (f-dirname dst)))
-             (print (f-exists? (f-dirname dst)))
-             (print  (url-copy-file src dst t))
+              (f-exists? (f-dirname dst))
+               (url-copy-file src dst t)
              (when (memq :exec opts)
                (call-process (executable-find "chmod")
                              nil
@@ -288,6 +288,8 @@ See buffer *cargo-makedocs* for more info")
     (message "If you want to convert the documentation for the dependencies in a project,
 visit the project and run `rustic-doc-convert-current-package'! \
 \(Or activate rustic-doc-mode if you are in one)")))
+
+
 
 (defun rustic-doc-install-deps (&optional noconfirm)
   "Install dependencies with Cargo.

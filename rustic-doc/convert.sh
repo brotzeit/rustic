@@ -6,13 +6,7 @@ function get_toolchain {
     rustup show | sed -nr 's/(.*) \(default\)/\1/p' | head -n 1
 }
 
-if [ -f "/etc/debian_version" ]
-then
-    fdfind="fdfind"
-else
-    fdfind="fd"
-fi
-version=$($fdfind --version)
+version=$(fd --version)
 echo "fd version: $version"
 echo "pandoc version: $(pandoc -v)"
 
@@ -44,7 +38,7 @@ mkdir -p "$DEST_DIR" || exit 1
 cd "$DOC_PATH" || exit 1
 
 ## Copy directory structure
-$fdind . -td -x mkdir -p "$DEST_DIR/{}"
+fd . -td -x mkdir -p "$DEST_DIR/{}"
 
 ## Find redirect files (removes $DOC_PATH prefix)
 ignore_file="$(mktemp)"
@@ -63,7 +57,7 @@ else
    cores=$(nproc)
 fi
 ## Convert files
-$fdfind . \
+fd . \
     -ehtml \
     --ignore-file "$ignore_file" \
     -j"$cores" \

@@ -54,12 +54,19 @@ Header = function(el)
   if el.classes:includes("section-header") then
     return {}
   end
+
+  if not el.content then
+    return {}
+  end
+
   if el.classes:includes("small-section-header") and el.content and tablelength(el.content) > 0 then
-    return pandoc.Header(1, pandoc.List(el.content[1]))
+    return pandoc.Header(1, pandoc.List({el.content[1]}))
   end
+
   if el.classes:includes("impl") and el.content then
-    return pandoc.Header(2, pandoc.List(el.content[1]))
+    return pandoc.Header(2, pandoc.List({el.content[1]}))
   end
+
   if el.classes:includes("fqn") and el.level == 1 and el.content and el.content[1].content then
     crate = ""
     for i,v in ipairs(el.content[1].content) do
