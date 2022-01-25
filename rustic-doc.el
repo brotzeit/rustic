@@ -296,7 +296,7 @@ visit the project and run `rustic-doc-convert-current-package'! \
 (defun rustic-doc--confirm-dep-versions (missing-fd)
   "Verify that dependencies are not too old."
   (when (not missing-fd)
-    (when  (>= 8 (string-to-number
+    (when  (> 8 (string-to-number
                   (substring (shell-command-to-string "fd --version") 3 4)))
       (message "Your version of fd is too old, please install a recent version, potentially through cargo.")))
 
