@@ -48,6 +48,7 @@ All projects and std by default, otherwise last open project and std.")
 
 (defvar rustic-doc-save-loc (concat (rustic-doc--xdg-data-home)
                                     "/emacs/rustic-doc"))
+
 ;; (defvar rustic-doc-resources
 ;;   `((,rustic-doc-convert-prog
 ;;      (:exec)
@@ -65,6 +66,9 @@ All projects and std by default, otherwise last open project and std.")
     (,rustic-doc-lua-filter
      ()
      "https://raw.githubusercontent.com/samhedin/rustic/rustic-doc-tests/rustic-doc/filter.lua")))
+
+(when (boundp 'rustic-doc-resources)
+  (print (format "rustic-doc-resources: %s" rustic-doc-resources)))
 
 (defun rustic-doc-default-rg-search-command ()
   "The default search command when using helm-ag.
