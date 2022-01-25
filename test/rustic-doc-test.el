@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t -*-
 (require 'rustic-doc)
-
+(require 'f)
 (ert-deftest create-dir-test ()
   (make-directory "~/rustic-doc-test"))
 
@@ -9,6 +9,7 @@
   (should (file-exists-p rustic-doc-convert-prog))
   (should (file-exists-p rustic-doc-lua-filter))
   (should (file-exists-p "~/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/share/doc/rust/html/std/option"))
-  (print (format "rustic document location: %s" (concat rustic-doc-save-loc "/std/option/")))
-  (print (format "files in std option: %s" (directory-files (concat rustic-doc-save-loc "/std/option/"))))
+  (print (format "rustic document location: %s" (f-join rustic-doc-save-loc "/std/option/")))
+  (print (format "files in std: %s" (directory-files (f-joni rustic-doc-save-loc "/std"))))
+  (print (format "files in std option: %s" (directory-files (f-join rustic-doc-save-loc "/std/option/"))))
   (should (file-exists-p (concat rustic-doc-save-loc "/std/option/enum.Option.org"))))

@@ -330,6 +330,7 @@ the pandoc filter and bash script.
 NO-DL is primarily used for development of the filters.
 If NOCONFIRM is non-nil, install all dependencies without prompting user."
   (interactive)
+  (rustic-doc-mode)
   (unless no-dl
     (rustic-doc--install-resources)
     (rustic-doc-install-deps noconfirm))
