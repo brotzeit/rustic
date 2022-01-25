@@ -34,6 +34,7 @@ if [ "$DEST_DIR" = "" ]; then
     echo "Generating org files in: $DEST_DIR"
 fi
 
+echo "destination dir: $DEST_DIR"
 mkdir -p "$DEST_DIR" || exit 1
 cd "$DOC_PATH" || exit 1
 
