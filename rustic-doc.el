@@ -127,7 +127,7 @@ The function should take search-dir and search-term as arguments."
              (unless (f-exists? (f-dirname dst))
                (f-mkdir (f-dirname dst)))
              (f-exists? (f-dirname dst))
-             (url-copy-file src dst t)
+             (print (format "Downloaded %s: %s" dst (url-copy-file src dst t)))
              (when (memq :exec opts)
                (call-process (executable-find "chmod")
                              nil
@@ -296,13 +296,17 @@ visit the project and run `rustic-doc-convert-current-package'! \
 (defun rustic-doc--confirm-dep-versions (missing-fd)
   "Verify that dependencies are not too old."
   (when (not missing-fd)
-    (when  (<= 8 (string-to-number
+    (when  (>= 8 (string-to-number
                   (substring (shell-command-to-string "fd --version") 3 4)))
       (message "Your version of fd is too old, please install a recent version, potentially through cargo.")))
 
   (when (>= 11 (string-to-number
                 (substring (shell-command-to-string "pandoc --version") 9 11)))
     (message "Your version of pandoc is too old, please install a more recent version. See their github for more info.")))
+
+(print (format "fd version: %s" (shell-command-to-string "fd --version")))
+(print (format "pandoc version: %s" (shell-command-to-string "pandoc --version")))
+(print (format "rg version: %s" (shell-command-to-string "rg --version")))
 
 
 (defun rustic-doc-install-deps (&optional noconfirm)
