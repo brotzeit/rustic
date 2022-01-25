@@ -42,8 +42,6 @@
 (defvar rustic-doc-source-repo
   "https://raw.githubusercontent.com/brotzeit/rustic/master/rustic-doc/")
 
-(defvar rustic-doc-source-)
-
 (defvar rustic-doc-current-project nil
   "Location to search for documentation.
 All projects and std by default, otherwise last open project and std.")
@@ -60,7 +58,7 @@ All projects and std by default, otherwise last open project and std.")
 
 ;; https://raw.githubusercontent.com/brotzeit/rustic/b9da0ce935babefc1cb2927a017c816f524480ac/rustic-doc/convert.sh
 
-(defvar rustic-doc-resources
+(setq rustic-doc-resources
   `((,rustic-doc-convert-prog
      (:exec)
      "https://raw.githubusercontent.com/samhedin/rustic/rustic-doc-tests/rustic-doc/convert.sh")
