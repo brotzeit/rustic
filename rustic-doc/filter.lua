@@ -168,5 +168,6 @@ end,
 }
 
 function Pandoc(el)
+  print("hello world from lua")
   return pandoc.Pandoc(pandoc.walk_block(pandoc.Div(el.blocks), cleanblocks), pandoc.Meta({}))
 end

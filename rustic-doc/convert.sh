@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 
 LUA_FILTER="$HOME/.local/bin/rustic-doc-filter.lua"
-
 function get_toolchain {
     rustup show | sed -nr 's/(.*) \(default\)/\1/p' | head -n 1
 }
-
-version=$(fd --version)
-echo "fd version: $version"
-echo "pandoc version: $(pandoc -v)"
 
 if [ "$1" = "" ] || [ "$1" = "--help"  ]; then
     MY_NAME="$(basename "$0")"

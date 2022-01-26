@@ -49,26 +49,13 @@ All projects and std by default, otherwise last open project and std.")
 (defvar rustic-doc-save-loc (concat (rustic-doc--xdg-data-home)
                                     "/emacs/rustic-doc"))
 
-;; (defvar rustic-doc-resources
-;;   `((,rustic-doc-convert-prog
-;;      (:exec)
-;;      ,(concat rustic-doc-source-repo "convert.sh"))
-;;     (,rustic-doc-lua-filter
-;;      ()
-;;      ,(concat rustic-doc-source-repo "filter.lua"))))
-
-;; https://raw.githubusercontent.com/brotzeit/rustic/b9da0ce935babefc1cb2927a017c816f524480ac/rustic-doc/convert.sh
-
-(setq rustic-doc-resources
+(defvar rustic-doc-resources
   `((,rustic-doc-convert-prog
      (:exec)
-     "https://raw.githubusercontent.com/samhedin/rustic/rustic-doc-tests/rustic-doc/convert.sh")
+     ,(concat rustic-doc-source-repo "convert.sh"))
     (,rustic-doc-lua-filter
      ()
-     "https://raw.githubusercontent.com/samhedin/rustic/rustic-doc-tests/rustic-doc/filter.lua")))
-
-(when (boundp 'rustic-doc-resources)
-  (print (format "rustic-doc-resources: %s" rustic-doc-resources)))
+     ,(concat rustic-doc-source-repo "filter.lua"))))
 
 (defun rustic-doc-default-rg-search-command ()
   "The default search command when using helm-ag.
@@ -222,7 +209,7 @@ it doesn't manage to find what you're looking for, try `rustic-doc-dumb-search'.
 
 (defun rustic-doc--update-current-project ()
   "Update `rustic-doc-current-project' if editing a rust file, otherwise leave it."
-  (when (and lsp-mode
+  (when (and (featurep  'lsp-mode)
              (derived-mode-p 'rust-mode 'rustic-mode))
     (setq rustic-doc-current-project (lsp-workspace-root))))
 
@@ -348,6 +335,7 @@ If NOCONFIRM is non-nil, install all dependencies without prompting user."
   (rustic-doc-convert-current-package))
 
 (defun rustic-doc--start-process (name program finish-func &rest program-args)
+  (print (format "rustic-doc--start-process. name: %s program:  %s" name program))
   (let* ((buf (generate-new-buffer (concat "*" name "*")))
          (proc (let ((process-connection-type nil))
                  (apply #'start-process name buf program program-args))))
@@ -359,6 +347,8 @@ If NOCONFIRM is non-nil, install all dependencies without prompting user."
 See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
                 (when finish-func
                   (funcall finish-func proc))
+                (with-temp-buffer buf
+                                  (print (buffer-string)))
                 (when (buffer-live-p buf)
                   (kill-buffer buf))))))
     proc))
