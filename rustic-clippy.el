@@ -40,7 +40,8 @@
          (buf rustic-clippy-buffer-name)
          (proc rustic-clippy-process-name)
          (mode 'rustic-cargo-clippy-mode))
-    (rustic-compilation-process-live)
+    (unless (plist-get args :no-save)
+      (rustic-compilation-process-live))
     (rustic-compilation c (list :buffer buf
                                 :process proc
                                 :mode mode
@@ -76,6 +77,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   (rustic-cargo-clippy-run
    :params (concat "--fix "
                    (format "%s" rustic-cargo-clippy-fix-args))
+   :no-save (plist-get args :no-save)
    :silent t
    :sentinel (lambda (proc msg)
                (while (eq (process-status proc) 'run)
