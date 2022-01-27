@@ -6,6 +6,8 @@
 ;;; Code:
 
 (require 'tabulated-list)
+(require 'dash)
+(require 's)
 
 (require 'rustic-compile)
 (require 'rustic-interaction) ; for rustic-beginning-of-function
@@ -517,11 +519,27 @@ in your project like `pwd'"
   (rustic-run-cargo-command (list (rustic-cargo-bin) "build")
                             (list :clippy-fix t)))
 
+(defvar rustic-clean-arguments nil
+  "Holds arguments for 'cargo clean', similar to `compilation-arguments`.")
+
 ;;;###autoload
-(defun rustic-cargo-clean ()
-  "Run 'cargo clean' for the current project."
-  (interactive)
-  (rustic-run-cargo-command (list (rustic-cargo-bin) "clean")))
+(defun rustic-cargo-clean (&optional arg)
+  "Run 'cargo clean' for the current project.
+
+If ARG is not nil, use value as argument and store it in `rustic-clean-arguments'.
+When calling this function from `rustic-popup-mode', always use the value of
+`rustic-clean-arguments'."
+  (interactive "P")
+  (rustic-run-cargo-command
+   (-filter (lambda (s) (s-present? s))
+            (-flatten
+             (list (rustic-cargo-bin) "clean"
+                   (cond (arg
+                          (setq rustic-clean-arguments
+                                (s-split " "
+                                         (read-from-minibuffer "Cargo clean arguments: "
+                                                               (s-join " " rustic-clean-arguments)))))
+                         (t rustic-clean-arguments)))))))
 
 ;;;###autoload
 (defun rustic-cargo-check ()
