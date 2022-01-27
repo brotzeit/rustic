@@ -44,8 +44,6 @@ jobs:
                    sudo dpkg -i pandoc-2.17.0.1-1-amd64.deb
                    cargo install fd-find
                    cargo install ripgrep
-                   mkdir -p ~/.local/bin
-                   mkdir -p ~/.local/share/emacs/rustic-doc/std/
                    rustup component add rust-docs
 
             - name: Run tests
