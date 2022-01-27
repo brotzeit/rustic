@@ -530,7 +530,6 @@ If ARG is not nil, use value as argument and store it in `rustic-clean-arguments
 When calling this function from `rustic-popup-mode', always use the value of
 `rustic-clean-arguments'."
   (interactive "P")
-  (message "%s" arg)
   (rustic-run-cargo-command
    (-filter (lambda (s) (s-present? s))
             (-flatten
