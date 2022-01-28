@@ -431,6 +431,7 @@ Customization:
 
 - `rustic-cargo-bin` Path to cargo executable
 - `rustic-cargo-bin-remote` Path to remote cargo executable
+- `rustic-cargo-check-arguments` default arguments for cargo check
 
 ### Edit
 
@@ -521,6 +522,9 @@ before being used.
 Currently cargo does not display the correct installation command for
 some toolchains when clippy isn't installed.  If you have problems try
 it with `rustup component add --toolchain nightly clippy`.
+
+You can change the parameters `rustic-default-clippy-arguments` that
+default to "--workspace --benches --tests --all-features".
 
 ### auto-fixing before compilation
 
