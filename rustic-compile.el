@@ -11,6 +11,7 @@
 
 (require 'markdown-mode)
 (require 'xterm-color)
+(require 's)
 
 (require 'compile)
 
@@ -287,6 +288,9 @@ ARGS is a plist that affects how the process is run.
     (unless (plist-get args :no-display)
       (funcall rustic-compile-display-method buf))
     (with-current-buffer buf
+      (read-only-mode -1)
+      (insert (format "%s \n" (s-join " "  command)))
+      (read-only-mode 1)
       (rustic-make-process :name process
                            :buffer buf
                            :command command
