@@ -1,8 +1,6 @@
 ;; -*- lexical-binding: t -*-
 (require 'rustic-doc)
 (require 'f)
-(ert-deftest create-dir-test ()
-  (make-directory "~/rustic-doc-test"))
 
 (ert-deftest rustic-doc-setup-test ()
   (rustic-doc-setup nil t)

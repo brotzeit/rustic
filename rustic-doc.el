@@ -105,7 +105,6 @@ The function should take search-dir and search-term as arguments."
 
 (defun rustic-doc--install-resources ()
   "Install or update the rustic-doc resources."
-  (executable-find "chmod")
   (dolist (resource rustic-doc-resources)
     (pcase resource
       (`(,dst ,opts ,src)
@@ -335,7 +334,6 @@ If NOCONFIRM is non-nil, install all dependencies without prompting user."
   (rustic-doc-convert-current-package))
 
 (defun rustic-doc--start-process (name program finish-func &rest program-args)
-  (print (format "rustic-doc--start-process. name: %s program:  %s" name program))
   (let* ((buf (generate-new-buffer (concat "*" name "*")))
          (proc (let ((process-connection-type nil))
                  (apply #'start-process name buf program program-args))))
