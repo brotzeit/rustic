@@ -113,7 +113,7 @@ The function should take search-dir and search-term as arguments."
              (unless (f-exists? (f-dirname dst))
                (f-mkdir (f-dirname dst)))
              (f-exists? (f-dirname dst))
-             (print (format "Downloaded %s: %s" dst (url-copy-file src dst t)))
+             (url-copy-file src dst t)
              (when (memq :exec opts)
                (call-process (executable-find "chmod")
                              nil
@@ -197,8 +197,7 @@ it doesn't manage to find what you're looking for, try `rustic-doc-dumb-search'.
     (unless (file-directory-p rustic-doc-save-loc)
       (rustic-doc-setup)
       (message "Running first time setup. Please re-run your search\
- once conversion has completed.")
-      (sleep-for 3))
+ once conversion has completed."))
     ;; If the user has not run `rustic-doc-convert-current-package' in
     ;; the current project, we create a default directory that only
     ;; contains a symlink to std.
@@ -253,8 +252,7 @@ If the user has not visited a project, returns the main doc directory."
   (interactive)
   (unless (file-directory-p rustic-doc-save-loc)
     (rustic-doc-setup)
-    (message "Running first time setup.")
-    (sleep-for 3))
+    (message "Running first time setup."))
   (if rustic-doc-current-project
       (progn
         (message "Converting documentation for %s "
@@ -275,9 +273,7 @@ See buffer *cargo-makedocs* for more info")
                                        finish-func
                                        docs-src
                                        (rustic-doc--project-doc-dest)))))
-    (message "If you want to convert the documentation for the dependencies in a project,
-visit the project and run `rustic-doc-convert-current-package'! \
-\(Or activate rustic-doc-mode if you are in one)")))
+    (message "Activate rustic-doc-mode to run `rustic-doc-convert-current-package")))
 
 (defun rustic-doc--confirm-dep-versions (missing-fd)
   "Verify that dependencies are not too old."
@@ -322,7 +318,6 @@ If NOCONFIRM is non-nil, install all dependencies without prompting user."
   (unless no-dl
     (rustic-doc--install-resources)
     (rustic-doc-install-deps noconfirm))
-  (message "Setup is converting the standard library")
   (delete-directory (concat rustic-doc-save-loc "/std")
                     t)
   (rustic-doc--start-process "rustic-doc-std-conversion"
@@ -330,8 +325,9 @@ If NOCONFIRM is non-nil, install all dependencies without prompting user."
                              (lambda (_p)
                                (message "Finished converting docs for std"))
                              "std")
-  (sleep-for 3)
-  (rustic-doc-convert-current-package))
+  (if rustic-doc-current-project
+      (rustic-doc-convert-current-package)
+    (message "Setup is converting std. If you want to convert local dependencies, activate rustic-doc-mode when you are in a rust project and run `rustic-doc-convert-current-package")))
 
 (defun rustic-doc--start-process (name program finish-func &rest program-args)
   (let* ((buf (generate-new-buffer (concat "*" name "*")))
@@ -345,8 +341,6 @@ If NOCONFIRM is non-nil, install all dependencies without prompting user."
 See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
                 (when finish-func
                   (funcall finish-func proc))
-                (with-temp-buffer buf
-                                  (print (buffer-string)))
                 (when (buffer-live-p buf)
                   (kill-buffer buf))))))
     proc))
