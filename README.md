@@ -777,10 +777,10 @@ example](img/rustic-doc.png)
 
 Required:
 
-- [pandoc](https://pandoc.org/installing.html) (preferably at least version 2.11, as it will give somewhat nicer generated documentation)
+- [pandoc](https://pandoc.org/installing.html) preferably at least version 2.11, as it will give somewhat nicer generated documentation. Versions older than 2.9 may not work - if you're on a debian based distro installing through your regular repo might not work out.
 - [cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
 - [cargo-makedocs](https://github.com/Bunogi/cargo-makedocs)
-- [fd-find](https://github.com/sharkdp/fd)
+- [fd-find](https://github.com/sharkdp/fd) Old versions, especially before 2.x, may not work. Install through Cargo if you're having issues.
 
 Optional:
 
