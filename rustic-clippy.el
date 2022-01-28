@@ -12,6 +12,11 @@
   :type 'string
   :group 'rustic-cargo)
 
+(defcustom rustic-default-clippy-arguments "--workspace --benches --tests --all-features"
+  "Default arguments when running clippy."
+  :type 'string
+  :group 'rustic-cargo)
+
 (defvar rustic-clippy-process-name "rustic-cargo-clippy-process"
   "Process name for clippy processes.")
 
@@ -57,11 +62,14 @@ When calling this function from `rustic-popup-mode', always use the value of
 `rustic-clippy-arguments'."
   (interactive "P")
   (rustic-cargo-clippy-run
-   (cond (arg
+   :params (cond (arg
           (setq rustic-clippy-arguments (read-from-minibuffer "Cargo clippy arguments: " rustic-clippy-arguments)))
          ((eq major-mode 'rustic-popup-mode)
-          rustic-clippy-arguments)
-         (t ""))))
+          (if (> (length rustic-clippy-arguments) 0)
+              rustic-clippy-arguments
+            rustic-default-clippy-arguments))
+         (t
+          rustic-default-clippy-arguments))))
 
 ;;;###autoload
 (defun rustic-cargo-clippy-rerun ()
@@ -72,11 +80,10 @@ When calling this function from `rustic-popup-mode', always use the value of
 (defun rustic-cargo-clippy-fix (&rest args)
   "Run 'clippy fix'."
   (interactive)
-  (let ((a (plist-get args :args))
-        (silent (plist-get args :silent))))
   (rustic-cargo-clippy-run
    :params (concat "--fix "
-                   (format "%s" rustic-cargo-clippy-fix-args))
+                   rustic-cargo-clippy-fix-args " "
+                   rustic-default-clippy-arguments)
    :no-save (plist-get args :no-save)
    :silent t
    :sentinel (lambda (proc msg)

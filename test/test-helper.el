@@ -58,6 +58,18 @@ Emacs shutdown.")
       (save-buffer))
     dir))
 
+(defun rustic-test-count-error-helper-new (string)
+  (let* ((buffer (get-buffer-create "b"))
+         (default-directory org-babel-temporary-directory)
+         (dir (rustic-babel-generate-project t))
+         (file (expand-file-name "main.rs" (concat dir "/src")))
+         (default-directory dir))
+    (write-region (concat "#![allow(non_snake_case)]\n" string)
+                  nil file nil 0)
+    (with-current-buffer buffer
+      (find-file file))
+    (get-file-buffer file)))
+
 (defmacro rustic-test-silence (messages &rest body)
   `(cl-letf* (((symbol-function 'm)
                (symbol-function #'message))

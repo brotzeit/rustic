@@ -227,7 +227,7 @@ Set environment variables for rust process."
     (when (> (length rustic-compile-rustflags) 0)
       (setq process-environment
             (nconc (list (format "RUSTFLAGS=%s" rustic-compile-rustflags))
-              process-environment)))
+                   process-environment)))
 
     (let ((process (apply
                     #'start-file-process (plist-get args :name)
@@ -236,6 +236,7 @@ Set environment variables for rust process."
       (set-process-filter process (plist-get args :filter))
       (set-process-sentinel process (plist-get args :sentinel))
       (set-process-coding-system process 'utf-8-emacs-unix 'utf-8-emacs-unix)
+      (process-put process 'command (plist-get args :command))
       process)))
 
 (defun rustic-compilation-setup-buffer (buf dir mode &optional no-mode-line)

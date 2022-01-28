@@ -40,6 +40,11 @@ If nil then the project is simply created."
   :type 'boolean
   :group 'rustic-cargo)
 
+(defcustom rustic-cargo-check-arguments "--workspace --benches --tests --all-features"
+  "Default arguments when running 'cargo check'."
+  :type 'string
+  :group 'rustic-cargo)
+
 (defvar rustic-cargo-outdated-face nil)
 (make-obsolete-variable 'rustic-cargo-outdated-face
                         "use the face `rustic-cargo-outdated' instead."
@@ -545,7 +550,9 @@ When calling this function from `rustic-popup-mode', always use the value of
 (defun rustic-cargo-check ()
   "Run 'cargo check' for the current project."
   (interactive)
-  (rustic-run-cargo-command (list (rustic-cargo-bin) "check")))
+  (rustic-run-cargo-command `(,(rustic-cargo-bin)
+                              "check"
+                              ,@(split-string rustic-cargo-check-arguments))))
 
 ;;;###autoload
 (defun rustic-cargo-bench ()

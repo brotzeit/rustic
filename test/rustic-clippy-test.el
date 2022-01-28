@@ -1,5 +1,6 @@
 ;; -*- lexical-binding: t -*-
 
+
 (ert-deftest rustic-test-trigger-and-fix-format-on-compile ()
   (ignore-errors (kill-buffer (get-buffer rustic-compilation-buffer-name)))
   (let* ((buffer1 (get-buffer-create "b1"))
@@ -80,3 +81,45 @@
       (should (get-buffer rustic-clippy-buffer-name))
       (kill-buffer (get-buffer rustic-clippy-buffer-name))
       (kill-buffer buffer1))))
+
+(ert-deftest rustic-test-clippy ()
+  (let* ((string "fn main() {
+     String::from(' ').extend(String::from(' ').chars());
+}\n")
+         (buf (rustic-test-count-error-helper-new string))
+         (default-directory (buffer-file-name buf)))
+    (call-interactively 'rustic-cargo-clippy)
+    (let* ((proc (get-process rustic-clippy-process-name))
+           (buffer (process-buffer proc)))
+      (while (eq (process-status proc) 'run)
+        (sit-for 0.01))
+      (with-current-buffer buffer
+        (should (string-match "^warning:\s" (buffer-substring-no-properties (point-min) (point-max)))))
+    (should (string= (s-join " " (process-get proc 'command))
+                     (concat (rustic-cargo-bin) " clippy "
+                             rustic-default-clippy-arguments))))
+    (should (string= rustic-clippy-arguments ""))
+
+    (kill-buffer (get-buffer rustic-clippy-buffer-name))
+    (call-interactively 'rustic-cargo-clippy-rerun)
+    (let* ((proc (get-process rustic-clippy-process-name))
+           (buffer (process-buffer proc)))
+      (while (eq (process-status proc) 'run)
+        (sit-for 0.01))
+      (with-current-buffer buffer
+        (should (string-match "^warning:\s" (buffer-substring-no-properties (point-min) (point-max)))))      
+      (should (string= rustic-clippy-arguments "")))
+    (kill-buffer buf)))
+
+(ert-deftest rustic-test-clippy-fix ()
+  (let* ((string "fn main() { let s = 1;}")
+         (buf (rustic-test-count-error-helper-new string))
+         (default-directory (buffer-file-name buf)))
+    (with-current-buffer buf
+      (call-interactively 'rustic-cargo-clippy-fix)
+      (let* ((proc (get-process rustic-clippy-process-name))
+             (buffer (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.01))
+        (revert-buffer t t)
+        (should (string= (buffer-string) "#![allow(non_snake_case)]\nfn main() { let _s = 1;}"))))))

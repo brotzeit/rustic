@@ -191,3 +191,15 @@ fn test21() {
     (should (= 0 (length (split-string rustic-test-arguments))))
     (kill-buffer buf)))
 
+(ert-deftest rustic-test-check ()
+  (let* ((string "fn main() { let s = 1;}")
+         (buf (rustic-test-count-error-helper-new string))
+         (default-directory (buffer-file-name buf)))
+    (with-current-buffer buf
+      (call-interactively 'rustic-cargo-check)
+      (let* ((proc (get-process rustic-compilation-process-name))
+             (buffer (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.01))
+        (with-current-buffer buffer
+          (should (string-match "^warning:\s" (buffer-substring-no-properties (point-min) (point-max)))))))))
