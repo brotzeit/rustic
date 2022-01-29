@@ -208,3 +208,22 @@ fn test21() {
 
         (with-current-buffer buffer
           (should (string-match "^warning:\s" (buffer-substring-no-properties (point-min) (point-max)))))))))
+
+(ert-deftest rustic-cargo-test-test ()
+  (let* ((string "mod tests {
+#[test]
+fn test() {
+}
+}")
+         (buf (rustic-test-count-error-helper-new string))
+         (default-directory (buffer-file-name buf)))
+    (with-current-buffer buf
+      (let* ((proc (rustic-cargo-test))
+             (buffer (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.01))
+        (with-current-buffer buffer
+          (should (eq major-mode 'rustic-cargo-test-mode)))
+        (should (string= (s-join " " (process-get proc 'command))
+                         (concat (rustic-cargo-bin) " test "
+                                 rustic-default-test-arguments)))))))
