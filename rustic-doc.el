@@ -31,9 +31,9 @@
     (require 'xdg)
     (fset 'rustic-doc--xdg-data-home 'xdg-data-home)))
 
-(defvar rustic-doc-lua-filter (concat (file-name-as-directory (getenv "HOME"))
-                                      ".local/bin/rustic-doc-filter.lua")
-  "Save location for the rustic-doc lua filter.")
+(defvar rustic-doc-filter (concat (file-name-as-directory (getenv "HOME"))
+                                      ".local/bin/rustic-doc-filter")
+  "Save location for the rustic-doc filter.")
 
 (defvar rustic-doc-convert-prog (concat (file-name-as-directory (getenv "HOME"))
                                         ".local/bin/rustic-doc-convert.sh")
@@ -53,9 +53,9 @@ All projects and std by default, otherwise last open project and std.")
   `((,rustic-doc-convert-prog
      (:exec)
      ,(concat rustic-doc-source-repo "convert.sh"))
-    (,rustic-doc-lua-filter
-     ()
-     ,(concat rustic-doc-source-repo "filter.lua"))))
+    (,rustic-doc-filter
+     (:exec)
+     "https://github.com/samhedin/rustic/blob/pandoc-haskell-filter/rustic-doc/pandoc_filter/rustdoc-to-org-exe?raw=true")))
 
 (defun rustic-doc-default-rg-search-command ()
   "The default search command when using helm-ag.
