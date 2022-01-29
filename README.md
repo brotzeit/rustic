@@ -516,6 +516,7 @@ before being used.
 - `rustic-cargo-bench` run 'cargo bench' for the current project
 - `rustic-cargo-build-doc` build the documentation for the current project
 - `rustic-cargo-doc` open the documentation for the current project in a browser
+- `rustic-cargo-lints` called with `rustic-lints-arguments`
 
 ## Clippy
 

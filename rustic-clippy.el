@@ -17,6 +17,11 @@
   :type 'string
   :group 'rustic-cargo)
 
+(defcustom rustic-lints-arguments "-f custom_lints.toml clippy"
+  "Default arguments when running cargo-lints."
+  :type 'string
+  :group 'rustic-cargo)
+
 (defvar rustic-clippy-process-name "rustic-cargo-clippy-process"
   "Process name for clippy processes.")
 
@@ -52,6 +57,18 @@
                                 :mode mode
                                 :sentinel (plist-get args :sentinel)
                                 :no-display (plist-get args :silent)))))
+
+;;;###autoload
+(defun rustic-cargo-lints ()
+  "Run cargo-lints with optional ARGS."
+  (interactive)
+  (let* ((command `(,rustic-cargo-bin
+                    "lints"
+                    ,@(rustic-lints-arguments)))
+         (buf rustic-clippy-buffer-name)
+         (proc rustic-clippy-process-name)
+         (mode 'rustic-cargo-clippy-mode))
+    (rustic-compilation command (list :buffer buf :process proc :mode mode))))
 
 ;;;###autoload
 (defun rustic-cargo-clippy (&optional arg)
