@@ -41,7 +41,7 @@ If nil then the project is simply created."
   :group 'rustic-cargo)
 
 (defcustom rustic-default-test-arguments "--workspace --benches --tests --all-features"
-  "Default arguments when running clippy."
+  "Default arguments when running 'cargo test'."
   :type 'string
   :group 'rustic-cargo)
 
@@ -147,13 +147,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   (rustic-compilation-process-live)
   (-if-let (test-to-run (setq rustic-test-arguments
                               (rustic-cargo--get-test-target)))
-      (let* ((command (list (rustic-cargo-bin) "test" test-to-run))
-             (c (append command))
-             (buf rustic-test-buffer-name)
-             (proc rustic-test-process-name)
-             (mode 'rustic-cargo-test-mode))
-        (rustic-compilation c (list :buffer buf :process proc :mode mode)))
-    (rustic-cargo-run-test test-to-run)
+      (rustic-cargo-run-test test-to-run)
     (message "Could not find test at point.")))
 
 ;;;###autoload
