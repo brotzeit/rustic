@@ -364,7 +364,7 @@ kill the running process."
         (let ((default-directory dir)
               (toolchain (cdr (assq :toolchain params))))
           (write-region
-           (concat "#![allow(non_snake_case)]\n"
+           (concat "#![allow(non_snake_case, unused)]\n"
                    (if use-blocks (rustic-babel-insert-mod use-blocks) "")
                    (if include-blocks (rustic-babel-include-blocks include-blocks) "")
                    (if wrap-main (rustic-babel-ensure-main-wrap body) body))
