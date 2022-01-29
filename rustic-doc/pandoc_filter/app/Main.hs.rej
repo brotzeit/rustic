@@ -1,0 +1,47 @@
+diff a/rustdoc-to-org/app/Main.hs b/rustdoc-to-org/app/Main.hs	(rejected hunks)
+@@ -32,23 +32,37 @@ clearJunk (Plain ((Link (_, [name], _) _ _) : _))
+   | name == "test-arrow" = Null
+ 
+ clearJunk (Div (tag, _, _) bs)
+-  | tag == "main" = Div emptyAttrs $ map clearJunk bs
+-  | tag == "search" = Div emptyAttrs $ map clearJunk bs
+-  | tag == "implementation-list" = Div emptyAttrs $ map clearJunk bs
+-  | tag == "synthetic-implementation-list" = Div emptyAttrs $ map clearJunk bs
+-  | tag == "blanket-implementations-list" = Div emptyAttrs $ map clearJunk bs
++  | tag == "main" = Div emptyAttrs bs
++  | tag == "search" = Div emptyAttrs bs
++  | tag == "implementation-list" = Div emptyAttrs bs
++  | tag == "synthetic-implementation-list" = Div emptyAttrs bs
++  | tag == "blanket-implementations-list" = Div emptyAttrs bs
+ 
+ 
+-clearJunk (Plain inlines) = Plain $ cleanInlines $ filter (\case
++clearJunk (Plain inlines) = Plain $ removeLinebreaks $ filter (\case
+                                                (Link (_, [srclink], _) _ _) | srclink == "srclink" -> False
+                                                (Link (_, (collapse : _), _) _ _) | collapse == "collapse-toggle" -> False
+                                                _ -> True) inlines
+ 
+-clearJunk (Para ins) = Para $ cleanInlines ins
++clearJunk (Para ins) = Para $ removeLinebreaks ins
+ clearJunk (Header 4 attr [Code _ _]) = Null
+-clearJunk (Header a attr ins) = Header a attr (cleanInlines ins)
++clearJunk (Header a attr ins) = Header a attr (removeLinebreaks ins)
+ clearJunk x = x
+ 
++
++makeTitle :: Block -> Block
++makeTitle (Div a ((Header 1 _ inlines) : bs)) = Div a (Header 1 emptyAttrs (title inlines) : bs)
++  where
++    title :: [Inline] -> [Inline]
++    title ((Span (_, [inband], _) titlestrs):is)
++      | inband == "in-band" = foldr (\ x acc -> case x of
++                                        (Str t1) -> Str t1 : acc
++                                        (Link _ [(Str t1)] t) -> Link emptyAttrs [Str t1] t : acc
++                                        _ -> acc) [] titlestrs
++    title (_:is) = title is
++    title [] = []
++makeTitle x = x
++
+ variants :: Block -> Block
+ variants (Div (_,[_, section], _) xs)
+   | section == "small-section-header" = Div emptyAttrs xs

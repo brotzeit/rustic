@@ -1,0 +1,69 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: a79e978d3ffc3a3389f0515df3c789a7014e5ffdb9f74de7437b446955d8f2da
+
+name:           rustdoc-to-org
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/rustdoc-to-org#readme>
+homepage:       https://github.com/githubuser/rustdoc-to-org#readme
+bug-reports:    https://github.com/githubuser/rustdoc-to-org/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2020 Author name here
+license:        BSD3
+build-type:     Simple
+extra-source-files:
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/rustdoc-to-org
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_rustdoc_to_org
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , pandoc >=2.9
+    , pandoc-types >=1.20
+    , text >=1.2
+  default-language: Haskell2010
+
+executable rustdoc-to-org-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_rustdoc_to_org
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , pandoc >=2.9
+    , pandoc-types >=1.20
+    , rustdoc-to-org
+    , text >=1.2
+  default-language: Haskell2010
+
+test-suite rustdoc-to-org-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_rustdoc_to_org
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , pandoc >=2.9
+    , pandoc-types >=1.20
+    , rustdoc-to-org
+    , text >=1.2
+  default-language: Haskell2010

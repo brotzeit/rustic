@@ -1,0 +1,50 @@
+name:                rustdoc-to-org
+version:             0.1.0.0
+github:              "githubuser/rustdoc-to-org"
+license:             BSD3
+author:              "Author name here"
+maintainer:          "example@example.com"
+copyright:           "2020 Author name here"
+
+extra-source-files:
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/githubuser/rustdoc-to-org#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- pandoc >= 2.9
+- pandoc-types >= 1.20
+- text >= 1.2
+
+library:
+  source-dirs: src
+
+executables:
+  rustdoc-to-org-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - rustdoc-to-org
+
+tests:
+  rustdoc-to-org-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - rustdoc-to-org

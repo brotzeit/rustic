@@ -1,0 +1,13 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "rustdoc-to-org:lib"
+
+    - path: "./app/Main.hs"
+      component: "rustdoc-to-org:exe:rustdoc-to-org-exe"
+
+    - path: "./app/Paths_rustdoc_to_org.hs"
+      component: "rustdoc-to-org:exe:rustdoc-to-org-exe"
+
+    - path: "./test"
+      component: "rustdoc-to-org:test:rustdoc-to-org-test"
