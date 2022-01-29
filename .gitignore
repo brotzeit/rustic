@@ -2,3 +2,4 @@
 /.cask
 /config.mk
 *autoloads.el
+.stack-work/
