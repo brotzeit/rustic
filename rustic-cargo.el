@@ -97,8 +97,7 @@ stored in this variable.")
 
 (defun rustic-cargo-run-test (test)
   "Run TEST which can be a single test or mod name."
-  (let* ((command (list (rustic-cargo-bin) "test" test))
-         (c (append command))
+  (let* ((c (list (rustic-cargo-bin) "test" test))
          (buf rustic-test-buffer-name)
          (proc rustic-test-process-name)
          (mode 'rustic-cargo-test-mode))
