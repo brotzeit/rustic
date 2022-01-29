@@ -201,5 +201,10 @@ fn test21() {
              (buffer (process-buffer proc)))
         (while (eq (process-status proc) 'run)
           (sit-for 0.01))
+
+        (should (string= (s-join " " (process-get proc 'command))
+                             (concat (rustic-cargo-bin) " check "
+                                     rustic-cargo-check-arguments)))
+
         (with-current-buffer buffer
           (should (string-match "^warning:\s" (buffer-substring-no-properties (point-min) (point-max)))))))))
