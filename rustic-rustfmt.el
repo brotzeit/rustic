@@ -63,6 +63,13 @@ to 'on-save."
   :type 'function
   :group 'rustic)
 
+(defcustom rustic-cargo-clippy-trigger-fix nil
+  "Whether to run 'clippy --fix' before build or run."
+  :type '(choice (const :tag "Run 'clippy --fix' before saving." on-save)
+                 (const :tag "Run 'clippy --fix' before compilation." on-compile)
+                 (const :tag "Don't fix automatically." nil))
+  :group 'rustic)
+
 ;;; _
 
 (defvar rustic-format-process-name "rustic-rustfmt-process"
@@ -371,23 +378,43 @@ This is basically a wrapper around `project--buffer-list'."
 
 ;;; Hooks
 
-(defun rustic-maybe-format-before-compilation ()
-  (if (eq rustic-format-trigger 'on-compile)
-      (let ((proc (rustic-cargo-fmt)))
+(defun rustic-maybe-format-before-compilation (&optional clippy-fix)
+  "Will be executed before running `rustic-compilation'."
+  (let ((compile-ready-p t))
+    ;; run clippy --fix, but only for "build" or "run" and rustic-compile
+    (when (and clippy-fix
+               (eq rustic-cargo-clippy-trigger-fix 'on-compile))
+      (let* ((proc (rustic-cargo-clippy-fix :silent t :no-save t)))
         (while (eq (process-status proc) 'run)
           (sit-for 0.1))
-        (if (zerop (process-exit-status proc))
-            t
-          (funcall rustic-compile-display-method (process-buffer proc))
-          nil))
-    t))
+        (unless (zerop (process-exit-status proc))
+          (setq compile-ready-p nil))))
+
+    ;; cargo fmt
+    (when compile-ready-p
+      (when (eq rustic-format-trigger 'on-compile)
+        (let ((proc (rustic-cargo-fmt)))
+          (while (eq (process-status proc) 'run)
+            (sit-for 0.1))
+          (unless (zerop (process-exit-status proc))
+            (setq compile-ready-p nil)))))
+    compile-ready-p))
 
 (add-hook 'rustic-before-compilation-hook
           #'rustic-maybe-format-before-compilation)
 
 (defun rustic-before-save-hook ()
-  "Don't throw error if rustfmt isn't installed, as it makes saving impossible."
-  (save-excursion
+  "Automatically run 'clippy --fix' OR rustfmt before saving.
+
+Change `rustic-cargo-clippy-trigger-fix' and `rustic-format-trigger'
+to make use of these features.
+
+Don't throw error if rustfmt isn't installed, as it makes saving impossible."
+  (when (eq rustic-cargo-clippy-trigger-fix 'on-save)
+    (rustic-cargo-clippy-fix :silent t :no-save t))
+
+  (unless (eq rustic-cargo-clippy-trigger-fix 'on-save)
+    (save-excursion
       (when (and (rustic-format-on-save-p)
                  (not (rustic-compilation-process-live t)))
         (condition-case nil
@@ -396,7 +423,7 @@ This is basically a wrapper around `project--buffer-list'."
                   (rustic-format-buffer)
                 (funcall rustic-format-on-save-method))
               (sit-for 0.1))
-          (error nil)))))
+          (error nil))))))
 
 (defun rustic-after-save-hook ()
   "Check if rustfmt is installed after saving the file."

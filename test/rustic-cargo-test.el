@@ -64,6 +64,7 @@ fn test2() {
           (should (string-match "test1" (buffer-substring-no-properties (point-min) (point-max))))
           (should-not (string-match "test2" (buffer-substring-no-properties (point-min) (point-max)))))
         (kill-buffer proc-buf)))
+    (setq rustic-test-arguments "")
     (kill-buffer buf)))
 
 (ert-deftest rustic-test-cargo-current-test-with-comment ()
@@ -87,6 +88,7 @@ fn test1() {
         (with-current-buffer proc-buf
           (should (string-match "test1" (buffer-substring-no-properties (point-min) (point-max)))))
         (kill-buffer proc-buf)))
+    (setq rustic-test-arguments "")
     (kill-buffer buf)))
 
 (ert-deftest rustic-test-cargo-current-test-no-test-found ()
@@ -110,6 +112,7 @@ use std;
         (with-current-buffer proc-buf
           (should (string-match "test1" (buffer-substring-no-properties (point-min) (point-max)))))
         (kill-buffer proc-buf)))
+    (setq rustic-test-arguments "")
     (kill-buffer buf)))
 
 (ert-deftest rustic-test-rustic-cargo-test-disable-warnings ()
@@ -127,3 +130,76 @@ use std;
       (should-not (string-match "^warning:\s" (buffer-substring-no-properties (point-min) (point-max)))))
     (kill-buffer buf))
   (setq rustic-cargo-test-disable-warnings nil))
+
+(ert-deftest rustic-test-cargo-current-test-rerun ()
+  (let* ((string "mod tests {
+#[test]
+fn test1() {
+}
+#[test]
+fn test2() {
+}}")
+         (default-directory (rustic-test-count-error-helper string))
+         (buf (get-buffer-create "test-current-test")))
+    (with-current-buffer buf
+      (insert string)
+      (goto-char (point-min))
+      (forward-line 3)
+      (let* ((proc (rustic-cargo-current-test))
+             (proc-buf (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.1)))
+      (let* ((proc (rustic-cargo-test-rerun))
+             (proc-buf (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.1))
+        (should (string= rustic-test-arguments "tests::test1"))
+      (with-current-buffer proc-buf
+        (should (string-match "test1" (buffer-substring-no-properties (point-min) (point-max))))
+        (should-not (string-match "test2" (buffer-substring-no-properties (point-min) (point-max)))))
+      (kill-buffer proc-buf)))
+  (setq rustic-test-arguments "")
+  (kill-buffer buf)))
+
+(ert-deftest rustic-test-cargo-run-test-with-mod ()
+  (let* ((string "
+mod tests1 {
+#[test]
+fn test11() {
+}
+}
+
+mod tests2 {
+#[test]
+fn test21() {
+}
+}")
+         (default-directory (rustic-test-count-error-helper string))
+         (buf (get-buffer-create "test-current-test")))
+    (with-current-buffer buf
+      (insert string)
+      (goto-char (point-min))
+      (forward-line 1)
+      (let* ((proc (rustic-cargo-run-test "tests1"))
+             (proc-buf (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.1))
+        (with-current-buffer proc-buf
+          (should (string-match "tests1::test1" (buffer-substring-no-properties (point-min) (point-max))))
+          (should-not (string-match "test21" (buffer-substring-no-properties (point-min) (point-max)))))
+        (kill-buffer proc-buf)))
+    (should (= 0 (length (split-string rustic-test-arguments))))
+    (kill-buffer buf)))
+
+(ert-deftest rustic-test-check ()
+  (let* ((string "fn main() { let s = 1;}")
+         (buf (rustic-test-count-error-helper-new string))
+         (default-directory (buffer-file-name buf)))
+    (with-current-buffer buf
+      (call-interactively 'rustic-cargo-check)
+      (let* ((proc (get-process rustic-compilation-process-name))
+             (buffer (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.01))
+        (with-current-buffer buffer
+          (should (string-match "^warning:\s" (buffer-substring-no-properties (point-min) (point-max)))))))))

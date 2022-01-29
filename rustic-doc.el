@@ -100,6 +100,8 @@ The function should take search-dir and search-term as arguments."
   :type 'function
   :group 'rustic-doc)
 
+
+
 (defun rustic-doc--install-resources ()
   "Install or update the rustic-doc resources."
   (dolist (resource rustic-doc-resources)
@@ -109,6 +111,7 @@ The function should take search-dir and search-term as arguments."
            (progn
              (unless (f-exists? (f-dirname dst))
                (f-mkdir (f-dirname dst)))
+             (f-exists? (f-dirname dst))
              (url-copy-file src dst t)
              (when (memq :exec opts)
                (call-process (executable-find "chmod")
@@ -193,8 +196,7 @@ it doesn't manage to find what you're looking for, try `rustic-doc-dumb-search'.
     (unless (file-directory-p rustic-doc-save-loc)
       (rustic-doc-setup)
       (message "Running first time setup. Please re-run your search\
- once conversion has completed.")
-      (sleep-for 3))
+ once conversion has completed."))
     ;; If the user has not run `rustic-doc-convert-current-package' in
     ;; the current project, we create a default directory that only
     ;; contains a symlink to std.
@@ -204,7 +206,7 @@ it doesn't manage to find what you're looking for, try `rustic-doc-dumb-search'.
 
 (defun rustic-doc--update-current-project ()
   "Update `rustic-doc-current-project' if editing a rust file, otherwise leave it."
-  (when (and (boundp 'lsp-mode)
+  (when (and (featurep  'lsp-mode)
              (derived-mode-p 'rust-mode 'rustic-mode))
     (setq rustic-doc-current-project (lsp-workspace-root))))
 
@@ -249,8 +251,7 @@ If the user has not visited a project, returns the main doc directory."
   (interactive)
   (unless (file-directory-p rustic-doc-save-loc)
     (rustic-doc-setup)
-    (message "Running first time setup.")
-    (sleep-for 3))
+    (message "Running first time setup."))
   (if rustic-doc-current-project
       (progn
         (message "Converting documentation for %s "
@@ -271,19 +272,31 @@ See buffer *cargo-makedocs* for more info")
                                        finish-func
                                        docs-src
                                        (rustic-doc--project-doc-dest)))))
-    (message "If you want to convert the documentation for the dependencies in a project,
-visit the project and run `rustic-doc-convert-current-package'! \
-\(Or activate rustic-doc-mode if you are in one)")))
+    (message "Activate rustic-doc-mode to run `rustic-doc-convert-current-package")))
 
-(defun rustic-doc-install-deps ()
-  "Install dependencies with Cargo."
+(defun rustic-doc--confirm-dep-versions (missing-fd)
+  "Verify that dependencies are not too old."
+  (when (not missing-fd)
+    (when  (> 8 (string-to-number
+                  (substring (shell-command-to-string "fd --version") 3 4)))
+      (message "Your version of fd is too old, please install a recent version, maybe through cargo.")))
+
+  (when (>= 11 (string-to-number
+                (substring (shell-command-to-string "pandoc --version") 9 11)))
+    (message "Your version of pandoc is too old, please install a more recent version. See their github for more info.")))
+
+
+(defun rustic-doc-install-deps (&optional noconfirm)
+  "Install dependencies with Cargo.
+If NOCONFIRM is non-nil, install all dependencies without prompting user."
   (if (not (executable-find "cargo"))
       (message "You need to have cargo installed to use rustic-doc")
     (let ((missing-rg (not (executable-find "rg")))
-          (missing-fd (not (executable-find "fd")))
+          (missing-fd (and  (not (executable-find "fd") )))
           (missing-makedocs (not (executable-find "cargo-makedocs"))))
+      (rustic-doc--confirm-dep-versions missing-fd)
       (when (and (or missing-fd missing-makedocs missing-rg)
-                 (y-or-n-p "Missing some dependencies for rustic doc, install them? "))
+                 (or noconfirm (y-or-n-p "Missing some dependencies for rustic doc, install them? ")))
         (when missing-fd
           (rustic-doc--start-process "install-fd" "cargo" nil "install" "fd-find"))
         (when missing-rg
@@ -293,16 +306,17 @@ visit the project and run `rustic-doc-convert-current-package'! \
                                      "install" "cargo-makedocs"))))))
 
 ;;;###autoload
-(defun rustic-doc-setup (&optional no-dl)
+(defun rustic-doc-setup (&optional no-dl noconfirm)
   "Setup or update rustic-doc filter and convert script. Convert std.
 If NO-DL is non-nil, will not try to re-download
 the pandoc filter and bash script.
-NO-DL is primarily used for development of the filters."
+NO-DL is primarily used for development of the filters.
+If NOCONFIRM is non-nil, install all dependencies without prompting user."
   (interactive)
+  (rustic-doc-mode)
   (unless no-dl
     (rustic-doc--install-resources)
-    (rustic-doc-install-deps))
-  (message "Setup is converting the standard library")
+    (rustic-doc-install-deps noconfirm))
   (delete-directory (concat rustic-doc-save-loc "/std")
                     t)
   (rustic-doc--start-process "rustic-doc-std-conversion"
@@ -310,7 +324,9 @@ NO-DL is primarily used for development of the filters."
                              (lambda (_p)
                                (message "Finished converting docs for std"))
                              "std")
-  (rustic-doc-convert-current-package))
+  (if rustic-doc-current-project
+      (rustic-doc-convert-current-package)
+    (message "Setup is converting std. If you want to convert local dependencies, activate rustic-doc-mode when you are in a rust project and run `rustic-doc-convert-current-package")))
 
 (defun rustic-doc--start-process (name program finish-func &rest program-args)
   (let* ((buf (generate-new-buffer (concat "*" name "*")))

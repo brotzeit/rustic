@@ -32,6 +32,7 @@
                 - [Macro expansion](#macro-expansion)
         - [LSP + TRAMP](#lsp--tramp)
     - [Cargo](#cargo)
+        - [auto-fixing before compilation](#auto-fixing-before-compilation)
         - [Edit](#edit)
         - [Test](#test)
         - [Run](#run)
@@ -54,7 +55,7 @@
             - [:use](#use)
     - [Spinner](#spinner)
     - [rust docs in org mode](#rust-docs-in-org-mode)
-        - [Prequisites](#prequisites)
+        - [Prerequisites](#prerequisites)
         - [Usage](#usage)
         - [Notes](#notes)
     - [Popup](#popup)
@@ -344,8 +345,7 @@ Turn off flymake.
 - `lsp-describe-thing-at-point` display documentation
 - `lsp-find-definition` makes use of xref
 
-You can find more information in the [lsp-mode
-wiki](https://emacs-lsp.github.io/lsp-mode/page/lsp-rust/).
+You can find more information in the [lsp-mode documentation for Rust](https://emacs-lsp.github.io/lsp-mode/page/lsp-rust-analyzer/).
 
 ##### `lsp-execute-code-action`
 
@@ -431,6 +431,7 @@ Customization:
 
 - `rustic-cargo-bin` Path to cargo executable
 - `rustic-cargo-bin-remote` Path to remote cargo executable
+- `rustic-cargo-check-arguments` default arguments for cargo check
 
 ### Edit
 
@@ -463,8 +464,26 @@ arguments in `rustic-test-arguments`
 
 ### Run
 
-`rustic-cargo-run` run 'cargo run'.  Input can be sent to the program
-in one of two ways:
+Based on the usecase, we provide three variants of it:
+
+- `rustic-cargo-run`
+
+This is meant for non interactive programs. It's creates a new mode
+which is built on top of `rustic-compilation-mode`. You can press `g`
+in this mode's buffer to make it re-run.
+
+- `rustic-cargo-comint-run`
+
+This is meant for both interactive and non interactive programs. For
+non interactive programs, you would need to pass data to it via stdin.
+It's creates a new mode which is built on top of `comint-mode`. You
+can press `C-c C-g` in this mode's buffer to make it re-run.  You can
+pass input to the program directly in it's output buffer and press `RET`.
+
+- `rustic-cargo-plain-run`
+
+This is similar to the above `rustic-cargo-comint-run`. Input can be
+sent to the program in one of two ways:
 
 - `rustic-compile-send-input`, which reads the input from the
   minibuffer.
@@ -503,6 +522,24 @@ before being used.
 Currently cargo does not display the correct installation command for
 some toolchains when clippy isn't installed.  If you have problems try
 it with `rustup component add --toolchain nightly clippy`.
+
+You can change the parameters `rustic-default-clippy-arguments` that
+default to "--workspace --benches --tests --all-features".
+
+### auto-fixing before compilation
+
+It's possible to run 'clippy --fix' automatically when starting a compile
+process by setting `rustic-cargo-clippy-trigger-fix` to `'on-compile`.
+You can also use `'on-save`, but this doesn't work in combination with
+automatic formatting.
+
+This feature can be used in combination with auto-formatting.
+
+Works for:
+
+- `rustic-cargo-build`
+- `rustic-compile`
+- `rustic-recompile`
 
 ### Commands
 
@@ -744,10 +781,10 @@ example](img/rustic-doc.png)
 
 Required:
 
-- [pandoc](https://pandoc.org/installing.html) (preferably at least version 2.11, as it will give somewhat nicer generated documentation)
+- [pandoc](https://pandoc.org/installing.html) preferably at least version 2.11, as it will give somewhat nicer generated documentation. Versions older than 2.9 may not work - if you're on a debian based distro installing through your regular repo might not work out.
 - [cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
 - [cargo-makedocs](https://github.com/Bunogi/cargo-makedocs)
-- [fd-find](https://github.com/sharkdp/fd)
+- [fd-find](https://github.com/sharkdp/fd) Old versions, especially before 2.x, may not work. Install through Cargo if you're having issues.
 
 Optional:
 

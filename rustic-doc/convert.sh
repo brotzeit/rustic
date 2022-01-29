@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 LUA_FILTER="$HOME/.local/bin/rustic-doc-filter.lua"
-
 function get_toolchain {
     rustup show | sed -nr 's/(.*) \(default\)/\1/p' | head -n 1
 }
@@ -30,6 +29,7 @@ if [ "$DEST_DIR" = "" ]; then
     echo "Generating org files in: $DEST_DIR"
 fi
 
+echo "destination dir: $DEST_DIR"
 mkdir -p "$DEST_DIR" || exit 1
 cd "$DOC_PATH" || exit 1
 

@@ -30,7 +30,6 @@ jobs:
 
                   sudo apt update
                   sudo apt install -y gnutls-bin gnupg2 dirmngr
-
                   sudo apt install -y texinfo libgif-dev libxpm-dev
 
             - name: Install needed rust stuff
@@ -38,6 +37,16 @@ jobs:
                   curl -sSf https://build.travis-ci.com/files/rustup-init.sh | sh -s -- --default-toolchain=stable -y
                   source $HOME/.cargo/env
                   rustup component add rustfmt-preview
+
+            - name: rustic-doc prerequisites
+              run: |
+                   wget https://github.com/jgm/pandoc/releases/download/2.17.0.1/pandoc-2.17.0.1-1-amd64.deb
+                   sudo dpkg -i pandoc-2.17.0.1-1-amd64.deb
+                   mkdir -p ~/.local/bin
+                   mkdir -p ~/.local/share/emacs/rustic-doc/std/
+                   cargo install fd-find
+                   cargo install ripgrep
+                   rustup component add rust-docs
 
             - name: Run tests
               run: |
