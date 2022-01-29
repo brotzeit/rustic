@@ -63,7 +63,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   (interactive "P")
   (rustic-cargo-clippy-run
    :params (cond (arg
-          (setq rustic-clippy-arguments (read-from-minibuffer "Cargo clippy arguments: " rustic-clippy-arguments)))
+          (setq rustic-clippy-arguments (read-from-minibuffer "Cargo clippy arguments: " rustic-default-clippy-arguments)))
          ((eq major-mode 'rustic-popup-mode)
           (if (> (length rustic-clippy-arguments) 0)
               rustic-clippy-arguments

@@ -237,6 +237,7 @@ Set environment variables for rust process."
       (set-process-sentinel process (plist-get args :sentinel))
       (set-process-coding-system process 'utf-8-emacs-unix 'utf-8-emacs-unix)
       (process-put process 'command (plist-get args :command))
+      (process-put process 'file-buffer (plist-get args :file-buffer))
       process)))
 
 (defun rustic-compilation-setup-buffer (buf dir mode &optional no-mode-line)
@@ -283,7 +284,8 @@ ARGS is a plist that affects how the process is run.
         (process (or (plist-get args :process) rustic-compilation-process-name))
         (mode (or (plist-get args :mode) 'rustic-compilation-mode))
         (directory (or (plist-get args :directory) (funcall rustic-compile-directory-method)))
-        (sentinel (or (plist-get args :sentinel) #'compilation-sentinel)))
+        (sentinel (or (plist-get args :sentinel) #'compilation-sentinel))
+        (file-buffer (current-buffer)))
     (rustic-compilation-setup-buffer buf directory mode)
     (setq next-error-last-buffer buf)
     (unless (plist-get args :no-display)
@@ -294,6 +296,7 @@ ARGS is a plist that affects how the process is run.
       (rustic-make-process :name process
                            :buffer buf
                            :command command
+                           :file-buffer file-buffer
                            :filter #'rustic-compilation-filter
                            :sentinel sentinel
                            :file-handler t))))

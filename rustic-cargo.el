@@ -40,6 +40,11 @@ If nil then the project is simply created."
   :type 'boolean
   :group 'rustic-cargo)
 
+(defcustom rustic-default-test-arguments "--workspace --benches --tests --all-features"
+  "Default arguments when running 'cargo test'."
+  :type 'string
+  :group 'rustic-cargo)
+
 (defcustom rustic-cargo-check-arguments "--workspace --benches --tests --all-features"
   "Default arguments when running 'cargo check'."
   :type 'string
@@ -90,6 +95,15 @@ stored in this variable.")
   (when rustic-cargo-test-disable-warnings
     (setq-local rustic-compile-rustflags "-Awarnings")))
 
+(defun rustic-cargo-run-test (test)
+  "Run TEST which can be a single test or mod name."
+  (let* ((command (list (rustic-cargo-bin) "test" test))
+         (c (append command))
+         (buf rustic-test-buffer-name)
+         (proc rustic-test-process-name)
+         (mode 'rustic-cargo-test-mode))
+    (rustic-compilation c (list :buffer buf :process proc :mode mode))))
+
 ;;;###autoload
 (defun rustic-cargo-test-run (&optional test-args)
   "Start compilation process for 'cargo test' with optional TEST-ARGS."
@@ -112,10 +126,13 @@ When calling this function from `rustic-popup-mode', always use the value of
   (interactive "P")
   (rustic-cargo-test-run
    (cond (arg
-          (setq rustic-test-arguments (read-from-minibuffer "Cargo test arguments: " rustic-test-arguments)))
+          (setq rustic-test-arguments (read-from-minibuffer "Cargo test arguments: " rustic-default-test-arguments)))
          ((eq major-mode 'rustic-popup-mode)
-          rustic-test-arguments)
-         (t ""))))
+          (if (> (length rustic-test-arguments) 0)
+              rustic-test-arguments
+            rustic-default-test-arguments))
+         (t
+          rustic-default-test-arguments))))
 
 ;;;###autoload
 (defun rustic-cargo-test-rerun ()
@@ -140,15 +157,6 @@ When calling this function from `rustic-popup-mode', always use the value of
   (if-let (test (or (rustic-cargo--get-current-fn-name)
                     (rustic-cargo--get-current-mod)))
       (rustic-cargo-test)))
-
-(defun rustic-cargo-run-test (test)
-  "Run TEST which can be a single test or mod name."
-  (let* ((command (list (rustic-cargo-bin) "test" test))
-         (c (append command))
-         (buf rustic-test-buffer-name)
-         (proc rustic-test-process-name)
-         (mode 'rustic-cargo-test-mode))
-    (rustic-compilation c (list :buffer buf :process proc :mode mode))))
 
 (defconst rustic-cargo-mod-regexp
   "^\s*mod\s+\\([[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*\\)\s*{")
@@ -235,7 +243,7 @@ Execute process in PATH."
          (inhibit-read-only t))
     (make-process :name rustic-cargo-outdated-process-name
                   :buffer buf
-                  :command '("cargo" "outdated" "--depth" "1")
+                  :command `(,(rustic-cargo-bin) "outdated" "--depth" "1")
                   :filter #'rustic-cargo-outdated-filter
                   :sentinel #'rustic-cargo-outdated-sentinel
                   :file-handler t)
@@ -287,7 +295,7 @@ Execute process in PATH."
   "Ask whether to install crate CRATE."
   (let ((cmd (format "cargo install cargo-%s" crate)))
     (when (yes-or-no-p (format "Cargo-%s missing. Install ? " crate))
-      (async-shell-command cmd "cargo" "cargo-error"))))
+      (async-shell-command cmd (rustic-cargo-bin) "cargo-error"))))
 
 (defun rustic-cargo-outdated-generate-menu (packages)
   "Re-populate the `tabulated-list-entries' with PACKAGES."
