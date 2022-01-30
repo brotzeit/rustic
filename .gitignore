@@ -2,3 +2,4 @@
 /.cask
 /config.mk
 *autoloads.el
+test/test-project/target
