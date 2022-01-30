@@ -62,7 +62,7 @@
 (defun rustic-cargo-lints ()
   "Run cargo-lints with optional ARGS."
   (interactive)
-  (let* ((command `(,rustic-cargo-bin
+  (let* ((command `(,(rustic-cargo-bin)
                     "lints"
                     ,@(split-string rustic-lints-arguments)))
          (buf rustic-clippy-buffer-name)
