@@ -345,6 +345,8 @@ See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
                 (when finish-func
                   (funcall finish-func proc))
                 (when (buffer-live-p buf)
+                  (print (with-temp-buffer buf
+                                           (buffer-string )))
                   (kill-buffer buf))))))
     proc))
 
