@@ -47,12 +47,12 @@ All projects and std by default, otherwise last open project and std.")
 
 ;; todo: fix rustic-doc-filter link after merge.
 (setq rustic-doc-resources
-  `((,rustic-doc-convert-prog
-     (:exec)
-     ,(concat rustic-doc-source-repo "convert.sh"))
-    (,rustic-doc-filter
-     (:exec)
-     "https://github.com/samhedin/rustic/blob/pandoc-haskell-filter/rustic-doc/pandoc_filter/rustdoc-to-org-exe?raw=true")))
+      `((,rustic-doc-convert-prog
+         (:exec)
+         ,(concat rustic-doc-source-repo "convert.sh"))
+        (,rustic-doc-filter
+         (:exec)
+         "https://github.com/samhedin/rustic/blob/pandoc-haskell-filter/rustic-doc/pandoc_filter/rustdoc-to-org-exe?raw=true")))
 
 (defun rustic-doc--install-pandoc ()
   "Install a compatible version of pandoc. Does not modify potential existing system installation of pandoc."
@@ -259,33 +259,33 @@ If the user has not visited a project, returns the main doc directory."
   (unless (file-directory-p rustic-doc-save-loc)
     (rustic-doc-setup)
     (message "Running first time setup."))
+  (rustic-doc--update-current-project)
   (if rustic-doc-current-project
       (progn
         (message "Converting documentation for %s "
                  rustic-doc-current-project)
-        (if (/= 0 (call-process "cargo" nil "*cargo-makedocs*" nil "makedocs")) ;todo: This needs to be run in  rustic-doc-current project folder.
-            (message "\
-cargo makedocs could not generate docs for the current package. \
-See buffer *cargo-makedocs* for more info")
-          (let* ((docs-src
-                  (concat (file-name-as-directory rustic-doc-current-project)
-                          "target/doc"))
-                 (finish-func (lambda (_p)
-                                (message "Finished converting docs for dependencies of %s. Std conversion might still be running."
-                                         rustic-doc-current-project))))
-            (rustic-doc-create-project-dir)
-            (rustic-doc--start-process "rustic-doc-convert"
-                                       rustic-doc-convert-prog
-                                       finish-func
-                                       docs-src
-                                       (rustic-doc--project-doc-dest)))))
+        ;; Spawn a new shell that cd's into `rustic-doc-current-project' and converts the packages.
+        (message  (format "cargo makedocs: %s" (shell-command-to-string (format  "sh -c \"cd %s; %s makedocs\"" rustic-doc-current-project (rustic-cargo-bin)))))
+        (let* ((docs-src
+                (concat (file-name-as-directory rustic-doc-current-project)
+                        "target/doc"))
+               (finish-func (lambda (_p)
+                              (message "Finished converting docs for dependencies of %s. Std conversion might still be running."
+                                       rustic-doc-current-project))))
+          (rustic-doc-create-project-dir)
+          (rustic-doc--start-process "rustic-doc-convert"
+                                     rustic-doc-convert-prog
+                                     finish-func
+                                     docs-src
+                                     (rustic-doc--project-doc-dest))))
     (message "Activate rustic-doc-mode to run `rustic-doc-convert-current-package")))
+
 
 (defun rustic-doc--confirm-dep-versions (missing-fd)
   "Verify that dependencies are not too old."
   (when (not missing-fd)
     (when  (> 8 (string-to-number
-                  (substring (shell-command-to-string "fd --version") 3 4)))
+                 (substring (shell-command-to-string "fd --version") 3 4)))
       (message "Your version of fd is too old, please install a recent version, maybe through cargo."))))
 
 
@@ -294,7 +294,7 @@ See buffer *cargo-makedocs* for more info")
 If NOCONFIRM is non-nil, install all dependencies without prompting user."
   (if (not (executable-find "cargo"))
       (message "You need to have cargo installed to use rustic-doc")
-  (rustic-doc--install-pandoc)
+    (rustic-doc--install-pandoc)
     (let ((missing-rg (not (executable-find "rg")))
           (missing-fd (and  (not (executable-find "fd") )))
           (missing-makedocs (not (executable-find "cargo-makedocs"))))
