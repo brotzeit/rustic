@@ -64,7 +64,7 @@
   (interactive)
   (let* ((command `(,rustic-cargo-bin
                     "lints"
-                    ,@(rustic-lints-arguments)))
+                    ,@(split-string rustic-lints-arguments)))
          (buf rustic-clippy-buffer-name)
          (proc rustic-clippy-process-name)
          (mode 'rustic-cargo-clippy-mode))
