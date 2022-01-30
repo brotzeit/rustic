@@ -3,3 +3,4 @@
 /config.mk
 *autoloads.el
 .stack-work/
+test/test-project/target

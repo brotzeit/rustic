@@ -153,6 +153,7 @@
         (should (= compilation-num-errors-found 1))))))
 
 (ert-deftest rustic-test-cargo-test ()
+  ;; NOTE: this doesn't seem to be the case anymore
   ;; compilation-num-errors-found would be 8 with regular compilaton mode
   ;; due to parsing issues https://github.com/rust-lang/rust-mode/pull/254
   (let ((rustic-compile-backtrace "full"))
@@ -209,19 +210,32 @@
       (with-current-buffer (get-buffer rustic-test-buffer-name)
         (should (= compilation-num-errors-found 10))))))
 
-;; ;; TODO: parsing doesn't work
-;; (ert-deftest rustic-test-count-warnings ()
-;;   (let* ((string "fn main() {
-;;                        let v1 = vec![1, 2, 3];
-;;                        let v2 = vec![1, 2, 3];
-;;                     }")
-;;          (default-directory (rustic-test-count-error-helper string))
-;;          (proc (rustic-compilation-start (split-string "cargo build"))))
-;;     (while (eq (process-status proc) 'run)
-;;       (sit-for 0.1))
-;;     (with-current-buffer (get-buffer rustic-compilation-buffer-name)
-;;       (should (= compilation-num-warnings-found 1)))))
-
-
-
-
+(ert-deftest rustic-test-count-warnings ()
+  (let* ((string "fn main() {
+                       let v1 = vec![1, 2, 3];
+                       let v2 = vec![1, 2, 3];
+                       let v3 = vec![1, 2, 3];
+                       let v4 = vec![1, 2, 3];
+                       let v5 = vec![1, 2, 3];
+                       let v6 = vec![1, 2, 3];
+                       let v7 = vec![1, 2, 3];
+                       let v8 = vec![1, 2, 3];
+                       let v9 = vec![1, 2, 3];
+                       let v10 = vec![1, 2, 3];
+                       let v11 = vec![1, 2, 3];
+                       let v12 = vec![1, 2, 3];
+                       let v13 = vec![1, 2, 3];
+                       let v14 = vec![1, 2, 3];
+                       let v15 = vec![1, 2, 3];
+                       let v16 = vec![1, 2, 3];
+                       let v17 = vec![1, 2, 3];
+                       let v18 = vec![1, 2, 3];
+                       let v19 = vec![1, 2, 3];
+                       let v20 = vec![1, 2, 3];
+                    }")
+         (default-directory (rustic-test-count-error-helper string))
+         (proc (rustic-compilation-start (split-string "cargo build"))))
+    (while (eq (process-status proc) 'run)
+      (sit-for 0.1))
+    (with-current-buffer (get-buffer rustic-compilation-buffer-name)
+      (should (= compilation-num-warnings-found 20)))))

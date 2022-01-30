@@ -1,1 +1,2 @@
-# Dummy file needed for test
+[workspace]
+members = ["crates/*"]
