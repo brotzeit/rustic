@@ -23,3 +23,9 @@ create_filter:
 	cd pandoc_filter; \
 	stack install --local-bin-path .; \
 	cd ..
+
+overwrite_local:
+	cd pandoc_filter; \
+	stack install --local-bin-path ~/.local/bin/rustic-doc-filter; \
+	cd ..
+	cp convert.sh ~/.local/bin/rustic-doc-convert.sh

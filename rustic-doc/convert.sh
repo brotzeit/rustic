@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-LUA_FILTER="$HOME/.local/bin/rustic-doc-filter"
+echo HELLO
+FILTER="$HOME/.local/bin/rustic-doc-filter"
 function get_toolchain {
     rustup show | sed -nr 's/(.*) \(default\)/\1/p' | head -n 1
 }
@@ -58,5 +59,5 @@ fd . \
     --ignore-file "$ignore_file" \
     -j"$cores" \
     -x pandoc '{}' \
-    --filter "$LUA_FILTER" \
+    --filter "$FILTER" \
     -o "$DEST_DIR/{.}.org"
