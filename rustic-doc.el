@@ -100,14 +100,11 @@ Search for SEARCH-TERM inside SEARCH-DIR"
    (t
     (grep (format "grep -RPIni '%s' %s" search-term search-dir)))))
 
-
 (defcustom rustic-doc-search-function 'rustic-doc-default-search-function
   "Function to use for searching documentation.
 The function should take search-dir and search-term as arguments."
   :type 'function
   :group 'rustic-doc)
-
-
 
 (defun rustic-doc--install-resources ()
   "Install or update the rustic-doc resources."
@@ -265,7 +262,8 @@ If the user has not visited a project, returns the main doc directory."
         (message "Converting documentation for %s "
                  rustic-doc-current-project)
         ;; Spawn a new shell that cd's into `rustic-doc-current-project' and converts the packages.
-        (message  (format "cargo makedocs: %s" (shell-command-to-string (format  "sh -c \"cd %s; %s makedocs\"" rustic-doc-current-project (rustic-cargo-bin)))))
+        (message (format "cargo makedocs: %s" (shell-command-to-string
+                                       (format  "sh -c \"cd %s; %s makedocs\"" rustic-doc-current-project (rustic-cargo-bin)))))
         (let* ((docs-src
                 (concat (file-name-as-directory rustic-doc-current-project)
                         "target/doc"))
@@ -280,7 +278,6 @@ If the user has not visited a project, returns the main doc directory."
                                      (rustic-doc--project-doc-dest))))
     (message "Activate rustic-doc-mode to run `rustic-doc-convert-current-package")))
 
-
 (defun rustic-doc--confirm-dep-versions (missing-fd)
   "Verify that dependencies are not too old."
   (when (not missing-fd)
@@ -288,26 +285,23 @@ If the user has not visited a project, returns the main doc directory."
                  (substring (shell-command-to-string "fd --version") 3 4)))
       (message "Your version of fd is too old, please install a recent version, maybe through cargo."))))
 
-
 (defun rustic-doc-install-deps (&optional noconfirm)
   "Install dependencies with Cargo.
 If NOCONFIRM is non-nil, install all dependencies without prompting user."
-  (if (not (executable-find "cargo"))
-      (message "You need to have cargo installed to use rustic-doc")
-    (rustic-doc--install-pandoc)
-    (let ((missing-rg (not (executable-find "rg")))
-          (missing-fd (and  (not (executable-find "fd") )))
-          (missing-makedocs (not (executable-find "cargo-makedocs"))))
-      (rustic-doc--confirm-dep-versions missing-fd)
-      (when (and (or missing-fd missing-makedocs missing-rg)
-                 (or noconfirm (y-or-n-p "Missing some dependencies for rustic doc, install them? ")))
-        (when missing-fd
-          (rustic-doc--start-process "install-fd" "cargo" nil "install" "fd-find"))
-        (when missing-rg
-          (rustic-doc--start-process "install-rg" "cargo" nil "install" "ripgrep"))
-        (when missing-makedocs
-          (rustic-doc--start-process "install-makedocs" "cargo" nil
-                                     "install" "cargo-makedocs"))))))
+  (rustic-doc--install-pandoc)
+  (let ((missing-rg (not (executable-find "rg")))
+        (missing-fd (and  (not (executable-find "fd") )))
+        (missing-makedocs (not (executable-find "cargo-makedocs"))))
+    (rustic-doc--confirm-dep-versions missing-fd)
+    (when (and (or missing-fd missing-makedocs missing-rg)
+               (or noconfirm (y-or-n-p "Missing some dependencies for rustic doc, install them? ")))
+      (when missing-fd
+        (rustic-doc--start-process "install-fd" "cargo" nil "install" "fd-find"))
+      (when missing-rg
+        (rustic-doc--start-process "install-rg" "cargo" nil "install" "ripgrep"))
+      (when missing-makedocs
+        (rustic-doc--start-process "install-makedocs" "cargo" nil
+                                   "install" "cargo-makedocs")))))
 
 ;;;###autoload
 (defun rustic-doc-setup (&optional no-dl noconfirm)
@@ -328,7 +322,8 @@ If NOCONFIRM is non-nil, install all dependencies without prompting user."
                              (lambda (_p)
                                (message "Finished converting docs for std"))
                              "std")
-  (if rustic-doc-current-project
+
+    (if rustic-doc-current-project
       (rustic-doc-convert-current-package)
     (message "Setup is converting std. If you want to convert local dependencies, activate rustic-doc-mode when you are in a rust project and run `rustic-doc-convert-current-package")))
 
@@ -340,14 +335,19 @@ If NOCONFIRM is non-nil, install all dependencies without prompting user."
      proc (lambda (proc event)
             (let ((buf (process-buffer proc)))
               (if (string-match-p (regexp-quote "abnormally") event)
-                  (message "Could not finish process: %s. \
-See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
+                  (progn
+                    (with-current-buffer "*rustic-doc-std-conversion*"
+                      (print (format "STD-CONVERSION: %s" (buffer-string)) #'external-debugging-output))
+                    (with-current-buffer "*messages*"
+                      (print (format "MESSAGES: %s" (buffer-string)) #'external-debugging-output))
+                    (message "Could not finish process: %s. \
+See the *Messages* buffer or %s for more info." event (concat "*" name "*")))
                 (when finish-func
                   (funcall finish-func proc))
-                (when (buffer-live-p buf)
-                  (print (with-temp-buffer buf
-                                           (buffer-string )))
-                  (kill-buffer buf))))))
+                ;; (when (buffer-live-p buf)
+                ;;   (kill-buffer buf))
+                (print )
+                ))))
     proc))
 
 (defun rustic-doc--thing-at-point ()
