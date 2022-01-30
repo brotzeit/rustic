@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 FILTER="$HOME/.local/bin/rustic-doc/filter"
+PANDOC="$HOME/.local/bin/rustic-doc/pandoc"
 function get_toolchain {
     rustup show | sed -nr 's/(.*) \(default\)/\1/p' | head -n 1
 }
@@ -57,6 +58,6 @@ fd . \
     -ehtml \
     --ignore-file "$ignore_file" \
     -j"$cores" \
-    -x pandoc '{}' \
+    -x $PANDOC '{}' \
     --filter "$FILTER" \
     -o "$DEST_DIR/{.}.org"

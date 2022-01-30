@@ -42,6 +42,7 @@ jobs:
               run: |
                    mkdir -p ~/.local/bin
                    mkdir -p ~/.local/share/emacs/rustic-doc/std/
+                   sudo apt install -y libc6
                    cargo install fd-find
                    cargo install ripgrep
                    rustup component add rust-docs
