@@ -31,14 +31,12 @@
     (require 'xdg)
     (fset 'rustic-doc--xdg-data-home 'xdg-data-home)))
 
-(defvar rustic-doc-bin-location (f-join  (getenv "HOME") ".local/bin/rustic-doc"))
-(defvar rustic-doc-filter (f-join rustic-doc-bin-location "filter"))
-(defvar rustic-doc-convert-prog  (f-join rustic-doc-bin-location "convert.sh"))
-(defvar rustic-doc-pandoc  (f-join rustic-doc-bin-location "pandoc"))
-(defvar rustic-doc-pandoc-tar (f-join rustic-doc-bin-location ".local/bin/rustic-doc-pandoc.tar.gz"))
-(defvar rustic-doc-source-repo
-  "https://raw.githubusercontent.com/brotzeit/rustic/master/rustic-doc/")
-
+(setq rustic-doc-bin-location (f-join  (file-name-as-directory (getenv "HOME")) ".local/bin/rustic-doc/"))
+(setq rustic-doc-filter (f-join rustic-doc-bin-location "filter"))
+(setq rustic-doc-convert-prog  (f-join rustic-doc-bin-location "convert.sh"))
+(setq rustic-doc-pandoc  (f-join rustic-doc-bin-location "pandoc"))
+(setq rustic-doc-pandoc-tar (f-join rustic-doc-bin-location "pandoc.tar.gz"))
+(setq rustic-doc-source-repo "https://raw.githubusercontent.com/samhedin/rustic/pandoc-haskell-filter/rustic-doc/")
 
 (defvar rustic-doc-current-project nil
   "Location to search for documentation.
@@ -47,22 +45,23 @@ All projects and std by default, otherwise last open project and std.")
 (defvar rustic-doc-save-loc (concat (rustic-doc--xdg-data-home)
                                     "/emacs/rustic-doc"))
 
-(defvar rustic-doc-resources
+;; todo: fix rustic-doc-filter link after merge.
+(setq rustic-doc-resources
   `((,rustic-doc-convert-prog
      (:exec)
      ,(concat rustic-doc-source-repo "convert.sh"))
     (,rustic-doc-filter
      (:exec)
-     "https://github.com/samhedin/rustic/blob/pandoc-haskell-filter/rustic-doc/pandoc_filter/rustdoc-to-org-exe?raw=true")
-    ))
-;; todo:
-;; tar -xf rustic-doc-pandoc.tar.gz pandoc-2.17.0.1/bin/pandoc; mv pandoc-2.17.0.1/bin/pandoc .
+     "https://github.com/samhedin/rustic/blob/pandoc-haskell-filter/rustic-doc/pandoc_filter/rustdoc-to-org-exe?raw=true")))
+
 (defun rustic-doc--install-pandoc ()
-  "Install the latest version of pandoc. Does not interrupt potential system installation."
-  (if  (url-copy-file "https://github.com/jgm/pandoc/releases/download/2.17.0.1/pandoc-2.17.0.1-linux-amd64.tar.gz" rustic-doc-pandoc-tar t)
-      (shell-command (format "tar -xf %s -C %s " rustic-doc-pandoc-tar rustic-doc-pandoc)
-                     )
-    (message "Couldn't install pandoc")) )
+  "Install a compatible version of pandoc. Does not modify potential existing system installation of pandoc."
+  (unless (file-exists-p rustic-doc-pandoc)
+    (if   (url-copy-file "https://github.com/jgm/pandoc/releases/download/2.17.0.1/pandoc-2.17.0.1-linux-amd64.tar.gz" rustic-doc-pandoc-tar t)
+        (progn
+          (shell-command (format "tar -xf %s " rustic-doc-pandoc-tar ))
+          (shell-command (format "cp pandoc-2.17.0.1/bin/pandoc %s" rustic-doc-pandoc)))
+      (message "Couldn't install pandoc"))))
 
 (defun rustic-doc-default-rg-search-command ()
   "The default search command when using helm-ag.
@@ -264,7 +263,7 @@ If the user has not visited a project, returns the main doc directory."
       (progn
         (message "Converting documentation for %s "
                  rustic-doc-current-project)
-        (if (/= 0 (call-process "cargo" nil "*cargo-makedocs*" nil "makedocs"))
+        (if (/= 0 (call-process "cargo" nil "*cargo-makedocs*" nil "makedocs")) ;todo: This needs to be run in  rustic-doc-current project folder.
             (message "\
 cargo makedocs could not generate docs for the current package. \
 See buffer *cargo-makedocs* for more info")
@@ -272,7 +271,7 @@ See buffer *cargo-makedocs* for more info")
                   (concat (file-name-as-directory rustic-doc-current-project)
                           "target/doc"))
                  (finish-func (lambda (_p)
-                                (message "Finished converting docs for %s"
+                                (message "Finished converting docs for dependencies of %s. Std conversion might still be running."
                                          rustic-doc-current-project))))
             (rustic-doc-create-project-dir)
             (rustic-doc--start-process "rustic-doc-convert"
@@ -287,11 +286,7 @@ See buffer *cargo-makedocs* for more info")
   (when (not missing-fd)
     (when  (> 8 (string-to-number
                   (substring (shell-command-to-string "fd --version") 3 4)))
-      (message "Your version of fd is too old, please install a recent version, maybe through cargo.")))
-
-  (when (>= 11 (string-to-number
-                (substring (shell-command-to-string "pandoc --version") 9 11)))
-    (message "Your version of pandoc is too old, please install a more recent version. See their github for more info.")))
+      (message "Your version of fd is too old, please install a recent version, maybe through cargo."))))
 
 
 (defun rustic-doc-install-deps (&optional noconfirm)
@@ -299,6 +294,7 @@ See buffer *cargo-makedocs* for more info")
 If NOCONFIRM is non-nil, install all dependencies without prompting user."
   (if (not (executable-find "cargo"))
       (message "You need to have cargo installed to use rustic-doc")
+  (rustic-doc--install-pandoc)
     (let ((missing-rg (not (executable-find "rg")))
           (missing-fd (and  (not (executable-find "fd") )))
           (missing-makedocs (not (executable-find "cargo-makedocs"))))
