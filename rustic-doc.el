@@ -31,16 +31,14 @@
     (require 'xdg)
     (fset 'rustic-doc--xdg-data-home 'xdg-data-home)))
 
-(defvar rustic-doc-filter (concat (file-name-as-directory (getenv "HOME"))
-                                      ".local/bin/rustic-doc-filter")
-  "Save location for the rustic-doc filter.")
-
-(defvar rustic-doc-convert-prog (concat (file-name-as-directory (getenv "HOME"))
-                                        ".local/bin/rustic-doc-convert.sh")
-  "Save location for the rustic-doc conversion script.")
-
+(defvar rustic-doc-bin-location (f-join  (getenv "HOME") ".local/bin/rustic-doc"))
+(defvar rustic-doc-filter (f-join rustic-doc-bin-location "filter"))
+(defvar rustic-doc-convert-prog  (f-join rustic-doc-bin-location "convert.sh"))
+(defvar rustic-doc-pandoc  (f-join rustic-doc-bin-location "pandoc"))
+(defvar rustic-doc-pandoc-tar (f-join rustic-doc-bin-location ".local/bin/rustic-doc-pandoc.tar.gz"))
 (defvar rustic-doc-source-repo
   "https://raw.githubusercontent.com/brotzeit/rustic/master/rustic-doc/")
+
 
 (defvar rustic-doc-current-project nil
   "Location to search for documentation.
@@ -55,7 +53,16 @@ All projects and std by default, otherwise last open project and std.")
      ,(concat rustic-doc-source-repo "convert.sh"))
     (,rustic-doc-filter
      (:exec)
-     "https://github.com/samhedin/rustic/blob/pandoc-haskell-filter/rustic-doc/pandoc_filter/rustdoc-to-org-exe?raw=true")))
+     "https://github.com/samhedin/rustic/blob/pandoc-haskell-filter/rustic-doc/pandoc_filter/rustdoc-to-org-exe?raw=true")
+    ))
+;; todo:
+;; tar -xf rustic-doc-pandoc.tar.gz pandoc-2.17.0.1/bin/pandoc; mv pandoc-2.17.0.1/bin/pandoc .
+(defun rustic-doc--install-pandoc ()
+  "Install the latest version of pandoc. Does not interrupt potential system installation."
+  (if  (url-copy-file "https://github.com/jgm/pandoc/releases/download/2.17.0.1/pandoc-2.17.0.1-linux-amd64.tar.gz" rustic-doc-pandoc-tar t)
+      (shell-command (format "tar -xf %s -C %s " rustic-doc-pandoc-tar rustic-doc-pandoc)
+                     )
+    (message "Couldn't install pandoc")) )
 
 (defun rustic-doc-default-rg-search-command ()
   "The default search command when using helm-ag.

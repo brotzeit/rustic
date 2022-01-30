@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-echo HELLO
-FILTER="$HOME/.local/bin/rustic-doc-filter"
+FILTER="$HOME/.local/bin/rustic-doc/filter"
 function get_toolchain {
     rustup show | sed -nr 's/(.*) \(default\)/\1/p' | head -n 1
 }
