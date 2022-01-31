@@ -357,30 +357,42 @@ Execute process in PATH."
   (interactive)
   (tabulated-list-put-tag " " t))
 
+(cl-defstruct rustic-crate name version)
+
+(defun rustic-cargo--outdated-make-crate (crate-line)
+  "Create RUSTIC-CRATE struct out of a CRATE-LINE.
+
+The CREATE-LINE is a single line from the `rustic-cargo-oudated-buffer-name'"
+  (make-rustic-crate :name (nth 1 crate-line) :version (nth 2 crate-line)))
+
 ;;;###autoload
 (defun rustic-cargo-upgrade-execute ()
   "Perform marked menu actions."
   (interactive)
-  (let (crates)
-    (save-excursion
-      (goto-char (point-min))
-      (while (not (eobp))
-        (let* ((cmd (char-after))
-               (crate (tabulated-list-get-entry (point))))
-          (when (eq cmd ?U)
-            (push crate crates)))
-        (forward-line)))
+  (let ((crates (rustic-cargo--outdated-get-crates (buffer-string))))
     (if crates
-        (let ((msg (format "Upgrade %s ?" (mapconcat #'(lambda (x) (elt x 0)) crates " "))))
+        (let ((msg (format "Upgrade %s ?" (mapconcat #'(lambda (x) (rustic-crate-name x)) crates " "))))
           (when (yes-or-no-p msg)
             (rustic-cargo-upgrade-crates crates)))
       (user-error "No operations specified"))))
+
+(defun rustic-cargo--outdated-get-crates (cargo-outdated-buffer-string)
+  "Return a list of RUSTIC-CRATE which needs to be updated.
+
+ CARGO-OUTDATED-BUFFER-STRING represents the entire buffer of
+`rustic-cargo-oudated-buffer-name'"
+  (let* ((lines (s-lines cargo-outdated-buffer-string))
+         (new-crates (-filter (lambda (crate) (s-starts-with? "U" crate)) lines))
+         (crates (-map (lambda (crate)
+                         (rustic-cargo--outdated-make-crate
+                          (s-split " " (s-collapse-whitespace crate)))) new-crates)))
+    crates))
 
 (defun rustic-cargo-upgrade-crates (crates)
   "Upgrade CRATES."
   (let (upgrade)
     (dolist (crate crates)
-      (setq upgrade (concat upgrade (format "%s@%s " (elt crate 0) (elt crate 2)))))
+      (setq upgrade (concat upgrade (format "%s@%s " (rustic-crate-name crate) (rustic-crate-version crate)))))
     (let ((output (shell-command-to-string (format "cargo upgrade %s" upgrade))))
       (if (string-match "error: no such subcommand:" output)
           (rustic-cargo-install-crate-p "edit")
