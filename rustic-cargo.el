@@ -362,7 +362,7 @@ Execute process in PATH."
 (defun rustic-cargo--outdated-make-crate (crate-line)
   "Create RUSTIC-CRATE struct out of a CRATE-LINE.
 
-The CREATE-LINE is a single line from the `rustic-cargo-oudated-buffer-name'"
+The CRATE-LINE is a single line from the `rustic-cargo-oudated-buffer-name'"
   (make-rustic-crate :name (nth 1 crate-line) :version (nth 2 crate-line)))
 
 ;;;###autoload
@@ -377,7 +377,7 @@ The CREATE-LINE is a single line from the `rustic-cargo-oudated-buffer-name'"
       (user-error "No operations specified"))))
 
 (defun rustic-cargo--outdated-get-crates (cargo-outdated-buffer-string)
-  "Return a list of RUSTIC-CRATE which needs to be updated.
+  "Return a list of `rustic-crate' which needs to be updated.
 
  CARGO-OUTDATED-BUFFER-STRING represents the entire buffer of
 `rustic-cargo-oudated-buffer-name'"
