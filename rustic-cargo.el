@@ -257,6 +257,15 @@ Execute process in PATH."
     (with-current-buffer (process-buffer proc)
       (insert output))))
 
+(defun rustic-cargo-outdated--skip-to-packages ()
+  "Move line forward till we reach the package name."
+  (goto-char (point-min))
+  (let ((line (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
+    (while (not (or (eobp) (s-starts-with? "--" line)))
+      (forward-line 1)
+      (setf line (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
+    (when (s-starts-with? "--" line) (forward-line 1))))
+
 (defun rustic-cargo-outdated-sentinel (proc _output)
   "Sentinel for rustic-cargo-outdated-process."
   (let ((buf (process-buffer proc))
@@ -264,8 +273,7 @@ Execute process in PATH."
         (exit-status (process-exit-status proc)))
     (if (zerop exit-status)
         (with-current-buffer buf
-          (goto-char (point-min))
-          (forward-line 2)
+          (rustic-cargo-outdated--skip-to-packages)
           (let ((packages (split-string
                            (buffer-substring (point) (point-max)) "\n" t)))
             (erase-buffer)
