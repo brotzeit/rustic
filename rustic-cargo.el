@@ -213,6 +213,7 @@ When calling this function from `rustic-popup-mode', always use the value of
     (define-key map (kbd "U") 'rustic-cargo-mark-all-upgrades)
     (define-key map (kbd "x") 'rustic-cargo-upgrade-execute)
     (define-key map (kbd "r") 'rustic-cargo-reload-outdated)
+    (define-key map (kbd "l") 'rustic-cargo-mark-latest-upgrade)
     (define-key map (kbd "c") 'rustic-compile)
     (define-key map (kbd "q") 'quit-window)
     map)
@@ -333,6 +334,28 @@ Execute process in PATH."
   (let* ((crate (tabulated-list-get-entry (point)))
          (v (read-from-minibuffer "Update to version: "
                                   (substring-no-properties (elt crate 2))))
+         (inhibit-read-only t))
+    (when v
+      (save-excursion
+        (goto-char (line-beginning-position))
+        (save-match-data
+          (when (search-forward (elt crate 0))
+            (replace-match (propertize (elt crate 0)
+                                       'font-lock-face
+                                       'rustic-cargo-outdated-upgrade)))
+          (goto-char (line-beginning-position))
+          (when (search-forward (elt crate 1))
+            (replace-match (propertize v
+                                       'font-lock-face
+                                       'rustic-cargo-outdated-upgrade)))))
+      (tabulated-list-put-tag "U" t))))
+
+;;;###autoload
+(defun rustic-cargo-mark-latest-upgrade ()
+  "Mark an upgradable package to the latest available version."
+  (interactive)
+  (let* ((crate (tabulated-list-get-entry (point)))
+         (v (substring-no-properties (elt crate 3)))
          (inhibit-read-only t))
     (when v
       (save-excursion
