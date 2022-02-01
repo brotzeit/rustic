@@ -504,6 +504,7 @@ before being used.
   version that should be used for upgrade.
 - `U` mark all upgradable crates.
 - `l` mark single crate for upgrading to latest available package
+- `L` mark all crates to latest available package
 - `m` remove mark
 - `x` perform marked package menu actions
 - `r` refresh crate list
