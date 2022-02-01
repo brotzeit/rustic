@@ -12,3 +12,33 @@
 ;; just test if project-root function works for different versions
 (ert-deftest rust-test-project-root ()
   (should (equal (rustic-project-root (project-current)) default-directory)))
+
+;; test if only test-workspace will be compiled with `rustic-buffer-crate'
+;; and not another-test-workspace
+(ert-deftest rustic-test-rustic-buffer-crate ()
+  (let* ((test-workspace (expand-file-name "test/test-project/"))
+         (test-crate (expand-file-name "test/test-project/crates/test-crate/")))
+    (let ((default-directory (expand-file-name "src" test-crate)))
+      (rustic-cargo-build)
+      (let* ((proc (get-process rustic-compilation-process-name))
+             (buffer (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.01))
+        (with-current-buffer buffer
+          (should (string-match "Compiling test-workspace" (buffer-substring-no-properties (point-min) (point-max))))
+          (should-not (string-match "Compiling another-test-workspace" (buffer-substring-no-properties (point-min) (point-max)))))))))
+
+;; test if both crates will be compiled with `rustic-buffer-workspace'
+(ert-deftest rustic-test-rustic-buffer-workspace ()
+  (let* ((test-workspace (expand-file-name "test/test-project/"))
+         (test-crate (expand-file-name "test/test-project/crates/test-crate/"))
+         (rustic-compile-directory-method 'rustic-buffer-workspace))
+    (let ((default-directory (expand-file-name "src" test-crate)))
+      (rustic-cargo-build)
+      (let* ((proc (get-process rustic-compilation-process-name))
+             (buffer (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.01))
+        (with-current-buffer buffer
+          (should (string-match "Compiling test-workspace" (buffer-substring-no-properties (point-min) (point-max))))
+          (should (string-match "Compiling another-test-workspace" (buffer-substring-no-properties (point-min) (point-max)))))))))
