@@ -1,2 +1,2 @@
 * linguist-vendored
-rustic-doc/debug_files/* linguist-vendored
+*.el linguist-vendored=false
