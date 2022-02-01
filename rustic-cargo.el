@@ -40,12 +40,12 @@ If nil then the project is simply created."
   :type 'boolean
   :group 'rustic-cargo)
 
-(defcustom rustic-default-test-arguments "--workspace --benches --tests --all-features"
+(defcustom rustic-default-test-arguments "--benches --tests --all-features"
   "Default arguments when running 'cargo test'."
   :type 'string
   :group 'rustic-cargo)
 
-(defcustom rustic-cargo-check-arguments "--workspace --benches --tests --all-features"
+(defcustom rustic-cargo-check-arguments "--benches --tests --all-features"
   "Default arguments when running 'cargo check'."
   :type 'string
   :group 'rustic-cargo)
