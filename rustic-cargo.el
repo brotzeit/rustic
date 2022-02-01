@@ -214,6 +214,7 @@ When calling this function from `rustic-popup-mode', always use the value of
     (define-key map (kbd "x") 'rustic-cargo-upgrade-execute)
     (define-key map (kbd "r") 'rustic-cargo-reload-outdated)
     (define-key map (kbd "l") 'rustic-cargo-mark-latest-upgrade)
+    (define-key map (kbd "L") 'rustic-cargo-mark-all-upgrades-latest)
     (define-key map (kbd "c") 'rustic-compile)
     (define-key map (kbd "q") 'quit-window)
     map)
@@ -371,6 +372,31 @@ Execute process in PATH."
                                        'font-lock-face
                                        'rustic-cargo-outdated-upgrade)))))
       (tabulated-list-put-tag "U" t))))
+
+;;;###autoload
+(defun rustic-cargo-mark-all-upgrades-latest ()
+  "Mark all packages in the Package Menu to latest version."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (eobp))
+      (let ((crate (aref (tabulated-list-get-entry) 0))
+            (current-version (aref (tabulated-list-get-entry) 1))
+            (latest-version (aref (tabulated-list-get-entry) 3))
+            (inhibit-read-only t))
+        (goto-char (line-beginning-position))
+        (save-match-data
+          (when (search-forward crate)
+            (replace-match (propertize crate
+                                       'font-lock-face
+                                       'rustic-cargo-outdated-upgrade)))
+          (goto-char (line-beginning-position))
+          (when (search-forward current-version)
+            (replace-match (propertize latest-version
+                                       'font-lock-face
+                                       'rustic-cargo-outdated-upgrade))))
+        (tabulated-list-put-tag "U")
+        (forward-line)))))
 
 ;;;###autoload
 (defun rustic-cargo-mark-all-upgrades ()
