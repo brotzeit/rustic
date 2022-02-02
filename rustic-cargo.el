@@ -357,10 +357,11 @@ Execute process in PATH."
   (interactive)
   (let* ((crate (tabulated-list-get-entry (point)))
          (v (substring-no-properties (elt crate 3)))
+         (line-beg (line-beginning-position))
          (inhibit-read-only t))
     (when v
       (save-excursion
-        (goto-char (line-beginning-position))
+        (goto-char line-beg)
         (save-match-data
           (when (search-forward (elt crate 0))
             (replace-match (propertize (elt crate 0)
