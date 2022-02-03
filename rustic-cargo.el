@@ -378,6 +378,7 @@ Execute process in PATH."
 (defun rustic-cargo-mark-all-upgrades-latest ()
   "Mark all packages in the Package Menu to latest version."
   (interactive)
+  (tabulated-list-print t)
   (save-excursion
     (goto-char (point-min))
     (while (not (eobp))
