@@ -382,21 +382,23 @@ Execute process in PATH."
   (save-excursion
     (goto-char (point-min))
     (while (not (eobp))
-      (let ((crate (aref (tabulated-list-get-entry) 0))
-            (current-version (aref (tabulated-list-get-entry) 1))
-            (latest-version (aref (tabulated-list-get-entry) 3))
-            (inhibit-read-only t))
-        (goto-char (line-beginning-position))
-        (save-match-data
-          (when (search-forward crate)
-            (replace-match (propertize crate
-                                       'font-lock-face
-                                       'rustic-cargo-outdated-upgrade)))
-          (goto-char (line-beginning-position))
-          (when (search-forward current-version)
-            (replace-match (propertize latest-version
-                                       'font-lock-face
-                                       'rustic-cargo-outdated-upgrade))))
+      (let* ((crate (aref (tabulated-list-get-entry) 0))
+             (current-version (aref (tabulated-list-get-entry) 1))
+             (latest-version (aref (tabulated-list-get-entry) 3))
+             (line-beg (line-beginning-position))
+             (highlight-text (lambda ()
+                               (save-match-data
+                                 (when (search-forward crate)
+                                   (replace-match (propertize crate
+                                                              'font-lock-face
+                                                              'rustic-cargo-outdated-upgrade)))
+                                 (goto-char line-beg)
+                                 (when (search-forward current-version)
+                                   (replace-match (propertize latest-version
+                                                              'font-lock-face
+                                                              'rustic-cargo-outdated-upgrade))))))
+             (inhibit-read-only t))
+        (funcall highlight-text)
         (tabulated-list-put-tag "U")
         (forward-line)))))
 
