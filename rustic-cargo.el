@@ -386,19 +386,18 @@ Execute process in PATH."
              (current-version (aref (tabulated-list-get-entry) 1))
              (latest-version (aref (tabulated-list-get-entry) 3))
              (line-beg (line-beginning-position))
-             (highlight-text (lambda ()
-                               (save-match-data
-                                 (when (search-forward crate)
-                                   (replace-match (propertize crate
-                                                              'font-lock-face
-                                                              'rustic-cargo-outdated-upgrade)))
-                                 (goto-char line-beg)
-                                 (when (search-forward current-version)
-                                   (replace-match (propertize latest-version
-                                                              'font-lock-face
-                                                              'rustic-cargo-outdated-upgrade))))))
+             (replace-highlight-text
+              (lambda (text)
+                (replace-match (propertize text
+                                           'font-lock-face
+                                           'rustic-cargo-outdated-upgrade))))
              (inhibit-read-only t))
-        (funcall highlight-text)
+        (save-match-data
+          (when (search-forward crate)
+            (funcall replace-highlight-text crate))
+          (goto-char line-beg)
+          (when (search-forward current-version)
+            (funcall replace-highlight-text latest-version)))
         (tabulated-list-put-tag "U")
         (forward-line)))))
 
