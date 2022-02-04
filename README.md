@@ -500,8 +500,10 @@ can use most commands you know from the emacs package menu. This
 option requires the rust package `cargo-outdated` to be installed
 before being used.
 
-- `u` mark single crate for upgrade
-- `U` mark all upgradable crates
+- `u` mark single crate for upgrade and prompt user for version.
+- `U` mark all upgradable crates.
+- `l` mark single crate for upgrading to latest version.
+- `L` mark all crates to latest version.
 - `m` remove mark
 - `x` perform marked package menu actions
 - `r` refresh crate list
