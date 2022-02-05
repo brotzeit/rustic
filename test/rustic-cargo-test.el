@@ -194,7 +194,7 @@ fn test21() {
 (ert-deftest rustic-test-check ()
   (let* ((string "fn main() { let s = 1;}")
          (buf (rustic-test-count-error-helper-new string))
-         (default-directory (buffer-file-name buf)))
+         (default-directory (file-name-directory (buffer-file-name buf))))
     (with-current-buffer buf
       (call-interactively 'rustic-cargo-check)
       (let* ((proc (get-process rustic-compilation-process-name))
@@ -216,7 +216,7 @@ fn test() {
 }
 }")
          (buf (rustic-test-count-error-helper-new string))
-         (default-directory (buffer-file-name buf)))
+         (default-directory (file-name-directory (buffer-file-name buf))))
     (with-current-buffer buf
       (let* ((proc (rustic-cargo-test))
              (buffer (process-buffer proc)))
@@ -231,7 +231,7 @@ fn test() {
 (ert-deftest rustic-cargo-expand-test ()
   (let* ((string "fn main() {()}")
          (buf (rustic-test-count-error-helper-new string))
-         (default-directory (buffer-file-name buf)))
+         (default-directory (file-name-directory (buffer-file-name buf))))
     (rustic-cargo-expand)
     (rustic-test--wait-till-finished rustic-expand-buffer-name)
     (with-current-buffer (get-buffer rustic-expand-buffer-name)

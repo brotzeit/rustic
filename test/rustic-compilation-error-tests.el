@@ -1,48 +1,55 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
 
-;; (ert-deftest rustic-test-crate-path-error ()
-;;   (let* ((test-workspace (expand-file-name "test/test-project/"))
-;;          (test-crate (expand-file-name "test/test-project/crates/test-crate/")))
-;;     (let ((default-directory (expand-file-name "src" test-crate)))
-;;       (rustic-cargo-build)
-;;       (let* ((proc (get-process rustic-compilation-process-name))
-;;              (buffer (process-buffer proc)))
-;;         (while (eq (process-status proc) 'run)
-;;           (sit-for 0.01))
-;;         (with-current-buffer buffer
-;;           (goto-char (point-min))
-;;           (when (re-search-forward "-->")
-;;             (goto-char (match-beginning 0))
-;;             (let* ((msg (get-text-property (point) 'compilation-message))
-;;                   (loc (compilation--message->loc msg))
-;;                   (path (caar (compilation--loc->file-struct loc))))
-;;               (with-current-buffer buffer
-;;                 (should (string= (concat default-directory path)
-;;                                  (concat test-crate "src/lib.rs")))))))))))
+(ert-deftest rustic-test-crate-path-error ()
+  (let* ((test-workspace (expand-file-name "test/test-project/"))
+         (test-crate (expand-file-name "test/test-project/crates/test-crate/")))
+    (let ((default-directory (expand-file-name "src" test-crate)))
+      (rustic-cargo-build)
+      (let* ((proc (get-process rustic-compilation-process-name))
+             (buffer (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.01))
+        (with-current-buffer buffer
+          (goto-char (point-min))
+          (when (re-search-forward "-->")
+            (goto-char (match-beginning 0))
+            (let* ((msg (get-text-property (point) 'compilation-message))
+                  (loc (compilation--message->loc msg))
+                  (path (caar (compilation--loc->file-struct loc))))
+              (with-current-buffer buffer
+                (should (string= (concat default-directory path)
+                                 (concat test-crate "src/lib.rs")))))))))))
 
-;; (ert-deftest rustic-test-workspace-path-error ()
-;;   (let* ((test-workspace (expand-file-name "test/test-project/"))
-;;          (test-crate (expand-file-name "test/test-project/crates/test-crate/"))
-;;          (rustic-compile-directory-method 'rustic-buffer-workspace))
+;; TODO: improve error testing for crates
+(ert-deftest rustic-test-workspace-path-error ()
+  (let* ((test-workspace (expand-file-name "test/test-project/"))
+         (test-crate (expand-file-name "test/test-project/crates/test-crate/"))
+         (another-test-crate (expand-file-name "test/test-project/crates/another-test-crate/"))
+         (rustic-compile-directory-method 'rustic-buffer-workspace))
 
-;;     (let ((default-directory (expand-file-name "src" test-crate)))
-;;       (rustic-cargo-build)
-;;       (let* ((proc (get-process rustic-compilation-process-name))
-;;              (buffer (process-buffer proc)))
-;;         (while (eq (process-status proc) 'run)
-;;           (sit-for 0.01))
-;;         (with-current-buffer buffer
-;;           (goto-char (point-min))
-;;           (when (re-search-forward "-->")
-;;             (goto-char (match-beginning 0))
-;;             (let* ((msg (get-text-property (point) 'compilation-message))
-;;                   (loc (compilation--message->loc msg))
-;;                   (path (caar (compilation--loc->file-struct loc))))
-;;               (with-current-buffer buffer
-;;                 (should (string= (concat default-directory path)
-;;                                  (concat test-crate "src/lib.rs"))))
-;;               (should (file-exists-p (expand-file-name path test-workspace))))))))))
+    (let ((default-directory (expand-file-name "src" test-crate)))
+      (rustic-cargo-build)
+      (let* ((proc (get-process rustic-compilation-process-name))
+             (buffer (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.01))
+        (with-current-buffer buffer
+          (goto-char (point-min))
+          (when (re-search-forward "-->")
+            (goto-char (match-beginning 0))
+            (let* ((msg (get-text-property (point) 'compilation-message))
+                   (loc (compilation--message->loc msg))
+                   (path (caar (compilation--loc->file-struct loc))))
+              (with-current-buffer buffer
+                ;; TODO: it seems sometimes "test-crate" is compiled first
+                ;; and somestimes "another-test-crate".
+                ;; would be good to test this more precisely
+                (should (or (string= (concat default-directory path)
+                                     (concat test-crate "src/lib.rs"))
+                            (string= (concat default-directory path)
+                                     (concat another-test-crate "src/lib.rs"))))
+                (should (file-exists-p (expand-file-name path test-workspace)))))))))))
 
 (ert-deftest rustic-test-count-errors ()
   ;; test error without error code

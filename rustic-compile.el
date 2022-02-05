@@ -237,6 +237,7 @@ Set environment variables for rust process."
       (set-process-sentinel process (plist-get args :sentinel))
       (set-process-coding-system process 'utf-8-emacs-unix 'utf-8-emacs-unix)
       (process-put process 'command (plist-get args :command))
+      (process-put process 'crate (plist-get args :crate))
       (process-put process 'file-buffer (plist-get args :file-buffer))
       process)))
 
@@ -279,13 +280,17 @@ ARGS is a plist that affects how the process is run.
 - `:mode' mode for process buffer
 - `:directory' set `default-directory'
 - `:sentinel' process sentinel"
-  (let ((buf (get-buffer-create
-              (or (plist-get args :buffer) rustic-compilation-buffer-name)))
-        (process (or (plist-get args :process) rustic-compilation-process-name))
-        (mode (or (plist-get args :mode) 'rustic-compilation-mode))
-        (directory (or (plist-get args :directory) (funcall rustic-compile-directory-method)))
-        (sentinel (or (plist-get args :sentinel) #'compilation-sentinel))
-        (file-buffer (current-buffer)))
+  (let* ((buf (get-buffer-create
+               (or (plist-get args :buffer) rustic-compilation-buffer-name)))
+         (process (or (plist-get args :process) rustic-compilation-process-name))
+         (mode (or (plist-get args :mode) 'rustic-compilation-mode))
+         (directory (or (plist-get args :directory) (funcall rustic-compile-directory-method)))
+         (sentinel (or (plist-get args :sentinel) #'compilation-sentinel))
+         (file-buffer (current-buffer))
+         ;; only set crate when we really need it
+         (crate (when (and (eq rustic-compile-directory-method 'rustic-buffer-crate)
+                           (not (string= directory (rustic-buffer-workspace))))
+                  (nth 1 (reverse (split-string (funcall rustic-compile-directory-method) "/"))))))
     (rustic-compilation-setup-buffer buf directory mode)
     (setq next-error-last-buffer buf)
     (unless (plist-get args :no-display)
@@ -299,6 +304,7 @@ ARGS is a plist that affects how the process is run.
                            :file-buffer file-buffer
                            :filter #'rustic-compilation-filter
                            :sentinel sentinel
+                           :crate crate
                            :file-handler t))))
 
 (defun rustic-compilation-filter (proc string)
@@ -329,6 +335,7 @@ Translate STRING with `xterm-color-filter'."
                 ;; now use window-point-insertion-type instead.
 
                 (insert xterm-string)
+
                 (compilation--ensure-parse (point-max))
 
                 (unless comint-inhibit-carriage-motion
