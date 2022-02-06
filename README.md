@@ -503,6 +503,15 @@ before being used.
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
 
+### Expand
+
+[cargo-expand](https://github.com/dtolnay/cargo-expand) provides the ability to expand macros. It also
+provides the ability to target a specific modules or a named item
+within a module (eg: `module::Type`).
+
+- `rustic-cargo-expand`: runs `cargo expand`. You can also use
+  universal argument to target a specific named item to expand.
+
 ### More cargo commands
 
 - `rustic-cargo-init` run 'cargo init' to initialize a directory
