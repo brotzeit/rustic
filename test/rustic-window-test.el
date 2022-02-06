@@ -22,7 +22,7 @@
       (rustic-mode)
       (insert string)
       (let ((proc (rustic-format-buffer)))
-        (rustic-test--wait-till-finished rustic-compilation-buffer-name))
+        (rustic-test--wait-till-finished rustic-format-buffer-name))
       (should (= (length (window-list)) 2))
       (should (get-buffer-window rustic-format-buffer-name)))
     (kill-buffer buf)))
