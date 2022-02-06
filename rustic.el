@@ -175,6 +175,7 @@ This variable might soon be remove again.")
   (require 'rustic-rustfix)
   (require 'rustic-playpen)
   (require 'rustic-lsp)
+  (require 'rustic-expand)
   (with-eval-after-load 'flycheck
     (require 'rustic-flycheck)))
 
