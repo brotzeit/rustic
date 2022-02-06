@@ -20,6 +20,7 @@
          (test-crate (expand-file-name "test/test-project/crates/test-crate/")))
     (let ((default-directory (expand-file-name "src" test-crate)))
       (rustic-cargo-build)
+      (rustic-test--wait-till-finished rustic-compilation-buffer-name)
       (let* ((proc (get-process rustic-compilation-process-name))
              (buffer (process-buffer proc)))
         (while (eq (process-status proc) 'run)
