@@ -104,8 +104,7 @@
     (call-interactively 'rustic-cargo-clippy-rerun)
     (let* ((proc (get-process rustic-clippy-process-name))
            (buffer (process-buffer proc)))
-      (while (eq (process-status proc) 'run)
-        (sit-for 0.01))
+      (rustic-test--wait-till-finished rustic-clippy-buffer-name)
       (with-current-buffer buffer
         (should (string-match "^warning:\s" (buffer-substring-no-properties (point-min) (point-max)))))
       (should (string= rustic-clippy-arguments "")))
