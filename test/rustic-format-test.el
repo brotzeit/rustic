@@ -202,8 +202,7 @@
 
       ;; run `rustic-compile'
       (if-let ((proc (call-interactively 'rustic-compile)))
-          (while (eq (process-status proc) 'run)
-            (sit-for 0.01)))
+          (rustic-test--wait-till-finished rustic-compilation-buffer-name))
       ;; #352
       (should (get-buffer rustic-compilation-buffer-name))
       (with-current-buffer buffer1
@@ -229,8 +228,7 @@
 
       ;; run `rustic-compile'
       (if-let ((proc (call-interactively 'rustic-compile)))
-          (while (eq (process-status proc) 'run)
-            (sit-for 0.01)))
+          (rustic-test--wait-till-finished rustic-compilation-buffer-name))
       (should-not (get-buffer rustic-compilation-buffer-name))
       (kill-buffer buffer1))))
 
