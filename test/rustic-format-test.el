@@ -179,8 +179,7 @@
       ;; run 'cargo fmt'
       (call-interactively 'rustic-cargo-fmt)
       (if-let ((proc (get-process rustic-format-process-name)))
-          (while (eq (process-status proc) 'run)
-            (sit-for 0.01)))
+          (rustic-test--wait-till-finished rustic-format-buffer-name))
       (with-current-buffer buffer1
         (should (string= (buffer-string) formatted-string))))
     (kill-buffer buffer1)))
@@ -291,7 +290,7 @@
          (buf (get-buffer-create "test")))
     (rustic-test-format-create-rustfmt-toml dir "foo = 1\nbar = 2")
     (write-region string nil main nil 0)
-   
+
     (with-current-buffer buf
       (insert string)
       (rustic-mode)
