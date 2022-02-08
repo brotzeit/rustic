@@ -117,14 +117,6 @@ need to update GPG keys used by the ELPA package manager. Try
 installing
 [gnu-elpa-keyring-update](https://elpa.gnu.org/packages/gnu-elpa-keyring-update.html).
 
-If you have `rust-mode` installed, ensure it is required before rustic
-since it has to be removed from `auto-mode-alist`. However you only
-need `rust-mode` if you want to use `emacs-racer`. There's some stuff
-that isn't included in rustic.
-
-If you have any issues with rustic, please try running emacs without
-`rust-mode` loaded.
-
 If you can't run rust-analyzer or cargo can't be found, your
 environment variables probably don't work in emacs.  Try
 [exec-path-from-shell](https://github.com/purcell/exec-path-from-shell/tree/81125c5adbc903943c016c2984906dc089372a41#usage)
@@ -239,9 +231,9 @@ To save buffers automatically, you can change the value of
 
 ```elisp
 (defun rustic-mode-auto-save-hook ()
-    "Enable auto-saving in rustic-mode buffers."
-    (when buffer-file-name
-      (setq-local compilation-ask-about-save nil)))
+  "Enable auto-saving in rustic-mode buffers."
+  (when buffer-file-name
+    (setq-local compilation-ask-about-save nil)))
 (add-hook 'rustic-mode-hook 'rustic-mode-auto-save-hook)
 ```
 
@@ -854,8 +846,8 @@ View help buffer containing a command's flags with `h`:
 
 ## rust-mode
 
-The rustic mode derives from rust-mode using all of its functionality. However
-we replace default key bindings and some hooks.
+rustic-mode derives from rust-mode, however we replace default key
+bindings and some hooks.
 
 There are also some additional commands:
 
