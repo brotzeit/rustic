@@ -7,9 +7,5 @@ name = "another-test-workspace"
 version = "0.0.1"
 
 [[package]]
-name = "expand-package"
-version = "0.0.1"
-
-[[package]]
 name = "test-workspace"
 version = "0.0.1"

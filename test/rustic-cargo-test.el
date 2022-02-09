@@ -229,10 +229,12 @@ fn test() {
                                  rustic-default-test-arguments)))))))
 
 (ert-deftest rustic-cargo-expand-test ()
-  (let* ((test-crate (expand-file-name "test/test-project/crates/expand-crate/"))
-         (default-directory (expand-file-name "src" test-crate))
-         (proc (rustic-cargo-expand))
-         (buffer (process-buffer proc)))
-    (with-current-buffer buffer
+  (let* ((string "fn main() {()}")
+         (buf (rustic-test-count-error-helper-new string))
+         (default-directory (buffer-file-name buf)))
+    (rustic-cargo-expand)
+    (rustic-test--wait-till-finished rustic-expand-buffer-name)
+    (with-current-buffer (get-buffer rustic-expand-buffer-name)
       (let ((buf-string (buffer-substring-no-properties (point-min) (point-max))))
-        (should (string-match "^cargo expand" buf-string))))))
+        (should (string-match "^cargo expand" buf-string))
+        (should (string-match (regexp-quote "prelude") buf-string))))))
