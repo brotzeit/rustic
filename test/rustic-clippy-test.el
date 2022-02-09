@@ -77,7 +77,7 @@
 
       (with-current-buffer buffer1
         (revert-buffer t t)
-        (should-not (string= (buffer-string) formatted-string)))      
+        (should-not (string= (buffer-string) formatted-string)))
       (should (get-buffer rustic-clippy-buffer-name))
       (kill-buffer (get-buffer rustic-clippy-buffer-name))
       (kill-buffer buffer1))))
@@ -104,10 +104,9 @@
     (call-interactively 'rustic-cargo-clippy-rerun)
     (let* ((proc (get-process rustic-clippy-process-name))
            (buffer (process-buffer proc)))
-      (while (eq (process-status proc) 'run)
-        (sit-for 0.01))
+      (rustic-test--wait-till-finished rustic-clippy-buffer-name)
       (with-current-buffer buffer
-        (should (string-match "^warning:\s" (buffer-substring-no-properties (point-min) (point-max)))))      
+        (should (string-match "^warning:\s" (buffer-substring-no-properties (point-min) (point-max)))))
       (should (string= rustic-clippy-arguments "")))
     (kill-buffer buf)))
 
@@ -119,7 +118,6 @@
       (call-interactively 'rustic-cargo-clippy-fix)
       (let* ((proc (get-process rustic-clippy-process-name))
              (buffer (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.01))
+        (rustic-test--wait-till-finished rustic-clippy-buffer-name)
         (revert-buffer t t)
         (should (string= (buffer-string) "#![allow(non_snake_case)]\nfn main() { let _s = 1;}"))))))

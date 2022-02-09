@@ -22,8 +22,7 @@
       (rustic-cargo-build)
       (let* ((proc (get-process rustic-compilation-process-name))
              (buffer (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.01))
+        (rustic-test--wait-till-finished rustic-compilation-buffer-name)
         (with-current-buffer buffer
           (should (string-match "Compiling test-workspace" (buffer-substring-no-properties (point-min) (point-max))))
           (should-not (string-match "Compiling another-test-workspace" (buffer-substring-no-properties (point-min) (point-max)))))))))
