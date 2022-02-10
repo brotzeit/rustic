@@ -236,5 +236,4 @@ fn test() {
     (rustic-test--wait-till-finished rustic-expand-buffer-name)
     (with-current-buffer (get-buffer rustic-expand-buffer-name)
       (let ((buf-string (buffer-substring-no-properties (point-min) (point-max))))
-        (should (string-match "^cargo expand" buf-string))
-        (should (string-match (regexp-quote "prelude") buf-string))))))
+        (should (string-match "^cargo expand" buf-string))))))
