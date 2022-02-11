@@ -237,6 +237,7 @@ Set environment variables for rust process."
       (set-process-sentinel process (plist-get args :sentinel))
       (set-process-coding-system process 'utf-8-emacs-unix 'utf-8-emacs-unix)
       (process-put process 'command (plist-get args :command))
+      (process-put process 'workspace (plist-get args :workspace))
       (process-put process 'crate (plist-get args :crate))
       (process-put process 'file-buffer (plist-get args :file-buffer))
       process)))
@@ -285,12 +286,10 @@ ARGS is a plist that affects how the process is run.
          (process (or (plist-get args :process) rustic-compilation-process-name))
          (mode (or (plist-get args :mode) 'rustic-compilation-mode))
          (directory (or (plist-get args :directory) (funcall rustic-compile-directory-method)))
-         (sentinel (or (plist-get args :sentinel) #'compilation-sentinel))
-         (file-buffer (current-buffer))
-         ;; only set crate when we really need it
-         (crate (when (and (eq rustic-compile-directory-method 'rustic-buffer-crate)
-                           (not (string= directory (rustic-buffer-workspace))))
-                  (nth 1 (reverse (split-string (funcall rustic-compile-directory-method) "/"))))))
+         (crate (rustic-buffer-crate))
+         (workspace (rustic-buffer-workspace))
+         (sentinel (or (plist-get args :sentinel) #'rustic-compilation-sentinel))
+         (file-buffer (current-buffer)))
     (rustic-compilation-setup-buffer buf directory mode)
     (setq next-error-last-buffer buf)
     (unless (plist-get args :no-display)
@@ -305,12 +304,14 @@ ARGS is a plist that affects how the process is run.
                            :filter #'rustic-compilation-filter
                            :sentinel sentinel
                            :crate crate
+                           :workspace workspace
                            :file-handler t))))
 
 (defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.
 Translate STRING with `xterm-color-filter'."
-  (let ((buffer (process-buffer proc))
+  (let ((default-directory (process-get proc 'crate))
+        (buffer (process-buffer proc))
         buffer-empty-p)
     (when (buffer-live-p buffer)
       (with-current-buffer buffer
@@ -352,6 +353,28 @@ Translate STRING with `xterm-color-filter'."
         (let ((win (get-buffer-window buffer)))
           (set-window-start win (point-min))
           (set-window-point win (point-min)))))))
+
+(defun rustic-compilation-sentinel (proc msg)
+  "Sentinel for compilation buffers."
+  (with-current-buffer (process-buffer proc)
+   (setq default-directory (process-get proc 'workspace)))
+  (if (memq (process-status proc) '(exit signal))
+      (let ((buffer (process-buffer proc)))
+	(if (null (buffer-name buffer))
+	    ;; buffer killed
+	    (set-process-buffer proc nil)
+	  (with-current-buffer buffer
+	    ;; Write something in the compilation buffer
+	    ;; and hack its mode line.
+	    (compilation-handle-exit (process-status proc)
+				     (process-exit-status proc)
+				     msg)
+	    ;; Since the buffer and mode line will show that the
+	    ;; process is dead, we can delete it now.  Otherwise it
+	    ;; will stay around until M-x list-processes.
+	    (delete-process proc)))
+        (setq compilation-in-progress (delq proc compilation-in-progress))
+        (compilation--update-in-progress-mode-line))))
 
 (defun rustic-compilation-process-live (&optional nosave)
   "Ask to kill live rustic process if any and call `rustic-save-some-buffers'.

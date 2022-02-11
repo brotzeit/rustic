@@ -24,8 +24,8 @@
              (buffer (process-buffer proc)))
         (rustic-test--wait-till-finished rustic-compilation-buffer-name)
         (with-current-buffer buffer
-          (should (string-match "Compiling test-workspace" (buffer-substring-no-properties (point-min) (point-max))))
-          (should-not (string-match "Compiling another-test-workspace" (buffer-substring-no-properties (point-min) (point-max)))))))))
+          (should (string-match "Compiling test-crate" (buffer-substring-no-properties (point-min) (point-max))))
+          (should-not (string-match "Compiling another-test-crate" (buffer-substring-no-properties (point-min) (point-max)))))))))
 
 ;; test if both crates will be compiled with `rustic-buffer-workspace'
 (ert-deftest rustic-test-rustic-buffer-workspace ()
@@ -39,5 +39,6 @@
         (while (eq (process-status proc) 'run)
           (sit-for 0.01))
         (with-current-buffer buffer
-          (should (string-match "Compiling test-workspace" (buffer-substring-no-properties (point-min) (point-max))))
-          (should (string-match "Compiling another-test-workspace" (buffer-substring-no-properties (point-min) (point-max)))))))))
+          ;; (print (buffer-substring-no-properties (point-min) (point-max)))
+          (should (string-match "Compiling test-crate" (buffer-substring-no-properties (point-min) (point-max))))
+          (should (string-match "Compiling another-test-crate" (buffer-substring-no-properties (point-min) (point-max)))))))))
