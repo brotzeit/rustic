@@ -255,6 +255,8 @@ and it's `cdr' is a list of arguments."
 
 (defun rustic-cargo-fmt-sentinel (proc output)
   "Sentinel for formatting with `rustic-cargo-fmt'."
+  (with-current-buffer (process-buffer proc)
+    (setq default-directory (process-get proc 'workspace)))
   (let ((proc-buffer (process-buffer proc))
         (inhibit-read-only t))
     (with-current-buffer proc-buffer

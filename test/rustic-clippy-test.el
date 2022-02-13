@@ -87,7 +87,7 @@
      String::from(' ').extend(String::from(' ').chars());
 }\n")
          (buf (rustic-test-count-error-helper-new string))
-         (default-directory (buffer-file-name buf)))
+         (default-directory (file-name-directory (buffer-file-name buf))))
     (call-interactively 'rustic-cargo-clippy)
     (let* ((proc (get-process rustic-clippy-process-name))
            (buffer (process-buffer proc)))
@@ -113,7 +113,7 @@
 (ert-deftest rustic-test-clippy-fix ()
   (let* ((string "fn main() { let s = 1;}")
          (buf (rustic-test-count-error-helper-new string))
-         (default-directory (buffer-file-name buf)))
+         (default-directory (file-name-directory (buffer-file-name buf))))
     (with-current-buffer buf
       (call-interactively 'rustic-cargo-clippy-fix)
       (let* ((proc (get-process rustic-clippy-process-name))

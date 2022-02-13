@@ -13,10 +13,11 @@
 
 (ert-deftest rustic-test-window-count-format-proc ()
   (should (= (length (window-list)) 1))
-  (let ((string "ffn main()      {}")
-        (formatted-string "fn main() {}\n")
-        (buf (get-buffer-create "test"))
-        (buffer-read-only nil))
+  (let* ((string "ffn main()      {}")
+         (formatted-string "fn main() {}\n")
+         (buf (rustic-test-count-error-helper-new string))
+         (default-directory (file-name-directory (buffer-file-name buf)))
+         (buffer-read-only nil))
     (with-current-buffer buf
       (erase-buffer)
       (rustic-mode)

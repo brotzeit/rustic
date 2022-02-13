@@ -3,17 +3,6 @@
 version = 3
 
 [[package]]
-name = "another-test-crate"
-version = "0.0.1"
-
-[[package]]
-name = "depend-on-test-crate"
-version = "0.0.1"
-dependencies = [
- "test-crate",
-]
-
-[[package]]
 name = "test-crate"
 version = "0.0.1"
 
@@ -21,7 +10,5 @@ version = "0.0.1"
 name = "test-project"
 version = "0.0.1"
 dependencies = [
- "another-test-crate",
- "depend-on-test-crate",
  "test-crate",
 ]
