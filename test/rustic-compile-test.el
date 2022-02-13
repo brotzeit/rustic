@@ -2,10 +2,12 @@
 ;; Before editing, eval (load-file "test-helper.el")
 
 (ert-deftest rustic-test-format-next-error-last-buffer ()
-  (let ((string "fn main()      {}")
-        (buf (get-buffer-create "test-next-error-last-buffer")))
+  (let* ((string "fn main()      {}")
+         (buf (rustic-test-count-error-helper-new string))
+         (default-directory (file-name-directory (buffer-file-name buf))))
     (with-current-buffer buf
       (erase-buffer)
+      (fundamental-mode)
       (should-error (rustic-format-buffer))
       (rustic-mode)
       (insert string)
