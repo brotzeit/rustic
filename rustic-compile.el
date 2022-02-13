@@ -203,7 +203,9 @@ Error matching regexes from compile.el are removed."
   (add-to-list 'compilation-error-regexp-alist 'rustic-info)
   (add-to-list 'compilation-error-regexp-alist 'rustic-panic)
 
-  (add-hook 'compilation-filter-hook #'rustic-insert-errno-button nil t))
+  (add-hook 'compilation-filter-hook #'rustic-insert-errno-button nil t)
+
+  (setq-local rustic-compilation-workspace (rustic-buffer-workspace)))
 
 ;;; Compilation Process
 
@@ -238,7 +240,6 @@ Set environment variables for rust process."
       (set-process-coding-system process 'utf-8-emacs-unix 'utf-8-emacs-unix)
       (process-put process 'command (plist-get args :command))
       (process-put process 'workspace (plist-get args :workspace))
-      (process-put process 'crate (plist-get args :crate))
       (process-put process 'file-buffer (plist-get args :file-buffer))
       process)))
 
@@ -286,7 +287,6 @@ ARGS is a plist that affects how the process is run.
          (process (or (plist-get args :process) rustic-compilation-process-name))
          (mode (or (plist-get args :mode) 'rustic-compilation-mode))
          (directory (or (plist-get args :directory) (funcall rustic-compile-directory-method)))
-         (crate (rustic-buffer-crate))
          (workspace (rustic-buffer-workspace))
          (sentinel (or (plist-get args :sentinel) #'rustic-compilation-sentinel))
          (file-buffer (current-buffer)))
@@ -303,15 +303,13 @@ ARGS is a plist that affects how the process is run.
                            :file-buffer file-buffer
                            :filter #'rustic-compilation-filter
                            :sentinel sentinel
-                           :crate crate
                            :workspace workspace
                            :file-handler t))))
 
 (defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.
 Translate STRING with `xterm-color-filter'."
-  (let ((default-directory (process-get proc 'crate))
-        (buffer (process-buffer proc))
+  (let ((buffer (process-buffer proc))
         buffer-empty-p)
     (when (buffer-live-p buffer)
       (with-current-buffer buffer
@@ -354,27 +352,29 @@ Translate STRING with `xterm-color-filter'."
           (set-window-start win (point-min))
           (set-window-point win (point-min)))))))
 
+;; we only use this sentinel to set `default-directory' to the workspace
+;; dir to ensure goto-error functions work
 (defun rustic-compilation-sentinel (proc msg)
   "Sentinel for compilation buffers."
-  (with-current-buffer (process-buffer proc)
-   (setq default-directory (process-get proc 'workspace)))
-  (if (memq (process-status proc) '(exit signal))
-      (let ((buffer (process-buffer proc)))
-	(if (null (buffer-name buffer))
-	    ;; buffer killed
-	    (set-process-buffer proc nil)
-	  (with-current-buffer buffer
-	    ;; Write something in the compilation buffer
-	    ;; and hack its mode line.
-	    (compilation-handle-exit (process-status proc)
-				     (process-exit-status proc)
-				     msg)
-	    ;; Since the buffer and mode line will show that the
-	    ;; process is dead, we can delete it now.  Otherwise it
-	    ;; will stay around until M-x list-processes.
-	    (delete-process proc)))
-        (setq compilation-in-progress (delq proc compilation-in-progress))
-        (compilation--update-in-progress-mode-line))))
+  (let ((buffer (process-buffer proc)))
+    (with-current-buffer buffer
+      (setq default-directory (process-get proc 'workspace)))
+    (if (memq (process-status proc) '(exit signal))
+	    (if (null (buffer-name buffer))
+	        ;; buffer killed
+	        (set-process-buffer proc nil)
+	      (with-current-buffer buffer
+	        ;; Write something in the compilation buffer
+	        ;; and hack its mode line.
+	        (compilation-handle-exit (process-status proc)
+				                     (process-exit-status proc)
+				                     msg)
+	        ;; Since the buffer and mode line will show that the
+	        ;; process is dead, we can delete it now.  Otherwise it
+	        ;; will stay around until M-x list-processes.
+	        (delete-process proc)))
+      (setq compilation-in-progress (delq proc compilation-in-progress))
+      (compilation--update-in-progress-mode-line))))
 
 (defun rustic-compilation-process-live (&optional nosave)
   "Ask to kill live rustic process if any and call `rustic-save-some-buffers'.
@@ -452,6 +452,7 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
 This hook checks if there's a line number at the beginning of the
 current line in an error section."
   (-if-let* ((rustic-p (eq major-mode 'rustic-compilation-mode))
+             (default-directory rustic-compilation-workspace)
              (line-contents (buffer-substring-no-properties
                              (line-beginning-position)
                              (line-end-position)))
