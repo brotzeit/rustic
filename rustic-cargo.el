@@ -607,8 +607,8 @@ in your project like `pwd'"
   (interactive)
   (rustic-run-cargo-command `(,(rustic-cargo-bin)
                               "build"
-                              ,@(split-string rustic-cargo-build-arguments)))
-                            (list :clippy-fix t))
+                              ,@(split-string rustic-cargo-build-arguments))
+                              (list :clippy-fix t)))
 
 (defvar rustic-clean-arguments nil
   "Holds arguments for 'cargo clean', similar to `compilation-arguments`.")
