@@ -425,6 +425,7 @@ Customization:
 
 - `rustic-cargo-bin` Path to cargo executable
 - `rustic-cargo-bin-remote` Path to remote cargo executable
+- `rustic-cargo-build-arguments` default arguments for cargo build
 - `rustic-cargo-check-arguments` default arguments for cargo check
 
 ### Edit

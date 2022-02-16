@@ -191,6 +191,22 @@ fn test21() {
     (should (= 0 (length (split-string rustic-test-arguments))))
     (kill-buffer buf)))
 
+(ert-deftest rustic-test-build ()
+  (let* ((string "fn main() { let s = 1;}")
+         (buf (rustic-test-count-error-helper-new string))
+         (default-directory (file-name-directory (buffer-file-name buf)))
+         (rustic-cargo-build-arguments "--all-targets"))
+    (with-current-buffer buf
+      (call-interactively 'rustic-cargo-build)
+      (let* ((proc (get-process rustic-compilation-process-name))
+             (buffer (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.01))
+
+        (should (string= (s-join " " (process-get proc 'command))
+                             (concat (rustic-cargo-bin) " build "
+                                     rustic-cargo-build-arguments)))))))
+
 (ert-deftest rustic-test-check ()
   (let* ((string "fn main() { let s = 1;}")
          (buf (rustic-test-count-error-helper-new string))

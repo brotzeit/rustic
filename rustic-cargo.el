@@ -605,8 +605,9 @@ in your project like `pwd'"
 (defun rustic-cargo-build ()
   "Run 'cargo build' for the current project."
   (interactive)
-  (rustic-run-cargo-command (list (rustic-cargo-bin)
-                                  "build" rustic-cargo-build-arguments))
+  (rustic-run-cargo-command `(,(rustic-cargo-bin)
+                              "build"
+                              ,@(split-string rustic-cargo-build-arguments)))
                             (list :clippy-fix t))
 
 (defvar rustic-clean-arguments nil
