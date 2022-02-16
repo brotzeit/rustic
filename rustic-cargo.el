@@ -50,6 +50,11 @@ If nil then the project is simply created."
   :type 'string
   :group 'rustic-cargo)
 
+(defcustom rustic-cargo-build-arguments ""
+  "Default arguments when running 'cargo build'."
+  :type 'string
+  :group 'rustic-cargo)
+
 (defvar rustic-cargo-outdated-face nil)
 (make-obsolete-variable 'rustic-cargo-outdated-face
                         "use the face `rustic-cargo-outdated' instead."
@@ -600,8 +605,9 @@ in your project like `pwd'"
 (defun rustic-cargo-build ()
   "Run 'cargo build' for the current project."
   (interactive)
-  (rustic-run-cargo-command (list (rustic-cargo-bin) "build")
-                            (list :clippy-fix t)))
+  (rustic-run-cargo-command (list (rustic-cargo-bin)
+                                  "build" rustic-cargo-build-arguments))
+                            (list :clippy-fix t))
 
 (defvar rustic-clean-arguments nil
   "Holds arguments for 'cargo clean', similar to `compilation-arguments`.")
