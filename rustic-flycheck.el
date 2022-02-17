@@ -176,6 +176,11 @@ Flycheck according to the Cargo project layout."
       rustic-flycheck-clippy-params-nightly
     rustic-flycheck-clippy-params-stable))
 
+(defun rustic-flycheck-rust-manifest-directory ()
+  "This function looks up the workspace root instead of the crate root
+so error highlighting also works with multi-crate projects."
+  (rustic-buffer-workspace))
+
 (flycheck-define-checker rustic-clippy
   "A Rust syntax checker using clippy.
 
@@ -186,11 +191,11 @@ See URL `https://github.com/rust-lang-nursery/rust-clippy'."
   :error-explainer flycheck-rust-error-explainer
   :modes rustic-mode
   :predicate flycheck-buffer-saved-p
-  :working-directory (lambda (_) (flycheck-rust-manifest-directory))
+  :working-directory (lambda (_) (rustic-flycheck-rust-manifest-directory))
   :verify
   (lambda (_)
     (and buffer-file-name
-         (let ((has-toml (flycheck-rust-manifest-directory))
+         (let ((has-toml (rustic-flycheck-rust-manifest-directory))
                (has-clippy (flycheck-rust-cargo-has-command-p "clippy")))
            (list
             (flycheck-verification-result-new
