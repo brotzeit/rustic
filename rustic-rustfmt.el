@@ -116,7 +116,7 @@ and it's `cdr' is a list of arguments."
         (error (format "File %s does not exist." it))))
     (with-current-buffer err-buf
       (let* ((c `(,(rustic-rustfmt-bin)
-                  ,rustic-rustfmt-args
+                  ,@(split-string rustic-rustfmt-args)
                   ,@command "--" ,@files))
              (proc (rustic-make-process :name rustic-format-process-name
                                         :buffer err-buf

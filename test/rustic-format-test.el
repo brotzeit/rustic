@@ -251,7 +251,7 @@
   (let* ((string "fn main()      {}")
          (formatted-string "fn main() {}\n")
          (rustic-rustfmt-config-alist '((hard_tabs . t) (skip_children . nil)))
-         (rustic-rustfmt-args "+stable")
+         (rustic-rustfmt-args "+stable --edition 2021")
          (dir (rustic-babel-generate-project t))
          (main (expand-file-name "main.rs" (concat dir "/src")))
          (buf (get-buffer-create "test")))
