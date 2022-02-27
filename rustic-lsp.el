@@ -48,6 +48,19 @@ then you must set this to nil before loading `rustic-lsp'."
   :type '(repeat (string))
   :group 'rustic)
 
+(defcustom rustic-enable-detached-file-support nil
+  "(Experimental) Enable rust-analyzer's detached file support.
+
+If enabled, rust-analyzer will try to manage a single file
+without requiring a dedicate Cargo project.
+
+Currently, only eglot is supported.  Note that due to a current
+limitation, the whole directory to which the source file belongs
+will be managed.  Hence, you should avoid visiting a Rust file
+in, e.g. your home directory."
+  :type 'boolean
+  :group 'rustic)
+
 ;;; Common
 
 (defun rustic-setup-lsp ()
@@ -118,7 +131,7 @@ with `lsp-rust-switch-server'."
                                      (when (symbolp (car mode))
                                        (eq (car mode) 'rust-mode)))
                                    eglot-server-programs)))))
-    (add-to-list 'eglot-server-programs `(rustic-mode . ,rustic-analyzer-command)))
+    (add-to-list 'eglot-server-programs `(rustic-mode . (eglot-rust-analyzer . ,rustic-analyzer-command))))
   ;; don't allow formatting with rls
   (unless rustic-lsp-format
     (let ((feature :documentFormattingProvider))
@@ -126,6 +139,18 @@ with `lsp-rust-switch-server'."
         (add-to-list 'eglot-ignored-server-capabilites feature)))))
 
 (with-eval-after-load 'eglot
+  (defclass eglot-rust-analyzer (eglot-lsp-server) ()
+    :documentation "Rust-analyzer LSP server.")
+
+  (cl-defmethod eglot-initialization-options ((server eglot-rust-analyzer))
+    "Pass `detachedFiles' when `rustic-enable-detached-file-support' is non-`nil'."
+    (if (or (null rustic-enable-detached-file-support)
+            (rustic-buffer-crate t)
+            (null buffer-file-name))
+        eglot--{}
+      (list :detachedFiles
+            (vector (file-local-name (file-truename buffer-file-name))))))
+
   (rustic-setup-eglot))
 
 ;;; rustic-macro-expansion-mode

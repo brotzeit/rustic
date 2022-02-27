@@ -416,6 +416,18 @@ you might have to additionally use:
 
 You'll have to have `rust-analyzer` already installed on the target machine.
 
+### Detached file
+
+This is an early experimental feature, and is disabled by default.
+
+Source files not belonging to any crate, or _detached_ source files,
+are supported by rust-analyzer, and this feature can be enabled via
+`rustic-enable-detached-file-support`. (Currently, only eglot is
+supported.)
+
+**Caveat**: Due to some current limitations, you should avoid open a
+detached file in a large directory with this feature enabled.
+
 ## Cargo
 
 Since the cargo commands also use the derived compilation mode, you can use
