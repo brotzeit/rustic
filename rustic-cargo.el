@@ -551,9 +551,9 @@ When calling this function from `rustic-popup-mode', always use the value of
   (rustic-cargo-run-command
    (cond (arg
           (setq rustic-run-arguments (read-from-minibuffer "Cargo run arguments: " rustic-run-arguments)))
-         ((rustic--get-run-arguments))
          ((eq major-mode 'rustic-popup-mode)
           rustic-run-arguments)
+         ((rustic--get-run-arguments))
          (t ""))))
 
 ;;;###autoload
