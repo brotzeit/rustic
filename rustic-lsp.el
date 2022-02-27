@@ -145,8 +145,8 @@ with `lsp-rust-switch-server'."
   (cl-defmethod eglot-initialization-options ((server eglot-rust-analyzer))
     "Pass `detachedFiles' when `rustic-enable-detached-file-support' is non-`nil'."
     (if (or (null rustic-enable-detached-file-support)
-            (rustic-buffer-crate t)
-            (null buffer-file-name))
+            (null buffer-file-name)
+            (rustic-buffer-crate t))
         eglot--{}
       (list :detachedFiles
             (vector (file-local-name (file-truename buffer-file-name))))))

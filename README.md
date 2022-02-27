@@ -425,8 +425,8 @@ are supported by rust-analyzer, and this feature can be enabled via
 `rustic-enable-detached-file-support`. (Currently, only eglot is
 supported.)
 
-**Caveat**: Due to some current limitations, you should avoid open a
-detached file in a large directory with this feature enabled.
+**Caveat**: Due to some current limitations, you should avoid opening
+a detached file in a large directory with this feature enabled.
 
 ## Cargo
 
