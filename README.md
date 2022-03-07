@@ -31,6 +31,7 @@
                     - [Auto import](#auto-import)
                 - [Macro expansion](#macro-expansion)
         - [LSP + TRAMP](#lsp--tramp)
+        - [Detached file](#detached-file)
     - [Cargo](#cargo)
         - [Edit](#edit)
         - [Test](#test)
