@@ -128,7 +128,7 @@ this variable."
     (define-key map (kbd "C-c C-c r") 'rustic-cargo-rm)
     (define-key map (kbd "C-c C-c u") 'rustic-cargo-upgrade)
     map)
-  "Keymap for Rust major mode.")
+  "Keymap for `rustic-mode'.")
 
 ;;;###autoload
 (define-derived-mode rustic-mode rust-mode "Rustic"
