@@ -73,20 +73,15 @@
 
 This package is based on [rust-mode](https://github.com/rust-lang/rust-mode) and provides additional features:
 
-- flycheck integration
 - cargo popup
 - multiline error parsing
 - translation of ANSI control sequences through
   [xterm-color](https://github.com/atomontage/xterm-color)
 - async org babel
-- custom compilation process
-- rustfmt errors in a rust compilation mode
 - automatic LSP configuration with
   [eglot](https://github.com/joaotavora/eglot) or
   [lsp-mode](https://github.com/emacs-lsp/lsp-mode)
-- Optional rust inline documentation
 - cask for testing
-- requires emacs 26
 - etc.
 
 rustic only shares the rust-mode code from rust-mode.el and rust-utils.el.
