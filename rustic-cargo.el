@@ -652,7 +652,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   (interactive)
   (if (y-or-n-p "Create documentation for dependencies?")
       (rustic-run-cargo-command (list (rustic-cargo-bin) "doc"))
-    (rustic-run-cargo-command (list (rustic-cargo-bin) "doc --no-deps"))))
+    (rustic-run-cargo-command (list (rustic-cargo-bin) "doc" "--no-deps"))))
 
 ;; TODO: buffer with cargo output should be in rustic-compilation-mode
 ;;;###autoload
@@ -662,8 +662,8 @@ The documentation is built if necessary."
   (interactive)
   (if (y-or-n-p "Open docs for dependencies as well?")
       ;; open docs only works with synchronous process
-      (shell-command (list (rustic-cargo-bin) "doc --open"))
-    (shell-command (list (rustic-cargo-bin) "doc --open --no-deps"))))
+      (shell-command (format "%s doc --open" (rustic-cargo-bin)))
+    (shell-command (format "%s doc --open --no-deps" (rustic-cargo-bin)))))
 
 ;;; cargo edit
 
