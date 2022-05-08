@@ -253,3 +253,20 @@ fn test() {
     (with-current-buffer (get-buffer rustic-expand-buffer-name)
       (let ((buf-string (buffer-substring-no-properties (point-min) (point-max))))
         (should (string-match "^cargo expand" buf-string))))))
+
+(ert-deftest rustic-cargo-login-test ()
+  (let* ((process-environment (cl-copy-list process-environment))
+         (tempdir (concat (temporary-file-directory) (file-name-as-directory "rustic-cargo-login-test")))
+         (credfile (concat tempdir "credentials")))
+
+    (when (file-exists-p credfile) (delete-file credfile))
+
+    (setenv "CARGO_HOME" tempdir)
+
+    (rustic-cargo-login "test-credentials")
+
+    (with-temp-buffer
+      (find-file credfile)
+      (let ((buf-string (buffer-string)))
+        (message buf-string)
+        (should (string-match "\\\[registry\\\]\ntoken = \"test-credentials\"\n" buf-string))))))
