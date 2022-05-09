@@ -709,5 +709,17 @@ If running with prefix command `C-u', read whole command from minibuffer."
                       (concat (rustic-cargo-bin) " upgrade"))))
       (rustic-run-cargo-command command))))
 
+;;;###autoload
+(defun rustic-cargo-login (token)
+  "Add crates.io API token using `cargo login'.
+
+`TOKEN' the token for interacting with crates.io. Visit [1] for
+        how to get one
+
+[1] https://doc.rust-lang.org/cargo/reference/publishing.html#before-your-first-publish"
+
+  (interactive "sAPI token: ")
+  (shell-command (format "%s login %s" (rustic-cargo-bin) token)))
+
 (provide 'rustic-cargo)
 ;;; rustic-cargo.el ends here
