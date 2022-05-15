@@ -20,7 +20,7 @@
 
 (defvar rustic-cargo-expand-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "g") 'rustic-cargo-expand-rerun)
+    (define-key map [remap recompile] 'rustic-cargo-expand-rerun)
     map)
   "Local keymap for `rustic-cargo-expand-mode' buffers.")
 

@@ -134,7 +134,7 @@
     (suppress-keymap map t)
     (set-keymap-parent map compilation-mode-map)
     (define-key map "p" 'rustic-popup)
-    (define-key map "g" 'rustic-recompile)
+    (define-key map [remap recompile] 'rustic-recompile)
     map)
   "Keymap for rust compilation log buffers.")
 

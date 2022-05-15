@@ -33,7 +33,7 @@
 
 (defvar rustic-cargo-clippy-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "g") 'rustic-cargo-clippy-rerun)
+    (define-key map [remap recompile] 'rustic-cargo-clippy-rerun)
     map)
   "Local keymap for `rustic-cargo-clippy-mode' buffers.")
 
