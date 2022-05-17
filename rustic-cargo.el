@@ -89,7 +89,7 @@ stored in this variable.")
 (defvar rustic-cargo-test-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map rustic-compilation-mode-map)
-    (define-key map (kbd "g") 'rustic-cargo-test-rerun)
+    (define-key map [remap recompile] 'rustic-cargo-test-rerun)
     map)
   "Local keymap for `rustic-cargo-test-mode' buffers.")
 
@@ -521,7 +521,7 @@ If BIN is not nil, create a binary application, otherwise a library."
 
 (defvar rustic-cargo-run-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "g") 'rustic-cargo-run-rerun)
+    (define-key map [remap recompile] 'rustic-cargo-run-rerun)
     map)
   "Local keymap for `rustic-cargo-test-mode' buffers.")
 

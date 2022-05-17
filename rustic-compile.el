@@ -134,7 +134,7 @@
     (suppress-keymap map t)
     (set-keymap-parent map compilation-mode-map)
     (define-key map "p" 'rustic-popup)
-    (define-key map "g" 'rustic-recompile)
+    (define-key map [remap recompile] 'rustic-recompile)
     map)
   "Keymap for rust compilation log buffers.")
 
@@ -235,6 +235,7 @@ Set environment variables for rust process."
                     #'start-file-process (plist-get args :name)
                     (plist-get args :buffer)
                     (plist-get args :command))))
+      (run-hook-with-args 'compilation-start-hook process)
       (set-process-filter process (plist-get args :filter))
       (set-process-sentinel process (plist-get args :sentinel))
       (set-process-coding-system process 'utf-8-emacs-unix 'utf-8-emacs-unix)
