@@ -19,6 +19,26 @@
   :type 'string
   :group 'rustic-cargo)
 
+(defcustom rustic-cargo-check-exec-command "check"
+  "Execute command to run cargo check."
+  :type 'string
+  :group 'rustic-cargo)
+
+(defcustom rustic-cargo-test-exec-command "test"
+  "Execute command to run cargo test."
+  :type 'string
+  :group 'rustic-cargo)
+
+(defcustom rustic-cargo-run-exec-command "run"
+  "Execute command to run cargo run."
+  :type 'string
+  :group 'rustic-cargo)
+
+(defcustom rustic-cargo-build-exec-command "build"
+  "Execute command to run cargo build."
+  :type 'string
+  :group 'rustic-cargo)
+
 (defcustom rustic-cargo-bin-remote "~/.cargo/bin/cargo"
   "Path to remote cargo executable."
   :type 'string
@@ -102,7 +122,7 @@ stored in this variable.")
 
 (defun rustic-cargo-run-test (test)
   "Run TEST which can be a single test or mod name."
-  (let* ((c (list (rustic-cargo-bin) "test" test))
+  (let* ((c (list (rustic-cargo-bin) rustic-cargo-test-exec-command test))
          (buf rustic-test-buffer-name)
          (proc rustic-test-process-name)
          (mode 'rustic-cargo-test-mode))
@@ -113,7 +133,7 @@ stored in this variable.")
   "Start compilation process for 'cargo test' with optional TEST-ARGS."
   (interactive)
   (rustic-compilation-process-live)
-  (let* ((command (list (rustic-cargo-bin) "test"))
+  (let* ((command (list (rustic-cargo-bin) rustic-cargo-test-exec-command))
          (c (append command (split-string (if test-args test-args ""))))
          (buf rustic-test-buffer-name)
          (proc rustic-test-process-name)
@@ -533,7 +553,7 @@ If BIN is not nil, create a binary application, otherwise a library."
   "Start compilation process for 'cargo run' with optional RUN-ARGS."
   (interactive)
   (rustic-compilation-process-live)
-  (let* ((command (list (rustic-cargo-bin) "run"))
+  (let* ((command (list (rustic-cargo-bin) rustic-cargo-run-exec-command))
          (c (append command (split-string (if run-args run-args ""))))
          (buf rustic-run-buffer-name)
          (proc rustic-run-process-name)
@@ -606,9 +626,9 @@ in your project like `pwd'"
   "Run 'cargo build' for the current project."
   (interactive)
   (rustic-run-cargo-command `(,(rustic-cargo-bin)
-                              "build"
+                              ,rustic-cargo-build-exec-command
                               ,@(split-string rustic-cargo-build-arguments))
-                              (list :clippy-fix t)))
+                            (list :clippy-fix t)))
 
 (defvar rustic-clean-arguments nil
   "Holds arguments for 'cargo clean', similar to `compilation-arguments`.")
@@ -637,7 +657,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   "Run 'cargo check' for the current project."
   (interactive)
   (rustic-run-cargo-command `(,(rustic-cargo-bin)
-                              "check"
+                              ,rustic-cargo-check-exec-command
                               ,@(split-string rustic-cargo-check-arguments))))
 
 ;;;###autoload
