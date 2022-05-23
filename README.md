@@ -789,7 +789,7 @@ types](https://github.com/Malabarba/spinner.el/blob/master/spinner.el#L104)).
 ## rust docs in org-mode
 
 It is possible to read rust documentation inside Emacs! This currently
-requires LSP-mode and cargo.  ![Rustic-doc
+requires LSP-mode and cargo. Unfortunately, this probably won't work on Windows. ![Rustic-doc
 example](img/rustic-doc.png)
 
 ### Prerequisites
