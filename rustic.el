@@ -64,16 +64,20 @@
 
 (defun rustic-buffer-workspace (&optional nodefault)
   "Get workspace for the current buffer."
+  ;; this variable is buffer local so we can use the cached value
   (if rustic--buffer-workspace
       rustic--buffer-workspace
     (with-temp-buffer
       (let ((ret (call-process (rustic-cargo-bin) nil (list (current-buffer) nil) nil "locate-project" "--workspace")))
-        (when (and (/= ret 0) (not nodefault))
-          (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
-        (goto-char 0)
-        (let* ((output (json-read))
-               (dir (file-name-directory (cdr (assoc-string "root" output)))))
-          (setq rustic--buffer-workspace dir))))))
+        (cond ((and (/= ret 0) nodefault)
+               (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
+              ((and (/= ret 0) (not nodefault))
+               (setq rustic--buffer-workspace default-directory))
+              (t
+               (goto-char 0)
+               (let* ((output (json-read))
+                      (dir (file-name-directory (cdr (assoc-string "root" output)))))
+                 (setq rustic--buffer-workspace dir))))))))
 
 (defun rustic-buffer-crate (&optional nodefault)
   "Return the crate for the current buffer.

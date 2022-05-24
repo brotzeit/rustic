@@ -619,7 +619,7 @@ in your project like `pwd'"
   (let ((c (if (listp command)
                command
              (split-string command))))
-    (rustic-compilation-start c args)))
+    (rustic-compilation-start c (append (list :no-default-dir t) args))))
 
 ;;;###autoload
 (defun rustic-cargo-build ()

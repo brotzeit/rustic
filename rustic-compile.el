@@ -288,7 +288,7 @@ ARGS is a plist that affects how the process is run.
          (process (or (plist-get args :process) rustic-compilation-process-name))
          (mode (or (plist-get args :mode) 'rustic-compilation-mode))
          (directory (or (plist-get args :directory) (funcall rustic-compile-directory-method)))
-         (workspace (rustic-buffer-workspace))
+         (workspace (rustic-buffer-workspace (plist-get args :no-default-dir)))
          (sentinel (or (plist-get args :sentinel) #'rustic-compilation-sentinel))
          (file-buffer (current-buffer)))
     (rustic-compilation-setup-buffer buf directory mode)
