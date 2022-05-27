@@ -138,6 +138,9 @@ that doesn't work remotely, please open an issue.
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/compilation_buffer.png)
 
+If you want to use a Makefile you can either use `(setq
+rustic-compile-command "make")` or run `C-u` + `rustic-compile`.
+
 Commands:
 
 - `rustic-compile`            compile project using `rustic-compile-command`
