@@ -97,7 +97,6 @@ rustic namespace for backwards compatability reasons(rustic has been a fork).
 
 - `rust-syntax-propertize` and `adaptive-wrap-prefix-mode` can lead to
   severe lag when editing larger files (#107)
-- Sometimes `rust-analyzer` is not installed automatically. See [Automatic server installation](#automatic-server-installation).
 
 ## Installation
 
