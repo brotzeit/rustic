@@ -23,6 +23,7 @@
         - [remote](#remote-1)
     - [LSP](#lsp)
         - [Server](#server)
+            - [Automatic server installation](#automatic-server-installation)
         - [Client](#client)
             - [eglot](#eglot)
             - [lsp-mode](#lsp-mode)
@@ -293,6 +294,10 @@ Currently only `rustic-format-buffer` works remotely.
 Disable LSP support by setting `rustic-lsp-client` to nil. You have to
 restart emacs when you switch lsp clients.
 
+Don't forget that rustic doesn't contain the code for interacting with
+lsp servers. Therefore most issues are not related to rustic, but
+to the lsp client or server you are using.
+
 ### Server
 
 rust-analyzer is the default and can be changed to rls. lsp-mode
@@ -308,6 +313,12 @@ Change rust-analyzer path.
 ``` emacs-lisp
 (setq rustic-analyzer-command '("~/.cargo/bin/rust-analyzer"))
 ```
+
+#### Automatic server installation
+
+lsp-mode provides this feature, but eglot doesn't [#403](https://github.com/brotzeit/rustic/issues/403)
+
+Install [rust-analyzer manually](https://rust-analyzer.github.io/manual.html#installation).
 
 ### Client
 
