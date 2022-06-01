@@ -100,6 +100,8 @@ rustic namespace for backwards compatability reasons(rustic has been a fork).
 
 ## Installation
 
+First, you may need to install `rust-analyzer`. See [Automatic server installation](#automatic-server-installation).
+
 Simply put `(use-package rustic)` in your config and most stuff gets
 configured automatically.
 ([use-package](https://github.com/jwiegley/use-package))
@@ -117,7 +119,7 @@ installing
 [gnu-elpa-keyring-update](https://elpa.gnu.org/packages/gnu-elpa-keyring-update.html).
 
 If you can't run rust-analyzer or cargo can't be found, your
-environment variables probably don't work in emacs.  Try
+environment variables probably don't work in emacs. Try
 [exec-path-from-shell](https://github.com/purcell/exec-path-from-shell/tree/81125c5adbc903943c016c2984906dc089372a41#usage)
 to fix this.
 
