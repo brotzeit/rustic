@@ -225,9 +225,7 @@ You can format your code with:
 - `rustic-format-dwim`   run format on region,file or cargo fmt
 
 Rustic uses the function `rustic-save-some-buffers` for saving buffers
-before compilation. In case you prefer using lsp for
-formatting, turn off `rustic-format-on-save` and set
-`rustic-lsp-format`to `t`.
+before compilation.
 
 To save buffers automatically, you can change the value of
 `compilation-ask-about-save`, it has higher precedence than

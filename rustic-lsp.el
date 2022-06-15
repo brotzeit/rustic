@@ -37,12 +37,6 @@ then you must set this to nil before loading `rustic-lsp'."
                  (const :tag "No LSP client" nil))
   :group 'rustic)
 
-(defcustom rustic-lsp-format nil
-  "Allow formatting through lsp server."
-  :type 'boolean
-  :safe #'booleanp
-  :group 'rustic)
-
 (defcustom rustic-analyzer-command '("rust-analyzer")
   "Command for calling rust analyzer."
   :type '(repeat (string))
@@ -131,12 +125,7 @@ with `lsp-rust-switch-server'."
                                      (when (symbolp (car mode))
                                        (eq (car mode) 'rust-mode)))
                                    eglot-server-programs)))))
-    (add-to-list 'eglot-server-programs `(rustic-mode . (eglot-rust-analyzer . ,rustic-analyzer-command))))
-  ;; don't allow formatting with rls
-  (unless rustic-lsp-format
-    (let ((feature :documentFormattingProvider))
-      (unless (-contains? eglot-ignored-server-capabilites feature)
-        (add-to-list 'eglot-ignored-server-capabilites feature)))))
+    (add-to-list 'eglot-server-programs `(rustic-mode . (eglot-rust-analyzer . ,rustic-analyzer-command)))))
 
 (with-eval-after-load 'eglot
   (defclass eglot-rust-analyzer (eglot-lsp-server) ()
