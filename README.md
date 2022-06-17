@@ -39,6 +39,7 @@
         - [Run](#run)
         - [Outdated](#outdated)
         - [Expand](#expand)
+        - [Spellcheck](#spellcheck)
         - [More cargo commands](#more-cargo-commands)
     - [Clippy](#clippy)
         - [auto-fixing before compilation](#auto-fixing-before-compilation)
@@ -536,6 +537,15 @@ within a module (eg: `module::Type`).
 
 - `rustic-cargo-expand`: runs `cargo expand`. You can also use
   universal argument to target a specific named item to expand.
+
+### Spellcheck
+
+[cargo spellcheck](https://github.com/drahnr/cargo-spellcheck) checks the documentation for spelling and
+grammar mistakes.
+
+- `rustic-cargo-spellcheck`: runs `cargo spellcheck` and will open a
+  buffer where you can go through the various errors pointed out by
+  it.
 
 ### More cargo commands
 

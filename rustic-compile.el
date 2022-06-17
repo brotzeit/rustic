@@ -391,7 +391,8 @@ Return non-nil if there was a live process."
                              (bound-and-true-p rustic-clippy-process-name)
                              (bound-and-true-p rustic-run-process-name)
                              (bound-and-true-p rustic-test-process-name)
-                             (bound-and-true-p rustic-expand-process-name)))))
+                             (bound-and-true-p rustic-expand-process-name)
+                             (bound-and-true-p rustic-spellcheck-process-name)))))
     (when (> (length procs) 1)
       (error "BUG: Multiple live rustic processes: %s" procs))
     (when procs

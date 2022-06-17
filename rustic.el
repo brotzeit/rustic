@@ -180,6 +180,7 @@ This variable might soon be remove again.")
   (require 'rustic-playpen)
   (require 'rustic-lsp)
   (require 'rustic-expand)
+  (require 'rustic-spellcheck)
   (with-eval-after-load 'flycheck
     (require 'rustic-flycheck)))
 
