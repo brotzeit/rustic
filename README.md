@@ -541,7 +541,7 @@ within a module (eg: `module::Type`).
 ### Spellcheck
 
 [cargo spellcheck](https://github.com/drahnr/cargo-spellcheck) checks the documentation for spelling and
-grammer mistakes.
+grammar mistakes.
 
 - `rustic-cargo-spellcheck`: runs `cargo spellcheck` and will open a
   buffer where you can go through the various errors pointed out by
