@@ -555,6 +555,7 @@ grammar mistakes.
 - `rustic-cargo-build-doc` build the documentation for the current project
 - `rustic-cargo-doc` open the documentation for the current project in a browser
 - `rustic-cargo-lints` called with `rustic-lints-arguments`
+- `rustic-cargo-install` run 'cargo install' on the current package.
 
 ## Clippy
 
