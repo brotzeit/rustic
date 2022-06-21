@@ -774,7 +774,7 @@ stored in this variable.")
 
 ;;;###autoload
 (defun rustic-cargo-install-rerun ()
-  "Run 'cargo test' with `rustic-install-arguments'."
+  "Run 'cargo install' with `rustic-install-arguments'."
   (interactive)
   (rustic-compilation-start rustic-install-arguments
                               (list :buffer rustic-install-buffer-name
@@ -795,7 +795,6 @@ If running with prefix command `C-u', read whole command from minibuffer."
          (proc rustic-install-process-name)
          (mode 'rustic-cargo-install-mode)
          (default-directory (rustic-buffer-crate)))
-    (message "foo %s" default-directory)
     (setq rustic-install-arguments c)
     (setq rustic-install-project-dir default-directory)
     (rustic-compilation-start c (list :buffer buf :process proc :mode mode
