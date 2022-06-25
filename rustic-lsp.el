@@ -12,7 +12,7 @@
 ;; FIXME This is non-idomatic.  This option should be replaced with
 ;; documentation that instructs the user to add the setup function
 ;; themselves, iff so desired.
-(defcustom rustic-lsp-setup-p t
+(defcustom rustic-lsp-setup-p nil
   "Setup LSP related stuff automatically.
 If this is non-nil (the default), then loading `rustic-lsp' adds
 `rustic-setup-lsp' to `rustic-mode-hook'.  If you don't want that
