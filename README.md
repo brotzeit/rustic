@@ -292,8 +292,8 @@ Currently only `rustic-format-buffer` works remotely.
 
 ## LSP
 
-Disable LSP support by setting `rustic-lsp-client` to nil. You have to
-restart emacs when you switch lsp clients.
+Enable automatic LSP configuration by setting `rustic-lsp-client` to
+t. You have to restart emacs when you switch lsp clients.
 
 Don't forget that rustic doesn't contain the code for interacting with
 lsp servers. Therefore most issues are not related to rustic, but
