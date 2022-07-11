@@ -596,9 +596,11 @@ When calling this function from `rustic-popup-mode', always use the value of
 (defun rustic-cargo-run-get-relative-example-name ()
   "Run 'cargo run --example' if current buffer within a 'examples' directory."
   (let* ((buffer-project-root (rustic-buffer-crate))
+         (buffer-path-list (split-string buffer-project-root "\\/"))
+	 (buffer-folder (nth (- (length buffer-path-list) 2) buffer-path-list))     ;; get deepest dir in path
          (relative-filenames
           (if buffer-project-root
-              (split-string (file-relative-name buffer-file-name buffer-project-root) "/") nil)))
+              (split-string (file-relative-name buffer-folder buffer-project-root) "/") nil)))
     (if (and relative-filenames (string= "examples" (car relative-filenames)))
         (let ((size (length relative-filenames)))
           (cond ((eq size 2) (file-name-sans-extension (nth 1 relative-filenames))) ;; examples/single-example1.rs
