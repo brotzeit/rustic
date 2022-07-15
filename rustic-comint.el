@@ -54,7 +54,7 @@ If ARG is not nil, use value as argument and store it in `rustic-run-arguments'.
 When calling this function from `rustic-popup-mode', always use the value of
 `rustic-run-arguments'."
   (interactive "P")
-  (let* ((run-args (rustic--get-run-arguments)))
+  (let ((run-args (rustic--get-run-arguments)))
     (pop-to-buffer-same-window
      (get-buffer-create rustic-run-comint-buffer-name))
     (unless (comint-check-proc (current-buffer))
