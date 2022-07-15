@@ -54,18 +54,19 @@ If ARG is not nil, use value as argument and store it in `rustic-run-arguments'.
 When calling this function from `rustic-popup-mode', always use the value of
 `rustic-run-arguments'."
   (interactive "P")
-  (pop-to-buffer-same-window
-   (get-buffer-create rustic-run-comint-buffer-name))
-  (unless (comint-check-proc (current-buffer))
+  (let ((run-args (rustic--get-run-arguments)))
+    (pop-to-buffer-same-window
+     (get-buffer-create rustic-run-comint-buffer-name))
+    (unless (comint-check-proc (current-buffer))
     (rustic--cargo-repl-in-buffer
      (current-buffer)
      (concat "run" (cond
                     (arg
                      (setq rustic-run-comint-arguments
                            (read-from-minibuffer "Cargo run arguments: " rustic-run-comint-arguments)))
-                    ((rustic--get-run-arguments))
+                    (run-args)
                     (t ""))))
-    (rustic-cargo-run-comint-mode)))
+    (rustic-cargo-run-comint-mode))))
 
 ;;;###autoload
 (defun rustic-cargo-comint-run-rerun ()
