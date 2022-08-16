@@ -709,24 +709,67 @@ If running with prefix command `C-u', read whole command from minibuffer."
                               (read-from-minibuffer "Crate: ")))))
       (rustic-run-cargo-command command))))
 
-(defun rustic-cargo-add-missing-imports ()
-  "Add missing imports to Cargo.toml.
-Adds all missing imports by default.
+(defun rustic-cargo-add-missing-dependencies (&optional arg)
+  "Add missing dependencies to Cargo.toml.
+Adds all missing crates by default with latest version.
 Use with 'prefix-arg` to select imports to add."
   (interactive)
   (when (rustic-cargo-edit-installed-p)
-    (let ((missing-imports (delete-dups
-                            (seq-reduce (lambda (missing-crates errortable)
-                                          (if (string= "E0432" (gethash "code" errortable))
-                                              (cons (nth 3 (split-string (gethash "message" errortable) "`")) missing-crates)
-                                            missing-crates))
-                                        (gethash (buffer-file-name) (lsp-diagnostics t)) '()))))
-      (if missing-imports
-          (rustic-run-cargo-command (format  "cargo add %s"
-                                             (if current-prefix-arg
-                                                 (completing-read "Select import to add to Cargo.toml" missing-imports)
-                                               (mapconcat 'identity  missing-imports " "))))
-        (message "Couldn't find any imports to add. If this was a mistake, make sure your language server is running properly.")))))
+    (let (deps)
+      (setq deps
+            (cond ((featurep 'lsp-mode)
+                   (rustic-cargo-add-missing-dependencies-lsp-mode))
+                  ((featurep 'eglot)
+                   (rustic-cargo-add-missing-dependencies-eglot))
+                  (t
+                   nil)))
+      (if deps
+          (progn
+            (when (listp deps)
+              (setq deps (mapconcat 'identity  deps " ")))
+            (let (d)
+              (if current-prefix-arg
+                  (setq d (completing-read "Add dependencies: " deps))
+                (setq d deps))
+              (rustic-run-cargo-command (concat (rustic-cargo-bin) " add " d))))
+        (message "No missing crates found. Maybe check your lsp server.")))))
+
+(defun rustic-cargo-add-missing-dependencies-lsp-mode ()
+  "Return missing dependencies using `lsp-diagnostics'."
+  (let* ((diags (gethash (buffer-file-name) (lsp-diagnostics t)))
+         (lookup-missing-crates
+          (lambda (missing-crates errortable)
+            (if (string= "E0432" (gethash "code" errortable))
+                (cons (nth 3 (split-string (gethash "message" errortable) "`"))
+                      missing-crates)
+              missing-crates))))
+    (delete-dups (seq-reduce lookup-missing-crates
+                             diags
+                             '()))))
+
+(defun rustic-cargo-add-missing-dependencies-eglot ()
+  "Return missing dependencies by parsing flymake diagnostics buffer."
+  (let* ((buf (flymake--diagnostics-buffer-name))
+         crates)
+    ;; ensure flymake diagnostics buffer exists
+    (unless (buffer-live-p buf)
+      (let* ((name (flymake--diagnostics-buffer-name))
+             (source (current-buffer))
+             (target (or (get-buffer name)
+                         (with-current-buffer (get-buffer-create name)
+                           (flymake-diagnostics-buffer-mode)
+                           (current-buffer)))))
+        (with-current-buffer target
+          (setq flymake--diagnostics-buffer-source source)
+          (revert-buffer))))
+    (with-current-buffer buf
+      (let ((errors (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n")))
+        (dolist (s errors)
+          (if (string-match-p
+               (regexp-quote "unresolved import")
+               s)
+              (push (string-trim  (car (reverse (split-string s))) "`" "`" ) crates)))))
+    crates))
 
 ;;;###autoload
 (defun rustic-cargo-rm (&optional arg)

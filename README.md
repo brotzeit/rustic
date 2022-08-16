@@ -464,7 +464,7 @@ modify the parameters of a command.
 - `rustic-cargo-add`      Add crate to Cargo.toml using 'cargo add'
 - `rustic-cargo-rm`       Remove crate from Cargo.toml using 'cargo rm'
 - `rustic-cargo-upgrade`  Upgrade dependencies as specified in the local manifest file using 'cargo upgrade'
-- `rustic-cargo-add-missing-imports ` Add the missing imports for the current buffer to `cargo.toml`. This function requires `lsp-mode`.
+- `rustic-cargo-add-missing-dependencies` Add the missing dependencies for the current buffer to `Cargo.toml`. This function requires either lsp-mode or eglot
 
 ### Test
 
