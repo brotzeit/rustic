@@ -729,7 +729,7 @@ Use with 'prefix-arg` to select imports to add."
               (setq deps (mapconcat 'identity  deps " ")))
             (let (d)
               (if current-prefix-arg
-                  (setq d (completing-read "Add dependencies: " deps))
+                  (setq d (read-from-minibuffer "Add dependencies: " deps))
                 (setq d deps))
               (rustic-run-cargo-command (concat (rustic-cargo-bin) " add " d))))
         (message "No missing crates found. Maybe check your lsp server.")))))
