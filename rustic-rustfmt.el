@@ -456,9 +456,13 @@ non-nil."
   (or rustic-format-on-save (eq rustic-format-trigger 'on-save)))
 
 (defun rustic-save-some-buffers-advice (orig-fun &rest args)
-  (let ((rustic-format-trigger nil)
-        (rustic-format-on-save nil))
-    (apply orig-fun args)))
+  "Use `rustic-save-some-buffers' instead when called in rust project.
+Otherwise turn off rustic format functionality and run `save-some-buffers'."
+  (if (rustic-buffer-crate t)
+      (rustic-save-some-buffers)
+    (let ((rustic-format-trigger nil)
+          (rustic-format-on-save nil))
+      (apply orig-fun args))))
 
 (advice-add 'save-some-buffers :around
             #'rustic-save-some-buffers-advice)
