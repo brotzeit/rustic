@@ -710,9 +710,10 @@ If running with prefix command `C-u', read whole command from minibuffer."
       (rustic-run-cargo-command command))))
 
 (defun rustic-cargo-add-missing-dependencies (&optional arg)
-  "Add missing dependencies to Cargo.toml.
-Adds all missing crates by default with latest version.
-Use with 'prefix-arg` to select imports to add."
+  "Lookup and add missing dependencies to Cargo.toml.
+Adds all missing crates by default with latest version using lsp functionality.
+Supports both lsp-mode and egot.
+Use with 'C-u` to open prompt with missing crates."
   (interactive)
   (when (rustic-cargo-edit-installed-p)
     (let (deps)
@@ -765,10 +766,8 @@ Use with 'prefix-arg` to select imports to add."
     (with-current-buffer buf
       (let ((errors (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n")))
         (dolist (s errors)
-          (if (string-match-p
-               (regexp-quote "unresolved import")
-               s)
-              (push (string-trim  (car (reverse (split-string s))) "`" "`" ) crates)))))
+          (if (string-match-p (regexp-quote "unresolved import") s)
+              (push (string-trim (car (reverse (split-string s))) "`" "`" ) crates)))))
     crates))
 
 ;;;###autoload
