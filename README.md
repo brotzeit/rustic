@@ -333,9 +333,9 @@ The default package is `lsp-mode`. But you can also use `eglot`.
 
 LSP commands:
 
-`xref-find-definitions`
-
-`xref-find-references` with helm and rust-analyzer
+- `xref-find-definitions` find definitions
+- `xref-find-references` with helm and rust-analyzer
+- `rustic-cargo-add-missing-dependencies` convenient command that adds missing dependencies to a crate's Cargo.toml
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/xref_references.png)
 
