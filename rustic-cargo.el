@@ -700,6 +700,9 @@ The documentation is built if necessary."
 
 ;;; cargo edit
 
+(defvar rustic-cargo-dependencies "*cargo-add-dependencies*"
+  "Buffer that is used for adding missing dependencies with 'cargo add'.")
+
 (defun rustic-cargo-edit-installed-p ()
   "Check if cargo-edit is installed. If not, ask the user if he wants to install it."
   (if (executable-find "cargo-add") t (rustic-cargo-install-crate-p "edit") nil))
@@ -728,14 +731,16 @@ Use with 'C-u` to open prompt with missing crates."
         (progn
           (when current-prefix-arg
             (setq deps (read-from-minibuffer "Add dependencies: " deps)))
-          (rustic-run-cargo-command (concat (rustic-cargo-bin) " add " deps)))
+          (rustic-run-cargo-command (concat (rustic-cargo-bin) " add " deps)
+                                    (append (list :buffer rustic-cargo-dependencies))))
       (message "No missing crates found. Maybe check your lsp server."))))
 
 (defun rustic-cargo-add-missing-dependencies-hook ()
   "Silently look for missing dependencies and add them to Cargo.toml."
   (-when-let (deps (rustic-cargo-find-missing-dependencies))
     (rustic-compilation-start (split-string (concat (rustic-cargo-bin) " add " deps))
-                              (append (list :no-default-dir t
+                              (append (list :buffer rustic-cargo-dependencies
+                                            :no-default-dir t
                                             :no-display t)))))
 
 (defun rustic-cargo-find-missing-dependencies ()
