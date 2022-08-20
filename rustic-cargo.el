@@ -716,24 +716,27 @@ Supports both lsp-mode and egot.
 Use with 'C-u` to open prompt with missing crates."
   (interactive)
   (when (rustic-cargo-edit-installed-p)
-    (let (deps)
-      (setq deps
-            (cond ((featurep 'lsp-mode)
-                   (rustic-cargo-add-missing-dependencies-lsp-mode))
-                  ((featurep 'eglot)
-                   (rustic-cargo-add-missing-dependencies-eglot))
-                  (t
-                   nil)))
-      (if deps
-          (progn
-            (when (listp deps)
-              (setq deps (mapconcat 'identity  deps " ")))
-            (let (d)
-              (if current-prefix-arg
-                  (setq d (read-from-minibuffer "Add dependencies: " deps))
-                (setq d deps))
-              (rustic-run-cargo-command (concat (rustic-cargo-bin) " add " d))))
-        (message "No missing crates found. Maybe check your lsp server.")))))
+    (if-let ((deps (rustic-cargo-find-missing-dependencies)))
+        (let (d)
+          (if current-prefix-arg
+              (setq d (read-from-minibuffer "Add dependencies: " deps))
+            (setq d deps))
+          (rustic-run-cargo-command (concat (rustic-cargo-bin) " add " d)))
+      (message "No missing crates found. Maybe check your lsp server."))))
+
+(defun rustic-cargo-find-missing-dependencies ()
+  "Return missing dependencies using either lsp-mode or eglot/flymake
+as string."
+  (let (crates)
+    (setq crates (cond ((featurep 'lsp-mode)
+                        (rustic-cargo-add-missing-dependencies-lsp-mode))
+                       ((featurep 'eglot)
+                        (rustic-cargo-add-missing-dependencies-eglot))
+                       (t
+                        nil)))
+    (if (listp crates)
+        (setq crates (mapconcat 'identity  crates " "))
+      crates)))
 
 (defun rustic-cargo-add-missing-dependencies-lsp-mode ()
   "Return missing dependencies using `lsp-diagnostics'."
