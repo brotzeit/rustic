@@ -731,17 +731,19 @@ Use with 'C-u` to open prompt with missing crates."
         (progn
           (when current-prefix-arg
             (setq deps (read-from-minibuffer "Add dependencies: " deps)))
-          (rustic-run-cargo-command (concat (rustic-cargo-bin) " add " deps)
-                                    (append (list :buffer rustic-cargo-dependencies))))
+          (rustic-compilation-start
+           (split-string (concat (rustic-cargo-bin) " add " deps))
+           (append (list :buffer rustic-cargo-dependencies))))
       (message "No missing crates found. Maybe check your lsp server."))))
 
 (defun rustic-cargo-add-missing-dependencies-hook ()
   "Silently look for missing dependencies and add them to Cargo.toml."
   (-when-let (deps (rustic-cargo-find-missing-dependencies))
-    (rustic-compilation-start (split-string (concat (rustic-cargo-bin) " add " deps))
-                              (append (list :buffer rustic-cargo-dependencies
-                                            :no-default-dir t
-                                            :no-display t)))))
+    (rustic-compilation-start
+     (split-string (concat (rustic-cargo-bin) " add " deps))
+     (append (list :buffer rustic-cargo-dependencies
+                   :no-default-dir t
+                   :no-display t)))))
 
 (defun rustic-cargo-find-missing-dependencies ()
   "Return missing dependencies using either lsp-mode or eglot/flymake
