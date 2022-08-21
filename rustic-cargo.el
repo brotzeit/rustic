@@ -80,6 +80,14 @@ If nil then the project is simply created."
   :type 'string
   :group 'rustic-cargo)
 
+(defcustom rustic-cargo-auto-add-missing-dependencies nil
+  "Automatically adds dependencies to Cargo.toml.
+This way rustic checks new diagnostics for 'unresolved import'
+errors and passes the crates to 'cargo add'.
+Currently only working with lsp-mode."
+  :type 'boolean
+  :group 'rustic-cargo)
+
 (defvar rustic-cargo-outdated-face nil)
 (make-obsolete-variable 'rustic-cargo-outdated-face
                         "use the face `rustic-cargo-outdated' instead."
@@ -692,6 +700,9 @@ The documentation is built if necessary."
 
 ;;; cargo edit
 
+(defvar rustic-cargo-dependencies "*cargo-add-dependencies*"
+  "Buffer that is used for adding missing dependencies with 'cargo add'.")
+
 (defun rustic-cargo-edit-installed-p ()
   "Check if cargo-edit is installed. If not, ask the user if he wants to install it."
   (if (executable-find "cargo-add") t (rustic-cargo-install-crate-p "edit") nil))
@@ -716,24 +727,38 @@ Supports both lsp-mode and egot.
 Use with 'C-u` to open prompt with missing crates."
   (interactive)
   (when (rustic-cargo-edit-installed-p)
-    (let (deps)
-      (setq deps
-            (cond ((featurep 'lsp-mode)
-                   (rustic-cargo-add-missing-dependencies-lsp-mode))
-                  ((featurep 'eglot)
-                   (rustic-cargo-add-missing-dependencies-eglot))
-                  (t
-                   nil)))
-      (if deps
-          (progn
-            (when (listp deps)
-              (setq deps (mapconcat 'identity  deps " ")))
-            (let (d)
-              (if current-prefix-arg
-                  (setq d (read-from-minibuffer "Add dependencies: " deps))
-                (setq d deps))
-              (rustic-run-cargo-command (concat (rustic-cargo-bin) " add " d))))
-        (message "No missing crates found. Maybe check your lsp server.")))))
+    (-if-let (deps (rustic-cargo-find-missing-dependencies))
+        (progn
+          (when current-prefix-arg
+            (setq deps (read-from-minibuffer "Add dependencies: " deps)))
+          (rustic-compilation-start
+           (split-string (concat (rustic-cargo-bin) " add " deps))
+           (append (list :buffer rustic-cargo-dependencies))))
+      (message "No missing crates found. Maybe check your lsp server."))))
+
+(defun rustic-cargo-add-missing-dependencies-hook ()
+  "Silently look for missing dependencies and add them to Cargo.toml."
+  (-when-let (deps (rustic-cargo-find-missing-dependencies))
+    (rustic-compilation-start
+     (split-string (concat (rustic-cargo-bin) " add " deps))
+     (append (list :buffer rustic-cargo-dependencies
+                   :no-default-dir t
+                   :no-display t
+                   :sentinel (lambda (proc msg) ()))))))
+
+(defun rustic-cargo-find-missing-dependencies ()
+  "Return missing dependencies using either lsp-mode or eglot/flymake
+as string."
+  (let ((crates nil))
+    (setq crates (cond ((featurep 'lsp-mode)
+                        (rustic-cargo-add-missing-dependencies-lsp-mode))
+                       ((featurep 'eglot)
+                        (rustic-cargo-add-missing-dependencies-eglot))
+                       (t
+                        nil)))
+    (if (> (length crates) 0)
+        (mapconcat 'identity crates " ")
+      crates)))
 
 (defun rustic-cargo-add-missing-dependencies-lsp-mode ()
   "Return missing dependencies using `lsp-diagnostics'."

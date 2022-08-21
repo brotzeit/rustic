@@ -150,7 +150,10 @@ this variable."
   "Major mode for Rust code.
 
 \\{rustic-mode-map}"
-  :group 'rustic)
+  :group 'rustic
+
+  (when rustic-cargo-auto-add-missing-dependencies
+   (add-hook 'lsp-after-diagnostics-hook 'rustic-cargo-add-missing-dependencies-hook nil t)))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
