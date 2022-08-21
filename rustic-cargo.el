@@ -743,7 +743,8 @@ Use with 'C-u` to open prompt with missing crates."
      (split-string (concat (rustic-cargo-bin) " add " deps))
      (append (list :buffer rustic-cargo-dependencies
                    :no-default-dir t
-                   :no-display t)))))
+                   :no-display t
+                   :sentinel (lambda (proc msg) ()))))))
 
 (defun rustic-cargo-find-missing-dependencies ()
   "Return missing dependencies using either lsp-mode or eglot/flymake
