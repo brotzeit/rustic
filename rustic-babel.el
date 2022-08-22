@@ -302,7 +302,7 @@ executed with the parameter `:include'."
   (let ((contents ""))
     (with-current-buffer (current-buffer)
       (save-excursion
-        (dolist (b blocks)
+        (dolist (b (mapcar (lambda (b) (if (symbolp b) (symbol-name b) b)) blocks))
           (when-let ((c (rustic-babel-block-contents b)))
             (setq contents (concat contents c))))))
     contents))
@@ -323,7 +323,7 @@ executed with the parameter `:include'."
 
 (defun rustic-babel-generate-modules (root blocks)
   "Create module files for BLOCKS in the project with ROOT."
-  (dolist (b blocks)
+  (dolist (b (mapcar (lambda (b) (if (symbolp b) (symbol-name b) b)) blocks))
     (let* ((contents (rustic-babel-block-contents b))
            (src-dir (concat root "/src/"))
            (module (expand-file-name (format "%s.rs" b) src-dir)))
