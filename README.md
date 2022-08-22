@@ -773,7 +773,7 @@ pub fn b2_func() -> String {
 }
 #+end_src
 
-#+begin_src rust :include '("b1" "b2")
+#+begin_src rust :include '(b1 b2)
   fn main() {
       println!("{:?}", b1_func());
       println!("{:?}", b2_func());
@@ -798,7 +798,7 @@ pub fn myfunc() -> String {
 }
 #+end_src
 
-#+begin_src rust :use '("mymodule")
+#+begin_src rust :use '(mymodule)
 use mymodule::myfunc;
 
 fn main() {
