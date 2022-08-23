@@ -79,7 +79,7 @@
         (setq-local process-environment env)
         ;; Set PATH so we can find cargo.
         (setq-local exec-path path)
-        (let ((ret (call-process (rustic-cargo-bin) nil (list (current-buffer) nil) nil "locate-project" "--workspace")))
+        (let ((ret (process-file (rustic-cargo-bin) nil (list (current-buffer) nil) nil "locate-project" "--workspace")))
           (cond ((and (/= ret 0) nodefault)
                  (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
                 ((and (/= ret 0) (not nodefault))
