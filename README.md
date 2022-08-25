@@ -638,6 +638,7 @@ Customization:
 - `rustic-babel-display-compilation-buffer` display compilation buffer
   of babel process
 - `rustic-babel-auto-wrap-main` wrap body into main function
+- `rustic-babel-default-toolchain` active toolchain for babel blocks
 
 ### lsp-mode
 
