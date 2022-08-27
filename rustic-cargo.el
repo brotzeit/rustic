@@ -635,7 +635,7 @@ in your project like `pwd'"
     (rustic-compilation-start c (append (list :no-default-dir t) args))))
 
 ;;;###autoload
-(defun rustic-cargo-build (arg)
+(defun rustic-cargo-build (&optional arg)
   "Run 'cargo build' for the current project, allow configuring
 `rustic-cargo-build-arguments' when prefix argument (C-u) is enabled."
   (interactive "P")
