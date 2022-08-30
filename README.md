@@ -453,7 +453,7 @@ Customization:
 - `rustic-cargo-build-arguments` default arguments for cargo build
 - `rustic-cargo-check-arguments` default arguments for cargo check
 - `rustic-cargo-auto-add-missing-dependencies` automatically add missing dependencies
-to Cargo.toml by checking new diagnostics for 'unresolved import' errors(currently only works with lsp-mode)
+to Cargo.toml by checking new diagnostics for 'unresolved import' errors
 
 ### Edit
 
@@ -466,7 +466,7 @@ modify the parameters of a command.
 - `rustic-cargo-add`      Add crate to Cargo.toml using 'cargo add'
 - `rustic-cargo-rm`       Remove crate from Cargo.toml using 'cargo rm'
 - `rustic-cargo-upgrade`  Upgrade dependencies as specified in the local manifest file using 'cargo upgrade'
-- `rustic-cargo-add-missing-dependencies` Add the missing dependencies for the current buffer to `Cargo.toml`. This function requires either lsp-mode or eglot
+- `rustic-cargo-add-missing-dependencies` Add the missing dependencies for the current buffer to `Cargo.toml`
 
 ### Test
 

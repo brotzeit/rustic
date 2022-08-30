@@ -741,7 +741,8 @@ Use with 'C-u` to open prompt with missing crates."
       (message "No missing crates found. Maybe check your lsp server."))))
 
 (defun rustic-cargo-add-missing-dependencies-hook ()
-  "Silently look for missing dependencies and add them to Cargo.toml."
+  "Silently look for missing dependencies in the current buffer and add
+them to Cargo.toml."
   (-when-let (deps (rustic-cargo-find-missing-dependencies))
     (rustic-compilation-start
      (split-string (concat (rustic-cargo-bin) " add " deps))
@@ -754,10 +755,12 @@ Use with 'C-u` to open prompt with missing crates."
   "Return missing dependencies using either lsp-mode or eglot/flymake
 as string."
   (let ((crates nil))
-    (setq crates (cond ((featurep 'lsp-mode)
+    (setq crates (cond ((bound-and-true-p lsp-mode)
                         (rustic-cargo-add-missing-dependencies-lsp-mode))
-                       ((featurep 'eglot)
+                       ((bound-and-true-p eglot)
                         (rustic-cargo-add-missing-dependencies-eglot))
+                       ((bound-and-true-p flycheck-mode)
+                        (rustic-cargo-add-missing-dependencies-flycheck))
                        (t
                         nil)))
     (if (> (length crates) 0)
@@ -797,6 +800,18 @@ as string."
         (dolist (s errors)
           (if (string-match-p (regexp-quote "unresolved import") s)
               (push (string-trim (car (reverse (split-string s))) "`" "`" ) crates)))))
+    crates))
+
+(defun rustic-cargo-add-missing-dependencies-flycheck ()
+  "Return missing dependencies by parsing flycheck diagnostics buffer."
+  (let* (crates)
+    (unless (get-buffer flycheck-error-list-buffer)
+      (flycheck-list-errors))
+    (with-current-buffer (get-buffer flycheck-error-list-buffer)
+      (let ((errors (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n")))
+        (dolist (s errors)
+          (when (string-match-p (regexp-quote "unresolved import") s)
+            (push  (string-trim (nth 7 (split-string s))  "`" "`" )  crates)))))
     crates))
 
 ;;;###autoload
