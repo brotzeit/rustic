@@ -65,7 +65,7 @@ If nil then the project is simply created."
   :type 'string
   :group 'rustic-cargo)
 
-(defcustom rustic-cargo-default-install-arguments '("--path" ".")
+(defcustom rustic-cargo-default-install-arguments '("--path" "." "--locked")
   "Default arguments when running 'cargo install'."
   :type '(list string)
   :group 'rustic-cargo)
