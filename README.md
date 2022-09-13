@@ -710,7 +710,8 @@ argument:
 
 #### :toolchain
 
-You can also specify the `:toolchain`. Remember to quote the value!
+You can specify the `:toolchain` by quoted `'stable`/`'nightly`/`'beta`, 
+or specify a [toolchain version](https://rust-lang.github.io/rustup/concepts/toolchains.html) like `"1.63.0"`, `"nightly-2022-08-08"`.
 
 ```
 #+begin_src rust :toolchain 'nightly
