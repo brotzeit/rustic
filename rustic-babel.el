@@ -36,11 +36,11 @@
   :type 'boolean
   :group 'rustic-babel)
 
-(defcustom rustic-babel-default-toolchain "+stable"
+(defcustom rustic-babel-default-toolchain "stable"
   "Active toolchain for babel blocks.
 When passing a toolchain to a block as argument, this variable won't be
 considered."
-  :type 'boolean
+  :type 'string
   :group 'rustic-babel)
 
 (defvar rustic-babel-buffer-name '((:default . "*rust-babel*")))
@@ -70,7 +70,7 @@ considered."
                           ((eq toolchain-kw-or-string 'beta) "+beta")
                           ((eq toolchain-kw-or-string 'stable) "+stable")
                           (toolchain-kw-or-string (format "+%s" toolchain-kw-or-string))
-                          (t rustic-babel-default-toolchain)))
+                          (t (format "+%s" rustic-babel-default-toolchain))))
          (params (list "cargo" toolchain "build" "--quiet"))
          (inhibit-read-only t))
     (rustic-compilation-setup-buffer err-buff dir 'rustic-compilation-mode)
