@@ -36,11 +36,11 @@
   :type 'boolean
   :group 'rustic-babel)
 
-(defcustom rustic-babel-default-toolchain "+stable"
+(defcustom rustic-babel-default-toolchain "stable"
   "Active toolchain for babel blocks.
 When passing a toolchain to a block as argument, this variable won't be
 considered."
-  :type 'boolean
+  :type 'string
   :group 'rustic-babel)
 
 (defvar rustic-babel-buffer-name '((:default . "*rust-babel*")))
@@ -62,13 +62,15 @@ considered."
 
 (defvar rustic-babel-spinner nil)
 
-(defun rustic-babel-eval (dir toolchain-kw)
+(defun rustic-babel-eval (dir toolchain-kw-or-string)
   "Start a rust babel compilation process in directory DIR."
   (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
          (default-directory dir)
-         (toolchain (cond ((eq toolchain-kw 'nightly) "+nightly")
-                          ((eq toolchain-kw 'beta) "+beta")
-                          (t rustic-babel-default-toolchain)))
+         (toolchain (cond ((eq toolchain-kw-or-string 'nightly) "+nightly")
+                          ((eq toolchain-kw-or-string 'beta) "+beta")
+                          ((eq toolchain-kw-or-string 'stable) "+stable")
+                          (toolchain-kw-or-string (format "+%s" toolchain-kw-or-string))
+                          (t (format "+%s" rustic-babel-default-toolchain))))
          (params (list "cargo" toolchain "build" "--quiet"))
          (inhibit-read-only t))
     (rustic-compilation-setup-buffer err-buff dir 'rustic-compilation-mode)
@@ -310,9 +312,9 @@ executed with the parameter `:include'."
 (defun rustic-babel-block-contents (block-name)
   "Return contents of block with the name BLOCK-NAME"
   (with-current-buffer (current-buffer)
-   (save-excursion
-     (org-babel-goto-named-src-block block-name)
-     (org-element-property :value (org-element-at-point)))))
+    (save-excursion
+      (org-babel-goto-named-src-block block-name)
+      (org-element-property :value (org-element-at-point)))))
 
 (defun rustic-babel-insert-mod (mods)
   "Build string with module declarations for MODS and return it."
@@ -352,7 +354,7 @@ kill the running process."
         (make-directory (file-name-directory main) t)
         (rustic-babel-cargo-toml dir params)
         (when use-blocks
-         (rustic-babel-generate-modules dir use-blocks))
+          (rustic-babel-generate-modules dir use-blocks))
         (setq rustic-info (org-babel-get-src-block-info))
         (setq rustic-babel-params params)
 
