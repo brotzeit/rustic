@@ -641,7 +641,7 @@ in your project like `pwd'"
   (interactive "P")
   (when arg
     (setq rustic-cargo-build-arguments
-          (read-string "Configure cargo build arguments: " "")))
+          (read-string "Cargo build arguments: " "")))
   (rustic-run-cargo-command `(,(rustic-cargo-bin)
                               ,rustic-cargo-build-exec-command
                               ,@(split-string rustic-cargo-build-arguments))
@@ -670,9 +670,13 @@ When calling this function from `rustic-popup-mode', always use the value of
                          (t rustic-clean-arguments)))))))
 
 ;;;###autoload
-(defun rustic-cargo-check ()
-  "Run 'cargo check' for the current project."
-  (interactive)
+(defun rustic-cargo-check (&optional arg)
+  "Run 'cargo check' for the current project, allow configuring
+`rustic-cargo-check-arguments' when prefix argument (C-u) is enabled."
+  (interactive "p")
+  (when arg
+    (setq rustic-cargo-check-arguments
+          (read-string "Cargo check arguments: " "")))
   (rustic-run-cargo-command `(,(rustic-cargo-bin)
                               ,rustic-cargo-check-exec-command
                               ,@(split-string rustic-cargo-check-arguments))))
