@@ -561,6 +561,7 @@ grammar mistakes.
 - `rustic-cargo-doc` open the documentation for the current project in a browser
 - `rustic-cargo-lints` called with `rustic-lints-arguments`
 - `rustic-cargo-install` run 'cargo install' on the current package.
+- `rustic-cargo-update` run `cargo update` on the current package.
 
 ## Clippy
 
@@ -710,7 +711,7 @@ argument:
 
 #### :toolchain
 
-You can specify the `:toolchain` by quoted `'stable`/`'nightly`/`'beta`, 
+You can specify the `:toolchain` by quoted `'stable`/`'nightly`/`'beta`,
 or specify a [toolchain version](https://rust-lang.github.io/rustup/concepts/toolchains.html) like `"1.63.0"`, `"nightly-2022-08-08"`.
 
 ```
