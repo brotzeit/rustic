@@ -673,7 +673,7 @@ When calling this function from `rustic-popup-mode', always use the value of
 (defun rustic-cargo-check (&optional arg)
   "Run 'cargo check' for the current project, allow configuring
 `rustic-cargo-check-arguments' when prefix argument (C-u) is enabled."
-  (interactive "p")
+  (interactive "P")
   (when arg
     (setq rustic-cargo-check-arguments
           (read-string "Cargo check arguments: " "")))
