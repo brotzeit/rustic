@@ -840,6 +840,18 @@ If running with prefix command `C-u', read whole command from minibuffer."
       (rustic-run-cargo-command command))))
 
 ;;;###autoload
+(defun rustic-cargo-update (&optional arg)
+  "Update dependencies as recorded in the local lock file.
+If running with prefix command `C-u', use ARG by reading whole
+command from minibuffer."
+  (interactive "P")
+  (let* ((command (if arg
+                      (read-from-minibuffer "Cargo update command: "
+                                            (format "%s %s" (rustic-cargo-bin) "update"))
+                    (concat (rustic-cargo-bin) " update"))))
+    (rustic-run-cargo-command command)))
+
+;;;###autoload
 (defun rustic-cargo-login (token)
   "Add crates.io API token using `cargo login'.
 
