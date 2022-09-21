@@ -292,7 +292,6 @@ ARGS is a plist that affects how the process is run.
          (process (or (plist-get args :process) rustic-compilation-process-name))
          (mode (or (plist-get args :mode) 'rustic-compilation-mode))
          (directory (or (plist-get args :directory) (funcall rustic-compile-directory-method)))
-         (workspace (rustic-buffer-workspace (plist-get args :no-default-dir)))
          (sentinel (or (plist-get args :sentinel) #'rustic-compilation-sentinel))
          (file-buffer (current-buffer)))
     (rustic-compilation-setup-buffer buf directory mode)
@@ -302,14 +301,17 @@ ARGS is a plist that affects how the process is run.
     (with-current-buffer buf
       (let ((inhibit-read-only t))
         (insert (format "%s \n" (s-join " "  command))))
-      (rustic-make-process :name process
-                           :buffer buf
-                           :command command
-                           :file-buffer file-buffer
-                           :filter #'rustic-compilation-filter
-                           :sentinel sentinel
-                           :workspace workspace
-                           :file-handler t))))
+      (let ((workspace (if (eq rustic-compile-directory-method 'rustic-buffer-workspace)
+                           directory ;; don't lookup workspace twice
+                         (rustic-buffer-workspace (plist-get args :no-default-dir)))))
+        (rustic-make-process :name process
+                             :buffer buf
+                             :command command
+                             :file-buffer file-buffer
+                             :filter #'rustic-compilation-filter
+                             :sentinel sentinel
+                             :workspace workspace
+                             :file-handler t)))))
 
 (defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.
