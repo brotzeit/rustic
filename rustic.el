@@ -152,7 +152,7 @@ this variable."
 \\{rustic-mode-map}"
   :group 'rustic
 
-  (when rustic-cargo-auto-add-missing-dependencies
+  (when (bound-and-true-p rustic-cargo-auto-add-missing-dependencies)
    (add-hook 'lsp-after-diagnostics-hook 'rustic-cargo-add-missing-dependencies-hook nil t)))
 
 ;;;###autoload
