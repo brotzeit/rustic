@@ -402,7 +402,7 @@ Return non-nil if there was a live process."
     (when procs
       (rustic-process-kill-p (car procs)))
     (unless nosave
-      (rustic-save-some-buffers))
+      (rustic-save-some-buffers t))
     procs))
 
 (defun rustic-process-kill-p (proc &optional no-error)
@@ -420,7 +420,7 @@ If NO-ERROR is t, don't throw error if user chooses not to kill running process.
     (unless no-error
       (error "Cannot have two rust processes at once"))))
 
-(defun rustic-save-some-buffers ()
+(defun rustic-save-some-buffers (&optional compile-p)
   "Unlike `save-some-buffers', only consider project related files.
 
 The variable `compilation-ask-about-save' can be used for customization and
@@ -442,14 +442,16 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
             (let ((rustic-format-trigger nil)
                   (rustic-format-on-save nil))
               (setq saved-p
-                    (if (not compilation-ask-about-save)
+                    (if (if compile-p
+                            (not compilation-ask-about-save)
+                          buffer-save-without-query)
                         (progn (save-buffer) t)
                       (if (yes-or-no-p (format "Save file %s ? "
                                                (buffer-file-name buffer)))
                           (progn (save-buffer) t)
                         nil))))
             (when (and saved-p
-                       (eq major-mode 'rustic-mode)
+                       (derived-mode-p 'rustic-mode)
                        (fboundp 'rustic-maybe-format-after-save))
               (rustic-maybe-format-after-save buffer))))))))
 
