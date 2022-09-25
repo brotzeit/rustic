@@ -420,11 +420,15 @@ If NO-ERROR is t, don't throw error if user chooses not to kill running process.
     (unless no-error
       (error "Cannot have two rust processes at once"))))
 
-(defun rustic-save-some-buffers (&optional compile-p)
+(defun rustic-save-some-buffers (&optional pre-compile)
   "Unlike `save-some-buffers', only consider project related files.
 
-The variable `compilation-ask-about-save' can be used for customization and
-buffers are formatted after saving if turned on by `rustic-format-trigger'."
+The optional argument `pre-compile' is used for rustic compile commands
+that make use of `compilation-ask-about-save'. If called without
+the optional argument, `buffer-save-without-query' determines if
+buffers will saved automatically.
+
+Buffers are formatted after saving if turned on by `rustic-format-trigger'."
   (let ((buffers (cl-remove-if-not
                   #'buffer-file-name
                   (if (fboundp rustic-list-project-buffers-function)
@@ -442,7 +446,7 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
             (let ((rustic-format-trigger nil)
                   (rustic-format-on-save nil))
               (setq saved-p
-                    (if (if compile-p
+                    (if (if pre-compile
                             (not compilation-ask-about-save)
                           buffer-save-without-query)
                         (progn (save-buffer) t)
@@ -451,7 +455,7 @@ buffers are formatted after saving if turned on by `rustic-format-trigger'."
                           (progn (save-buffer) t)
                         nil))))
             (when (and saved-p
-                       (derived-mode-p 'rustic-mode)
+                       (eq major-mode 'rustic-mode)
                        (fboundp 'rustic-maybe-format-after-save))
               (rustic-maybe-format-after-save buffer))))))))
 
