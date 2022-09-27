@@ -129,9 +129,8 @@ stored in this variable.")
 (define-derived-mode rustic-cargo-test-mode rustic-compilation-mode "cargo-test"
   :group 'rustic
 
-  ;; TODO: append to rustic-compile-rustflags
   (when rustic-cargo-test-disable-warnings
-    (setq-local rustic-compile-rustflags "-Awarnings")))
+    (setq-local rustic-compile-rustflags (concat rustic-compile-rustflags" -Awarnings"))))
 
 (defun rustic-cargo-run-test (test)
   "Run TEST which can be a single test or mod name."
