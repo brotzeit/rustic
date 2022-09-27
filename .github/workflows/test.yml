@@ -11,9 +11,7 @@ jobs:
                 os: [ubuntu-latest]
                 emacs-version:
                     - 27.2
-                    # TODO: enable again when cask doesn't fail
-                    # - snapshot
-
+                    - 28.1
         steps:
             - uses: actions/checkout@v2
 
