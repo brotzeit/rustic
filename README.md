@@ -475,6 +475,7 @@ If you want to disable warnings when running cargo-test commands, you can set
 
 Commands:
 
+`rustic-cargo-nextest-exec-command` command for running [nextest](https://github.com/nextest-rs/nextest)
 `rustic-cargo-test` run 'cargo test', when called with `C-u` store
 arguments in `rustic-test-arguments`
 

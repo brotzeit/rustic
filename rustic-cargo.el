@@ -29,6 +29,11 @@
   :type 'string
   :group 'rustic-cargo)
 
+(defcustom rustic-cargo-nextest-exec-command "nextest run"
+  "Execute command to run nextest."
+  :type 'string
+  :group 'rustic-cargo)
+
 (defcustom rustic-cargo-run-exec-command "run"
   "Execute command to run cargo run."
   :type 'string
@@ -132,9 +137,13 @@ stored in this variable.")
   (when rustic-cargo-test-disable-warnings
     (setq-local rustic-compile-rustflags (concat rustic-compile-rustflags " -Awarnings"))))
 
-(defun rustic-cargo-run-test (test)
-  "Run TEST which can be a single test or mod name."
-  (let* ((c (list (rustic-cargo-bin) rustic-cargo-test-exec-command test))
+(defun rustic-cargo-run-nextest (&optional arg)
+  "Command for running nextest."
+  (interactive "P")
+  (let* ((nextest (if arg
+                      (read-from-minibuffer "nextest command: " rustic-cargo-nextest-exec-command)
+                    rustic-cargo-nextest-exec-command))
+         (c (-flatten (list (rustic-cargo-bin) (split-string nextest))))
          (buf rustic-test-buffer-name)
          (proc rustic-test-process-name)
          (mode 'rustic-cargo-test-mode))
@@ -185,6 +194,14 @@ When calling this function from `rustic-popup-mode', always use the value of
                               (rustic-cargo--get-test-target)))
       (rustic-cargo-run-test test-to-run)
     (message "Could not find test at point.")))
+
+(defun rustic-cargo-run-test (test)
+  "Run TEST which can be a single test or mod name."
+  (let* ((c (list (rustic-cargo-bin) rustic-cargo-test-exec-command test))
+         (buf rustic-test-buffer-name)
+         (proc rustic-test-process-name)
+         (mode 'rustic-cargo-test-mode))
+    (rustic-compilation c (list :buffer buf :process proc :mode mode))))
 
 ;;;###autoload
 (defun rustic-cargo-test-dwim ()
