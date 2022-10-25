@@ -27,7 +27,7 @@
   :group 'rustic-babel)
 
 (defcustom rustic-babel-auto-wrap-main t
-  "Whether to auto wrap body in 'fn main' to function call if none exists."
+  "Whether to auto wrap body in `fn main' to function call if none exists."
   :type 'boolean
   :group 'rustic-babel)
 
@@ -235,7 +235,8 @@ Otherwise create it with `rustic-babel-generate-project'."
           new)))))
 
 (defun crate-dependencies (name version features path)
-  "Generate a Cargo.toml [dependencies] entry for a crate given a version and features."
+  "Generate a Cargo.toml [dependencies] entry for crate NAME.
+Use VERSION, FEATURES and PATH."
   (let* ((version-string (concat "version = \"" version "\""))
          (features-string
           (when features
