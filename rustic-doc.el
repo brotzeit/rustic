@@ -275,7 +275,8 @@ See buffer *cargo-makedocs* for more info")
     (message "Activate rustic-doc-mode to run `rustic-doc-convert-current-package")))
 
 (defun rustic-doc--confirm-dep-versions (missing-fd)
-  "Verify that dependencies are not too old."
+  "Verify that dependencies are not too old.
+Do not check `fd' when MISSING-FD is non-nil."
   (when (not missing-fd)
     (when  (> 8 (string-to-number
                   (substring (shell-command-to-string "fd --version") 3 4)))
@@ -329,6 +330,10 @@ If NOCONFIRM is non-nil, install all dependencies without prompting user."
     (message "Setup is converting std. If you want to convert local dependencies, activate rustic-doc-mode when you are in a rust project and run `rustic-doc-convert-current-package")))
 
 (defun rustic-doc--start-process (name program finish-func &rest program-args)
+  "Start a process in buffer `*NAME*' for PROGRAM.
+If FINISH-FUNC is non-nil, it will be called after PROGRAM has
+exited, with the process object as its only argument.
+Any PROGRAM-ARGS are passed to PROGRAM."
   (let* ((buf (generate-new-buffer (concat "*" name "*")))
          (proc (let ((process-connection-type nil))
                  (apply #'start-process name buf program program-args))))
@@ -414,7 +419,8 @@ If anything goes wrong, return DEFAULT."
     default))
 
 (defun rustic-doc--thing-at-point ()
-  "Return info about `thing-at-point'. If `thing-at-point' is nil or no language, return defaults."
+  "Return info about `thing-at-point'.
+If `thing-at-point' is nil or no language, return defaults."
   (let ((default `((search-dir . ,(rustic-doc--project-doc-dest))
                    (short-name . ,nil))))
     (cond ((boundp 'lsp-mode) (rustic-doc--thing-at-point-lsp-mode default))
