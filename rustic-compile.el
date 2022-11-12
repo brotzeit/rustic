@@ -238,11 +238,7 @@ Set environment variables for rust process."
       (run-hook-with-args 'compilation-start-hook process)
       (set-process-filter process (plist-get args :filter))
       (set-process-sentinel process (plist-get args :sentinel))
-      ;; Workaround for rustic-format-file hanging bug on Windows
-      ;; See https://github.com/brotzeit/rustic/issues/423
-      (if (eq system-type 'windows-nt)
-          (set-process-coding-system process default-process-coding-system default-process-coding-system)
-        (set-process-coding-system process 'utf-8-emacs-unix 'utf-8-emacs-unix))
+      (set-process-coding-system process 'utf-8-emacs-unix 'utf-8-emacs-unix)
       (process-put process 'command (plist-get args :command))
       (process-put process 'workspace (plist-get args :workspace))
       (process-put process 'file-buffer (plist-get args :file-buffer))
