@@ -290,19 +290,33 @@ This operation requires a nightly version of rustfmt.
               (eq major-mode 'rustic-macro-expansion-mode))
     (error "Not a rustic-mode buffer."))
   (if (not (region-active-p)) (rustic-format-buffer)
-    (let* ((buf (current-buffer))
-           (file (buffer-file-name buf))
+    (let* ((buffer rustic-format-buffer-name)
+           (file (buffer-file-name (current-buffer)))
+           (mode 'rustic-format-mode)
+           (proc rustic-format-process-name)
            (start (rustic--get-line-number begin))
-           (finish (rustic--get-line-number end)))
-      (rustic-compilation-process-live t)
-      (rustic-format-start-process
-       'rustic-format-file-sentinel
-       :buffer buf
-       :command
-       (append (list (rustic-cargo-bin) "+nightly" "fmt" "--")
-               (rustic-compute-rustfmt-file-lines-args file
-                                                       start
-                                                       finish))))))
+           (finish (rustic--get-line-number end))
+           (sentinel (lambda (proc output)
+                       (let ((proc-buffer (process-buffer proc))
+                             (inhibit-read-only t))
+                         (with-current-buffer proc-buffer
+                           (if (not (string-match-p "^finished" output))
+                               (funcall rustic-compile-display-method proc-buffer)
+                             (with-current-buffer (process-get proc 'file-buffer)
+                               ;; turn off mark after region was formatted
+                               ;; successfully
+                               (setq mark-active nil)
+                               (revert-buffer t t))
+                             (kill-buffer proc-buffer))))))
+           (command (append (list (rustic-cargo-bin) "+nightly" "fmt" "--")
+                            (rustic-compute-rustfmt-file-lines-args file
+                                                                    start
+                                                                    finish))))
+      (rustic-compilation command (list :no-display t
+                                        :buffer buffer
+                                        :process proc
+                                        :mode mode
+                                        :sentinel sentinel)))))
 
 ;;;###autoload
 (defun rustic-format-buffer ()
