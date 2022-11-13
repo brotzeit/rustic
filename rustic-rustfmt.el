@@ -303,6 +303,9 @@ This operation requires a nightly version of rustfmt.
                            (if (not (string-match-p "^finished" output))
                                (funcall rustic-compile-display-method proc-buffer)
                              (with-current-buffer (process-get proc 'file-buffer)
+                               ;; turn off mark after region was formatted
+                               ;; successfully
+                               (setq mark-active nil)
                                (revert-buffer t t))
                              (kill-buffer proc-buffer))))))
            (command (append (list (rustic-cargo-bin) "+nightly" "fmt" "--")
