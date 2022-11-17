@@ -164,7 +164,7 @@ Customization:
 Supported compile.el variables:
 
 - compilation-arguments
-- compilation-scroll-output
+- compilation-scroll-output (possible values are `t` for automatic scrolling and `first-error` to scroll to first error)
 
 ### Navigating errors
 
