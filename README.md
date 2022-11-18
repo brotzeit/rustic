@@ -10,6 +10,7 @@
     - [Intro](#intro)
     - [Known issues](#known-issues)
     - [Installation](#installation)
+        - [package](#package)
         - [straight](#straight)
     - [remote](#remote)
     - [Compilation](#compilation)
@@ -103,26 +104,29 @@ rustic namespace for backwards compatability reasons(rustic has been a fork).
 
 First, you may need to install `rust-analyzer`. See [Automatic server installation](#automatic-server-installation).
 
-Simply put `(use-package rustic)` in your config and most stuff gets
-configured automatically.
-([use-package](https://github.com/jwiegley/use-package))
+If you can't run rust-analyzer or cargo can't be found, your
+environment variables probably don't work in emacs. Try
+[exec-path-from-shell](https://github.com/purcell/exec-path-from-shell/tree/81125c5adbc903943c016c2984906dc089372a41#usage)
+to fix this.
 
+### package
+
+This section explains how to install rustic with the default package manager.
 It's necessary to include elpa for a package dependency:
 
 ```elisp
+(require 'package)
 (setq package-archives '(("melpa" . "http://melpa.org/packages/")
                          ("gnu" . "http://elpa.gnu.org/packages/")))
+(package-initialize)
+(package-refresh-contents)
+(use-package rustic)
 ```
 
 If ‘spinner-1.7.3’ is unavailable” when trying to install rustic, you
 need to update GPG keys used by the ELPA package manager. Try
 installing
 [gnu-elpa-keyring-update](https://elpa.gnu.org/packages/gnu-elpa-keyring-update.html).
-
-If you can't run rust-analyzer or cargo can't be found, your
-environment variables probably don't work in emacs. Try
-[exec-path-from-shell](https://github.com/purcell/exec-path-from-shell/tree/81125c5adbc903943c016c2984906dc089372a41#usage)
-to fix this.
 
 ### straight
 
@@ -216,6 +220,9 @@ Additional faces:
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/rustc_errno.png)
 
 ## Rustfmt
+
+Ensure rustfmt is installed by running `rustup component add rustfmt-preview`
+in your project's directory.
 
 You can format your code with:
 
