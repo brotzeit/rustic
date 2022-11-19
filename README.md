@@ -461,6 +461,7 @@ Customization:
 - `rustic-cargo-check-arguments` default arguments for cargo check
 - `rustic-cargo-auto-add-missing-dependencies` automatically add missing dependencies
 to Cargo.toml by checking new diagnostics for 'unresolved import' errors
+- `rustic-cargo-use-last-stored-arguments` always use stored arguments that were provided with `C-u`(instead of requiring to run rustic "rerun" commands)
 
 ### Edit
 

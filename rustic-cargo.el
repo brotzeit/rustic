@@ -65,6 +65,18 @@ If nil then the project is simply created."
   :type 'boolean
   :group 'rustic-cargo)
 
+(defcustom rustic-cargo-use-last-stored-arguments nil
+  "Always rerun cargo commands with stored arguments.
+
+Example:
+When `rustic-cargo-use-last-stored-arguments' is `nil', then
+rustic-cargo-test will always use `rustic-default-test-arguments'.
+
+If you set it to `t', you can reuse the arguments with `rustic-cargo-test'
+instead of applying the default arguments from `rustic-default-test-arguments'."
+  :type 'boolean
+  :group 'rustic-cargo)
+
 (defcustom rustic-default-test-arguments "--benches --tests --all-features"
   "Default arguments when running 'cargo test'."
   :type 'string
@@ -172,7 +184,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   (rustic-cargo-test-run
    (cond (arg
           (setq rustic-test-arguments (read-from-minibuffer "Cargo test arguments: " rustic-default-test-arguments)))
-         ((eq major-mode 'rustic-popup-mode)
+         (rustic-cargo-use-last-stored-arguments
           (if (> (length rustic-test-arguments) 0)
               rustic-test-arguments
             rustic-default-test-arguments))
@@ -600,7 +612,7 @@ When calling this function from `rustic-popup-mode', always use the value of
   (rustic-cargo-run-command
    (cond (arg
           (setq rustic-run-arguments (read-from-minibuffer "Cargo run arguments: " rustic-run-arguments)))
-         ((eq major-mode 'rustic-popup-mode)
+         (rustic-cargo-use-last-stored-arguments
           rustic-run-arguments)
          ((rustic--get-run-arguments))
          (t ""))))
