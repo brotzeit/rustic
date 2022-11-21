@@ -261,7 +261,8 @@ Customization:
   * `'on-save` format buffer before saving
   * `'on-compile` run 'cargo fmt' before compilation
   * `nil` don't format automatically
-
+- `rustic-use-rust-save-some-buffers` turn on to use automatic formatting
+  for `save-some-buffers`
 
 known issues:
 
