@@ -472,14 +472,16 @@ non-nil."
 (defun rustic-save-some-buffers-advice (orig-fun &rest args)
   "Use `rustic-save-some-buffers' instead when called in rust project.
 Otherwise turn off rustic format functionality and run `save-some-buffers'."
-  (if (and
-       (rustic-buffer-crate t)
-       (let ((pred (nth 1 args)))
-         (if (functionp pred) (funcall pred) t)))
-      (rustic-save-some-buffers)
+  ;; TODO: fix issue #450
+  ;; (if (and
+  ;;      (rustic-buffer-crate t)
+  ;;      (let ((pred (nth 1 args)))
+  ;;        (if (functionp pred) (funcall pred) t)))
+  ;;     (rustic-save-some-buffers)
     (let ((rustic-format-trigger nil)
           (rustic-format-on-save nil))
-      (apply orig-fun args))))
+      (apply orig-fun args)))
+;; )
 
 (advice-add 'save-some-buffers :around
             #'rustic-save-some-buffers-advice)
