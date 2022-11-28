@@ -922,10 +922,13 @@ stored in this variable.")
 (defun rustic-cargo-install (&optional arg)
   "Install rust binary using 'cargo install'.
 If running with prefix command `C-u', read whole command from minibuffer."
-  (interactive)
+  (interactive "P")
   (let* ((command (if arg
                       (read-from-minibuffer "Cargo install command: "
-                                            (rustic-cargo-bin) " install ")
+                                            (format "%s %s %s"
+                                                    (rustic-cargo-bin)
+                                                    "install"
+                                                    (string-join rustic-cargo-default-install-arguments " ")))
                     (s-join " " (cons (rustic-cargo-bin) (cons "install" rustic-cargo-default-install-arguments)))))
          (c (s-split " " command))
          (buf rustic-install-buffer-name)
