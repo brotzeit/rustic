@@ -127,18 +127,40 @@ with `lsp-rust-switch-server'."
                                    eglot-server-programs)))))
     (add-to-list 'eglot-server-programs `(rustic-mode . (eglot-rust-analyzer . ,rustic-analyzer-command)))))
 
+(defun rustic-get-string-from-file (file-path)
+  "Return file content as string."
+  (with-temp-buffer
+    (insert-file-contents file-path)
+    (buffer-string)))
+
+(defun rustic-load-rust-analyzer-init ()
+  "Load '.rust-analyzer-init.json' from the project's root"
+  (let ((init-file (concat default-directory ".rust-analyzer-init.json")))
+    (if (file-exists-p init-file)
+        (condition-case err
+            (json-parse-string (rustic-get-string-from-file init-file))
+          (error (message "failed to parse '%S': %S" init-file err) eglot--{}))
+      eglot--{})
+    ))
+
 (with-eval-after-load 'eglot
   (defclass eglot-rust-analyzer (eglot-lsp-server) ()
     :documentation "Rust-analyzer LSP server.")
 
   (cl-defmethod eglot-initialization-options ((server eglot-rust-analyzer))
-    "Pass `detachedFiles' when `rustic-enable-detached-file-support' is non-`nil'."
-    (if (or (null rustic-enable-detached-file-support)
-            (null buffer-file-name)
-            (rustic-buffer-crate t))
-        eglot--{}
-      (list :detachedFiles
-            (vector (file-local-name (file-truename buffer-file-name))))))
+    "Try to load `.rust-analyzer-init.json' and pass it to rust-analyzer.
+Moreover pass `detachedFiles' when `rustic-enable-detached-file-support'
+is non-`nil'."
+    (let ((detached-files
+           (if (or (null rustic-enable-detached-file-support)
+                   (null buffer-file-name)
+                   (rustic-buffer-crate t))
+               eglot--{}
+             (list :detachedFiles
+                   (vector (file-local-name (file-truename buffer-file-name))))))
+          (lsp-init (rustic-load-rust-analyzer-init)))
+      (maphash (lambda (item) (add-to-list 'lsp-init item)) detached-files)
+      lsp-init))
 
   (rustic-setup-eglot))
 
