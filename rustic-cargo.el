@@ -634,12 +634,13 @@ When calling this function from `rustic-popup-mode', always use the value of
   (let* ((buffer-project-root (rustic-buffer-crate))
          (relative-filenames
           (if buffer-project-root
-              (split-string (file-relative-name buffer-file-name buffer-project-root) "/") nil)))
+              (split-string (file-relative-name default-directory buffer-project-root) "/") nil)))
     (if (and relative-filenames (string= "examples" (car relative-filenames)))
         (let ((size (length relative-filenames)))
           (cond ((eq size 2) (file-name-sans-extension (nth 1 relative-filenames))) ;; examples/single-example1.rs
                 ((> size 2) (car (nthcdr (- size 2) relative-filenames)))           ;; examples/example2/main.rs
-                (t nil))) nil)))
+                (t nil)))
+      nil)))
 
 ;;;###autoload
 (defun rustic-run-shell-command (&optional arg)
