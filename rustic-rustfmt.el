@@ -275,7 +275,7 @@ and it's `cdr' is a list of arguments."
                           (funcall rustic-list-project-buffers-function))))
             (dolist (b buffers)
               (with-current-buffer b
-                (revert-buffer t t)))))
+                (revert-buffer t t t)))))
         (kill-buffer proc-buffer)
         (message "Workspace formatted with cargo-fmt.")))))
 
