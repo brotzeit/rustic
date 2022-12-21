@@ -50,6 +50,9 @@ The first element of each list contains a command's binding."
 (defvar rustic-popup-buffer-name "rustic-popup-buffer"
   "Buffer name for rustic popup buffers.")
 
+(defvar rustic--popup-rust-src-name nil
+  "Rust source code file name from which rustic-popup was invoked.")
+
 (defvar rustic-popup-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map [remap self-insert-command] 'rustic-popup-invoke-popup-action)
@@ -111,6 +114,7 @@ The first element of each list contains a command's binding."
   "Setup popup.
 If directory is not in a rust project call `read-directory-name'."
   (interactive "P")
+  (setq rustic--popup-rust-src-name buffer-file-name)
   (let ((func (lambda ()
                 (let ((buf (get-buffer-create rustic-popup-buffer-name))
                       (win (split-window-below))

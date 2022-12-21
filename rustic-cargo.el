@@ -615,7 +615,7 @@ When calling this function from `rustic-popup-mode', always use the value of
          (rustic-cargo-use-last-stored-arguments
           rustic-run-arguments)
          ((rustic--get-run-arguments))
-         (t ""))))
+         (t rustic-run-arguments))))
 
 ;;;###autoload
 (defun rustic-cargo-run-rerun ()
@@ -625,16 +625,19 @@ When calling this function from `rustic-popup-mode', always use the value of
 
 (defun rustic--get-run-arguments ()
   "Helper utility for getting arguments related to 'examples' directory."
-  (if (rustic-cargo-run-get-relative-example-name)
-      (concat "--example " (rustic-cargo-run-get-relative-example-name))
-    (car compile-history)))
+  (let ((example-name (rustic-cargo-run-get-relative-example-name)))
+    (when example-name
+      (concat "--example " example-name))))
 
 (defun rustic-cargo-run-get-relative-example-name ()
   "Run 'cargo run --example' if current buffer within a 'examples' directory."
   (let* ((buffer-project-root (rustic-buffer-crate))
+         (current-filename (if buffer-file-name
+                               buffer-file-name
+                             rustic--popup-rust-src-name))
          (relative-filenames
           (if buffer-project-root
-              (split-string (file-relative-name default-directory buffer-project-root) "/") nil)))
+              (split-string (file-relative-name current-filename buffer-project-root) "/") nil)))
     (if (and relative-filenames (string= "examples" (car relative-filenames)))
         (let ((size (length relative-filenames)))
           (cond ((eq size 2) (file-name-sans-extension (nth 1 relative-filenames))) ;; examples/single-example1.rs
