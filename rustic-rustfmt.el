@@ -228,7 +228,7 @@ and it's `cdr' is a list of arguments."
         (if (string-match-p "^finished" output)
             (and
              (with-current-buffer next-error-last-buffer
-               (revert-buffer t t))
+               (revert-buffer t t t))
              (kill-buffer proc-buffer))
           (sit-for 0.1)
           (with-current-buffer next-error-last-buffer
@@ -313,7 +313,7 @@ This operation requires a nightly version of rustfmt.
                                ;; turn off mark after region was formatted
                                ;; successfully
                                (setq mark-active nil)
-                               (revert-buffer t t))
+                               (revert-buffer t t t))
                              (kill-buffer proc-buffer))))))
            (command (append (list (rustic-cargo-bin) "+nightly" "fmt" "--")
                             (rustic-compute-rustfmt-file-lines-args file
