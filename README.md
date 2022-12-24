@@ -381,7 +381,7 @@ top of the sideline.
 ##### Macro expansion
 
 `lsp-rust-analyzer-expand-macro` expand macro call at point
-recursively
+recursively.
 
 The results are formatted and highlighted by default, but you can use
 your own function by customizing

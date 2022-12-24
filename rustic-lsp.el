@@ -167,22 +167,15 @@ with `lsp-rust-switch-server'."
 
 ;;;###autoload
 (defun rustic-analyzer-macro-expand (result)
-  "Default method for displaying macro expansion results."
-  (interactive)
+  "Default method for displaying macro expansion RESULT ."
   (let* ((root (lsp-workspace-root default-directory))
          (buf (get-buffer-create
                (format "*rust-analyzer macro expansion %s*" root))))
     (with-current-buffer buf
       (let ((inhibit-read-only t))
         (erase-buffer)
-        ;; wrap expanded macro in a main function so we can run rustfmt
-        (insert "fn main() {")
-        ;; rustfmt complains about $s
-        (insert (replace-regexp-in-string "\\$" "" result))
-        (insert "}")
-        (rustic-macro-expansion-mode)
-
-        (rustic-format-macro-buffer)))
+        (insert result)
+        (rustic-macro-expansion-mode)))
     (display-buffer buf)))
 
 ;;; _

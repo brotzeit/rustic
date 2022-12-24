@@ -198,28 +198,6 @@ and it's `cdr' is a list of arguments."
                 (goto-char (point-min)))))
           (message warnings))))))
 
-(defun rustic-format-macro-sentinel (proc output)
-  "Format buffer and remove decorations that we create for rustfmt"
-  (rustic-format-sentinel proc output)
-  (with-current-buffer next-error-last-buffer
-    (save-excursion
-      (read-only-mode -1)
-      ;; remove fn __main() {
-      (goto-char (point-min))
-      (delete-region (point-min) (line-end-position))
-      (delete-blank-lines)
-      (goto-char (point-max))
-      ;; remove } from fn __main()
-      (forward-line -1)
-      (delete-region (line-beginning-position) (point-max))
-      ;; reindent buffer to left
-      (indent-region (point-min) (point-max))
-      (goto-char (point-max))
-      ;; clean blanked line
-      ;; (delete-blank-lines)
-      (delete-trailing-whitespace (point-min) (point-max)))))
-
-
 (defun rustic-format-file-sentinel (proc output)
   "Sentinel for rustfmt processes when formatting a file."
   (ignore-errors
@@ -337,17 +315,6 @@ This operation requires a nightly version of rustfmt.
     (rustic-format-start-process 'rustic-format-sentinel
                                  :buffer (current-buffer)
                                  :stdin (buffer-string))))
-
-(defun rustic-format-macro-buffer ()
-  "Format the current buffer using rustfmt, and theh remove first and last lines."
-  (interactive)
-  (unless (or (eq major-mode 'rustic-mode)
-              (eq major-mode 'rustic-macro-expansion-mode))
-    (error "Not a rustic-mode buffer."))
-  (rustic-compilation-process-live t)
-  (rustic-format-start-process 'rustic-format-macro-sentinel
-                               :buffer (current-buffer)
-                               :stdin (buffer-string)))
 
 ;;;###autoload
 (defun rustic-format-file (&optional file)
