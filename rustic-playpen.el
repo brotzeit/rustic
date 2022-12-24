@@ -17,7 +17,7 @@
   :type 'string
   :group 'rustic)
 
-(defcustom rustic-playpen-enable-shortener nil
+(defcustom rustic-playpen-enable-shortener t
   "Enable shortend URL for playpen links."
   :type 'boolean
   :safe #'booleanp
@@ -61,7 +61,8 @@ src-block or buffer on the Rust playpen."
                                 (error "failed to shorten playpen url: %s" last-line)
                               (let ((URL (read-from-minibuffer "Playpen URL: " last-line)))
                                 (browse-url URL))))))
-            (message "%s" playpen-url)))))))
+            (browse-url playpen-url)))))))
+
 
 (defun rustic-playpen-buffer ()
   "Create a shareable URL for the contents of the buffer on the Rust playpen."
