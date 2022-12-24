@@ -17,6 +17,12 @@
   :type 'string
   :group 'rustic)
 
+(defcustom rustic-playpen-enable-shortener nil
+  "Enable shortend URL for playpen links."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'rustic)
+
 ;;; Commands
 
 ;;;###autoload
@@ -33,15 +39,15 @@ src-block or buffer on the Rust playpen."
      (t
       (setq data (buffer-substring (point-min) (point-max)))))
     (let* ((escaped-data (url-hexify-string data))
-           (escaped-playpen-url (url-hexify-string
-                                 (format rustic-playpen-url-format
-                                         escaped-data))))
+           (playpen-url (format rustic-playpen-url-format escaped-data))
+           (escaped-playpen-url (url-hexify-string playpen-url)))
       (if (> (length escaped-playpen-url) 5000)
           (error "encoded playpen data exceeds 5000 character limit (length %s)"
                  (length escaped-playpen-url))
         (let ((shortener-url (format rustic-shortener-url-format escaped-playpen-url))
               (url-request-method "POST"))
-          (url-retrieve shortener-url
+          (if rustic-playpen-enable-shortener
+              (url-retrieve shortener-url
                         (lambda (state)
                           ;; filter out the headers etc. included at the
                           ;; start of the buffer: the relevant text
@@ -54,7 +60,13 @@ src-block or buffer on the Rust playpen."
                             (if err
                                 (error "failed to shorten playpen url: %s" last-line)
                               (let ((URL (read-from-minibuffer "Playpen URL: " last-line)))
-                                (browse-url URL)))))))))))
+                                (browse-url URL))))))
+            (message "%s" playpen-url)))))))
+
+(defun rustic-playpen-buffer ()
+  "Create a shareable URL for the contents of the buffer on the Rust playpen."
+  (interactive)
+  (rustic-playpen (point-min) (point-max)))
 
 ;;; _
 (provide 'rustic-playpen)
