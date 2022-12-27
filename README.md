@@ -12,6 +12,7 @@
     - [Installation](#installation)
         - [package](#package)
         - [straight](#straight)
+    - [treesitter](#treesitter)
     - [remote](#remote)
     - [Compilation](#compilation)
         - [Navigating errors](#navigating-errors)
