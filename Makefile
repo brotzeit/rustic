@@ -39,7 +39,7 @@ rustic-rustfix.elc:     rustic-cargo.elc
 rustic-rustfmt.elc:     rustic-cargo.elc
 rustic-babel.elc:       rustic-rustfmt.elc
 rustic-lsp.elc:         rustic-rustfmt.elc
-rustic-playpen.elc:
+rustic-playground.elc:
 rustic-doc.elc:
 
 ## Without Cask
