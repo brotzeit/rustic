@@ -12,7 +12,6 @@
     - [Installation](#installation)
         - [package](#package)
         - [straight](#straight)
-    - [treesitter](#treesitter)
     - [remote](#remote)
     - [Compilation](#compilation)
         - [Navigating errors](#navigating-errors)
@@ -136,29 +135,6 @@ clones each of your packages directly from its source. There are good
 additional [installation
 instructions](https://github.crookster.org/switching-to-straight.el-from-emacs-26-builtin-package.el/)
 for moving your package management from package.el to straight.
-
-## treesitter
-
-You can try the new native treesitter mode `rust-ts-mode` with:
-
-```elisp
-(use-package rustic
-  :init
-  (setq rustic-treesitter-derive t))
-```
-
-In case you want to use treesitter but can't use emacs master, you can
-take a look at
-[tree-sitter](https://github.com/emacs-tree-sitter/elisp-tree-sitter). When
-the dependencies are installed you can activate the feature with:
-
-```elisp
-(use-package tree-sitter
-  :config
-  (require 'tree-sitter-langs)
-  (global-tree-sitter-mode)
-  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
-```
 
 ## remote
 
