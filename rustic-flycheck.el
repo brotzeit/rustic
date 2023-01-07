@@ -44,7 +44,7 @@ current workspace, and returns them in a list, or nil if no
 targets could be found."
   (let ((process-output-as-json
          (lambda (program &rest args)
-           (with-temp-buffer
+           (rustic--with-temp-process-buffer
              (let ((code-or-signal (apply 'process-file program nil '(t nil) nil args)))
                (unless (equal code-or-signal 0)
                  ;; Prevent from displaying "JSON readtable error".

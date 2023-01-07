@@ -105,40 +105,41 @@ When COMMAND is non-nil, it replaces the default command.
 When COMMAND is a string, it is the program file name.
 When COMMAND is a list, it's `car' is the program file name
 and it's `cdr' is a list of arguments."
-  (let* ((err-buf (get-buffer-create rustic-format-buffer-name))
-         (inhibit-read-only t)
-         (dir (funcall rustic-compile-directory-method))
-         (buffer (plist-get args :buffer))
-         (string (plist-get args :stdin))
-         (files  (plist-get args :files))
-         (files (if (listp files) files (list files)))
-         (command (or (plist-get args :command)
-                      (rustic-compute-rustfmt-args)))
-         (command (if (listp command) command (list command)))
-         (cur-buf (current-buffer)))
-    (setq rustic-save-pos (set-marker (make-marker) (point) (current-buffer)))
-    (rustic-compilation-setup-buffer err-buf dir 'rustic-format-mode t)
-    (--each files
-      (unless (file-exists-p it)
-        (error (format "File %s does not exist." it))))
-    (with-current-buffer err-buf
-      (let* ((c `(,(rustic-rustfmt-bin)
-                  ,@(split-string rustic-rustfmt-args)
-                  ,@command "--" ,@files))
-             (proc (rustic-make-process :name rustic-format-process-name
-                                        :buffer err-buf
-                                        :command (remove "" c)
-                                        :filter #'rustic-compilation-filter
-                                        :sentinel sentinel
-                                        :file-handler t)))
-        (setq next-error-last-buffer buffer)
-        (when string
-          (process-put proc 'command-buf cur-buf)
-          (while (not (process-live-p proc))
-            (sleep-for 0.01))
-          (process-send-string proc (concat string "\n"))
-          (process-send-eof proc))
-        proc))))
+  (rustic--inheritenv
+   (let* ((err-buf (get-buffer-create rustic-format-buffer-name))
+          (inhibit-read-only t)
+          (dir (funcall rustic-compile-directory-method))
+          (buffer (plist-get args :buffer))
+          (string (plist-get args :stdin))
+          (files  (plist-get args :files))
+          (files (if (listp files) files (list files)))
+          (command (or (plist-get args :command)
+                       (rustic-compute-rustfmt-args)))
+          (command (if (listp command) command (list command)))
+          (cur-buf (current-buffer)))
+     (setq rustic-save-pos (set-marker (make-marker) (point) (current-buffer)))
+     (rustic-compilation-setup-buffer err-buf dir 'rustic-format-mode t)
+     (--each files
+       (unless (file-exists-p it)
+         (error (format "File %s does not exist." it))))
+     (with-current-buffer err-buf
+       (let* ((c `(,(rustic-rustfmt-bin)
+                   ,@(split-string rustic-rustfmt-args)
+                   ,@command "--" ,@files))
+              (proc (rustic-make-process :name rustic-format-process-name
+                                         :buffer err-buf
+                                         :command (remove "" c)
+                                         :filter #'rustic-compilation-filter
+                                         :sentinel sentinel
+                                         :file-handler t)))
+         (setq next-error-last-buffer buffer)
+         (when string
+           (process-put proc 'command-buf cur-buf)
+           (while (not (process-live-p proc))
+             (sleep-for 0.01))
+           (process-send-string proc (concat string "\n"))
+           (process-send-eof proc))
+         proc)))))
 
 (defun rustic-compute-rustfmt-args ()
   "Compute the arguments to rustfmt from `rustic-rustfmt-config-alist'."

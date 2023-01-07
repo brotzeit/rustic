@@ -57,6 +57,24 @@
 (defalias 'rustic-indent-line #'rust-mode-indent-line)
 (defalias 'rustic-end-of-defun #'rust-end-of-defun)
 
+;;; workaround for with-temp-buffer not propagating the environment, as per
+;;; https://github.com/magit/magit/pull/4169
+(defmacro rustic--with-temp-process-buffer (&rest body)
+  "Like `with-temp-buffer', but always propagate `process-environment' and 'exec-path'.
+When those vars are buffer-local in the calling buffer, they are not
+propagated by `with-temp-buffer', so we explicitly ensure that
+happens, so that processes will be invoked consistently.  BODY is
+as for that macro."
+  (declare (indent 0) (debug (body)))
+  (let ((p (cl-gensym))
+        (e (cl-gensym)))
+    `(let ((,p process-environment)
+           (,e exec-path))
+       (with-temp-buffer
+         (setq-local process-environment ,p)
+         (setq-local exec-path ,e)
+         ,@body))))
+
 ;;; Workspace
 
 (defvar-local rustic--buffer-workspace nil
@@ -67,28 +85,17 @@
   ;; this variable is buffer local so we can use the cached value
   (if rustic--buffer-workspace
       rustic--buffer-workspace
-    ;; Copy environment variables into the new buffer, since
-    ;; with-temp-buffer will re-use the variables' defaults, even if
-    ;; they have been changed in this variable using e.g. envrc-mode.
-    ;; See https://github.com/purcell/envrc/issues/12.
-    (let ((env process-environment)
-          (path exec-path))
-      (with-temp-buffer
-        ;; Copy the entire environment just in case there's something we
-        ;; don't know we need.
-        (setq-local process-environment env)
-        ;; Set PATH so we can find cargo.
-        (setq-local exec-path path)
-        (let ((ret (process-file (rustic-cargo-bin) nil (list (current-buffer) nil) nil "locate-project" "--workspace")))
-          (cond ((and (/= ret 0) nodefault)
-                 (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
-                ((and (/= ret 0) (not nodefault))
-                 (setq rustic--buffer-workspace default-directory))
-                (t
-                 (goto-char 0)
-                 (let* ((output (json-read))
-                        (dir (file-name-directory (cdr (assoc-string "root" output)))))
-                   (setq rustic--buffer-workspace dir)))))))))
+    (rustic--with-temp-process-buffer
+      (let ((ret (process-file (rustic-cargo-bin) nil (list (current-buffer) nil) nil "locate-project" "--workspace")))
+        (cond ((and (/= ret 0) nodefault)
+               (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
+              ((and (/= ret 0) (not nodefault))
+               (setq rustic--buffer-workspace default-directory))
+              (t
+               (goto-char 0)
+               (let* ((output (json-read))
+                      (dir (file-name-directory (cdr (assoc-string "root" output)))))
+                 (setq rustic--buffer-workspace dir))))))))
 
 (defun rustic-buffer-crate (&optional nodefault)
   "Return the crate for the current buffer.
@@ -162,6 +169,22 @@ this variable."
 (let ((mode '("\\.rs\\'" . rust-mode)))
   (when (member mode auto-mode-alist)
     (setq auto-mode-alist (remove mode auto-mode-alist))))
+
+;;; envrc support
+
+;; To support envrc, it is necessary to wrap any buffer creation code
+;; with inheritenv.  Rather than depend on that package, we conditionally
+;; wrap if it is installed.  Users of envrc ought to ensure the inheritenv
+;; package is available before loading rustic.
+
+(defmacro rustic--inheritenv (&rest body)
+  "Wrap BODY so that the environment it sees will match the current value.
+This is useful if BODY creates a temp buffer, because that will
+not inherit any buffer-local values of variables `exec-path' and
+`process-environment'."
+  `(if (featurep 'inheritenv)
+       (inheritenv-apply (lambda () ,@body))
+     ,@body))
 
 ;;; _
 

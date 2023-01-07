@@ -42,29 +42,30 @@ ARGS is a plist that affects how the process is run.
 - `:mode' mode for process buffer
 - `:directory' set `default-directory'
 - `:sentinel' process sentinel"
-  (let* ((buf (get-buffer-create
-               (or (plist-get args :buffer) rustic-compilation-buffer-name)))
-         (process (or (plist-get args :process) rustic-compilation-process-name))
-         (mode (or (plist-get args :mode) 'rustic-compilation-mode))
-         (directory (or (plist-get args :directory) (funcall rustic-compile-directory-method)))
-         (workspace (rustic-buffer-workspace (plist-get args :no-default-dir)))
-         (sentinel (or (plist-get args :sentinel) #'rustic-compilation-sentinel))
-         (file-buffer (current-buffer)))
-    (rustic-compilation-setup-buffer buf directory mode)
-    (setq next-error-last-buffer buf)
-    (unless (plist-get args :no-display)
-      (funcall rustic-compile-display-method buf))
-    (with-current-buffer buf
-      (let ((inhibit-read-only t))
-        (insert (format "%s \n" (s-join " "  command))))
-      (rustic-make-process :name process
-                           :buffer buf
-                           :command command
-                           :file-buffer file-buffer
-                           :filter #'rustic-compilation-filter
-                           :sentinel sentinel
-                           :workspace workspace
-                           :file-handler t))))
+  (rustic--inheritenv
+   (let* ((buf (get-buffer-create
+                (or (plist-get args :buffer) rustic-compilation-buffer-name)))
+          (process (or (plist-get args :process) rustic-compilation-process-name))
+          (mode (or (plist-get args :mode) 'rustic-compilation-mode))
+          (directory (or (plist-get args :directory) (funcall rustic-compile-directory-method)))
+          (workspace (rustic-buffer-workspace (plist-get args :no-default-dir)))
+          (sentinel (or (plist-get args :sentinel) #'rustic-compilation-sentinel))
+          (file-buffer (current-buffer)))
+     (rustic-compilation-setup-buffer buf directory mode)
+     (setq next-error-last-buffer buf)
+     (unless (plist-get args :no-display)
+       (funcall rustic-compile-display-method buf))
+     (with-current-buffer buf
+       (let ((inhibit-read-only t))
+         (insert (format "%s \n" (s-join " "  command))))
+       (rustic-make-process :name process
+                            :buffer buf
+                            :command command
+                            :file-buffer file-buffer
+                            :filter #'rustic-compilation-filter
+                            :sentinel sentinel
+                            :workspace workspace
+                            :file-handler t)))))
 
 (define-compilation-mode rustic-cargo-spellcheck-mode "rustic-cargo-spellcheck"
   "Rust spellcheck compilation mode.

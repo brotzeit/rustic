@@ -305,25 +305,26 @@ When calling this function from `rustic-popup-mode', always use the value of
   "Use 'cargo outdated' to list outdated packages in `tabulated-list-mode'.
 Execute process in PATH."
   (interactive)
-  (let* ((dir (or path (rustic-buffer-crate)))
-         (buf (get-buffer-create rustic-cargo-oudated-buffer-name))
-         (default-directory dir)
-         (inhibit-read-only t))
-    (make-process :name rustic-cargo-outdated-process-name
-                  :buffer buf
-                  :command `(,(rustic-cargo-bin) "outdated" "--depth" "1")
-                  :sentinel #'rustic-cargo-outdated-sentinel
-                  :file-handler t)
-    (with-current-buffer buf
-      (setq default-directory dir)
-      (erase-buffer)
-      (rustic-cargo-outdated-mode)
-      (rustic-with-spinner rustic-cargo-outdated-spinner
-        (make-spinner rustic-spinner-type t 10)
-        '(rustic-cargo-outdated-spinner
-          (":Executing " (:eval (spinner-print rustic-cargo-outdated-spinner))))
-        (spinner-start rustic-cargo-outdated-spinner)))
-    (display-buffer buf)))
+  (rustic--inheritenv
+   (let* ((dir (or path (rustic-buffer-crate)))
+          (buf (get-buffer-create rustic-cargo-oudated-buffer-name))
+          (default-directory dir)
+          (inhibit-read-only t))
+     (make-process :name rustic-cargo-outdated-process-name
+                   :buffer buf
+                   :command `(,(rustic-cargo-bin) "outdated" "--depth" "1")
+                   :sentinel #'rustic-cargo-outdated-sentinel
+                   :file-handler t)
+     (with-current-buffer buf
+       (setq default-directory dir)
+       (erase-buffer)
+       (rustic-cargo-outdated-mode)
+       (rustic-with-spinner rustic-cargo-outdated-spinner
+         (make-spinner rustic-spinner-type t 10)
+         '(rustic-cargo-outdated-spinner
+           (":Executing " (:eval (spinner-print rustic-cargo-outdated-spinner))))
+         (spinner-start rustic-cargo-outdated-spinner)))
+     (display-buffer buf))))
 
 ;;;###autoload
 (defun rustic-cargo-reload-outdated ()
@@ -816,25 +817,26 @@ as string."
 
 (defun rustic-cargo-add-missing-dependencies-eglot ()
   "Return missing dependencies by parsing flymake diagnostics buffer."
-  (let* ((buf (flymake--diagnostics-buffer-name))
-         crates)
-    ;; ensure flymake diagnostics buffer exists
-    (unless (buffer-live-p buf)
-      (let* ((name (flymake--diagnostics-buffer-name))
-             (source (current-buffer))
-             (target (or (get-buffer name)
-                         (with-current-buffer (get-buffer-create name)
-                           (flymake-diagnostics-buffer-mode)
-                           (current-buffer)))))
-        (with-current-buffer target
-          (setq flymake--diagnostics-buffer-source source)
-          (revert-buffer))))
-    (with-current-buffer buf
-      (let ((errors (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n")))
-        (dolist (s errors)
-          (if (string-match-p (regexp-quote "unresolved import") s)
-              (push (string-trim (car (reverse (split-string s))) "`" "`" ) crates)))))
-    crates))
+  (rustic--inheritenv
+   (let* ((buf (flymake--diagnostics-buffer-name))
+          crates)
+     ;; ensure flymake diagnostics buffer exists
+     (unless (buffer-live-p buf)
+       (let* ((name (flymake--diagnostics-buffer-name))
+              (source (current-buffer))
+              (target (or (get-buffer name)
+                          (with-current-buffer (get-buffer-create name)
+                            (flymake-diagnostics-buffer-mode)
+                            (current-buffer)))))
+         (with-current-buffer target
+           (setq flymake--diagnostics-buffer-source source)
+           (revert-buffer))))
+     (with-current-buffer buf
+       (let ((errors (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n")))
+         (dolist (s errors)
+           (if (string-match-p (regexp-quote "unresolved import") s)
+               (push (string-trim (car (reverse (split-string s))) "`" "`" ) crates)))))
+     crates)))
 
 (defun rustic-cargo-add-missing-dependencies-flycheck ()
   "Return missing dependencies by parsing flycheck diagnostics buffer."

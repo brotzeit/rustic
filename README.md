@@ -59,6 +59,7 @@
             - [:main](#main)
             - [:include](#include)
             - [:use](#use)
+    - [Envrc](#envrc)
     - [Spinner](#spinner)
     - [rust docs in org-mode](#rust-docs-in-org-mode)
         - [Prerequisites](#prerequisites)
@@ -822,6 +823,14 @@ fn main() {
 #+RESULTS:
 : "mymodule function called"
 ```
+
+
+## envrc
+
+To load your Rust toolchain via [envrc](https://github.com/purcell/envrc), ensure that
+the [inheritenv](https://github.com/purcell/inheritenv) package is available before
+loading rustic, so that auxiliary rustic buffers acquire the correct environment to find
+the toolchain.
 
 ## Spinner
 

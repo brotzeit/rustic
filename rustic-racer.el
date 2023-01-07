@@ -131,17 +131,18 @@ COLUMN number."
 
 (defun rustic-racer-help-buf (contents)
   "Create a *Racer Help* buffer with CONTENTS."
-  (let ((buf (get-buffer-create "*Racer Help*"))
-        ;; If the buffer already existed, we need to be able to
-        ;; override `buffer-read-only'.
-        (inhibit-read-only t))
-    (with-current-buffer buf
-      (erase-buffer)
-      (insert contents)
-      (setq buffer-read-only t)
-      (goto-char (point-min))
-      (rustic-racer-help-mode))
-    buf))
+  (rustic--inheritenv
+   (let ((buf (get-buffer-create "*Racer Help*"))
+         ;; If the buffer already existed, we need to be able to
+         ;; override `buffer-read-only'.
+         (inhibit-read-only t))
+     (with-current-buffer buf
+       (erase-buffer)
+       (insert contents)
+       (setq buffer-read-only t)
+       (goto-char (point-min))
+       (rustic-racer-help-mode))
+     buf)))
 
 ;;; Racer
 
@@ -258,7 +259,7 @@ Return a list (exit-code stdout stderr)."
     (let (exit-code stdout stderr)
       ;; Create a temporary buffer for `call-process` to write stdout
       ;; into.
-      (with-temp-buffer
+      (rustic--with-temp-process-buffer
         (setq exit-code
               (apply #'call-process program nil
                      (list (current-buffer) tmp-file-for-stderr)
