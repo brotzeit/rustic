@@ -116,6 +116,7 @@
 (ert-deftest rustic-test-babel-format ()
   (let* ((string "fn main()      {}")
          (formatted-string "  fn main() {}\n")
+         (rustic-babel-auto-wrap-main nil)
          (buf (rustic-test-get-babel-block string)))
     (with-current-buffer buf
       (rustic-test-babel-execute-block buf)
