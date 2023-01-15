@@ -505,7 +505,7 @@ The CRATE-LINE is a single line from the `rustic-cargo-oudated-buffer-name'"
   (interactive)
   (let ((crates (rustic-cargo--outdated-get-crates (buffer-string))))
     (if crates
-        (let ((msg (format "Upgrade %s ?" (mapconcat #'(lambda (x) (rustic-crate-name x)) crates " "))))
+        (let ((msg (format "Upgrade `%s`? " (mapconcat #'(lambda (x) (rustic-crate-name x)) crates " "))))
           (when (yes-or-no-p msg)
             (rustic-cargo-upgrade-crates crates)))
       (user-error "No operations specified"))))
@@ -526,7 +526,7 @@ The CRATE-LINE is a single line from the `rustic-cargo-oudated-buffer-name'"
   "Upgrade CRATES."
   (let (upgrade)
     (dolist (crate crates)
-      (setq upgrade (concat upgrade (format "%s@%s " (rustic-crate-name crate) (rustic-crate-version crate)))))
+      (setq upgrade (concat upgrade (format "-p %s@%s " (rustic-crate-name crate) (rustic-crate-version crate)))))
     (let ((output (shell-command-to-string (format "cargo upgrade %s" upgrade))))
       (if (string-match "error: no such subcommand:" output)
           (rustic-cargo-install-crate-p "edit")
