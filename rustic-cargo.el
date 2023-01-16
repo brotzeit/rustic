@@ -404,7 +404,7 @@ Execute process in PATH."
   (interactive)
   (let* ((crate (tabulated-list-get-entry (point)))
          (v (read-from-minibuffer "Update to version: "
-                                  (substring-no-properties (elt crate 2))))
+                                  (substring-no-properties (elt crate 3))))
          (inhibit-read-only t))
     (when v
       (save-excursion
