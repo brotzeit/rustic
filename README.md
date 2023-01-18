@@ -93,7 +93,7 @@ of rustic, however can be considered light-weight compared to some rustic's
 functionality.
 
 The shared functions and options exist as aliases in the rust-mode and
-rustic namespace for backwards compatability reasons(rustic has been a fork).
+rustic namespace for backwards compatibility reasons(rustic has been a fork).
 
 ## Known issues
 

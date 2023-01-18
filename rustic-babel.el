@@ -62,8 +62,11 @@ considered."
 
 (defvar rustic-babel-spinner nil)
 
-(defun rustic-babel-eval (dir toolchain-kw-or-string)
-  "Start a rust babel compilation process in directory DIR."
+(defun rustic-babel-eval (dir toolchain-kw-or-string main-p)
+  "Start a rust babel compilation process.
+Compilation is started in directory DIR with appropriate
+TOOLCHAIN-KW-OR-STRING and MAIN-P indicates if a main function
+should be wrapped in which case we will disable rustfmt."
   (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
          (default-directory dir)
          (toolchain (cond ((eq toolchain-kw-or-string 'nightly) "+nightly")
@@ -82,7 +85,7 @@ considered."
      :command params
      :filter #'rustic-compilation-filter
      :sentinel (lambda (proc output)
-                 (rustic-babel-build-sentinel toolchain proc output)))))
+                 (rustic-babel-build-sentinel toolchain proc output main-p)))))
 
 (defun rustic-babel-format-block ()
   "Format babel block at point."
@@ -103,8 +106,9 @@ considered."
       (process-send-eof proc)
       proc)))
 
-(defun rustic-babel-build-sentinel (toolchain proc _output)
+(defun rustic-babel-build-sentinel (toolchain proc _output main-p)
   "Sentinel for rust babel compilation process PROC.
+MAIN-P indicates if the :main attribute is passed to the org header.
 If `rustic-babel-format-src-block' is t, format src-block after successful
 execution with rustfmt."
   (let ((proc-buffer (process-buffer proc))
@@ -113,7 +117,7 @@ execution with rustfmt."
         (let* ((default-directory rustic-babel-dir))
 
           ;; format babel block
-          (when rustic-babel-format-src-block
+          (when (and rustic-babel-format-src-block (not rustic-babel-auto-wrap-main) (not main-p))
             (let ((proc (rustic-babel-format-block)))
               (while (eq (process-status proc) 'run)
                 (sit-for 0.1))))
@@ -372,7 +376,7 @@ kill the running process."
                    (if include-blocks (rustic-babel-include-blocks include-blocks) "")
                    (if wrap-main (rustic-babel-ensure-main-wrap body) body))
            nil main nil 0)
-          (rustic-babel-eval dir toolchain)
+          (rustic-babel-eval dir toolchain main-p)
           (setq rustic-babel-src-location
                 (set-marker (make-marker) (point) (current-buffer)))
           project)))))
