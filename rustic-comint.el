@@ -54,29 +54,31 @@ If ARG is not nil, use value as argument and store it in `rustic-run-arguments'.
 When calling this function from `rustic-popup-mode', always use the value of
 `rustic-run-arguments'."
   (interactive "P")
-  (let ((run-args (rustic--get-run-arguments)))
-    (pop-to-buffer-same-window
-     (get-buffer-create rustic-run-comint-buffer-name))
-    (unless (comint-check-proc (current-buffer))
-    (rustic--cargo-repl-in-buffer
-     (current-buffer)
-     (concat "run" (cond
-                    (arg
-                     (setq rustic-run-comint-arguments
-                           (read-from-minibuffer "Cargo run arguments: " rustic-run-comint-arguments)))
-                    (run-args)
-                    (t ""))))
-    (rustic-cargo-run-comint-mode))))
+  (rustic--inheritenv
+   (let ((run-args (rustic--get-run-arguments)))
+     (pop-to-buffer-same-window
+      (get-buffer-create rustic-run-comint-buffer-name))
+     (unless (comint-check-proc (current-buffer))
+       (rustic--cargo-repl-in-buffer
+        (current-buffer)
+        (concat "run" (cond
+                       (arg
+                        (setq rustic-run-comint-arguments
+                              (read-from-minibuffer "Cargo run arguments: " rustic-run-comint-arguments)))
+                       (run-args)
+                       (t ""))))
+       (rustic-cargo-run-comint-mode)))))
 
 ;;;###autoload
 (defun rustic-cargo-comint-run-rerun ()
   "Run `cargo run' with `rustic-run-comint-arguments'."
   (interactive)
-  (pop-to-buffer-same-window
-   (get-buffer-create rustic-run-comint-buffer-name))
-  (rustic--cargo-repl-in-buffer
-   (current-buffer)
-   (concat "run" rustic-run-comint-arguments)))
+  (rustic--inheritenv
+   (pop-to-buffer-same-window
+    (get-buffer-create rustic-run-comint-buffer-name))
+   (rustic--cargo-repl-in-buffer
+    (current-buffer)
+    (concat "run" rustic-run-comint-arguments))))
 
 (defun rustic--cargo-repl-in-buffer (buffer run-args)
   "Make Cargo comint Repl in BUFFER.

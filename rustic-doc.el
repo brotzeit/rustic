@@ -334,20 +334,21 @@ If NOCONFIRM is non-nil, install all dependencies without prompting user."
 If FINISH-FUNC is non-nil, it will be called after PROGRAM has
 exited, with the process object as its only argument.
 Any PROGRAM-ARGS are passed to PROGRAM."
-  (let* ((buf (generate-new-buffer (concat "*" name "*")))
-         (proc (let ((process-connection-type nil))
-                 (apply #'start-process name buf program program-args))))
-    (set-process-sentinel
-     proc (lambda (proc event)
-            (let ((buf (process-buffer proc)))
-              (if (string-match-p (regexp-quote "abnormally") event)
-                  (message "Could not finish process: %s. \
+  (rustic--inheritenv
+   (let* ((buf (generate-new-buffer (concat "*" name "*")))
+          (proc (let ((process-connection-type nil))
+                  (apply #'start-process name buf program program-args))))
+     (set-process-sentinel
+      proc (lambda (proc event)
+             (let ((buf (process-buffer proc)))
+               (if (string-match-p (regexp-quote "abnormally") event)
+                   (message "Could not finish process: %s. \
 See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
-                (when finish-func
-                  (funcall finish-func proc))
-                (when (buffer-live-p buf)
-                  (kill-buffer buf))))))
-    proc))
+                 (when finish-func
+                   (funcall finish-func proc))
+                 (when (buffer-live-p buf)
+                   (kill-buffer buf))))))
+     proc)))
 
 
 

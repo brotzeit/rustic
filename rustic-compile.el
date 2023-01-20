@@ -283,29 +283,30 @@ ARGS is a plist that affects how the process is run.
 - `:mode' mode for process buffer
 - `:directory' set `default-directory'
 - `:sentinel' process sentinel"
-  (let* ((buf (get-buffer-create
-               (or (plist-get args :buffer) rustic-compilation-buffer-name)))
-         (process (or (plist-get args :process) rustic-compilation-process-name))
-         (mode (or (plist-get args :mode) 'rustic-compilation-mode))
-         (directory (or (plist-get args :directory) (funcall rustic-compile-directory-method)))
-         (workspace (rustic-buffer-workspace (plist-get args :no-default-dir)))
-         (sentinel (or (plist-get args :sentinel) #'rustic-compilation-sentinel))
-         (file-buffer (current-buffer)))
-    (rustic-compilation-setup-buffer buf directory mode)
-    (setq next-error-last-buffer buf)
-    (unless (plist-get args :no-display)
-      (funcall rustic-compile-display-method buf))
-    (with-current-buffer buf
-      (let ((inhibit-read-only t))
-        (insert (format "%s \n" (s-join " "  command))))
-      (rustic-make-process :name process
-                           :buffer buf
-                           :command command
-                           :file-buffer file-buffer
-                           :filter #'rustic-compilation-filter
-                           :sentinel sentinel
-                           :workspace workspace
-                           :file-handler t))))
+  (rustic--inheritenv
+   (let* ((buf (get-buffer-create
+                (or (plist-get args :buffer) rustic-compilation-buffer-name)))
+          (process (or (plist-get args :process) rustic-compilation-process-name))
+          (mode (or (plist-get args :mode) 'rustic-compilation-mode))
+          (directory (or (plist-get args :directory) (funcall rustic-compile-directory-method)))
+          (workspace (rustic-buffer-workspace (plist-get args :no-default-dir)))
+          (sentinel (or (plist-get args :sentinel) #'rustic-compilation-sentinel))
+          (file-buffer (current-buffer)))
+     (rustic-compilation-setup-buffer buf directory mode)
+     (setq next-error-last-buffer buf)
+     (unless (plist-get args :no-display)
+       (funcall rustic-compile-display-method buf))
+     (with-current-buffer buf
+       (let ((inhibit-read-only t))
+         (insert (format "%s \n" (s-join " "  command))))
+       (rustic-make-process :name process
+                            :buffer buf
+                            :command command
+                            :file-buffer file-buffer
+                            :filter #'rustic-compilation-filter
+                            :sentinel sentinel
+                            :workspace workspace
+                            :file-handler t)))))
 
 (defun rustic-compilation-filter (proc string)
   "Insert the text emitted by PROC.
@@ -515,26 +516,27 @@ buffer."
 
 (defun rustic-explain-error (button)
   "Open buffer with explanation for error at point."
-  (let* ((button-string (button-label button))
-         (errno (progn (string-match "E[0-9]+" button-string)
-                       (match-string 0 button-string)))
-         (buf (get-buffer-create "*rust errno*"))
-         (inhibit-read-only t))
-    (with-current-buffer buf
-      (erase-buffer)
-      (insert (shell-command-to-string
-               (concat "rustc --explain=" errno)))
-      (markdown-view-mode)
-      (setq
-       header-line-format
-       (concat (propertize " " 'display
-                           `(space :align-to (- right-fringe ,(1+ (length errno)))))
-               (propertize errno 'face 'rustic-errno-face)))
-      (setq-local markdown-fontify-code-blocks-natively t)
-      (setq-local markdown-fontify-code-block-default-mode 'rustic-mode)
-      (markdown-toggle-markup-hiding 1)
-      (goto-char (point-min)))
-    (pop-to-buffer buf)))
+  (rustic--inheritenv
+   (let* ((button-string (button-label button))
+          (errno (progn (string-match "E[0-9]+" button-string)
+                        (match-string 0 button-string)))
+          (buf (get-buffer-create "*rust errno*"))
+          (inhibit-read-only t))
+     (with-current-buffer buf
+       (erase-buffer)
+       (insert (shell-command-to-string
+                (concat "rustc --explain=" errno)))
+       (markdown-view-mode)
+       (setq
+        header-line-format
+        (concat (propertize " " 'display
+                            `(space :align-to (- right-fringe ,(1+ (length errno)))))
+                (propertize errno 'face 'rustic-errno-face)))
+       (setq-local markdown-fontify-code-blocks-natively t)
+       (setq-local markdown-fontify-code-block-default-mode 'rustic-mode)
+       (markdown-toggle-markup-hiding 1)
+       (goto-char (point-min)))
+     (pop-to-buffer buf))))
 
 (define-button-type 'rustc-errno
   'action #'rustic-explain-error
