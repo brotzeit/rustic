@@ -353,7 +353,7 @@ Execute process in PATH."
                   (lambda (arg)
                     (split-string arg "================" t "[\n\s]"))
                   (split-string (buffer-string) "\n\n" t))))
-            (if (= (length packages) 1)
+            (if (and (length packages) (= (length (car packages)) 1))
                 (setq packages (list (push "---" (car packages)))))
             (rustic-cargo-outdated-generate-menu packages))
           (pop-to-buffer buf))
