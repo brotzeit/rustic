@@ -332,15 +332,6 @@ Execute process in PATH."
   (interactive)
   (rustic-cargo-outdated default-directory))
 
-(defun rustic-cargo-outdated--skip-to-packages ()
-  "Move line forward till we reach the package name."
-  (goto-char (point-min))
-  (let ((line (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
-    (while (not (or (eobp) (s-starts-with? "--" line)))
-      (forward-line 1)
-      (setf line (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
-    (when (s-starts-with? "--" line) (forward-line 1))))
-
 (defun rustic-cargo-outdated-sentinel (proc _output)
   "Sentinel for rustic-cargo-outdated-process."
   (let ((buf (process-buffer proc))
