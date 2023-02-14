@@ -311,18 +311,24 @@ to the lsp client or server you are using.
 
 ### Server
 
-rust-analyzer is the default and can be changed to rls. lsp-mode
-related code was moved to the lsp-mode repo.  `rustic-lsp-server` sets
-the value of `lsp-rust-server`.
-
-``` emacs-lisp
-(setq rustic-lsp-server 'rls)
-```
+rust-analyzer is the default and can be changed to rls if required (Note that rls
+is deprecated and is slated to be removed). lsp-mode related code was
+moved to the lsp-mode repo.  `rustic-lsp-server` sets the value of
+`lsp-rust-server`.
 
 Change rust-analyzer path.
 
 ``` emacs-lisp
 (setq rustic-analyzer-command '("~/.cargo/bin/rust-analyzer"))
+```
+
+If you are using rustup to [manage your rust-analyzer](https://rust-analyzer.github.io/manual.html#rustup), you would
+have to configure like this to make it work with `use-package`:
+
+``` emacs-lisp
+(use-package rustic
+  :custom
+  (rustic-analyzer-command '("rustup" "run" "stable" "rust-analyzer")))
 ```
 
 #### Automatic server installation
