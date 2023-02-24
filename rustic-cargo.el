@@ -131,7 +131,7 @@ Currently only working with lsp-mode."
 (defvar rustic-test-buffer-name "*cargo-test*"
   "Buffer name for test buffers.")
 
-(defvar rustic-test-arguments ""
+(defvar rustic-test-arguments rustic-default-test-arguments
   "Holds arguments for 'cargo test', similar to `compilation-arguments`.
 Tests that are executed by `rustic-cargo-current-test' will also be
 stored in this variable.")
@@ -189,7 +189,7 @@ When calling this function from `rustic-popup-mode', always use the value of
               rustic-test-arguments
             rustic-default-test-arguments))
          (t
-          rustic-default-test-arguments))))
+          rustic-test-arguments))))
 
 ;;;###autoload
 (defun rustic-cargo-test-rerun ()
