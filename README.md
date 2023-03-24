@@ -456,6 +456,30 @@ supported.)
 **Caveat**: Due to some current limitations, you should avoid opening
 a detached file in a large directory with this feature enabled.
 
+### Working with the Rust compiler source
+
+Some projects, such as
+[Clippy](https://github.com/rust-lang/rust-clippy), require that
+`rust-analyzer` can access the compiler source code corresponding to
+the current toolchain. This is done by giving the full path of the
+compiler source into `rust-analyzer` initialization options, or by
+giving it the string "discover" to let it search the sources by
+itself.
+
+In `lsp-mode`, the `lsp-rust-analyzer-rust-source` variable can be set
+to the desired value. In `eglot` mode, a function added to the
+`rustic-eglot-init-options` variable can activate this initialization
+option selectively:
+
+```elisp
+(add-to-list
+  'rustic-eglot-init-options
+  (lambda ()
+    (if (string-prefix-p "/home/john-doe/dev/rust-clippy/"
+                         (rustic-buffer-crate t))
+        '(:rustcSource "discover"))))
+```
+
 ## Cargo
 
 Since the cargo commands also use the derived compilation mode, you can use

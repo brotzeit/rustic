@@ -55,6 +55,20 @@ in, e.g. your home directory."
   :type 'boolean
   :group 'rustic)
 
+(defcustom rustic-eglot-init-options
+  (list #'rustic-eglot-detached-file-support)
+  "Functions that provide additional options to be passed to
+rust-analyzer initialization options.
+
+Every function must return either `nil' or a succession of
+pairs representing options to pass to `rust-analyzer' in
+a representation that can be converted to JSON, such as:
+
+  (:option1 \"foo\"
+   :option2 [\"file-a\", \"file-b\"])"
+  :type '(repeat function)
+  :group 'rustic)
+ 
 ;;; Common
 
 (defun rustic-setup-lsp ()
@@ -127,18 +141,21 @@ with `lsp-rust-switch-server'."
                                    eglot-server-programs)))))
     (add-to-list 'eglot-server-programs `(rustic-mode . (eglot-rust-analyzer . ,rustic-analyzer-command)))))
 
+(defun rustic-eglot-detached-file-support ()
+  "Pass `detachedFiles' when `rustic-enable-detached-file-support' is non-`nil'."
+  (unless (or (null rustic-enable-detached-file-support)
+              (null buffer-file-name)
+              (rustic-buffer-crate t))
+    (list :detachedFiles
+          (vector (file-local-name (file-truename buffer-file-name))))))  
+
 (with-eval-after-load 'eglot
   (defclass eglot-rust-analyzer (eglot-lsp-server) ()
     :documentation "Rust-analyzer LSP server.")
 
   (cl-defmethod eglot-initialization-options ((server eglot-rust-analyzer))
-    "Pass `detachedFiles' when `rustic-enable-detached-file-support' is non-`nil'."
-    (if (or (null rustic-enable-detached-file-support)
-            (null buffer-file-name)
-            (rustic-buffer-crate t))
-        eglot--{}
-      (list :detachedFiles
-            (vector (file-local-name (file-truename buffer-file-name))))))
+    "Get initialization options from the functions in `rustic-eglot-init-options'."
+    (or (mapcan #'funcall rustic-eglot-init-options) eglot--{}))
 
   (rustic-setup-eglot))
 
