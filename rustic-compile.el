@@ -209,6 +209,9 @@ Error matching regexes from compile.el are removed."
 
 ;;; Compilation Process
 
+(defvar rustic-compilation-directory nil
+  "original directory for rust compilation process.")
+
 (defvar rustic-compilation-process-name "rustic-compilation-process"
   "Process name for rust compilation processes.")
 
@@ -249,6 +252,7 @@ Set environment variables for rust process."
   (let ((inhibit-read-only t))
     (with-current-buffer buf
       (erase-buffer)
+      (setq-local rustic-compilation-directory dir)
       (setq default-directory dir)
       (funcall mode)
       (unless no-mode-line

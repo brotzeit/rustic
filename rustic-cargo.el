@@ -195,7 +195,8 @@ When calling this function from `rustic-popup-mode', always use the value of
 (defun rustic-cargo-test-rerun ()
   "Run 'cargo test' with `rustic-test-arguments'."
   (interactive)
-  (rustic-cargo-test-run rustic-test-arguments))
+  (let ((default-directory (or rustic-compilation-directory default-directory)))
+    (rustic-cargo-test-run rustic-test-arguments)))
 
 ;;;###autoload
 (defun rustic-cargo-current-test ()
@@ -617,7 +618,8 @@ When calling this function from `rustic-popup-mode', always use the value of
 (defun rustic-cargo-run-rerun ()
   "Run 'cargo run' with `rustic-run-arguments'."
   (interactive)
-  (rustic-cargo-run-command rustic-run-arguments))
+  (let ((default-directory (or rustic-compilation-directory default-directory)))
+    (rustic-cargo-run-command rustic-run-arguments)))
 
 (defun rustic--get-run-arguments ()
   "Helper utility for getting arguments related to 'examples' directory."
