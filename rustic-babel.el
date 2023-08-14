@@ -406,7 +406,7 @@ at least one time in this emacs session before this command can be used."
           (default-directory org-babel-temporary-directory)
           (body (org-element-property :value (org-element-at-point)))
           (project (rustic-babel-project))
-          (params (list "cargo" "clippy")))
+          (params (list (rustic-cargo-bin) "clippy")))
      (let* ((dir (setq rustic-babel-dir (expand-file-name project)))
             (main (expand-file-name "main.rs" (concat dir "/src")))
             (default-directory dir))

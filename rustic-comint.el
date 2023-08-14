@@ -112,7 +112,8 @@ Read the full command from the minibuffer when ARG is non-nil or
 when called with a prefix command \\[universal-argument]."
   (interactive "P")
   (let* ((command (if arg
-                      (read-from-minibuffer "Cargo run command: " "cargo run -- ")
+                      (read-from-minibuffer "Cargo run command: "
+                                            (concat (rustic-cargo-bin) " run -- "))
                     (concat (rustic-cargo-bin) " run "
                             (setq rustic-run-arguments
                                   (read-from-minibuffer
