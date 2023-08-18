@@ -34,11 +34,8 @@
 (require 'subr-x)
 
 (require 'dash)
-
-(setq rust-load-optional-libraries nil)
-(setq rust-before-save-hook #'rustic-before-save-hook)
-(setq rust-after-save-hook #'rustic-after-save-hook)
-(require 'rust-mode)
+(when (version<= "29.1" emacs-version)
+  (require 'treesit))
 
 ;;; Customization
 
@@ -46,16 +43,6 @@
   "Support for Rust code."
   :link '(url-link "https://www.rustic-lang.org/")
   :group 'languages)
-
-;;; Define aliases for removed rustic functions
-
-(defvaralias 'rustic-indent-offset 'rust-indent-offset)
-(defvaralias 'rustic-indent-method-chain 'rust-indent-method-chain)
-(defvaralias 'rustic-indent-where-clause 'rust-indent-where-clause)
-(defvaralias 'rustic-match-angle-brackets 'rust-match-angle-brackets)
-(defvaralias 'rustic-indent-return-type-to-arguments 'rust-indent-return-type-to-arguments)
-(defalias 'rustic-indent-line #'rust-mode-indent-line)
-(defalias 'rustic-end-of-defun #'rust-end-of-defun)
 
 ;;; workaround for with-temp-buffer not propagating the environment, as per
 ;;; https://github.com/magit/magit/pull/4169
@@ -74,6 +61,14 @@ as for that macro."
          (setq-local process-environment ,p)
          (setq-local exec-path ,e)
          ,@body))))
+
+(defcustom rustic-treesitter-derive nil
+  "Whether rustic should derive from the new treesitter mode
+`rust-ts-mode'. If not, it derives from `rust-mode'. This option
+requires emacs29+"
+  :version "29.1"
+  :type 'boolean
+  :group 'rustic)
 
 ;;; Workspace
 
@@ -152,23 +147,17 @@ this variable."
     map)
   "Keymap for `rustic-mode'.")
 
-;;;###autoload
-(define-derived-mode rustic-mode rust-mode "Rustic"
-  "Major mode for Rust code.
+(defun activate-rustic-mode ()
+  (if (and (version<= "29.1" emacs-version) rustic-treesitter-derive)
+    (if (treesit-ready-p 'rust t)
+        (require 'rustic-ts-mode)
+      (require 'rustic-rust-mode))
+    (require 'rustic-rust-mode)))
 
-\\{rustic-mode-map}"
-  :group 'rustic
-
-  (when (bound-and-true-p rustic-cargo-auto-add-missing-dependencies)
-   (add-hook 'lsp-after-diagnostics-hook 'rustic-cargo-add-missing-dependencies-hook nil t)))
+(activate-rustic-mode)
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
-
-;; remove rust-mode from `auto-mode-alist'
-(let ((mode '("\\.rs\\'" . rust-mode)))
-  (when (member mode auto-mode-alist)
-    (setq auto-mode-alist (remove mode auto-mode-alist))))
 
 ;;; envrc support
 

@@ -143,6 +143,16 @@ rustfmt and most of the common cargo commands should work remotely.
 We are currently updating the code base. If you encounter any command
 that doesn't work remotely, please open an issue.
 
+## TreeSitter
+
+You can try the new native treesitter mode `rust-ts-mode` with:
+
+```elisp
+(use-package rustic
+  :init
+  (setq rustic-treesitter-derive t))
+```
+
 ## Compilation
 
 ![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/compilation_buffer.png)
