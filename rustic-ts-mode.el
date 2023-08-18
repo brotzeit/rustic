@@ -5,10 +5,6 @@
 
 ;;; Code:
 
-;;; For the save hooks this is required
-(require 'rustic-rustfmt)
-
-
 ;;;###autoload
 (define-derived-mode rustic-mode rust-ts-mode "Rustic (TS)"
   "Major mode for Rust code.
