@@ -531,6 +531,28 @@ sent to the program in one of two ways:
   input can be typed directly into the output buffer of 'cargo run'
   and sent off with `RET`, just like in `comint-mode`.  You need
   [polymode](https://polymode.github.io) installed for this to work.
+  
+#### Run Arguments
+
+The run arguments of the `cargo run` command is determined by the 
+`rustic-run-arguments` variable.
+
+By default, any of the run commands will ask the user what the run arguments
+should be in the minibuffer and stored in the `rustic-run-arguments` variable. 
+However if the `rustic-cargo-use-last-stored-arguments` variable is set to a non
+`nil` value, the previously stored value of `rustic-run-arguments` would be used.
+
+An alternative way of specify the run arguments would be using the function
+arguments. If it is set to a non `nil` value the argument would be used and
+stored in `rustic-run-arguments` instead.
+
+For example:
+
+``` elisp
+(rustic-cargo-run "-r")
+```
+
+The `cargo run` would be run with the argument "-r".
 
 ### Outdated
 
