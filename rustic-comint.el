@@ -91,12 +91,12 @@ Otherwise the arguments are taken from the minibuffer."
   "Make Cargo comint Repl in BUFFER.
 Optionally accepts RUN-ARGS which will be passed to the
 executable."
-  (make-comint-in-buffer
+  (apply 'make-comint-in-buffer
    rustic-run-comint-buffer-name
    buffer
    (rustic-cargo-bin)
    '()
-   run-args))
+   (split-string run-args)))
 
 ;;; Cargo run with plain comint and optional polymode
 
