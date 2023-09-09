@@ -50,9 +50,16 @@ hit RET to send it to the program."
 (defun rustic-cargo-comint-run (&optional arg)
   "Run 'cargo run' but for interactive programs.
 
+
+TODO: Auto specify example/bin based on file.
+
 If ARG is not nil, use value as argument and store it in `rustic-run-arguments'.
-When calling this function from `rustic-popup-mode', always use the value of
-`rustic-run-arguments'."
+
+When calling this function from `rustic-popup-mode' or
+`rustic-cargo-use-last-stored-arguments' is not nil, always use the value of
+`rustic-run-arguments'.
+
+Otherwise the arguments are taken from the minibuffer."
   (interactive "P")
   (rustic--inheritenv
    (let ((run-args (rustic--get-run-arguments)))
@@ -61,12 +68,12 @@ When calling this function from `rustic-popup-mode', always use the value of
      (unless (comint-check-proc (current-buffer))
        (rustic--cargo-repl-in-buffer
         (current-buffer)
-        (concat "run" (cond
-                       (arg
-                        (setq rustic-run-comint-arguments
-                              (read-from-minibuffer "Cargo run arguments: " rustic-run-comint-arguments)))
-                       (run-args)
-                       (t ""))))
+        (concat "run " (cond (arg (setq rustic-run-arguments arg))
+                            ;; Using stored arguments
+                            (rustic-cargo-use-last-stored-arguments
+                             rustic-run-arguments)
+                            ;; Asking from minibuffer
+                            (t (rustic-ask-run-args)))))
        (rustic-cargo-run-comint-mode)))))
 
 ;;;###autoload
@@ -78,7 +85,7 @@ When calling this function from `rustic-popup-mode', always use the value of
     (get-buffer-create rustic-run-comint-buffer-name))
    (rustic--cargo-repl-in-buffer
     (current-buffer)
-    (concat "run" rustic-run-comint-arguments))))
+    (concat "run" rustic-run-arguments))))
 
 (defun rustic--cargo-repl-in-buffer (buffer run-args)
   "Make Cargo comint Repl in BUFFER.
@@ -108,20 +115,27 @@ executable."
 ;;;###autoload
 (defun rustic-cargo-plain-run (&optional arg)
   "Run `cargo run' for the current project.
-Read the full command from the minibuffer when ARG is non-nil or
-when called with a prefix command \\[universal-argument]."
+
+TODO: Auto specify example/bin based on file.
+
+If ARG is not nil, use value as argument and store it in `rustic-run-arguments'.
+
+When calling this function from `rustic-popup-mode' or
+`rustic-cargo-use-last-stored-arguments' is not nil, always use the value of
+`rustic-run-arguments'.
+
+Otherwise the arguments are taken from the minibuffer."
   (interactive "P")
-  (let* ((command (if arg
-                      (read-from-minibuffer "Cargo run command: " "cargo run -- ")
-                    (concat (rustic-cargo-bin) " run "
-                            (setq rustic-run-arguments
-                                  (read-from-minibuffer
-                                   "Run arguments: "
-                                   (if (rustic-cargo-run-get-relative-example-name)
-                                       (concat "--example "
-                                               (rustic-cargo-run-get-relative-example-name))
-                                     (car compile-history))
-                                   nil nil 'compile-history)) ))))
+  ;; (if (rustic-cargo-run-get-relative-example-name)
+  ;;     (concat "--example " (rustic-cargo-run-get-relative-example-name))
+  ;;   (car compile-history))
+  (let* ((command (concat (rustic-cargo-bin) " run "
+                          (cond (arg (setq rustic-run-arguments arg))
+                                ;; Using stored arguments
+                                (rustic-cargo-use-last-stored-arguments
+                                 rustic-run-arguments)
+                                ;; Asking from minibuffer
+                                (t (rustic-ask-run-args))))))
     (rustic-run-cargo-command command (list :mode 'rustic-cargo-plainrun-mode))))
 
 (define-derived-mode rustic-cargo-plain-run-mode rustic-compilation-mode "Cargo run"

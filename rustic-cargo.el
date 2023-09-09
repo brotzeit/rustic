@@ -585,6 +585,14 @@ If BIN is not nil, create a binary application, otherwise a library."
 (define-derived-mode rustic-cargo-run-mode rustic-compilation-mode "cargo-run"
   :group 'rustic)
 
+(defun rustic-ask-run-args ()
+  "Asks the cargo run arguments for cargo run from the minibuffer.
+
+The run arguments is stored in rustic-run-arguments."
+  (interactive)
+  (setq rustic-run-arguments (read-from-minibuffer
+                              "Cargo run arguments: " rustic-run-arguments)))
+
 ;;;###autoload
 (defun rustic-cargo-run-command (&optional run-args)
   "Start compilation process for 'cargo run' with optional RUN-ARGS."
@@ -601,17 +609,23 @@ If BIN is not nil, create a binary application, otherwise a library."
 (defun rustic-cargo-run (&optional arg)
   "Run 'cargo run'.
 
+TODO: Auto specify example/bin based on file.
+
 If ARG is not nil, use value as argument and store it in `rustic-run-arguments'.
-When calling this function from `rustic-popup-mode', always use the value of
-`rustic-run-arguments'."
+
+When calling this function from `rustic-popup-mode' or
+`rustic-cargo-use-last-stored-arguments' is not nil, always use the value of
+`rustic-run-arguments'.
+
+Otherwise the arguments are taken from the minibuffer."
   (interactive "P")
   (rustic-cargo-run-command
-   (cond (arg
-          (setq rustic-run-arguments (read-from-minibuffer "Cargo run arguments: " rustic-run-arguments)))
+   (cond (arg (setq rustic-run-arguments arg))
+         ;; Using stored arguments
          (rustic-cargo-use-last-stored-arguments
           rustic-run-arguments)
-         ((rustic--get-run-arguments))
-         (t rustic-run-arguments))))
+         ;; Asking from minibuffer
+         (t (rustic-ask-run-args)))))
 
 ;;;###autoload
 (defun rustic-cargo-run-rerun ()
