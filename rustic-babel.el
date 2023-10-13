@@ -116,7 +116,8 @@ execution with rustfmt."
    (let ((proc-buffer (process-buffer proc))
          (inhibit-read-only t))
      (if (zerop (process-exit-status proc))
-         (let* ((default-directory rustic-babel-dir))
+         (let* ((original-default-directory default-directory)
+                (default-directory rustic-babel-dir))
 
            ;; format babel block
            (when (and rustic-babel-format-src-block (not rustic-babel-auto-wrap-main) (not main-p))
@@ -125,9 +126,21 @@ execution with rustfmt."
                  (sit-for 0.1))))
 
            ;; run project
-           (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
-                  (params (list "cargo" toolchain "run" "--quiet"))
-                  (inhibit-read-only t))
+           (let* ((err-buff
+                 (get-buffer-create rustic-babel-compilation-buffer-name))
+                (params
+                 (list
+                  "cargo"
+                  toolchain
+                  "run"
+                  "--manifest-path"
+                  (format "%s/Cargo.toml" rustic-babel-dir)
+                  "--quiet"))
+                (inhibit-read-only t)
+                ;; command should run in the original default-directory
+                ;; which is typically the original org file
+                ;; This agrees with behaviour of C, C++, D, js, python, etc.
+                (default-directory original-default-directory))
              (rustic-make-process
               :name rustic-babel-process-name
               :buffer err-buff
