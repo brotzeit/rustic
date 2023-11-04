@@ -358,6 +358,7 @@ kill the running process."
                               (t rustic-babel-auto-wrap-main)))
              (include-blocks (cdr (assq :include params)))
              (use-blocks (cdr (assq :use params))))
+
         (make-directory (file-name-directory main) t)
         (rustic-babel-cargo-toml dir params)
         (when use-blocks
