@@ -116,6 +116,7 @@
 (ert-deftest rustic-test-babel-format ()
   (let* ((string "fn main()      {}")
          (formatted-string "  fn main() {}\n")
+         (rustic-babel-auto-wrap-main nil)
          (buf (rustic-test-get-babel-block string)))
     (with-current-buffer buf
       (rustic-test-babel-execute-block buf)
@@ -155,6 +156,20 @@
       (rustic-test-babel-execute-block buf)
       (should (eq (rustic-test-babel-check-results buf) nil)))))
 
+(ert-deftest rustic-test-babel-crate-without-version ()
+  (let* ((string "extern crate rand;
+                  extern crate serde;
+                  extern crate serde_json;
+                  fn main() {
+                      let _rng = rand::thread_rng();
+                  }")
+         ;; also test with strings for crate and version
+         (params ":crates '(rand (serde . *) (\"serde_json\" . \"*\"))")
+         (buf (rustic-test-get-babel-block string params)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (should (eq (rustic-test-babel-check-results buf) nil)))))
+
 (ert-deftest rustic-test-babel-crate-with-single-feature ()
   (let* ((string "extern crate serde;
                   extern crate serde_json;
@@ -183,6 +198,47 @@
                           });
                   }")
          (params ":crates '((tokio . 1.0)) :features '((tokio . (\"rt-multi-thread\" \"time\")))")
+         (buf (rustic-test-get-babel-block string params)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (should (eq (rustic-test-babel-check-results buf) nil)))))
+
+(ert-deftest rustic-test-babel-ensure-main-wrap-no()
+  (let* ((string "let x = \"fn main(){}\";")
+         (params ":main no")
+         (buf (rustic-test-get-babel-block string params)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (let ((re (format "error: Could not compile `%s`.\n"
+                        (car (reverse (split-string rustic-babel-dir "/"))))))
+        (should (string= re (rustic-test-babel-check-results buf)))))))
+
+(ert-deftest rustic-test-babel-ensure-main-wrap-yes-with-main()
+  (let* ((string "fn main() {
+                      let x = \"rustic\";
+                 }")
+         (params ":main yes")
+         (buf (rustic-test-get-babel-block string params)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (should (eq (rustic-test-babel-check-results buf) nil)))))
+
+(ert-deftest rustic-test-babel-ensure--main-wrap-yes-with-async-main()
+  (let* ((string "#[tokio::main]
+                  pub async fn main() {
+                      ()
+                 }")
+         (params ":crates '((tokio . 1.0)) :features '((tokio . (\"rt-multi-thread\" \"macros\"))) :main yes")
+         (buf (rustic-test-get-babel-block string params)))
+    (with-current-buffer buf
+      (rustic-test-babel-execute-block buf)
+      (should (eq (rustic-test-babel-check-results buf) nil)))))
+
+(ert-deftest rustic-test-babel-ensure-main-wrap-no-with-main()
+  (let* ((string "fn main() {
+                      let x = \"rustic\";
+                  }")
+         (params ":main no")
          (buf (rustic-test-get-babel-block string params)))
     (with-current-buffer buf
       (rustic-test-babel-execute-block buf)

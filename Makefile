@@ -17,6 +17,7 @@ ELS  += rustic-flycheck.el
 ELS  += rustic-interaction.el
 ELS  += rustic-compile.el
 ELS  += rustic-cargo.el
+ELS  += rustic-clippy.el
 ELS  += rustic-popup.el
 ELS  += rustic-rustfix.el
 ELS  += rustic-rustfmt.el
@@ -32,12 +33,13 @@ rustic-flycheck.elc:    rustic.elc
 rustic-interaction.elc: rustic.elc
 rustic-compile.elc:     rustic.elc
 rustic-cargo.elc:       rustic-compile.elc rustic-interaction.elc
+rustic-clippy.elc:      rustic-compile.elc
 rustic-popup.elc:       rustic-cargo.elc
 rustic-rustfix.elc:     rustic-cargo.elc
 rustic-rustfmt.elc:     rustic-cargo.elc
 rustic-babel.elc:       rustic-rustfmt.elc
 rustic-lsp.elc:         rustic-rustfmt.elc
-rustic-playpen.elc:
+rustic-playground.elc:
 rustic-doc.elc:
 
 ## Without Cask
@@ -61,6 +63,7 @@ DEPS += s
 DEPS += spinner
 DEPS += xterm-color
 DEPS += yasnippet
+DEPS += rust-mode
 
 LOAD_PATH  ?= $(addprefix -L ../,$(DEPS))
 LOAD_PATH  += -L .
@@ -104,7 +107,7 @@ cask-install: $(CASK_DIR)
 cask-build: loaddefs
 	EMACS=$(EMACS) cask build
 
-lisp: cask-build
+lisp: clean cask-install cask-build
 
 test: lisp
 	if [ -f "$(HOME)/.cargo/env" ] ; then . "$(HOME)/.cargo/env" ; fi ; \

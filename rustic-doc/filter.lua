@@ -26,11 +26,19 @@ end
 
 
 Span = function(el)
-  if el.classes:includes("since") or el.classes:includes("inner") or tablelength(el.content) == 1 then
-    return pandoc.Null
+  if tablelength(el.content) >= 3 and el.content[1]["text"] == "Expand" and el.content[3]["text"] == "description" then
+    return {}
+  elseif el.classes:includes("since") or el.classes:includes("inner") or tablelength(el.content) == 1 then
+    return {}
+  elseif tablelength(el.content) == 0 then
+    return {}
+  elseif tablelength(el.content) == 1 then
+    return el.content
   end
 end
-
+Image = function(el)
+  return {}
+end
 
 cleanblocks = {
   Str = function(el)
@@ -44,14 +52,21 @@ end,
 
 Header = function(el)
   if el.classes:includes("section-header") then
-    return pandoc.Null
+    return {}
   end
-  if el.classes:includes("small-section-header") then
-    return pandoc.Header(1, pandoc.List:new({el.content[1]}))
+
+  if not el.content then
+    return {}
   end
+
+  if el.classes:includes("small-section-header") and el.content and tablelength(el.content) > 0 then
+    return pandoc.Header(1, pandoc.List({el.content[1]}))
+  end
+
   if el.classes:includes("impl") and el.content then
-    return pandoc.Header(2, pandoc.List:new{el.content[1]})
+    return pandoc.Header(2, pandoc.List({el.content[1]}))
   end
+
   if el.classes:includes("fqn") and el.level == 1 and el.content and el.content[1].content then
     crate = ""
     for i,v in ipairs(el.content[1].content) do
@@ -98,19 +113,22 @@ Header = function(el)
     end
 
     if contains_must_use then
-      return pandoc.List:new({pandoc.Header(3, pandoc.List:new({pandoc.Code(methodname)})), pandoc.Plain(must_use_text:sub(1, -3))})
+      return pandoc.List({pandoc.Header(3, pandoc.List({pandoc.Code(methodname)})), pandoc.Plain(must_use_text:sub(1, -3))})
     end
-    return pandoc.Header(3, pandoc.List:new({pandoc.Code(methodname)}))
+    return pandoc.Header(3, pandoc.List({pandoc.Code(methodname)}))
   end
 
   return pandoc.Header(el.level - 1, el.content)
 end,
 
 Div = function(el)
+  if tablelength(el.content) == 1 then -- Removes one layer of unnecessary nesting.
+    return el.content
+  end
   if el.classes:includes("shortcuts") or el.classes:includes("sidebar-elems") or el.classes:includes("theme-picker") or el.classes:includes("infos") or el.classes:includes("search-container")  or el.classes:includes("sidebar-menu") or el.classes:includes("logo-container") or el.classes:includes("toggle-wrapper") then
-    return pandoc.Null
+    return {}
   elseif el.classes:includes("variant") and el.classes:includes("small-section-header") and el.content[1] and tablelength(el.content[1].content) > 1 then
-    return pandoc.List:new({pandoc.Header(2, pandoc.Code(el.content[1].content[2].text))})
+    return pandoc.List({pandoc.Header(2, pandoc.Code(el.content[1].content[2].text))})
     else
     return pandoc.Div(el.content)
   end
@@ -119,11 +137,11 @@ end,
 Plain = function(el)
   for i,v in ipairs(el.content) do
     if v.t == "Span" and v.content[1] and v.content[1].t == "Str" and v.content[1].text == "Run" then
-      return pandoc.Null
+      return {}
     end
 
     if v.t == "Span" and (v.classes:includes("loading-content") or tablelength(v.content) == 0) and tablelength(el.content) == 1 then --bug here! 1 week later: Why did I not explain what the bug was? I have no idea now.
-      return pandoc.Null
+      return {}
     end
 
     if v.t == "Span" and v.classes:includes("emoji") then
@@ -135,7 +153,7 @@ end,
 
 CodeBlock = function(el)
   if el.classes:includes("line-numbers") then
-    return pandoc.Null
+    return {}
   else
     return pandoc.Para(pandoc.Str("#+BEGIN_SRC rust \n" .. el.text .. "\n#+END_SRC"))
   end
@@ -143,7 +161,7 @@ end,
 
 Para = function(el)
   if el.content[1] and el.content[1].t == "Span" and tablelength(el.content[1].content) == 0 then
-    return pandoc.Null
+    return {}
   end
 end,
 

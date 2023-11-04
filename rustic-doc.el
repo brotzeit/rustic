@@ -19,7 +19,6 @@
 ;;; Code:
 
 (require 'url)
-(require 'lsp-mode)
 (require 'f)
 
 (eval-and-compile
@@ -101,6 +100,8 @@ The function should take search-dir and search-term as arguments."
   :type 'function
   :group 'rustic-doc)
 
+
+
 (defun rustic-doc--install-resources ()
   "Install or update the rustic-doc resources."
   (dolist (resource rustic-doc-resources)
@@ -110,6 +111,7 @@ The function should take search-dir and search-term as arguments."
            (progn
              (unless (f-exists? (f-dirname dst))
                (f-mkdir (f-dirname dst)))
+             (f-exists? (f-dirname dst))
              (url-copy-file src dst t)
              (when (memq :exec opts)
                (call-process (executable-find "chmod")
@@ -194,8 +196,7 @@ it doesn't manage to find what you're looking for, try `rustic-doc-dumb-search'.
     (unless (file-directory-p rustic-doc-save-loc)
       (rustic-doc-setup)
       (message "Running first time setup. Please re-run your search\
- once conversion has completed.")
-      (sleep-for 3))
+ once conversion has completed."))
     ;; If the user has not run `rustic-doc-convert-current-package' in
     ;; the current project, we create a default directory that only
     ;; contains a symlink to std.
@@ -205,7 +206,7 @@ it doesn't manage to find what you're looking for, try `rustic-doc-dumb-search'.
 
 (defun rustic-doc--update-current-project ()
   "Update `rustic-doc-current-project' if editing a rust file, otherwise leave it."
-  (when (and lsp-mode
+  (when (and (featurep  'lsp-mode)
              (derived-mode-p 'rust-mode 'rustic-mode))
     (setq rustic-doc-current-project (lsp-workspace-root))))
 
@@ -250,8 +251,7 @@ If the user has not visited a project, returns the main doc directory."
   (interactive)
   (unless (file-directory-p rustic-doc-save-loc)
     (rustic-doc-setup)
-    (message "Running first time setup.")
-    (sleep-for 3))
+    (message "Running first time setup."))
   (if rustic-doc-current-project
       (progn
         (message "Converting documentation for %s "
@@ -263,11 +263,6 @@ See buffer *cargo-makedocs* for more info")
           (let* ((docs-src
                   (concat (file-name-as-directory rustic-doc-current-project)
                           "target/doc"))
-                 ;; FIXME: Many projects could share the same docs.
-                 ;; *However* that would have to be versioned, so
-                 ;; we'll have to figure out a way to coerce `<crate>-<version>`
-                 ;; strings out of cargo, or just parse the Cargo.toml file, but
-                 ;; then we'd have to review different parsing solutions.
                  (finish-func (lambda (_p)
                                 (message "Finished converting docs for %s"
                                          rustic-doc-current-project))))
@@ -277,18 +272,32 @@ See buffer *cargo-makedocs* for more info")
                                        finish-func
                                        docs-src
                                        (rustic-doc--project-doc-dest)))))
-    (message "Could not find project to convert. Visit a rust project first! \
-\(Or activate rustic-doc-mode if you are in one)")))
+    (message "Activate rustic-doc-mode to run `rustic-doc-convert-current-package")))
 
-(defun rustic-doc-install-deps ()
-  "Install dependencies with Cargo."
+(defun rustic-doc--confirm-dep-versions (missing-fd)
+  "Verify that dependencies are not too old.
+Do not check `fd' when MISSING-FD is non-nil."
+  (when (not missing-fd)
+    (when  (> 8 (string-to-number
+                  (substring (shell-command-to-string "fd --version") 3 4)))
+      (message "Your version of fd is too old, please install a recent version, maybe through cargo.")))
+
+  (when (>= 11 (string-to-number
+                (substring (shell-command-to-string "pandoc --version") 9 11)))
+    (message "Your version of pandoc is too old, please install a more recent version. See their github for more info.")))
+
+
+(defun rustic-doc-install-deps (&optional noconfirm)
+  "Install dependencies with Cargo.
+If NOCONFIRM is non-nil, install all dependencies without prompting user."
   (if (not (executable-find "cargo"))
       (message "You need to have cargo installed to use rustic-doc")
     (let ((missing-rg (not (executable-find "rg")))
-          (missing-fd (not (executable-find "fd")))
+          (missing-fd (and  (not (executable-find "fd") )))
           (missing-makedocs (not (executable-find "cargo-makedocs"))))
+      (rustic-doc--confirm-dep-versions missing-fd)
       (when (and (or missing-fd missing-makedocs missing-rg)
-                 (y-or-n-p "Missing some dependencies for rustic doc, install them? "))
+                 (or noconfirm (y-or-n-p "Missing some dependencies for rustic doc, install them? ")))
         (when missing-fd
           (rustic-doc--start-process "install-fd" "cargo" nil "install" "fd-find"))
         (when missing-rg
@@ -298,43 +307,102 @@ See buffer *cargo-makedocs* for more info")
                                      "install" "cargo-makedocs"))))))
 
 ;;;###autoload
-(defun rustic-doc-setup ()
-  "Setup or update rustic-doc filter and convert script. Convert std."
+(defun rustic-doc-setup (&optional no-dl noconfirm)
+  "Setup or update rustic-doc filter and convert script. Convert std.
+If NO-DL is non-nil, will not try to re-download
+the pandoc filter and bash script.
+NO-DL is primarily used for development of the filters.
+If NOCONFIRM is non-nil, install all dependencies without prompting user."
   (interactive)
-  (rustic-doc--install-resources)
-  (rustic-doc-install-deps)
-  (message "Setup is converting the standard library")
+  (rustic-doc-mode)
+  (unless no-dl
+    (rustic-doc--install-resources)
+    (rustic-doc-install-deps noconfirm))
   (delete-directory (concat rustic-doc-save-loc "/std")
                     t)
   (rustic-doc--start-process "rustic-doc-std-conversion"
                              rustic-doc-convert-prog
                              (lambda (_p)
                                (message "Finished converting docs for std"))
-                             "std"))
+                             "std")
+  (if rustic-doc-current-project
+      (rustic-doc-convert-current-package)
+    (message "Setup is converting std. If you want to convert local dependencies, activate rustic-doc-mode when you are in a rust project and run `rustic-doc-convert-current-package")))
 
 (defun rustic-doc--start-process (name program finish-func &rest program-args)
-  (let* ((buf (generate-new-buffer (concat "*" name "*")))
-         (proc (let ((process-connection-type nil))
-                 (apply #'start-process name buf program program-args))))
-    (set-process-sentinel
-     proc (lambda (proc event)
-            (let ((buf (process-buffer proc)))
-              (if (string-match-p (regexp-quote "abnormally") event)
-                  (message "Could not finish process: %s. \
+  "Start a process in buffer `*NAME*' for PROGRAM.
+If FINISH-FUNC is non-nil, it will be called after PROGRAM has
+exited, with the process object as its only argument.
+Any PROGRAM-ARGS are passed to PROGRAM."
+  (rustic--inheritenv
+   (let* ((buf (generate-new-buffer (concat "*" name "*")))
+          (proc (let ((process-connection-type nil))
+                  (apply #'start-process name buf program program-args))))
+     (set-process-sentinel
+      proc (lambda (proc event)
+             (let ((buf (process-buffer proc)))
+               (if (string-match-p (regexp-quote "abnormally") event)
+                   (message "Could not finish process: %s. \
 See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
-                (when finish-func
-                  (funcall finish-func proc))
-                (when (buffer-live-p buf)
-                  (kill-buffer buf))))))
-    proc))
+                 (when finish-func
+                   (funcall finish-func proc))
+                 (when (buffer-live-p buf)
+                   (kill-buffer buf))))))
+     proc)))
 
-(defun rustic-doc--thing-at-point ()
-  "Return info about `thing-at-point'. If `thing-at-point' is nil, return defaults."
-  (if-let ((active lsp-mode)
-           (lsp-content (-some->> (lsp--text-document-position-params)
-                          (lsp--make-request "textDocument/hover")
-                          (lsp--send-request)
-                          (lsp:hover-contents)))
+
+
+(defun rustic-doc--search-dir (lsp-name short-name)
+  "The search directory for documentation.
+If short-name was `Option', long-name would be `std::option::Option'.
+LSP-NAME is given by the language server, and SHORT-NAME by Emacs.
+LSP-NAME is different from the stdlib name.
+For example, the LSP-NAME `core::option::Option'
+is called `std::option::Option' in the docs."
+  (let ((long-name
+         (concat (cond
+                  ((string-prefix-p "core" lsp-name)
+                   (concat "std"
+                           (seq-drop lsp-name 4)))
+                  ((string-prefix-p "alloc" lsp-name)
+                   (concat "std"
+                           (seq-drop lsp-name 5)))
+                  (t lsp-name))
+                 "::"
+                 short-name)))
+    (rustic-doc--deepest-dir
+     (concat (rustic-doc--project-doc-dest)
+             "/"
+             (seq-reduce (lambda (path p)
+                           (concat path "/" p))
+                         (split-string long-name "::")
+                         "")))))
+
+
+(defun rustic-doc--thing-at-point-eglot (default)
+  "Thing-at-point if using eglot.
+If anything goes wrong, return DEFAULT."
+  (interactive)
+  (if-let ((content (jsonrpc-request
+                     (eglot--current-server-or-lose)
+                     :textDocument/hover (eglot--TextDocumentPositionParams)))
+           ;; text-name is the qualified name, but it sometimes doesn't correspond to the folder structure.
+           (text-name (nth 2  (split-string (plist-get  (plist-get content :contents) :value) "\n")))
+           (short-name (thing-at-point 'symbol t))
+           (search-dir (rustic-doc--search-dir text-name short-name)))
+      `((search-dir . ,search-dir)
+        (short-name . ,short-name))
+    default))
+
+(defun rustic-doc--thing-at-point-lsp-mode (default)
+  "Thing at point if using lsp-mode.
+If anything goes wrong, return DEFAULT."
+  (if-let ((active (boundp 'lsp-mode))
+           (lsp-content (when (alist-get 'lsp-mode minor-mode-alist)
+                          (-some->> (lsp--text-document-position-params)
+                            (lsp--make-request "textDocument/hover")
+                            (lsp--send-request)
+                            (lsp:hover-contents))))
            ;; `short-name' is the unqalified of a struct, function
            ;; etc, like `Option'
            (short-name (thing-at-point 'symbol t))
@@ -346,28 +414,19 @@ See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
                          (setq short-name
                                (concat "primitive "
                                        (gethash "value" lsp-content)))))
-           ;; If short-name was `Option', long-name would be `std::option::Option'
-           (long-name (concat (cond
-                               ((string-prefix-p "core" lsp-info)
-                                (concat "std"
-                                        (seq-drop lsp-info 4)))
-                               ((string-prefix-p "alloc" lsp-info)
-                                (concat "std"
-                                        (seq-drop lsp-info 5)))
-                               (t lsp-info))
-                              "::"
-                              short-name))
-           (search-dir (rustic-doc--deepest-dir
-                        (concat (rustic-doc--project-doc-dest)
-                                "/"
-                                (seq-reduce (lambda (path p)
-                                              (concat path "/" p))
-                                            (split-string long-name "::")
-                                            "")))))
+           (search-dir (rustic-doc--search-dir  lsp-info short-name)))
       `((search-dir . ,search-dir)
         (short-name . ,short-name))
-    `((search-dir . ,(rustic-doc--project-doc-dest))
-      (short-name . ,nil))))
+    default))
+
+(defun rustic-doc--thing-at-point ()
+  "Return info about `thing-at-point'.
+If `thing-at-point' is nil or no language, return defaults."
+  (let ((default `((search-dir . ,(rustic-doc--project-doc-dest))
+                   (short-name . ,nil))))
+    (cond ((boundp 'lsp-mode) (rustic-doc--thing-at-point-lsp-mode default))
+          ((boundp 'eglot) (rustic-doc--thing-at-point-eglot default))
+          (t  default))))
 
 ;;;###autoload
 (define-minor-mode rustic-doc-mode
@@ -377,8 +436,7 @@ See the *Messages* buffer or %s for more info." event (concat "*" name "*"))
             (define-key map (kbd "C-#") 'rustic-doc-search)
             map)
   (dolist (mode '(rust-mode-hook rustic-mode-hook org-mode-hook))
-    (add-hook mode 'rustic-doc-mode))
-  (rustic-doc--update-current-project))
+    (add-hook mode 'rustic-doc-mode)))
 
 (provide 'rustic-doc)
 

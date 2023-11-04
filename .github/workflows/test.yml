@@ -4,15 +4,14 @@ on: [push, pull_request]
 
 jobs:
     unix-test:
-        runs-on: ubuntu-latest
+        runs-on: ${{ matrix.os }}
         strategy:
-            max-parallel: 6
+            fail-fast: false
             matrix:
+                os: [ubuntu-latest]
                 emacs-version:
-                    - 26.3
-                    - 27.1
-                    - snapshot
-
+                    - 27.2
+                    - 28.1
         steps:
             - uses: actions/checkout@v2
 
@@ -20,22 +19,9 @@ jobs:
               with:
                   version: ${{ matrix.emacs-version }}
 
-            - uses: actions/cache@v2
-              id: cache-cask-packages
-              with:
-                path: .cask
-                key: cache-cask-packages-000
-
-            - uses: actions/cache@v2
-              id: cache-cask-executable
-              with:
-                path: ~/.cask
-                key: cache-cask-executable-001
-
             - uses: conao3/setup-cask@master
-              if: steps.cache-cask-executable.outputs.cache-hit != 'true'
               with:
-                  version: snapshot
+                  version: 0.8.4
 
             - name: Install requirements
               run: |
@@ -44,7 +30,6 @@ jobs:
 
                   sudo apt update
                   sudo apt install -y gnutls-bin gnupg2 dirmngr
-
                   sudo apt install -y texinfo libgif-dev libxpm-dev
 
             - name: Install needed rust stuff
@@ -52,6 +37,16 @@ jobs:
                   curl -sSf https://build.travis-ci.com/files/rustup-init.sh | sh -s -- --default-toolchain=stable -y
                   source $HOME/.cargo/env
                   rustup component add rustfmt-preview
+
+            - name: rustic-doc prerequisites
+              run: |
+                   wget https://github.com/jgm/pandoc/releases/download/2.17.0.1/pandoc-2.17.0.1-1-amd64.deb
+                   sudo dpkg -i pandoc-2.17.0.1-1-amd64.deb
+                   mkdir -p ~/.local/bin
+                   mkdir -p ~/.local/share/emacs/rustic-doc/std/
+                   curl -sL https://github.com/sharkdp/fd/releases/download/v8.3.2/fd-v8.3.2-x86_64-unknown-linux-musl.tar.gz | tar xz --wildcards --strip-components=1 -C /usr/local/bin '*/fd'
+                   curl -sL https://github.com/BurntSushi/ripgrep/releases/download/13.0.0/ripgrep-13.0.0-x86_64-unknown-linux-musl.tar.gz | tar xz --wildcards --strip-components=1 -C /usr/local/bin '*/rg'
+                   rustup component add rust-docs
 
             - name: Run tests
               run: |

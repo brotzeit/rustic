@@ -25,6 +25,11 @@ The first element of each list contains a command's binding."
   :type 'list
   :group 'rustic-popup)
 
+(defcustom rustic-kill-buffer-and-window t
+  "Whether to kill popup window and buffer after command execution."
+  :type 'boolean
+  :group 'rustic)
+
 (define-obsolete-face-alias 'rustic-popup-key-face
   'rustic-popup-key "1.2")
 (define-obsolete-face-alias 'rustic-popup-section-face
@@ -44,6 +49,9 @@ The first element of each list contains a command's binding."
 
 (defvar rustic-popup-buffer-name "rustic-popup-buffer"
   "Buffer name for rustic popup buffers.")
+
+(defvar rustic--popup-rust-src-name nil
+  "Rust source code file name from which rustic-popup was invoked.")
 
 (defvar rustic-popup-mode-map
   (let ((map (make-sparse-keymap)))
@@ -87,7 +95,7 @@ The first element of each list contains a command's binding."
       (insert (propertize "Commands: " 'face 'rustic-popup-section) "\n")
       (insert " " (propertize "g" 'face 'rustic-popup-key)
               "      " "recompile" "   " "\""
-              (or compilation-arguments rustic-compile-command)
+              (or (car compilation-arguments) (rustic-compile-command))
               "\"" "\n\n")
       (dolist (command rustic-popup-commands)
         (insert "\s")
@@ -102,26 +110,26 @@ The first element of each list contains a command's binding."
       (goto-char (point-min)))))
 
 ;;;###autoload
-(defun rustic-popup ()
+(defun rustic-popup (&optional args)
   "Setup popup.
 If directory is not in a rust project call `read-directory-name'."
-  (interactive)
-  (let ((func (lambda ()
-                (let ((buf (get-buffer-create rustic-popup-buffer-name))
-                      (win (split-window-below))
-                      (inhibit-read-only t))
-                  (rustic-popup-insert-contents buf)
-                  (set-window-buffer win buf)
-                  (select-window win)
-                  (fit-window-to-buffer)
-                  (set-window-text-height win (+ (window-height) 1))))))
-    (if (rustic-buffer-workspace t)
-        (funcall func)
-      (let ((dir (read-directory-name "Rust project:")))
-        (let ((default-directory dir))
-          (if (rustic-buffer-workspace t)
-              (funcall func)
-            (message "Not a rust project.")))))))
+  (interactive "P")
+  (rustic--inheritenv
+   (setq rustic--popup-rust-src-name buffer-file-name)
+   (let ((func (lambda ()
+                 (let ((buf (get-buffer-create rustic-popup-buffer-name))
+                       (win (split-window-below))
+                       (inhibit-read-only t))
+                   (rustic-popup-insert-contents buf)
+                   (set-window-buffer win buf)
+                   (select-window win)
+                   (fit-window-to-buffer)
+                   (set-window-text-height win (+ (window-height) 1))))))
+     (if args
+         (let ((dir (read-directory-name "Rust project:")))
+           (let ((default-directory dir))
+             (funcall func)))
+       (funcall func)))))
 
 ;;; Interactive
 
@@ -141,7 +149,9 @@ If directory is not in a rust project call `read-directory-name'."
            (c (intern (concat "rustic-cargo-" command))))
       (if (commandp c)
           (call-interactively c)
-        (call-interactively 'rustic-compile (concat "cargo " command))))))
+        (call-interactively 'rustic-compile (concat "cargo " command)))))
+  (when rustic-kill-buffer-and-window
+    (kill-buffer-and-window)))
 
 ;;;###autoload
 (defun rustic-popup-default-action ()
@@ -162,9 +172,10 @@ corresponding line."
           (setq rustic-compile-backtrace "0")))
         (rustic-popup-insert-contents (current-buffer)))
        ((search-forward-regexp "\srecompile\s" (line-end-position) t)
-        (setq compilation-arguments
+        (rustic-set-compilation-arguments
               (read-string "Compilation arguments: "
-                           (or compilation-arguments rustic-compile-command)))
+                           (or (car compilation-arguments)
+                               (rustic-compile-command))))
         (rustic-popup-insert-contents (current-buffer)))
        ((search-forward-regexp "\stest" (line-end-position) t)
         (setq rustic-test-arguments
@@ -219,14 +230,15 @@ corresponding line."
 
 (defun rustic-popup-setup-help-popup (string)
   "Switch to help buffer."
-  (let ((buf (get-buffer-create rustic-popup-help-buffer-name)))
-    (switch-to-buffer buf)
-    (erase-buffer)
-    (rustic-popup-help-mode)
-    (insert string)
-    (fit-window-to-buffer)
-    (set-window-text-height (selected-window) (+ (window-height) 1))
-    (goto-char (point-min))))
+  (rustic--inheritenv
+   (let ((buf (get-buffer-create rustic-popup-help-buffer-name)))
+     (switch-to-buffer buf)
+     (erase-buffer)
+     (rustic-popup-help-mode)
+     (insert string)
+     (fit-window-to-buffer)
+     (set-window-text-height (selected-window) (+ (window-height) 1))
+     (goto-char (point-min)))))
 
 ;;;###autoload
 (defun rustic-popup-kill-help-buffer ()

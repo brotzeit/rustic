@@ -1,0 +1,6 @@
+[package]
+name = "depend-on-test-crate"
+version = "0.0.1"
+
+[dependencies]
+test-crate = { version = "0.0.1", path = "../test-crate" }

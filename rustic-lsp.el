@@ -37,15 +37,22 @@ then you must set this to nil before loading `rustic-lsp'."
                  (const :tag "No LSP client" nil))
   :group 'rustic)
 
-(defcustom rustic-lsp-format nil
-  "Allow formatting through lsp server."
-  :type 'boolean
-  :safe #'booleanp
-  :group 'rustic)
-
 (defcustom rustic-analyzer-command '("rust-analyzer")
   "Command for calling rust analyzer."
   :type '(repeat (string))
+  :group 'rustic)
+
+(defcustom rustic-enable-detached-file-support nil
+  "(Experimental) Enable rust-analyzer's detached file support.
+
+If enabled, rust-analyzer will try to manage a single file
+without requiring a dedicate Cargo project.
+
+Currently, only eglot is supported.  Note that due to a current
+limitation, the whole directory to which the source file belongs
+will be managed.  Hence, you should avoid visiting a Rust file
+in, e.g. your home directory."
+  :type 'boolean
   :group 'rustic)
 
 ;;; Common
@@ -59,7 +66,7 @@ then you must set this to nil before loading `rustic-lsp'."
            (if (eq client 'eglot)
                (eglot-ensure)
              (rustic-lsp-mode-setup)
-             (lsp)))
+             (lsp-deferred)))
           (t
            (rustic-install-lsp-client-p client)))))
 
@@ -78,7 +85,8 @@ then you must set this to nil before loading `rustic-lsp'."
 with `lsp-rust-switch-server'."
   (require 'lsp-rust)
   (require 'lsp-modeline)
-  (lsp-workspace-folders-add (rustic-buffer-workspace))
+  ;; TODO: Do we still need this ? Seems to break stuff (hlissner/doom-emacs/issues/4070)
+  ;; (lsp-workspace-folders-add (rustic-buffer-workspace))
   (setq lsp-rust-server rustic-lsp-server)
   (setq lsp-rust-analyzer-server-command rustic-analyzer-command)
   (lsp-rust-switch-server rustic-lsp-server))
@@ -117,14 +125,21 @@ with `lsp-rust-switch-server'."
                                      (when (symbolp (car mode))
                                        (eq (car mode) 'rust-mode)))
                                    eglot-server-programs)))))
-    (add-to-list 'eglot-server-programs `(rustic-mode . ,rustic-analyzer-command)))
-  ;; don't allow formatting with rls
-  (unless rustic-lsp-format
-    (let ((feature :documentFormattingProvider))
-      (unless (-contains? eglot-ignored-server-capabilites feature)
-        (add-to-list 'eglot-ignored-server-capabilites feature)))))
+    (add-to-list 'eglot-server-programs `(rustic-mode . (eglot-rust-analyzer . ,rustic-analyzer-command)))))
 
 (with-eval-after-load 'eglot
+  (defclass eglot-rust-analyzer (eglot-lsp-server) ()
+    :documentation "Rust-analyzer LSP server.")
+
+  (cl-defmethod eglot-initialization-options ((server eglot-rust-analyzer))
+    "Pass `detachedFiles' when `rustic-enable-detached-file-support' is non-`nil'."
+    (if (or (null rustic-enable-detached-file-support)
+            (null buffer-file-name)
+            (rustic-buffer-crate t))
+        eglot--{}
+      (list :detachedFiles
+            (vector (file-local-name (file-truename buffer-file-name))))))
+
   (rustic-setup-eglot))
 
 ;;; rustic-macro-expansion-mode
@@ -133,37 +148,36 @@ with `lsp-rust-switch-server'."
 
 (define-derived-mode rustic-macro-expansion-mode special-mode "Rust"
   :group 'rustic
-  :syntax-table rustic-mode-syntax-table
+
+  :syntax-table rust-mode-syntax-table
+
+  ;; Syntax
+  (setq-local syntax-propertize-function #'rust-syntax-propertize)
+
+  ;; Indentation
+  (setq-local indent-line-function 'rust-mode-indent-line)
+
   ;; Fonts
-  (setq-local font-lock-defaults '(rustic-font-lock-keywords
-                                   nil nil nil nil
-                                   (font-lock-syntactic-face-function
-                                    . rustic-syntactic-face-function))))
+  (setq-local font-lock-defaults
+              '(rust-font-lock-keywords
+                nil nil nil nil
+                (font-lock-syntactic-face-function
+                 . rust-mode-syntactic-face-function)))
+  )
 
 ;;;###autoload
 (defun rustic-analyzer-macro-expand (result)
-  "Default method for displaying macro expansion results."
-  (interactive)
-  (let* ((root (lsp-workspace-root default-directory))
-         (buf (get-buffer-create
-               (format "*rust-analyzer macro expansion %s*" root))))
-    (with-current-buffer buf
-      (let ((inhibit-read-only t))
-        (erase-buffer)
-        ;; wrap expanded macro in a main function so we can run rustfmt
-        (insert "fn main()")
-        ;; rustfmt complains about $s
-        (insert (replace-regexp-in-string "\\$" "" result))
-        (rustic-macro-expansion-mode)
-        (rustic-format-buffer)
-        (with-current-buffer buf
-          (save-excursion
-            (goto-char (point-min))
-            (delete-region (point-min) (line-end-position))
-            (goto-char (point-max))
-            (forward-line -1)
-            (delete-region (line-beginning-position) (point-max))))))
-    (display-buffer buf)))
+  "Default method for displaying macro expansion RESULT ."
+  (rustic--inheritenv
+   (let* ((root (lsp-workspace-root default-directory))
+          (buf (get-buffer-create
+                (format "*rust-analyzer macro expansion %s*" root))))
+     (with-current-buffer buf
+       (let ((inhibit-read-only t))
+         (erase-buffer)
+         (insert result)
+         (rustic-macro-expansion-mode)))
+     (display-buffer buf))))
 
 ;;; _
 (provide 'rustic-lsp)

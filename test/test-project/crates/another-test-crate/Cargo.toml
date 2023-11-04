@@ -1,0 +1,3 @@
+[package]
+name = "another-test-crate"
+version = "0.0.1"

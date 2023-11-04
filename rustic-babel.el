@@ -1,4 +1,4 @@
-;;; rustic-babel.el --- Org babel facilities for cargo -*-lexical-binding: t-*-
+;;; rustic-babel.el --- org-babel facilities for cargo -*-lexical-binding: t-*-
 
 ;;; Code:
 
@@ -26,9 +26,21 @@
   :type 'boolean
   :group 'rustic-babel)
 
+(defcustom rustic-babel-auto-wrap-main t
+  "Whether to auto wrap body in `fn main' to function call if none exists."
+  :type 'boolean
+  :group 'rustic-babel)
+
 (defcustom rustic-babel-format-src-block t
   "Whether to format a src block automatically after successful execution."
   :type 'boolean
+  :group 'rustic-babel)
+
+(defcustom rustic-babel-default-toolchain "stable"
+  "Active toolchain for babel blocks.
+When passing a toolchain to a block as argument, this variable won't be
+considered."
+  :type 'string
   :group 'rustic-babel)
 
 (defvar rustic-babel-buffer-name '((:default . "*rust-babel*")))
@@ -50,66 +62,86 @@
 
 (defvar rustic-babel-spinner nil)
 
-(defun rustic-babel-eval (dir)
-  "Start a rust babel compilation process in directory DIR."
-  (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
-         (default-directory dir)
-         (params '("cargo" "build" "--quiet"))
-         (inhibit-read-only t))
-    (rustic-compilation-setup-buffer err-buff dir 'rustic-compilation-mode)
-    (when rustic-babel-display-compilation-buffer
-      (display-buffer err-buff))
-    (rustic-make-process
-     :name rustic-babel-process-name
-     :buffer err-buff
-     :command params
-     :filter #'rustic-compilation-filter
-     :sentinel #'rustic-babel-build-sentinel)))
+(defun rustic-babel-eval (dir toolchain-kw-or-string main-p)
+  "Start a rust babel compilation process.
+Compilation is started in directory DIR with appropriate
+TOOLCHAIN-KW-OR-STRING and MAIN-P indicates if a main function
+should be wrapped in which case we will disable rustfmt."
+  (rustic--inheritenv
+   (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
+          (default-directory dir)
+          (toolchain (cond ((eq toolchain-kw-or-string 'nightly) "+nightly")
+                           ((eq toolchain-kw-or-string 'beta) "+beta")
+                           ((eq toolchain-kw-or-string 'stable) "+stable")
+                           (toolchain-kw-or-string (format "+%s" toolchain-kw-or-string))
+                           (t (format "+%s" rustic-babel-default-toolchain))))
+          (params (list "cargo" toolchain "build" "--quiet"))
+          (inhibit-read-only t))
+     (rustic-compilation-setup-buffer err-buff dir 'rustic-compilation-mode)
+     (when rustic-babel-display-compilation-buffer
+       (display-buffer err-buff))
+     (rustic-make-process
+      :name rustic-babel-process-name
+      :buffer err-buff
+      :command params
+      :filter #'rustic-compilation-filter
+      :sentinel (lambda (proc output)
+                  (rustic-babel-build-sentinel toolchain proc output main-p))))))
 
-(defun rustic-babel-build-sentinel (proc _output)
+(defun rustic-babel-format-block ()
+  "Format babel block at point."
+  (interactive)
+  (save-excursion
+    (let ((babel-body
+           (org-element-property :value (org-element-at-point)))
+          (proc
+           (make-process :name "rustic-babel-format"
+                         :buffer "rustic-babel-format-buffer"
+                         :command `(,(rustic-rustfmt-bin)
+                                    ,@(rustic-compute-rustfmt-args))
+                         :filter #'rustic-compilation-filter
+                         :sentinel #'rustic-babel-format-sentinel)))
+      (while (not (process-live-p proc))
+        (sleep-for 0.01))
+      (process-send-string proc babel-body)
+      (process-send-eof proc)
+      proc)))
+
+(defun rustic-babel-build-sentinel (toolchain proc _output main-p)
   "Sentinel for rust babel compilation process PROC.
+MAIN-P indicates if the :main attribute is passed to the org header.
 If `rustic-babel-format-src-block' is t, format src-block after successful
 execution with rustfmt."
-  (let ((proc-buffer (process-buffer proc))
-        (inhibit-read-only t))
-    (if (zerop (process-exit-status proc))
-        (let* ((default-directory rustic-babel-dir))
-          ;; format babel block
-          (when rustic-babel-format-src-block
-            (let ((babel-body
-                   (org-element-property :value (org-element-at-point)))
-                  (proc
-                   (make-process :name "rustic-babel-format"
-                                 :buffer "rustic-babel-format-buffer"
-                                 :command `(,rustic-rustfmt-bin
-                                            ,@(rustic-compute-rustfmt-args))
-                                 :filter #'rustic-compilation-filter
-                                 :sentinel #'rustic-babel-format-sentinel)))
-              (while (not (process-live-p proc))
-                (sleep-for 0.01))
-              (process-send-string proc babel-body)
-              (process-send-eof proc)
-              (while (eq (process-status proc) 'run)
-                (sit-for 0.1))))
+  (rustic--inheritenv
+   (let ((proc-buffer (process-buffer proc))
+         (inhibit-read-only t))
+     (if (zerop (process-exit-status proc))
+         (let* ((default-directory rustic-babel-dir))
 
-          ;; run project
-          (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
-                 (params '("cargo" "run" "--quiet"))
-                 (inhibit-read-only t))
-            (rustic-make-process
-             :name rustic-babel-process-name
-             :buffer err-buff
-             :command params
-             :filter #'rustic-compilation-filter
-             :sentinel #'rustic-babel-run-sentinel)))
+           ;; format babel block
+           (when (and rustic-babel-format-src-block (not rustic-babel-auto-wrap-main) (not main-p))
+             (let ((proc (rustic-babel-format-block)))
+               (while (eq (process-status proc) 'run)
+                 (sit-for 0.1))))
 
-      (let* ((project (car (reverse (split-string rustic-babel-dir "/"))))
-             (result (format "error: Could not compile `%s`." project)))
-        (rustic-babel-build-update-result-block result))
-      (rustic-with-spinner rustic-babel-spinner nil nil)
-      (if (= (length (with-current-buffer proc-buffer (buffer-string))) 0)
-          (kill-buffer proc-buffer)
-        (pop-to-buffer proc-buffer)))))
+           ;; run project
+           (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
+                  (params (list "cargo" toolchain "run" "--quiet"))
+                  (inhibit-read-only t))
+             (rustic-make-process
+              :name rustic-babel-process-name
+              :buffer err-buff
+              :command params
+              :filter #'rustic-compilation-filter
+              :sentinel #'rustic-babel-run-sentinel)))
+
+       (let* ((project (car (reverse (split-string rustic-babel-dir "/"))))
+              (result (format "error: Could not compile `%s`." project)))
+         (rustic-babel-build-update-result-block result))
+       (rustic-with-spinner rustic-babel-spinner nil nil)
+       (if (= (length (with-current-buffer proc-buffer (buffer-string))) 0)
+           (kill-buffer proc-buffer)
+         (pop-to-buffer proc-buffer))))))
 
 (defun rustic-babel-run-sentinel (proc _output)
   "Sentinel for babel project execution."
@@ -208,30 +240,44 @@ Otherwise create it with `rustic-babel-generate-project'."
           (put-text-property beg end 'project (make-symbol new))
           new)))))
 
-(defun crate-dependencies (name version features)
-  "Generate a Cargo.toml [dependencies] entry for a crate given a version and features."
-  (let ((version-string (concat "version = \"" version "\""))
-        (features-string
-         (if features
-             (concat "features = [" (mapconcat (lambda (s) (concat "\"" s "\"")) features ", ") "]")
-           nil)))
-    (let ((toml-entry (string-join (remove nil (list version-string features-string)) ", ")))
-      (concat name " = {" toml-entry "}"))))
+(defun crate-dependencies (name version features path)
+  "Generate a Cargo.toml [dependencies] entry for crate NAME.
+Use VERSION, FEATURES and PATH."
+  (let* ((version-string (concat "version = \"" version "\""))
+         (features-string
+          (when features
+            (concat "features = [" (mapconcat (lambda (s) (concat "\"" s "\"")) features ", ") "]")))
+         (path-string
+          (when path
+            (concat "path = \"" path "\"")))
+         (toml-entry (string-join (remove nil (list version-string features-string path-string)) ", ")))
+    (concat name " = {" toml-entry "}")))
 
-(defun cargo-toml-dependencies (crate-versions crate-features)
+(defun cargo-toml-dependencies (crate-versions crate-features crate-paths)
   "Generate the [dependencies] section of a Cargo.toml file given crates and their versions & features."
   (let ((dependencies ""))
     (dolist (crate-and-version crate-versions)
-      (let ((name (car crate-and-version))
-            (version (cdr crate-and-version)))
-        (let ((features (cdr (assoc name crate-features))))
-          (setq name (symbol-name name))
-          (when (numberp version)
-            (setq version (number-to-string version)))
-          (when (not (listp features))
-            (setq features (list features)))
-          (let ((cargo-toml-entry (crate-dependencies name version features)))
-            (setq dependencies (concat dependencies cargo-toml-entry "\n"))))))
+      (let* ((name (if (listp crate-and-version)
+                       (car crate-and-version)
+                     crate-and-version))
+             (version (if (listp crate-and-version)
+                          (cdr crate-and-version)
+                        "*"))
+             (features (cdr (assoc name crate-features)))
+             (path (cdr (assoc name crate-paths))))
+
+        ;; make sure it works with symbols and strings
+        (when (symbolp name)
+          (setq name (symbol-name name)))
+        (when (numberp version)
+          (setq version (number-to-string version)))
+        (when (symbolp version)
+          (setq version (symbol-name version)))
+
+        (when (not (listp features))
+          (setq features (list features)))
+        (let ((cargo-toml-entry (crate-dependencies name version features path)))
+          (setq dependencies (concat dependencies cargo-toml-entry "\n")))))
     (setq dependencies (concat "[dependencies]\n" dependencies))))
 
 (defun rustic-babel-cargo-toml (dir params)
@@ -240,8 +286,9 @@ Use org-babel parameter crates from PARAMS and add them to the project in
 directory DIR."
   (let ((crates (cdr (assq :crates params)))
         (features (cdr (assq :features params)))
+        (paths (cdr (assq :paths params)))
         (toml (expand-file-name "Cargo.toml" dir)))
-    (let ((dependencies (cargo-toml-dependencies crates features)))
+    (let ((dependencies (cargo-toml-dependencies crates features paths)))
       (make-directory (file-name-directory toml) t)
       (with-temp-file toml
         (condition-case nil
@@ -251,6 +298,45 @@ directory DIR."
           (erase-buffer)
           (insert s)
           (insert dependencies))))))
+
+(defun rustic-babel-ensure-main-wrap (body)
+  "Wrap BODY in a 'fn main' function call if none exists."
+  (if (string-match "^[ \t]*\\(pub \\)?\\(async \\)?[fn]+[ \t\n\r]*main[ \t]*(.*)" body)
+      body
+    (format "fn main() {\n%s\n}\n" body)))
+
+(defun rustic-babel-include-blocks (blocks)
+  "Insert contents of BLOCKS to the 'main block' that is being
+executed with the parameter `:include'."
+  (let ((contents ""))
+    (with-current-buffer (current-buffer)
+      (save-excursion
+        (dolist (b (mapcar (lambda (b) (if (symbolp b) (symbol-name b) b)) blocks))
+          (when-let ((c (rustic-babel-block-contents b)))
+            (setq contents (concat contents c))))))
+    contents))
+
+(defun rustic-babel-block-contents (block-name)
+  "Return contents of block with the name BLOCK-NAME"
+  (with-current-buffer (current-buffer)
+    (save-excursion
+      (org-babel-goto-named-src-block block-name)
+      (org-element-property :value (org-element-at-point)))))
+
+(defun rustic-babel-insert-mod (mods)
+  "Build string with module declarations for MODS and return it."
+  (let ((c ""))
+    (dolist (m mods)
+      (setq c (concat c (format "mod %s;\n" m))))
+    c))
+
+(defun rustic-babel-generate-modules (root blocks)
+  "Create module files for BLOCKS in the project with ROOT."
+  (dolist (b (mapcar (lambda (b) (if (symbolp b) (symbol-name b) b)) blocks))
+    (let* ((contents (rustic-babel-block-contents b))
+           (src-dir (concat root "/src/"))
+           (module (expand-file-name (format "%s.rs" b) src-dir)))
+      (write-region contents nil module nil 0))))
 
 (defun org-babel-execute:rustic (body params)
   "Execute a block of Rust code with org-babel.
@@ -265,14 +351,18 @@ kill the running process."
       (let* ((default-directory org-babel-temporary-directory)
              (project (rustic-babel-project))
              (dir (setq rustic-babel-dir (expand-file-name project)))
-             (wrapped-body (if (string-match-p "fn main()" body)
-                               body
-                             (concat "fn main(){\n  let result = {\n"
-                                     body
-                                     "\n};\n   println!(\"{:?}\",result)\n}")))
-             (main (expand-file-name "main.rs" (concat dir "/src"))))
+             (main-p (cdr (assq :main params)))
+             (main (expand-file-name "main.rs" (concat dir "/src")))
+             (wrap-main (cond ((string= main-p "yes") t)
+                              ((string= main-p "no") nil)
+                              (t rustic-babel-auto-wrap-main)))
+             (include-blocks (cdr (assq :include params)))
+             (use-blocks (cdr (assq :use params))))
+
         (make-directory (file-name-directory main) t)
         (rustic-babel-cargo-toml dir params)
+        (when use-blocks
+          (rustic-babel-generate-modules dir use-blocks))
         (setq rustic-info (org-babel-get-src-block-info))
         (setq rustic-babel-params params)
 
@@ -281,13 +371,83 @@ kill the running process."
           '(rustic-babel-spinner (":Executing " (:eval (spinner-print rustic-babel-spinner))))
           (spinner-start rustic-babel-spinner))
 
-        (let ((default-directory dir))
+        (let ((default-directory dir)
+              (toolchain (cdr (assq :toolchain params))))
           (write-region
-           (concat "#![allow(non_snake_case)]\n" wrapped-body) nil main nil 0)
-          (rustic-babel-eval dir)
+           (concat "#![allow(non_snake_case, unused)]\n"
+                   (if use-blocks (rustic-babel-insert-mod use-blocks) "")
+                   (if include-blocks (rustic-babel-include-blocks include-blocks) "")
+                   (if wrap-main (rustic-babel-ensure-main-wrap body) body))
+           nil main nil 0)
+          (rustic-babel-eval dir toolchain main-p)
           (setq rustic-babel-src-location
                 (set-marker (make-marker) (point) (current-buffer)))
           project)))))
+
+(defun rustic-babel-visit-project ()
+  "Open main.rs of babel block at point. The block has to be executed
+at least one time in this emacs session before this command can be used."
+  (interactive)
+  (let* ((beg (org-babel-where-is-src-block-head))
+         (end (save-excursion (goto-char beg)
+                              (line-end-position)))
+         (line (buffer-substring beg end))
+         (project (symbol-name (get-text-property 0 'project line)))
+         (path (concat org-babel-temporary-directory "/" project "/src/main.rs")))
+    (if (file-exists-p path)
+        (find-file path)
+      (message "Run block first to visit generated project."))))
+
+;; TODO: honor babel params
+(defun rustic-babel-clippy ()
+  "Currently doesn't support params."
+  (interactive)
+  (rustic--inheritenv
+   (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
+          (default-directory org-babel-temporary-directory)
+          (body (org-element-property :value (org-element-at-point)))
+          (project (rustic-babel-project))
+          (params (list "cargo" "clippy")))
+     (let* ((dir (setq rustic-babel-dir (expand-file-name project)))
+            (main (expand-file-name "main.rs" (concat dir "/src")))
+            (default-directory dir))
+       (write-region
+        (concat "#![allow(non_snake_case)]\n" body)
+        nil main nil 0)
+       (rustic-compilation-setup-buffer err-buff dir 'rustic-cargo-clippy-mode)
+       (display-buffer err-buff)
+       (rustic-make-process
+        :name rustic-babel-process-name
+        :buffer err-buff
+        :command params
+        :filter #'rustic-compilation-filter)))))
+
+(defun rustic-babel-lookup-missing-dependencies ()
+  (let* ((contents (org-element-property :value (org-element-at-point)))
+         crates)
+    (dolist (line (split-string contents "\n"))
+      (when (string-match "\s+use\s" line)
+        (if (string-match "::" line)
+            (let* ((import (nth 1 (split-string line)))
+                   (c (nth 0 (split-string import "::"))))
+              (unless (string-match "^std" c)
+                (push c crates)))
+          (let* ((import (nth 1 (split-string line))))
+            (unless (string-match "^std" import)
+              (push (string-trim-right import ";") crates))))))
+    crates))
+
+(defun rustic-babel-header-insert-crates ()
+  "Parse crates from imports and insert them with the header arg `:crates'.
+Ignore crates that are listed in `:use'."
+  (interactive)
+  (let* ((crates (rustic-babel-lookup-missing-dependencies))
+         (use-blocks (cdr (assq :use (nth 2 (org-babel-get-src-block-info)))))
+         (missing (--filter
+                   (not (-contains?
+                         (mapcar (lambda (b) (if (symbolp b) (symbol-name b) b)) use-blocks) it))
+                   crates)))
+    (org-babel-insert-header-arg (concat "crates '" (format "%s" missing)))))
 
 (provide 'rustic-babel)
 ;;; rustic-babel.el ends here

@@ -8,6 +8,7 @@
 
 (setq rustic-load-optional-libraries t)
 (setq rustic-lsp-setup-p nil) ; don't start LSP server for every test
+(setq auto-save-default nil)
 
 (require 'rustic)
 
@@ -49,7 +50,6 @@ Emacs shutdown.")
          (dir (rustic-babel-generate-project t))
          (src (concat dir "/src"))
          (file (expand-file-name "main.rs" src))
-         (buffer-save-without-query t)
          (rustic-format-trigger nil))
     (with-current-buffer buffer
       (write-file file)
@@ -57,6 +57,18 @@ Emacs shutdown.")
       (insert string)
       (save-buffer))
     dir))
+
+(defun rustic-test-count-error-helper-new (string)
+  (let* ((buffer (get-buffer-create "b"))
+         (default-directory org-babel-temporary-directory)
+         (dir (rustic-babel-generate-project t))
+         (file (expand-file-name "main.rs" (concat dir "/src")))
+         (default-directory dir))
+    (write-region (concat "#![allow(non_snake_case)]\n" string)
+                  nil file nil 0)
+    (with-current-buffer buffer
+      (find-file file))
+    (get-file-buffer file)))
 
 (defmacro rustic-test-silence (messages &rest body)
   `(cl-letf* (((symbol-function 'm)
@@ -105,3 +117,15 @@ list of substrings of `STR' each followed by its face."
     (font-lock-ensure)
     (font-lock-flush)
     (buffer-string)))
+
+(defun rustic-mode-auto-save-hook ()
+    "Enable auto-saving in rustic-mode buffers."
+    (when buffer-file-name
+      (setq-local compilation-ask-about-save nil)))
+(add-hook 'rustic-mode-hook 'rustic-mode-auto-save-hook)
+
+(defun rustic-test--wait-till-finished (buffer)
+  "Wait till the BUFFER has exited."
+  (let* ((proc (get-buffer-process buffer)))
+    (while (not (eq (process-status proc) 'exit))
+      (sit-for 0.2))))

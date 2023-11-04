@@ -21,7 +21,7 @@
 (defun rustic-rustfix ()
   "Run 'cargo fix'."
   (interactive)
-  (let* ((command (list rustic-cargo-bin "fix" "--allow-dirty"))
+  (let* ((command (list (rustic-cargo-bin) "fix" "--allow-dirty"))
          (err-buf rustic-rustfix-buffer-name)
          (proc rustic-rustfix-process-name)
          (mode 'rustic-rustfix-mode))

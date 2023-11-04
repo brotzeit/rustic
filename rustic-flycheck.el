@@ -9,8 +9,13 @@
 
 (require 'rustic)
 
-(defcustom rustic-flycheck-clippy-params "--message-format=json -Zunstable-options"
-  "Parameters for the flycheck clippy checker `rustic-clippy'."
+(defcustom rustic-flycheck-clippy-params-stable "--message-format=json"
+  "Parameters for the flycheck clippy checker `rustic-clippy' when active toolchain is stable."
+  :type 'string
+  :group 'rustic-flycheck)
+
+(defcustom rustic-flycheck-clippy-params-nightly "--message-format=json -Zunstable-options"
+  "Parameters for the flycheck clippy checker `rustic-clippy' when active toolchain is nightly."
   :type 'string
   :group 'rustic-flycheck)
 
@@ -39,7 +44,7 @@ current workspace, and returns them in a list, or nil if no
 targets could be found."
   (let ((process-output-as-json
          (lambda (program &rest args)
-           (with-temp-buffer
+           (rustic--with-temp-process-buffer
              (let ((code-or-signal (apply 'process-file program nil '(t nil) nil args)))
                (unless (equal code-or-signal 0)
                  ;; Prevent from displaying "JSON readtable error".
@@ -87,7 +92,7 @@ the closest matching target, or nil if no targets could be found.
 
 See http://doc.crates.io/manifest.html#the-project-layout for a
 description of the conventional Cargo project layout."
-  (-when-let* ((workspace (rustic-buffer-workspace t))
+  (-when-let* ((workspace (rustic-buffer-crate t))
                (manifest (file-local-name (concat workspace "Cargo.toml")))
                (packages (rustic-flycheck-get-cargo-targets manifest))
                (targets (-flatten-n 1 packages)))
@@ -160,24 +165,37 @@ Flycheck according to the Cargo project layout."
         (setq-local flycheck-rust-crate-type .kind)
         (setq-local flycheck-rust-binary-name .name)))))
 
+(defun rustic-flycheck-nightly-p ()
+  "Check if active toolchain is a nightly toolchain."
+  (let ((tc (shell-command-to-string "rustup show active-toolchain")))
+    (string-match-p "^nightly" (car (split-string tc)))))
+
+(defun rustic-flycheck-clippy-params ()
+  "Return clippy parameters for flycheck depending on the active toolchain."
+  (if (rustic-flycheck-nightly-p)
+      rustic-flycheck-clippy-params-nightly
+    rustic-flycheck-clippy-params-stable))
+
+(defun rustic-flycheck-rust-manifest-directory ()
+  "This function looks up the workspace root instead of the crate root
+so error highlighting also works with multi-crate projects."
+  (rustic-buffer-workspace))
+
 (flycheck-define-checker rustic-clippy
   "A Rust syntax checker using clippy.
 
 See URL `https://github.com/rust-lang-nursery/rust-clippy'."
-  :command ("cargo" "clippy" (eval (split-string rustic-flycheck-clippy-params)))
+  :command ("cargo" "clippy" (eval (split-string (rustic-flycheck-clippy-params))))
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
   :modes rustic-mode
   :predicate flycheck-buffer-saved-p
-  :enabled (lambda ()
-             (and (flycheck-rust-cargo-has-command-p "clippy")
-                  (flycheck-rust-manifest-directory)))
-  :working-directory (lambda (_) (flycheck-rust-manifest-directory))
+  :working-directory (lambda (_) (rustic-flycheck-rust-manifest-directory))
   :verify
   (lambda (_)
     (and buffer-file-name
-         (let ((has-toml (flycheck-rust-manifest-directory))
+         (let ((has-toml (rustic-flycheck-rust-manifest-directory))
                (has-clippy (flycheck-rust-cargo-has-command-p "clippy")))
            (list
             (flycheck-verification-result-new

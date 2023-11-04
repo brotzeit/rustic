@@ -1,1 +1,16 @@
-# Dummy file needed for test
+[package]
+authors = ["test"]
+name = "test-project"
+description = "test"
+version = "0.0.1"
+    
+[workspace]
+members = ["crates/*"]
+
+[dependencies]
+test-crate = { version = "0.0.1", path = "crates/test-crate" }    
+another-test-crate = { version = "0.0.1", path = "crates/another-test-crate" }
+depend-on-test-crate = { version = "0.0.1", path = "crates/depend-on-test-crate" }
+
+[lib]
+path = "lib.rs"

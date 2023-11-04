@@ -1,0 +1,8 @@
+#+TITLE: Readme
+The way I develop the filter is:
+1. Select an html-file to focus on, such as [[./debug_files/enum.Option.html]].
+2. Open [[./filter.lua]].
+3. Open [[./debug_files/option.org]].
+4. Open [[./debug_files/filterednative]].
+5. Running `make` will now update =option.org= with the org-representation and =filterednative= with the pandoc representation. If anything looks weird in the org-version, more details can be found in filterednative.
+   6. See [[./Makefile]] for the alternatives. =make standard= uses the default, whereas =make primitive= uses HTML for the type =i16=, which is formatted differently since it is a primitive.

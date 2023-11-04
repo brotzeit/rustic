@@ -1,0 +1,14 @@
+[package]
+authors = ["test"]
+name = "test-project"
+description = "test"
+version = "0.0.1"
+    
+[workspace]
+members = ["crates/*"]
+
+[dependencies]
+test-crate = { version = "0.0.1", path = "crates/test-crate" }    
+
+[lib]
+path = "lib.rs"
