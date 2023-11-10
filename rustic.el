@@ -118,6 +118,9 @@ this variable."
   :type 'function
   :group 'rustic)
 
+(defcustom rustic-prefer-ts nil
+  "If non-nil, prefer the tree-sitter derived mode.")
+
 ;;; Mode
 
 (defvar rustic-mode-map
@@ -163,10 +166,25 @@ this variable."
    (add-hook 'lsp-after-diagnostics-hook 'rustic-cargo-add-missing-dependencies-hook nil t)))
 
 ;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
+(when (fboundp 'rust-ts-mode)
+  (define-derived-mode rustic-ts-mode rust-ts-mode "Rustic-ts"
+    "Major mode for Rust code, using tree-sitter."
+    :group)) 'rustic
+
+
+;;;###autoload
+(add-to-list 'auto-mode-alist
+             `("\\.rs\\'" .
+               ,(if (and (fboundp 'rustic-ts-mode) rustic-prefer-ts)
+                    'rustic-ts-mode
+                  'rustic-mode)))
 
 ;; remove rust-mode from `auto-mode-alist'
 (let ((mode '("\\.rs\\'" . rust-mode)))
+  (when (member mode auto-mode-alist)
+    (setq auto-mode-alist (remove mode auto-mode-alist))))
+
+(let ((mode '("\\.rs\\'" . rust-ts-mode)))
   (when (member mode auto-mode-alist)
     (setq auto-mode-alist (remove mode auto-mode-alist))))
 
