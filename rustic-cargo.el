@@ -525,6 +525,16 @@ The CRATE-LINE is a single line from the `rustic-cargo-oudated-buffer-name'"
         (rustic-cargo-reload-outdated)))))
 
 ;;; New project
+(defun rustic--split-path (project-path)
+  "Split PROJECT-PATH into two parts: the longest prefix of directories that
+exist, and the rest. Return a cons cell of the two parts."
+  (let ((components (file-name-split project-path))
+        (existing-dir ""))
+    (while (and (not (null components))
+                (file-directory-p (file-name-concat existing-dir (car components))))
+      (setq existing-dir (file-name-concat existing-dir (car components)))
+      (setq components (cdr components)))
+    (cons existing-dir (apply 'file-name-concat (cons "" components)))))
 
 (defun rustic-create-project (project-path is-new &optional bin)
   "Run either 'cargo new' if IS-NEW is non-nil, or 'cargo init' otherwise.
@@ -544,10 +554,12 @@ BIN is not nil, create a binary application, otherwise a library."
                                                     "/src/main.rs"
                                                   "/src/lib.rs")))))))
          (proc (format "rustic-cargo-%s-process" cmd))
-         (buf (format "*cargo-%s*" cmd)))
+         (buf (format "*cargo-%s*" cmd))
+         (dir-pair (rustic--split-path project-path))
+         (default-directory (car dir-pair)))
     (make-process :name proc
                   :buffer buf
-                  :command (list (rustic-cargo-bin) cmd bin project-path)
+                  :command (list (rustic-cargo-bin) cmd bin (cdr dir-pair))
                   :sentinel new-sentinel
                   :file-handler t)))
 
@@ -555,7 +567,7 @@ BIN is not nil, create a binary application, otherwise a library."
 (defun rustic-cargo-new (project-path &optional bin)
   "Run 'cargo new' to start a new package in the path specified by PROJECT-PATH.
 If BIN is not nil, create a binary application, otherwise a library."
-  (interactive "DProject path: ")
+  (interactive "GProject path: ")
   (rustic-create-project project-path t bin))
 
 ;;;###autoload
