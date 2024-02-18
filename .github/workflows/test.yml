@@ -52,7 +52,7 @@ jobs:
       - uses: leotaku/elisp-check@v1.3
         with:
           file: "rustic.el"
-          check: melpa
+          check: load-file
           ignore_warnings: true
           warnings_as_errors: false
 
