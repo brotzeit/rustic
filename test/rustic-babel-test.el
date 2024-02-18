@@ -1,7 +1,7 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
 
-(require 'test-helper)
+(load-file "test-helper.el")
 (setq org-confirm-babel-evaluate nil)
 
 (defun rustic-test-get-babel-block (contents &optional params)
