@@ -160,7 +160,7 @@ execution with rustfmt."
           (save-excursion
             (save-match-data
               (goto-char (point-min))
-              (when (re-search-forward "^thread '[^']+' panicked at '[^']+', ")
+              (when (re-search-forward "^thread '[^']+' panicked at .*")
                 (goto-char (match-beginning 0))
                 (setq result (buffer-substring-no-properties (point) (line-end-position)))))))
         (rustic-babel-run-update-result-block result)
