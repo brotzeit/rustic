@@ -165,10 +165,13 @@ this variable."
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
 
-;; remove rust-mode from `auto-mode-alist'
-(let ((mode '("\\.rs\\'" . rust-mode)))
+;; remove rust-mode and rust-ts-mode from `auto-mode-alist'
+(let ((mode '("\\.rs\\'" . rust-mode))
+      (ts-mode '("\\.rs\\'" . rust-ts-mode)))
   (when (member mode auto-mode-alist)
-    (setq auto-mode-alist (remove mode auto-mode-alist))))
+    (setq auto-mode-alist (remove mode auto-mode-alist)))
+  (when (member ts-mode auto-mode-alist)
+    (setq auto-mode-alist (remove ts-mode auto-mode-alist))))
 
 ;;; envrc support
 
