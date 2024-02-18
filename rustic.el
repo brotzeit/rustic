@@ -30,7 +30,6 @@
 
 (require 'cl-lib)
 (require 'pcase)
-(require 'seq)
 (require 'subr-x)
 
 (require 'dash)
