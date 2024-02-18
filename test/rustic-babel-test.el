@@ -1,6 +1,9 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
 
+(require 'rustic)
+(require 'ert)
+
 (load-file "test-helper.el")
 (setq org-confirm-babel-evaluate nil)
 
