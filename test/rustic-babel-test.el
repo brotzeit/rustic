@@ -72,7 +72,7 @@
                    }")
          (buf (rustic-test-get-babel-block string)))
     (rustic-test-babel-execute-block buf)
-    (let ((re "^thread '[^']+' panicked at '[^']+', "))
+    (let ((re "^thread '[^']+' panicked at .*"))
       (should (string-match re (rustic-test-babel-check-results buf))))))
 
 (ert-deftest rustic-test-babel-spinner ()
