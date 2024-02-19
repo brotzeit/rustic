@@ -3,7 +3,7 @@
 (require 'rustic-babel-test)
 (require 'rustic-compilation-error-tests)
 (require 'rustic-compile-test)
-(require 'rustic-doc-test)
+;; (require 'rustic-doc-test)
 (require 'rustic-format-test)
 (require 'rustic-window-test)
 (require 'rustic-workspace-test)

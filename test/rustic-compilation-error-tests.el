@@ -15,7 +15,7 @@
       (with-current-buffer (get-buffer rustic-compilation-buffer-name)
         (should (= compilation-num-errors-found 1))))))
 
-(ert-deftest rustic-test-cargo-test ()
+(ert-deftest rustic-test-cargo-test-compilation ()
   ;; NOTE: this doesn't seem to be the case anymore
   ;; compilation-num-errors-found would be 8 with regular compilation mode
   ;; due to parsing issues https://github.com/rust-lang/rust-mode/pull/254
