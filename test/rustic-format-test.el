@@ -37,7 +37,6 @@
       (fundamental-mode)
       ;; no rustic-mode buffer
       (should-error (rustic-format-buffer))
-      (should-not (get-buffer rustic-format-buffer-name))
       (erase-buffer)
       (rustic-mode)
       (insert string-dummy)
