@@ -42,7 +42,7 @@
 
 (defun rustic-test-count-error-helper-new (string)
   (let* ((buffer (get-buffer-create "b"))
-         (default-directory org-babel-temporary-directory)
+         (default-directory rustic-org-babel-temporary-directory)
          (dir (rustic-babel-generate-project t))
          (file (expand-file-name "main.rs" (concat dir "/src")))
          (default-directory dir))
