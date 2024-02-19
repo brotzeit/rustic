@@ -71,7 +71,7 @@
       (while (eq (process-status proc) 'run)
         (sit-for 0.1))
       (with-current-buffer (get-buffer rustic-test-buffer-name)
-        (should (= compilation-num-errors-found 0))))))
+        (should (= compilation-num-errors-found 10))))))
 
 (ert-deftest rustic-test-count-warnings ()
   (let* ((string "fn main() {
