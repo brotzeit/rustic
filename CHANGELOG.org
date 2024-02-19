@@ -1,0 +1,7 @@
+* Unreleased
+
+- Revamp testing in CI: Use only cask.
+- Replace Makefile with justfile
+- Pin Rust version in CI to avoid spurious failure.
+- Create a new babel variable to create temporary directory and not
+  rely on babel's internal stuff. This was needed to fix the tests.
