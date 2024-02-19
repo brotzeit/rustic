@@ -1,5 +1,7 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
+(require 'rustic)
+(require 'test-helper)
 
 (ert-deftest rust-test-workspace-crate-location ()
   (should (equal (funcall rustic-compile-directory-method) default-directory))
@@ -42,3 +44,5 @@
           ;; (print (buffer-substring-no-properties (point-min) (point-max)))
           (should (string-match "Compiling test-crate" (buffer-substring-no-properties (point-min) (point-max))))
           (should (string-match "Compiling another-test-crate" (buffer-substring-no-properties (point-min) (point-max)))))))))
+
+(provide 'rustic-workspace-test)

@@ -1,5 +1,7 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
+(require 'rustic)
+(require 'test-helper)
 
 (ert-deftest rustic-test-format-buffer ()
   (let* ((string "fn main()      {}")
@@ -320,4 +322,4 @@
       (insert-file-contents main)
       (should (string= (buffer-string) formatted-string)))))
 
-
+(provide 'rustic-format-test)

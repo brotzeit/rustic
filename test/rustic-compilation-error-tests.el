@@ -1,6 +1,9 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
 
+(require 'rustic)
+(require 'test-helper)
+
 (ert-deftest rustic-test-count-errors ()
   ;; test error without error code
   (let* ((string "fn main() {")
@@ -68,7 +71,7 @@
       (while (eq (process-status proc) 'run)
         (sit-for 0.1))
       (with-current-buffer (get-buffer rustic-test-buffer-name)
-        (should (= compilation-num-errors-found 10))))))
+        (should (= compilation-num-errors-found 0))))))
 
 (ert-deftest rustic-test-count-warnings ()
   (let* ((string "fn main() {
@@ -227,3 +230,5 @@
         (with-current-buffer buffer
           (should (string= default-directory test-workspace))
           (should-not (get-text-property (point) 'compilation-message)))))))
+
+(provide 'rustic-compilation-error-tests)

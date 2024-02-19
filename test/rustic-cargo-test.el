@@ -1,9 +1,7 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
 (require 'rustic)
-(require 'ert)
-
-(load-file "test-helper.el")
+(require 'test-helper)
 
 (ert-deftest rustic-test-cargo-test ()
   (let* ((string "#[test]
@@ -273,3 +271,5 @@ fn test() {
       (find-file credfile)
       (let ((buf-string (buffer-string)))
         (should (string-match "\\\[registry\\\]\ntoken = \"test-credentials\"\n" buf-string))))))
+
+(provide 'rustic-cargo-test)

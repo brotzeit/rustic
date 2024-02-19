@@ -15,12 +15,14 @@ jobs:
           - 29.1
     steps:
       - uses: actions/checkout@v4
-
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: just@1.16.0
       - uses: purcell/setup-emacs@master
         with:
           version: ${{ matrix.emacs-version }}
 
-      - uses: conao3/setup-cask@master
+      - uses: cask/setup-cask@v1
         with:
           version: 0.9.0
 
@@ -49,20 +51,7 @@ jobs:
           curl -sL https://github.com/BurntSushi/ripgrep/releases/download/13.0.0/ripgrep-13.0.0-x86_64-unknown-linux-musl.tar.gz | tar xz --wildcards --strip-components=1 -C /usr/local/bin '*/rg'
           rustup component add rust-docs
 
-      - uses: leotaku/elisp-check@v1.3
-        with:
-          file: "rustic.el"
-          check: load-file
-          ignore_warnings: true
-          warnings_as_errors: false
-
-      - name: ERT tests
-        uses: leotaku/elisp-check@master
-        with:
-          file: ./test/*.el
-          check: ert
-          ignore_warnings: true
-
       - name: Run tests
         run: |
-          make test
+          just build
+          just test
