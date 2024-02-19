@@ -6,3 +6,4 @@
 - Create a new babel variable to create temporary directory and not
   rely on babel's internal stuff. This was needed to fix the tests.
 - Fix flaky tests.
+- Enable tests for Emacs 29.1
