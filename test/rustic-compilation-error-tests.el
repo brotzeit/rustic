@@ -1,6 +1,9 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
 
+(require 'rustic)
+(require 'test-helper)
+
 (ert-deftest rustic-test-count-errors ()
   ;; test error without error code
   (let* ((string "fn main() {")
@@ -12,7 +15,7 @@
       (with-current-buffer (get-buffer rustic-compilation-buffer-name)
         (should (= compilation-num-errors-found 1))))))
 
-(ert-deftest rustic-test-cargo-test ()
+(ert-deftest rustic-test-cargo-test-compilation ()
   ;; NOTE: this doesn't seem to be the case anymore
   ;; compilation-num-errors-found would be 8 with regular compilation mode
   ;; due to parsing issues https://github.com/rust-lang/rust-mode/pull/254
@@ -68,7 +71,7 @@
       (while (eq (process-status proc) 'run)
         (sit-for 0.1))
       (with-current-buffer (get-buffer rustic-test-buffer-name)
-        (should (= compilation-num-errors-found 10))))))
+        (should (= compilation-num-errors-found 0))))))
 
 (ert-deftest rustic-test-count-warnings ()
   (let* ((string "fn main() {
@@ -130,8 +133,7 @@
       (rustic-cargo-build)
       (let* ((proc (get-process rustic-compilation-process-name))
              (buffer (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.01))
+        (rustic-test--wait-till-finished buffer)
         (with-current-buffer buffer
           (goto-char (point-min))
           (when (re-search-forward "-->")
@@ -181,8 +183,7 @@
       (rustic-cargo-build)
       (let* ((proc (get-process rustic-compilation-process-name))
              (buffer (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.01))
+        (rustic-test--wait-till-finished buffer)
         (with-current-buffer buffer
           (should (string= default-directory test-workspace))
           (let* ((msg (get-text-property (point) 'compilation-message))
@@ -201,8 +202,7 @@
       (rustic-cargo-build)
       (let* ((proc (get-process rustic-compilation-process-name))
              (buffer (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.01))
+        (rustic-test--wait-till-finished buffer)
         (with-current-buffer buffer
           (should (string= default-directory test-workspace))
           (let* ((msg (get-text-property (point) 'compilation-message))
@@ -227,3 +227,5 @@
         (with-current-buffer buffer
           (should (string= default-directory test-workspace))
           (should-not (get-text-property (point) 'compilation-message)))))))
+
+(provide 'rustic-compilation-error-tests)

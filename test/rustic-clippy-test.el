@@ -1,5 +1,7 @@
 ;; -*- lexical-binding: t -*-
 
+(require 'rustic)
+(require 'test-helper)
 
 (ert-deftest rustic-test-trigger-and-fix-format-on-compile ()
   (ignore-errors (kill-buffer (get-buffer rustic-compilation-buffer-name)))
@@ -121,3 +123,5 @@
         (rustic-test--wait-till-finished rustic-clippy-buffer-name)
         (revert-buffer t t)
         (should (string= (buffer-string) "#![allow(non_snake_case)]\nfn main() { let _s = 1;}"))))))
+
+(provide 'rustic-clippy-test)
