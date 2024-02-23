@@ -312,7 +312,7 @@ Execute process in PATH."
           (inhibit-read-only t))
      (make-process :name rustic-cargo-outdated-process-name
                    :buffer buf
-                   :command `(,(rustic-cargo-bin) "outdated" "--depth" "1")
+                   :command `(,(rustic-cargo-bin) "outdated" "--quiet" "--depth" "1" "--format" "json")
                    :sentinel #'rustic-cargo-outdated-sentinel
                    :file-handler t)
      (with-current-buffer buf
@@ -332,6 +332,14 @@ Execute process in PATH."
   (interactive)
   (rustic-cargo-outdated default-directory))
 
+(defun rustic-cargo-outdated--skip-to-packages ()
+  "Move line forward till we reach the package name."
+  (goto-char (point-min))
+  (let ((line (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
+    (while (not (or (eobp) (s-starts-with? "{" line)))
+      (forward-line 1)
+      (setf line (buffer-substring-no-properties (line-beginning-position) (line-end-position))))))
+
 (defun rustic-cargo-outdated-sentinel (proc _output)
   "Sentinel for rustic-cargo-outdated-process."
   (let ((buf (process-buffer proc))
@@ -339,14 +347,11 @@ Execute process in PATH."
         (exit-status (process-exit-status proc)))
     (if (zerop exit-status)
         (with-current-buffer buf
-          (let ((packages
-                 (mapcar
-                  (lambda (arg)
-                    (split-string arg "================" t "[\n\s]"))
-                  (split-string (buffer-string) "\n\n" t))))
-            (if (and (length packages) (= (length (car packages)) 1))
-                (setq packages (list (push "---" (car packages)))))
-            (rustic-cargo-outdated-generate-menu packages))
+          (rustic-cargo-outdated--skip-to-packages)
+          (let* ((packages (buffer-substring-no-properties (point) (point-max)))
+                (json-packages (json-read-from-string packages)))
+            (erase-buffer)
+            (rustic-cargo-outdated-generate-menu (alist-get 'dependencies json-packages)))
           (pop-to-buffer buf))
       (with-current-buffer buf
         (let ((out (buffer-string)))
@@ -363,32 +368,29 @@ Execute process in PATH."
 
 (defun rustic-cargo-outdated-generate-menu (packages)
   "Re-populate the `tabulated-list-entries' with PACKAGES."
-  (let* ((name-with-split-deps
-          (mapcan
-           (lambda (arg0)
-             (nthcdr 2 (mapcar (lambda (arg1) (push (nth 0 arg0) arg1))
-                                (split-string (nth 1 arg0) "\n" t))))
-           packages)))
-    (setq tabulated-list-entries
-           (mapcar #'rustic-cargo-outdated-menu-entry name-with-split-deps))
-     (tabulated-list-print t)))
+  (setq tabulated-list-entries
+           (mapcar #'rustic-cargo-outdated-menu-entry packages))
+  (tabulated-list-print t))
 
 (defun rustic-cargo-outdated-menu-entry (crate)
   "Return a package entry of CRATE suitable for `tabulated-list-entries'."
-  (let* ((fields (split-string (cdr crate) "\s+"))
-         (name (nth 0 fields))
-         (project (nth 1 fields))
-         (compat (nth 2 fields)))
+  (let* ((name (alist-get 'name crate))
+         (project (alist-get 'project crate))
+         (compat (alist-get 'compat crate)))
     (list name `[,name
                  ,project
                  ,(if (when (not (string-match "^-" compat))
                         (version< project compat))
                       (propertize compat 'font-lock-face 'rustic-cargo-outdated)
                     compat)
-                 ,(nth 3 fields)
-                 ,(nth 4 fields)
-                 ,(car crate)
-                 ,(nth 5 fields)])))
+                 ,(alist-get 'latest crate)
+                 ,(alist-get 'kind crate)
+                 ,(if (alist-get 'platform  crate)
+                      (alist-get 'platform  crate)
+                    "NA")
+                 ,"NA"
+                 ,"NA"
+                 ])))
 
 ;;;###autoload
 (defun rustic-cargo-mark-upgrade ()
@@ -519,7 +521,7 @@ The CRATE-LINE is a single line from the `rustic-cargo-oudated-buffer-name'"
   (let (upgrade)
     (dolist (crate crates)
       (setq upgrade (concat upgrade (format "-p %s@%s " (rustic-crate-name crate) (rustic-crate-version crate)))))
-    (let ((output (shell-command-to-string (format "cargo upgrade %s" upgrade))))
+    (let ((output (shell-command-to-string (format "cargo upgrade --offline %s" upgrade))))
       (if (string-match "error: no such subcommand:" output)
           (rustic-cargo-install-crate-p "edit")
         (rustic-cargo-reload-outdated)))))
