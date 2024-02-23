@@ -159,8 +159,7 @@
       (rustic-cargo-build)
       (let* ((proc (get-process rustic-compilation-process-name))
              (buffer (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.01))
+        (rustic-test--wait-till-finished buffer)
         (with-current-buffer buffer
           (goto-char (point-min))
           (compilation-next-error 1)
