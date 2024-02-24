@@ -93,7 +93,7 @@
     (call-interactively 'rustic-cargo-clippy)
     (let* ((proc (get-process rustic-clippy-process-name))
            (buffer (process-buffer proc)))
-      (rustic-test--wait-till-finished rustic-clippy-process-name)
+      (rustic-test--wait-till-finished rustic-clippy-buffer-name)
       (with-current-buffer buffer
         (should (string-match "^warning:\s" (buffer-substring-no-properties (point-min) (point-max)))))
     (should (string= (s-join " " (process-get proc 'command))
