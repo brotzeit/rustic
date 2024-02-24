@@ -263,12 +263,10 @@
                    'rustic-format-file-sentinel
                    :buffer buf
                    :files main)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.1))))
+        (rustic-test--wait-till-finished rustic-format-buffer-name)))
     (with-temp-buffer
       (insert-file-contents main)
       (should (string= (buffer-string) formatted-string)))))
-
 
 ;; rustfmt.toml
 

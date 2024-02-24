@@ -102,6 +102,7 @@
       (sit-for 0.1))
     (with-current-buffer (get-buffer rustic-compilation-buffer-name)
       (should (= compilation-num-warnings-found 20)))))
+
 (ert-deftest rustic-test-crate-path-error ()
   (let* ((test-workspace (expand-file-name "test/test-project/"))
          (test-crate (expand-file-name "test/test-project/crates/test-crate/")))
@@ -109,8 +110,7 @@
       (rustic-cargo-build)
       (let* ((proc (get-process rustic-compilation-process-name))
              (buffer (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.01))
+        (rustic-test--wait-till-finished buffer)
         (with-current-buffer buffer
           (goto-char (point-min))
           (when (re-search-forward "-->")
@@ -221,8 +221,7 @@
       (rustic-cargo-build)
       (let* ((proc (get-process rustic-compilation-process-name))
              (buffer (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.01))
+        (rustic-test--wait-till-finished buffer)
         (with-current-buffer buffer
           (should (string= default-directory test-workspace))
           (should-not (get-text-property (point) 'compilation-message)))))))
