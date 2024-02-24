@@ -1,7 +1,7 @@
 # Rustic
 
 [![MELPA](https://melpa.org/packages/rustic-badge.svg)](https://melpa.org/#/rustic)
-[![](https://github.com/brotzeit/rustic/workflows/CI/badge.svg)](https://github.com/brotzeit/rustic/actions?query=workflow%3ACI)
+[![CI](https://github.com/psibi/rustic/actions/workflows/test.yml/badge.svg)](https://github.com/psibi/rustic/actions/workflows/test.yml)
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
