@@ -1,6 +1,5 @@
 # Rustic
 
-[![MELPA](https://melpa.org/packages/rustic-badge.svg)](https://melpa.org/#/rustic)
 [![CI](https://github.com/psibi/rustic/actions/workflows/test.yml/badge.svg)](https://github.com/psibi/rustic/actions/workflows/test.yml)
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
@@ -75,6 +74,8 @@
 
 ## Intro
 
+This is a fork of [rustic](https://github.com/brotzeit/rustic/issues/403) mode which is maintained.
+
 This package is based on [rust-mode](https://github.com/rust-lang/rust-mode) and provides additional features:
 
 - cargo popup
@@ -110,24 +111,28 @@ environment variables probably don't work in emacs. Try
 [exec-path-from-shell](https://github.com/purcell/exec-path-from-shell/tree/81125c5adbc903943c016c2984906dc089372a41#usage)
 to fix this.
 
-### package
+### quelpa
 
-This section explains how to install rustic with the default package manager.
-It's necessary to include elpa for a package dependency:
-
-```elisp
+``` emacs-lisp
 (require 'package)
 (setq package-archives '(("melpa" . "http://melpa.org/packages/")
                          ("gnu" . "http://elpa.gnu.org/packages/")))
 (package-initialize)
 (package-refresh-contents)
-(use-package rustic)
+
+(use-package quelpa-use-package
+  :ensure t)
+
+(use-package rustic
+  :quelpa (rustic :fetcher github
+                  :repo "psibi/rustic"))
 ```
 
 If ‘spinner-1.7.3’ is unavailable” when trying to install rustic, you
 need to update GPG keys used by the ELPA package manager. Try
 installing
 [gnu-elpa-keyring-update](https://elpa.gnu.org/packages/gnu-elpa-keyring-update.html).
+
 
 ### straight
 

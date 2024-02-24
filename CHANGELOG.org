@@ -11,3 +11,4 @@
 - Fix bugs in rustic-cargo-outdated mode in the presence of git
   repositories as dependency.
 - Remove racer integrace since it's development has been discontinued.
+- Enable tests for Emacs 29.2
