@@ -10,8 +10,7 @@
          (default-directory (rustic-test-count-error-helper string))
          (rustic-format-trigger nil))
     (let ((proc (rustic-compilation-start (split-string "cargo build"))))
-      (while (eq (process-status proc) 'run)
-        (sit-for 0.1))
+      (rustic-test--wait-till-finished (process-buffer proc))
       (with-current-buffer (get-buffer rustic-compilation-buffer-name)
         (should (= compilation-num-errors-found 1))))))
 
