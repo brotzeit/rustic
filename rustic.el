@@ -48,13 +48,16 @@
 
 ;;; Define aliases for removed rustic functions
 
-(defvaralias 'rustic-indent-offset 'rust-indent-offset)
-(defvaralias 'rustic-indent-method-chain 'rust-indent-method-chain)
-(defvaralias 'rustic-indent-where-clause 'rust-indent-where-clause)
-(defvaralias 'rustic-match-angle-brackets 'rust-match-angle-brackets)
-(defvaralias 'rustic-indent-return-type-to-arguments 'rust-indent-return-type-to-arguments)
-(defalias 'rustic-indent-line #'rust-mode-indent-line)
-(defalias 'rustic-end-of-defun #'rust-end-of-defun)
+(if (and (version<= "29.1" emacs-version) rust-mode-treesitter-derive)
+    (defvaralias 'rustic-indent-offset 'rust-ts-mode-indent-offset)
+  (progn
+    (defvaralias 'rustic-indent-offset 'rust-indent-offset)
+    (defvaralias 'rustic-indent-method-chain 'rust-indent-method-chain)
+    (defvaralias 'rustic-indent-where-clause 'rust-indent-where-clause)
+    (defvaralias 'rustic-match-angle-brackets 'rust-match-angle-brackets)
+    (defvaralias 'rustic-indent-return-type-to-arguments 'rust-indent-return-type-to-arguments)
+    (defalias 'rustic-indent-line #'rust-mode-indent-line)
+    (defalias 'rustic-end-of-defun #'rust-end-of-defun)))
 
 ;;; workaround for with-temp-buffer not propagating the environment, as per
 ;;; https://github.com/magit/magit/pull/4169

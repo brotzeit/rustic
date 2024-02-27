@@ -12,3 +12,4 @@
   repositories as dependency.
 - Remove racer integrace since it's development has been discontinued.
 - Enable tests for Emacs 29.2
+- Add fixes for enabling tree sitter support from rust-mode.
