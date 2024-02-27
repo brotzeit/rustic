@@ -67,10 +67,10 @@
                   }")
            (default-directory (rustic-test-count-error-helper string))
            (proc (rustic-cargo-test)))
-      (while (eq (process-status proc) 'run)
-        (sit-for 0.1))
+      (rustic-test--wait-till-finished rustic-test-buffer-name)
       (with-current-buffer (get-buffer rustic-test-buffer-name)
-        (should (= compilation-num-errors-found 0))))))
+        (should (= compilation-num-errors-found 0)))
+      (kill-buffer rustic-test-buffer-name))))
 
 (ert-deftest rustic-test-count-warnings ()
   (let* ((string "fn main() {
