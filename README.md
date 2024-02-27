@@ -71,7 +71,7 @@
 
 ## Intro
 
-This is a fork of [rustic](https://github.com/brotzeit/rustic/issues/403) mode which is maintained.
+This is a fork of [rustic](https://github.com/brotzeit/rustic) mode which is maintained.
 
 This package is based on [rust-mode](https://github.com/rust-lang/rust-mode) and provides additional features:
 
