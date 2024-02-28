@@ -80,13 +80,13 @@ When calling this function from `rustic-popup-mode', always use the value of
   (interactive "P")
   (rustic-cargo-clippy-run
    :params (cond (arg
-          (setq rustic-clippy-arguments (read-from-minibuffer "Cargo clippy arguments: " rustic-default-clippy-arguments)))
-         ((eq major-mode 'rustic-popup-mode)
-          (if (> (length rustic-clippy-arguments) 0)
-              rustic-clippy-arguments
-            rustic-default-clippy-arguments))
-         (t
-          rustic-default-clippy-arguments))))
+                  (setq rustic-clippy-arguments
+                        (read-from-minibuffer "Cargo clippy arguments: " rustic-default-clippy-arguments)))
+                 (t
+                  (if (> (length rustic-clippy-arguments) 0)
+                      rustic-clippy-arguments
+                    rustic-default-clippy-arguments)
+                  ))))
 
 ;;;###autoload
 (defun rustic-cargo-clippy-rerun ()
