@@ -73,8 +73,7 @@
         (write-file file1))
 
       (if-let ((proc (call-interactively 'rustic-cargo-build)))
-          (while (eq (process-status proc) 'run)
-            (sit-for 0.5)))
+          (rustic-test--wait-till-finished rustic-compilation-buffer-name))
 
       (with-current-buffer buffer1
         (revert-buffer t t)
