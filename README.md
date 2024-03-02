@@ -71,7 +71,9 @@
 
 ## Intro
 
-This is a fork of [rustic](https://github.com/brotzeit/rustic) mode which is maintained.
+This is a fork of [rustic](https://github.com/brotzeit/rustic) mode which is maintained. For more
+details, [see
+here](https://github.com/brotzeit/rustic/pull/551#issuecomment-1959124829).
 
 This package is based on [rust-mode](https://github.com/rust-lang/rust-mode) and provides additional features:
 
@@ -953,10 +955,10 @@ There are also some additional commands:
 To run the tests, you will need [Cask](https://github.com/cask/cask).
 
 ``` bash
-cask exec ert-runner
+cask emacs --batch -L . -L test -l test/all-tests.el -f ert-run-tests-batch-and-exit
 ```
 
-alternatively you can use `make test`
+alternatively you can use `just test`
 
 ## Contributing
 
