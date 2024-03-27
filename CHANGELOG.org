@@ -14,3 +14,6 @@
 - Enable tests for Emacs 29.2
 - Add fixes for enabling tree sitter support from rust-mode.
 - Make ~rustic-cargo-clippy~ remember it's universal arguments.
+- Populate minibuffer entries for ~rustic-cargo-clippy~ and
+  ~rustic-cargo-build~ with it's previous entry.
+- Fix integration with lsp-mode during format of buffers.

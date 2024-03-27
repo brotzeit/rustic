@@ -671,7 +671,7 @@ in your project like `pwd'"
   (interactive "P")
   (when arg
     (setq rustic-cargo-build-arguments
-          (read-string "Cargo build arguments: " "")))
+          (read-string "Cargo build arguments: " (rustic--populate-minibuffer (list rustic-cargo-build-arguments)))))
   (rustic-run-cargo-command `(,(rustic-cargo-bin)
                               ,rustic-cargo-build-exec-command
                               ,@(split-string rustic-cargo-build-arguments))
@@ -946,6 +946,12 @@ If running with prefix command `C-u', read whole command from minibuffer."
     (setq rustic-install-project-dir default-directory)
     (rustic-compilation-start c (list :buffer buf :process proc :mode mode
                                       :directory default-directory))))
+
+(defun rustic--populate-minibuffer (list)
+  "Return first non nil element in LIST."
+  (cond ((null list) nil)
+        ((not (s-blank? (car list))) (car list))
+        (t (rustic--populate-minibuffer (cdr list)))))
 
 (provide 'rustic-cargo)
 ;;; rustic-cargo.el ends here
