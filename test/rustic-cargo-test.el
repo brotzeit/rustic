@@ -15,8 +15,7 @@ fn it_works2() {
          (default-directory (rustic-test-count-error-helper string))
          (proc (call-interactively 'rustic-cargo-test))
          (buf (process-buffer proc)))
-    (while (eq (process-status proc) 'run)
-      (sit-for 0.1))
+    (rustic-test--wait-till-finished rustic-test-buffer-name)
     (should (string= rustic-test-arguments ""))
     (with-current-buffer buf
       ;; check if buffer has correct name and correct major mode
@@ -36,10 +35,9 @@ fn it_works2() {
     assert_eq!(2 + 2, 3);
 }")
          (default-directory (rustic-test-count-error-helper string))
-         (proc (rustic-cargo-test-run "it_works2"))
-         (buf (process-buffer proc)))
+         (proc (rustic-cargo-test-run "it_works2")))
     (rustic-test--wait-till-finished rustic-test-buffer-name)
-    (with-current-buffer buf
+    (with-current-buffer rustic-test-buffer-name
       ;; only test it_works2 is supposed to run
       (should-not (string-match "it_works1" (buffer-substring-no-properties (point-min) (point-max))))
       (should (string-match "it_works2" (buffer-substring-no-properties (point-min) (point-max)))))))
@@ -59,8 +57,7 @@ fn test2() {
       (forward-line 1)
       (let* ((proc (rustic-cargo-current-test))
              (proc-buf (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.1))
+        (rustic-test--wait-till-finished rustic-test-buffer-name)
         (with-current-buffer proc-buf
           (should (string-match "test1" (buffer-substring-no-properties (point-min) (point-max))))
           (should-not (string-match "test2" (buffer-substring-no-properties (point-min) (point-max)))))
@@ -84,8 +81,7 @@ fn test1() {
       (forward-line 3)
       (let* ((proc (rustic-cargo-current-test))
              (proc-buf (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.1))
+        (rustic-test--wait-till-finished rustic-test-buffer-name)
         (with-current-buffer proc-buf
           (should (string-match "test1" (buffer-substring-no-properties (point-min) (point-max)))))
         (kill-buffer proc-buf)))
@@ -108,8 +104,7 @@ use std;
       (forward-line 3)
       (let* ((proc (call-interactively 'rustic-cargo-current-test))
              (proc-buf (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.1))
+        (rustic-test--wait-till-finished rustic-test-buffer-name)
         (with-current-buffer proc-buf
           (should (string-match "test1" (buffer-substring-no-properties (point-min) (point-max)))))
         (kill-buffer proc-buf)))
@@ -125,8 +120,7 @@ use std;
          (default-directory (rustic-test-count-error-helper string))
          (proc (call-interactively 'rustic-cargo-test))
          (buf (process-buffer proc)))
-    (while (eq (process-status proc) 'run)
-      (sit-for 0.1))
+    (rustic-test--wait-till-finished rustic-test-buffer-name)
     (with-current-buffer buf
       (should-not (string-match "^warning:\s" (buffer-substring-no-properties (point-min) (point-max)))))
     (kill-buffer buf))
