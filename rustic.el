@@ -49,7 +49,9 @@
 ;;; Define aliases for removed rustic functions
 
 (if (and (version<= "29.1" emacs-version) rust-mode-treesitter-derive)
-    (defvaralias 'rustic-indent-offset 'rust-ts-mode-indent-offset)
+    (progn
+      (require 'rust-ts-mode)
+      (defvaralias 'rustic-indent-offset 'rust-ts-mode-indent-offset))
   (progn
     (defvaralias 'rustic-indent-offset 'rust-indent-offset)
     (defvaralias 'rustic-indent-method-chain 'rust-indent-method-chain)
