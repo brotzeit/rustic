@@ -950,7 +950,7 @@ If running with prefix command `C-u', read whole command from minibuffer."
 (defun rustic--populate-minibuffer (list)
   "Return first non nil element in LIST."
   (cond ((null list) nil)
-        ((not (null (car list))) (car list))
+        ((not (s-blank? (car list))) (car list))
         (t (rustic--populate-minibuffer (cdr list)))))
 
 (provide 'rustic-cargo)
