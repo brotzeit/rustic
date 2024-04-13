@@ -170,6 +170,10 @@ this variable."
   (when (member mode auto-mode-alist)
     (setq auto-mode-alist (remove mode auto-mode-alist))))
 
+;; remove rust-ts-mode from `auto-mode-alist'
+(when rust-mode-treesitter-derive
+  (setq auto-mode-alist (delete '("\\.rs\\'" . rust-ts-mode) auto-mode-alist)))
+
 ;;; envrc support
 
 ;; To support envrc, it is necessary to wrap any buffer creation code
