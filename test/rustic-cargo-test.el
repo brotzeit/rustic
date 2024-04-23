@@ -43,6 +43,126 @@ fn it_works2() {
       (should-not (string-match "it_works1" (buffer-substring-no-properties (point-min) (point-max))))
       (should (string-match "it_works2" (buffer-substring-no-properties (point-min) (point-max)))))))
 
+(ert-deftest rustic-test-cargo-current-test-gets-parent-mod ()
+  "Send 'cargo test' the 'parent_mod::test_mod' to ensure desired scope.
+When running all tests in a module, ensure that only tests in
+that module get run by giving an unique argument to 'cargo
+test'.
+
+When the module's parent is not the crate root, this means
+including the parent module, because usually test modules are
+not uniquely named.
+
+The parent module is either determined by the file name, or if
+the file name is 'mod.rs', then by the directory name."
+  (let* ((body "
+fn prod_fun() {
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test1() {
+    }
+
+    #[test]
+    fn test2() {
+    }
+}")
+    (buf-module-by-filename (rustic-test-create-test-file body "prod_module_file.rs"))
+    (buf-module-by-directory (rustic-test-create-test-file body "prod_module_dir/mod.rs")))
+
+    (with-current-buffer buf-module-by-filename
+      (goto-char (point-min))
+      ;; Put point at the beginning of the line with the module definition
+      (forward-line 5)
+      (let* ((proc (rustic-cargo-current-test))
+             (proc-buf (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.1))
+        (with-current-buffer proc-buf
+          (should (string-match "cargo test prod_module_file::tests"
+                                (buffer-substring-no-properties (point-min) (point-max)))))
+        (kill-buffer proc-buf)))
+
+    (with-current-buffer buf-module-by-directory
+      (goto-char (point-min))
+      ;; Put point one line past the module definition, but above the tests,
+      ;; just to ensure this works as well.
+      (forward-line 6)
+      (let* ((proc (rustic-cargo-current-test))
+             (proc-buf (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.1))
+        (with-current-buffer proc-buf
+          (should (string-match "cargo test prod_module_dir::tests"
+                                (buffer-substring-no-properties (point-min) (point-max))))
+          (should-not (string-match "cargo test mod::tests"
+                                (buffer-substring-no-properties (point-min) (point-max)))))
+        (kill-buffer proc-buf)))
+
+    (setq rustic-test-arguments "")
+    (kill-buffer buf-module-by-filename)
+    (kill-buffer buf-module-by-directory)))
+
+(ert-deftest rustic-test-cargo-current-test-gets-parent-mod-when-at-crate-root ()
+  "Send 'cargo test' a unique scope for a module's tests when at crate root.
+When running all tests in a module, ensure that only tests in
+that module get run by giving an unique argument to 'cargo test'.
+
+When the module's parent is the crate root, this means simply
+passing 'lib' or 'main' as an argument."
+  (let* ((body "
+fn prod_fun() {
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test1() {
+    }
+
+    #[test]
+    fn test2() {
+    }
+}")
+    (buf-main (rustic-test-create-test-file body "main.rs"))
+    (buf-lib (rustic-test-create-test-file body "lib.rs")))
+
+    (with-current-buffer buf-main
+      (goto-char (point-min))
+      ;; Put point at the beginning of the line with the module definition
+      (forward-line 5)
+      (let* ((proc (rustic-cargo-current-test))
+             (proc-buf (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.1))
+        (with-current-buffer proc-buf
+          (should (string-match "cargo test main " ; Note the space after main
+                                (buffer-substring-no-properties (point-min) (point-max)))))
+          (should-not (string-match "cargo test main::tests"
+                                (buffer-substring-no-properties (point-min) (point-max))))
+        (kill-buffer proc-buf)))
+
+    (with-current-buffer buf-lib
+      (goto-char (point-min))
+      ;; Put point at the beginning of the line with the module definition
+      (forward-line 5)
+      (let* ((proc (rustic-cargo-current-test))
+             (proc-buf (process-buffer proc)))
+        (while (eq (process-status proc) 'run)
+          (sit-for 0.1))
+        (with-current-buffer proc-buf
+          (should (string-match "cargo test lib " ; Note the space after lib
+                                (buffer-substring-no-properties (point-min) (point-max)))))
+          (should-not (string-match "cargo test lib::tests"
+                                (buffer-substring-no-properties (point-min) (point-max))))
+        (kill-buffer proc-buf)))
+
+    (setq rustic-test-arguments "")
+    (kill-buffer buf-main)
+    (kill-buffer buf-lib)))
+
 (ert-deftest rustic-test-cargo-current-test ()
   (let* ((string "#[test]
 fn test1() {

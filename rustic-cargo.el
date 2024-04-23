@@ -199,7 +199,12 @@ When calling this function from `rustic-popup-mode', always use the value of
 
 ;;;###autoload
 (defun rustic-cargo-current-test ()
-  "Run 'cargo test' for the test near point."
+  "Run 'cargo test' for the test or module near point.
+When point is at or below the line defining a test function, run
+that test.
+
+When point is above all test functions and at or below a test
+module's definition, then run that module's tests."
   (interactive)
   (rustic-compilation-process-live)
   (-if-let (test-to-run (setq rustic-test-arguments
@@ -235,7 +240,8 @@ When calling this function from `rustic-popup-mode', always use the value of
     (cond ((and mod-cons fn-cons)
            ;; both conses contain (location . name)
            (if (> (car mod-cons) (car fn-cons))
-               (cdr mod-cons)
+             (rustic-cargo--make-unique-test-module-scope
+               (rustic-cargo--get-module-parent-from-filepath) (cdr mod-cons))
              (concat (cdr mod-cons) "::" (cdr fn-cons))))
           (fn-cons (cdr fn-cons))
           (t (cdr mod-cons)))))
@@ -262,6 +268,44 @@ When calling this function from `rustic-popup-mode', always use the value of
         (progn
           (rustic-beginning-of-function)
           (rustic-cargo--get-current-line-fn-name)))))
+
+(defun rustic-cargo--make-unique-test-module-scope (parent-mod current-mod)
+  "Using PARENT-MOD and CURRENT-MOD, make an unique test module scope for the argument to cargo test."
+  (if (or (string= parent-mod "main") (string= parent-mod "lib"))
+      parent-mod
+    (concat parent-mod "::" current-mod)))
+
+(defun rustic-cargo--get-module-parent-from-filepath ()
+  "Return the current module's parent using the buffer's backing filepath."
+  (let ((filename (file-name-base (rustic-cargo--get-current-filename))))
+    (if (string= filename "mod")
+        (rustic-cargo--get-buffer-file-directory-name)
+      filename)))
+
+(defun rustic-cargo--get-buffer-file-directory-name ()
+   "Return the directory name of the buffer's backing file.
+ This gets the last element of the directory path name of the file
+ backing the current buffer, agnostic of platform."
+   (let* ((directory-path (file-name-directory (rustic-cargo--get-current-filename)))
+          (normalized-directory-path (replace-regexp-in-string "\\\\" "/" directory-path t t))
+          (parts (reverse (remove "" (split-string normalized-directory-path "/")))))
+     (car parts)))
+
+(defun rustic-cargo--get-current-filename ()
+  "Return the backing file of the current buffer, even if 'rustic-popup' is popped up."
+   (if buffer-file-name
+       buffer-file-name
+     rustic--popup-rust-src-name))
+
+;;; Outdated
+
+(defvar rustic-cargo-outdated-process-name "rustic-cargo-outdated-process")
+
+(defun rustic-cargo--get-current-filename ()
+  "Return the backing file of the current buffer, even if 'rustic-popup' is popped up."
+  (if buffer-file-name
+      buffer-file-name
+    rustic--popup-rust-src-name))
 
 ;;; Outdated
 
