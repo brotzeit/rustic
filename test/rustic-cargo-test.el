@@ -237,7 +237,7 @@ fn test() {
           (should (eq major-mode 'rustic-cargo-test-mode)))
         (should (string= (s-join " " (process-get proc 'command))
                          (concat (rustic-cargo-bin) " test "
-                                 rustic-default-test-arguments)))))))
+                                 rustic-test-arguments)))))))
 
 (ert-deftest rustic-cargo-expand-test ()
   (let* ((string "fn main() {()}")
