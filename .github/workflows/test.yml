@@ -9,9 +9,6 @@ on:
 jobs:
   unix-test:
     runs-on: ${{ matrix.os }}
-    concurrency:
-      group: rustic-${{ github.ref }}
-      cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix:
