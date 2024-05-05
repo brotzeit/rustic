@@ -579,7 +579,7 @@ It's a list that looks like (list command mode name-function highlight-regexp)."
 (defun rustic-recompile ()
   "Re-compile the program using `compilation-arguments'."
   (interactive)
-  (let* ((command (or (car compilation-arguments) (rustic-compile-command)))
+  (let* ((command (or (car compilation-arguments) (format "%s %s" (rustic-compile-command) rustic-cargo-build-arguments)))
          (dir compilation-directory))
     (rustic-compilation-process-live)
     (rustic-compilation-start (split-string command)
