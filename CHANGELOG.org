@@ -17,3 +17,4 @@
 - Populate minibuffer entries for ~rustic-cargo-clippy~ and
   ~rustic-cargo-build~ with it's previous entry.
 - Fix integration with lsp-mode during format of buffers.
+- Make ~rustic-cargo-test` rembmer it's universal arguments.

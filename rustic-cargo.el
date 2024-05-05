@@ -177,19 +177,19 @@ stored in this variable.")
 (defun rustic-cargo-test (&optional arg)
   "Run 'cargo test'.
 
-If ARG is not nil, use value as argument and store it in `rustic-test-arguments'.
-When calling this function from `rustic-popup-mode', always use the value of
+If ARG is not nil, use value as argument and store it in
+`rustic-test-arguments'.  When calling this function from
+`rustic-popup-mode', always use the value of
 `rustic-test-arguments'."
   (interactive "P")
-  (rustic-cargo-test-run
-   (cond (arg
-          (setq rustic-test-arguments (read-from-minibuffer "Cargo test arguments: " rustic-default-test-arguments)))
-         (rustic-cargo-use-last-stored-arguments
-          (if (> (length rustic-test-arguments) 0)
-              rustic-test-arguments
-            rustic-default-test-arguments))
-         (t
-          rustic-default-test-arguments))))
+  (when arg
+    (setq rustic-test-arguments
+          (read-from-minibuffer "Cargo test arguments: "
+                                (rustic--populate-minibuffer
+                                 (list rustic-test-arguments
+                                       rustic-cargo-build-arguments
+                                       rustic-default-test-arguments)))))
+  (rustic-cargo-test-run rustic-test-arguments))
 
 ;;;###autoload
 (defun rustic-cargo-test-rerun ()
