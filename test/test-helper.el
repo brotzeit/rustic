@@ -44,6 +44,24 @@ Emacs shutdown.")
     (should (rustic-compare-code-after-manip
              original point-pos manip-func expected (buffer-string)))))
 
+(cl-defun rustic-test-create-test-file (body &optional (test-file-path "main.rs"))
+  (let* ((project-dir (rustic-babel-generate-project t))
+         (full-test-file-path (concat project-dir "src/" test-file-path))
+         (file (expand-file-name full-test-file-path))
+         (file-dir (file-name-directory file))
+         (buffer (get-buffer-create "does-not-matter"))
+         (rustic-format-trigger nil))
+    ;; Ensure any intermediate directories exist, which may be the
+    ;; case with submodule setups
+    (if (not (file-directory-p file-dir))
+        (make-directory file-dir t))
+    (with-current-buffer buffer
+      (write-file file)
+      (insert "#[allow(non_snake_case)]")
+      (insert body)
+      (save-buffer)
+    buffer)))
+
 ;; TODO: rename
 (defun rustic-test-count-error-helper (string)
   (let* ((buffer (get-buffer-create "b"))
