@@ -124,7 +124,7 @@ to fix this.
 
 (use-package rustic
   :quelpa (rustic :fetcher github
-                  :repo "psibi/rustic"))
+                  :repo "emacs-rustic/rustic"))
 ```
 
 If ‘spinner-1.7.3’ is unavailable” when trying to install rustic, you
