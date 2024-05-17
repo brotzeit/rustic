@@ -209,6 +209,9 @@ Error matching regexes from compile.el are removed."
 
 ;;; Compilation Process
 
+(defvar-local rustic-compilation-directory nil
+  "original directory for rust compilation process.")
+
 (defvar rustic-compilation-process-name "rustic-compilation-process"
   "Process name for rust compilation processes.")
 
@@ -251,6 +254,7 @@ Set environment variables for rust process."
       (erase-buffer)
       (setq default-directory dir)
       (funcall mode)
+      (setq-local rustic-compilation-directory dir)
       (unless no-mode-line
         (setq mode-line-process
               '((:propertize ":%s" face compilation-mode-line-run)
@@ -579,7 +583,7 @@ It's a list that looks like (list command mode name-function highlight-regexp)."
 (defun rustic-recompile ()
   "Re-compile the program using `compilation-arguments'."
   (interactive)
-  (let* ((command (or (car compilation-arguments) (rustic-compile-command)))
+  (let* ((command (or (car compilation-arguments) (format "%s %s" (rustic-compile-command) rustic-cargo-build-arguments)))
          (dir compilation-directory))
     (rustic-compilation-process-live)
     (rustic-compilation-start (split-string command)

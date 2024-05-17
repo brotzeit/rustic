@@ -11,10 +11,6 @@
 
 (require 'rustic-rustfmt)
 
-;; FIXME This variable doesn't exist in noninteractive emacs sessions,
-;; which probably means that it is internal and we shouldn't use it.
-(defvar org-babel-temporary-directory)
-
 (defvar rustic-info nil)
 
 (add-to-list 'org-src-lang-modes '("rust" . rustic))
@@ -160,7 +156,7 @@ execution with rustfmt."
           (save-excursion
             (save-match-data
               (goto-char (point-min))
-              (when (re-search-forward "^thread '[^']+' panicked at '[^']+', ")
+              (when (re-search-forward "^thread '[^']+' panicked at .*")
                 (goto-char (match-beginning 0))
                 (setq result (buffer-substring-no-properties (point) (line-end-position)))))))
         (rustic-babel-run-update-result-block result)
@@ -210,10 +206,13 @@ after successful compilation."
                  (buffer-string)))))))
       (kill-buffer "rustic-babel-format-buffer"))))
 
+(defvar rustic-org-babel-temporary-directory
+  (make-temp-file "babel-" t))
+
 (defun rustic-babel-generate-project (&optional expand)
-  "Create rust project in `org-babel-temporary-directory'.
+  "Create rust project in `rustic-org-babel-temporary-directory'.
 Return full path if EXPAND is t."
-  (let* ((default-directory org-babel-temporary-directory)
+  (let* ((default-directory rustic-org-babel-temporary-directory)
          (dir (make-temp-file-internal "cargo" 0 "" nil)))
     (shell-command-to-string (format "cargo new %s --bin --quiet" dir))
     (if expand
@@ -224,14 +223,14 @@ Return full path if EXPAND is t."
   "In order to reduce the execution time when the project has
 dependencies, the project name is stored as a text property in the
 header of the org-babel block to check if the project already exists
-in `org-babel-temporary-directory'.  If the project exists, reuse it.
+in `rustic-org-babel-temporary-directory'.  If the project exists, reuse it.
 Otherwise create it with `rustic-babel-generate-project'."
   (let* ((beg (org-babel-where-is-src-block-head))
          (end (save-excursion (goto-char beg)
                               (line-end-position)))
          (line (buffer-substring beg end)))
     (let* ((project (symbol-name (get-text-property 0 'project line)))
-           (path (concat org-babel-temporary-directory "/" project "/")))
+           (path (concat rustic-org-babel-temporary-directory "/" project "/")))
       (if (file-directory-p path)
           (progn
             (put-text-property beg end 'project (make-symbol project))
@@ -348,7 +347,7 @@ kill the running process."
         (progn
           (rustic-process-kill-p p t)
           nil)
-      (let* ((default-directory org-babel-temporary-directory)
+      (let* ((default-directory rustic-org-babel-temporary-directory)
              (project (rustic-babel-project))
              (dir (setq rustic-babel-dir (expand-file-name project)))
              (main-p (cdr (assq :main params)))
@@ -392,7 +391,7 @@ at least one time in this emacs session before this command can be used."
                               (line-end-position)))
          (line (buffer-substring beg end))
          (project (symbol-name (get-text-property 0 'project line)))
-         (path (concat org-babel-temporary-directory "/" project "/src/main.rs")))
+         (path (concat rustic-org-babel-temporary-directory "/" project "/src/main.rs")))
     (if (file-exists-p path)
         (find-file path)
       (message "Run block first to visit generated project."))))
@@ -403,7 +402,7 @@ at least one time in this emacs session before this command can be used."
   (interactive)
   (rustic--inheritenv
    (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
-          (default-directory org-babel-temporary-directory)
+          (default-directory rustic-org-babel-temporary-directory)
           (body (org-element-property :value (org-element-at-point)))
           (project (rustic-babel-project))
           (params (list "cargo" "clippy")))

@@ -4,7 +4,7 @@
 ;; This library implements support for `clippy'.
 
 ;;; Code:
-
+(require 'rustic-cargo)
 (require 'rustic-compile)
 
 (defcustom rustic-cargo-clippy-fix-args "--allow-dirty"
@@ -80,13 +80,19 @@ When calling this function from `rustic-popup-mode', always use the value of
   (interactive "P")
   (rustic-cargo-clippy-run
    :params (cond (arg
-          (setq rustic-clippy-arguments (read-from-minibuffer "Cargo clippy arguments: " rustic-default-clippy-arguments)))
-         ((eq major-mode 'rustic-popup-mode)
-          (if (> (length rustic-clippy-arguments) 0)
-              rustic-clippy-arguments
-            rustic-default-clippy-arguments))
-         (t
-          rustic-default-clippy-arguments))))
+                  (setq rustic-clippy-arguments
+                        (read-from-minibuffer "Cargo clippy arguments: "
+                                              (rustic--populate-minibuffer
+                                               (list
+                                                rustic-clippy-arguments
+                                                rustic-cargo-build-arguments
+                                                rustic-default-clippy-arguments
+                                                )))))
+                 (t
+                  (if (> (length rustic-clippy-arguments) 0)
+                      rustic-clippy-arguments
+                    rustic-default-clippy-arguments)
+                  ))))
 
 ;;;###autoload
 (defun rustic-cargo-clippy-rerun ()

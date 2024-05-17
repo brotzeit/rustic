@@ -4,7 +4,7 @@
 ;; Author: Mozilla
 ;;
 ;; Keywords: languages
-;; Package-Requires: ((emacs "26.1") (rust-mode "1.0.3") (dash "2.13.0") (f "0.18.2") (let-alist "1.0.4") (markdown-mode "2.3") (project "0.3.0") (s "1.10.0") (seq "2.3") (spinner "1.7.3") (xterm-color "1.6"))
+;; Package-Requires: ((emacs "26.1") (rust-mode "1.0.3") (dash "2.13.0") (f "0.18.2") (let-alist "1.0.4") (markdown-mode "2.3") (project "0.3.0") (s "1.10.0") (spinner "1.7.3") (xterm-color "1.6") (flycheck "34.0"))
 
 ;; This file is distributed under the terms of both the MIT license and the
 ;; Apache License (version 2.0).
@@ -30,7 +30,6 @@
 
 (require 'cl-lib)
 (require 'pcase)
-(require 'seq)
 (require 'subr-x)
 
 (require 'dash)
@@ -49,13 +48,18 @@
 
 ;;; Define aliases for removed rustic functions
 
-(defvaralias 'rustic-indent-offset 'rust-indent-offset)
-(defvaralias 'rustic-indent-method-chain 'rust-indent-method-chain)
-(defvaralias 'rustic-indent-where-clause 'rust-indent-where-clause)
-(defvaralias 'rustic-match-angle-brackets 'rust-match-angle-brackets)
-(defvaralias 'rustic-indent-return-type-to-arguments 'rust-indent-return-type-to-arguments)
-(defalias 'rustic-indent-line #'rust-mode-indent-line)
-(defalias 'rustic-end-of-defun #'rust-end-of-defun)
+(if (and (version<= "29.1" emacs-version) rust-mode-treesitter-derive)
+    (progn
+      (require 'rust-ts-mode)
+      (defvaralias 'rustic-indent-offset 'rust-ts-mode-indent-offset))
+  (progn
+    (defvaralias 'rustic-indent-offset 'rust-indent-offset)
+    (defvaralias 'rustic-indent-method-chain 'rust-indent-method-chain)
+    (defvaralias 'rustic-indent-where-clause 'rust-indent-where-clause)
+    (defvaralias 'rustic-match-angle-brackets 'rust-match-angle-brackets)
+    (defvaralias 'rustic-indent-return-type-to-arguments 'rust-indent-return-type-to-arguments)
+    (defalias 'rustic-indent-line #'rust-mode-indent-line)
+    (defalias 'rustic-end-of-defun #'rust-end-of-defun)))
 
 ;;; workaround for with-temp-buffer not propagating the environment, as per
 ;;; https://github.com/magit/magit/pull/4169
@@ -127,7 +131,6 @@ this variable."
     (define-key map (kbd "C-c C-c C-u") 'rustic-compile)
     (define-key map (kbd "C-c C-c C-i") 'rustic-recompile)
     (define-key map (kbd "C-c C-c C-o") 'rustic-format-buffer)
-    (define-key map (kbd "C-c C-c C-d") 'rustic-racer-describe)
     (define-key map (kbd "C-c C-c C-,") 'rustic-docstring-dwim)
 
     (define-key map (kbd "C-c C-c C-b") 'rustic-cargo-build)
@@ -165,10 +168,13 @@ this variable."
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
 
-;; remove rust-mode from `auto-mode-alist'
-(let ((mode '("\\.rs\\'" . rust-mode)))
+;; remove rust-mode and rust-ts-mode from `auto-mode-alist'
+(let ((mode '("\\.rs\\'" . rust-mode))
+      (ts-mode '("\\.rs\\'" . rust-ts-mode)))
   (when (member mode auto-mode-alist)
-    (setq auto-mode-alist (remove mode auto-mode-alist))))
+    (setq auto-mode-alist (remove mode auto-mode-alist)))
+  (when (member ts-mode auto-mode-alist)
+    (setq auto-mode-alist (remove ts-mode auto-mode-alist))))
 
 ;;; envrc support
 
@@ -211,7 +217,6 @@ This variable might soon be remove again.")
   (require 'rustic-clippy)
   (require 'rustic-comint)
   (require 'rustic-babel)
-  (require 'rustic-racer)
   (require 'rustic-rustfmt)
   (require 'rustic-rustfix)
   (require 'rustic-playground)

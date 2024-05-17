@@ -1,6 +1,9 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
 
+(require 'ert)
+(require 'test-helper)
+
 (setq org-confirm-babel-evaluate nil)
 
 (defun rustic-test-get-babel-block (contents &optional params)
@@ -72,7 +75,7 @@
                    }")
          (buf (rustic-test-get-babel-block string)))
     (rustic-test-babel-execute-block buf)
-    (let ((re "^thread '[^']+' panicked at '[^']+', "))
+    (let ((re "^thread '[^']+' panicked at .*"))
       (should (string-match re (rustic-test-babel-check-results buf))))))
 
 (ert-deftest rustic-test-babel-spinner ()
@@ -112,6 +115,7 @@
       (rustic-test-babel-execute-block buf)
       (should-not (spinner-p rustic-babel-spinner))
       (should (eq mode-line-process nil)))))
+
 
 (ert-deftest rustic-test-babel-format ()
   (let* ((string "fn main()      {}")
@@ -243,3 +247,5 @@
     (with-current-buffer buf
       (rustic-test-babel-execute-block buf)
       (should (eq (rustic-test-babel-check-results buf) nil)))))
+
+(provide 'rustic-babel-test)
