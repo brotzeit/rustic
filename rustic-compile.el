@@ -464,7 +464,7 @@ Buffers are formatted after saving if turned on by `rustic-format-trigger'."
   "Provide possibility use `compile-goto-error' on line numbers in compilation buffers.
 This hook checks if there's a line number at the beginning of the
 current line in an error section."
-  (-if-let* ((rustic-p (eq major-mode 'rustic-compilation-mode))
+  (-if-let* ((rustic-p (derived-mode-p 'rustic-compilation-mode))
              (default-directory rustic-compilation-workspace)
              (line-contents (buffer-substring-no-properties
                              (line-beginning-position)
