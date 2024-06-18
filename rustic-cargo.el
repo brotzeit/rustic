@@ -875,7 +875,7 @@ If running with prefix command `C-u', read whole command from minibuffer."
   (interactive "P")
   (let* ((command (if arg
                       (read-from-minibuffer "Cargo upgrade command: "
-                                            (rustic-cargo-bin) " upgrade ")
+                                            (format "%s upgrade " (rustic-cargo-bin)))
                     (concat (rustic-cargo-bin) " upgrade"))))
     (rustic-run-cargo-command command)))
 
