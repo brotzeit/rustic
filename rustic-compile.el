@@ -115,18 +115,6 @@
   "Override `compilation-column-face' for rust compilation."
   :group 'rustic-compilation)
 
-(defcustom rustic-ansi-faces ["black"
-                              "red3"
-                              "green3"
-                              "yellow3"
-                              "blue2"
-                              "magenta3"
-                              "cyan3"
-                              "white"]
-  "Term ansi faces."
-  :type '(vector string string string string string string string string)
-  :group 'rustic-compilation)
-
 ;;; Compilation-mode
 
 (defvar rustic-compilation-mode-map
@@ -183,9 +171,6 @@ Error matching regexes from compile.el are removed."
   (setq-local compilation-info-face    'rustic-compilation-info)
   (setq-local compilation-column-face  'rustic-compilation-column)
   (setq-local compilation-line-face    'rustic-compilation-line)
-
-  (setq-local xterm-color-names-bright rustic-ansi-faces)
-  (setq-local xterm-color-names rustic-ansi-faces)
 
   (setq-local compilation-error-regexp-alist-alist nil)
   (add-to-list 'compilation-error-regexp-alist-alist

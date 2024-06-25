@@ -200,7 +200,7 @@ FTR #174 #179 #236
 
 The colors that are displayed in compilation buffers come from cargo
 and are translated by xterm-color. You can change these colors by
-modifying `rustic-ansi-faces`.
+modifying `xterm-color-names` and `xterm-color-names-bright`.
 
 `rustic-compilation-mode` doesn't use the default faces of
 compile.el. If you want to change these colors you can use something
