@@ -73,7 +73,7 @@ should be wrapped in which case we will disable rustfmt."
                            (toolchain-kw-or-string (format "+%s" toolchain-kw-or-string))
                            (rustic-babel-default-toolchain (format "+%s" rustic-babel-default-toolchain))
                            (t nil)))
-          (params (remove nil (list "cargo" toolchain "build" "--quiet")))
+          (params (remove nil (list (rustic-cargo-bin) toolchain "build" "--quiet")))
           (inhibit-read-only t))
      (rustic-compilation-setup-buffer err-buff dir 'rustic-compilation-mode)
      (when rustic-babel-display-compilation-buffer
@@ -124,7 +124,7 @@ execution with rustfmt."
 
            ;; run project
            (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
-                  (params (remove nil (list "cargo" toolchain "run" "--quiet")))
+                  (params (remove nil (list (rustic-cargo-bin) toolchain "run" "--quiet")))
                   (inhibit-read-only t))
              (rustic-make-process
               :name rustic-babel-process-name
@@ -216,7 +216,7 @@ after successful compilation."
 Return full path if EXPAND is t."
   (let* ((default-directory rustic-org-babel-temporary-directory)
          (dir (make-temp-file-internal "cargo" 0 "" nil)))
-    (shell-command-to-string (format "cargo new %s --bin --quiet" dir))
+    (shell-command-to-string (format "%s new %s --bin --quiet" (rustic-cargo-bin) dir))
     (if expand
         (concat (expand-file-name dir) "/")
       dir)))
@@ -407,7 +407,7 @@ at least one time in this emacs session before this command can be used."
           (default-directory rustic-org-babel-temporary-directory)
           (body (org-element-property :value (org-element-at-point)))
           (project (rustic-babel-project))
-          (params (list "cargo" "clippy")))
+          (params (list (rustic-cargo-bin) "clippy")))
      (let* ((dir (setq rustic-babel-dir (expand-file-name project)))
             (main (expand-file-name "main.rs" (concat dir "/src")))
             (default-directory dir))

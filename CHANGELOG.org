@@ -20,3 +20,4 @@
 - Make ~rustic-cargo-test~ rembmer it's universal arguments.
 - ~rustic-recompile~ will remember any universal arguments that is
   passed to it.
+- Fix ~rustic-cargo-upgrade~ in the presence of universal arguments.

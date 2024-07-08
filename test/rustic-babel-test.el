@@ -2,7 +2,9 @@
 ;; Before editing, eval (load-file "test-helper.el")
 
 (require 'ert)
-(require 'test-helper)
+(load (expand-file-name "test-helper.el"
+                        (file-name-directory
+                         (or load-file-name buffer-file-name))))
 
 (setq org-confirm-babel-evaluate nil)
 

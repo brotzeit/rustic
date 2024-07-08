@@ -111,5 +111,3 @@ list of substrings of `STR' each followed by its face."
   (let* ((proc (get-buffer-process buffer)))
     (while (not (eq (process-status proc) 'exit))
       (sit-for 0.2))))
-
-(provide 'test-helper)
