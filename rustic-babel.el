@@ -32,11 +32,12 @@
   :type 'boolean
   :group 'rustic-babel)
 
-(defcustom rustic-babel-default-toolchain "stable"
+(defcustom rustic-babel-default-toolchain nil
   "Active toolchain for babel blocks.
 When passing a toolchain to a block as argument, this variable won't be
 considered."
-  :type 'string
+  :type '(choice (string :tag "String")
+                 (const :tag "Nil" nil))
   :group 'rustic-babel)
 
 (defvar rustic-babel-buffer-name '((:default . "*rust-babel*")))
@@ -58,21 +59,6 @@ considered."
 
 (defvar rustic-babel-spinner nil)
 
-(defun rustic-babel-cargo-params (toolchain)
-  "Return a list of cargo commands for babel evaluation.
-If TOOLCHAIN has a value other than `nil' or `+', then add
-TOOLCHAIN to the list, else return a list of cargo commands with
-no toolchain. Users may need non-toolchain when the computing
-environment installed Cargo with a method other than rustup such
-as with an operating system's package manager, in which case
-Cargo has no support for toolchain specification."
-  (remove nil (list "cargo"
-                    (unless (or (null toolchain)
-                                (equal "+" toolchain))
-                      toolchain)
-                    "build"
-                    "--quiet")))
-
 (defun rustic-babel-eval (dir toolchain-kw-or-string main-p)
   "Start a rust babel compilation process.
 Compilation is started in directory DIR with appropriate
@@ -84,12 +70,10 @@ should be wrapped in which case we will disable rustfmt."
           (toolchain (cond ((eq toolchain-kw-or-string 'nightly) "+nightly")
                            ((eq toolchain-kw-or-string 'beta) "+beta")
                            ((eq toolchain-kw-or-string 'stable) "+stable")
-                           ((or (null rustic-babel-default-toolchain)
-                                (eq 0 (string-blank-p rustic-babel-default-toolchain)))
-                            nil)
                            (toolchain-kw-or-string (format "+%s" toolchain-kw-or-string))
-                           (t (format "+%s" rustic-babel-default-toolchain))))
-          (params (rustic-babel-cargo-params toolchain))
+                           (rustic-babel-default-toolchain (format "+%s" rustic-babel-default-toolchain))
+                           (t nil)))
+          (params (remove nil (list "cargo" toolchain "build" "--quiet")))
           (inhibit-read-only t))
      (rustic-compilation-setup-buffer err-buff dir 'rustic-compilation-mode)
      (when rustic-babel-display-compilation-buffer
@@ -140,7 +124,7 @@ execution with rustfmt."
 
            ;; run project
            (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
-                  (params (rustic-babel-cargo-params toolchain))
+                  (params (remove nil (list "cargo" toolchain "run" "--quiet")))
                   (inhibit-read-only t))
              (rustic-make-process
               :name rustic-babel-process-name
