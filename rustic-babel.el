@@ -32,11 +32,12 @@
   :type 'boolean
   :group 'rustic-babel)
 
-(defcustom rustic-babel-default-toolchain "stable"
+(defcustom rustic-babel-default-toolchain nil
   "Active toolchain for babel blocks.
 When passing a toolchain to a block as argument, this variable won't be
 considered."
-  :type 'string
+  :type '(choice (string :tag "String")
+                 (const :tag "Nil" nil))
   :group 'rustic-babel)
 
 (defvar rustic-babel-buffer-name '((:default . "*rust-babel*")))
@@ -70,8 +71,9 @@ should be wrapped in which case we will disable rustfmt."
                            ((eq toolchain-kw-or-string 'beta) "+beta")
                            ((eq toolchain-kw-or-string 'stable) "+stable")
                            (toolchain-kw-or-string (format "+%s" toolchain-kw-or-string))
-                           (t (format "+%s" rustic-babel-default-toolchain))))
-          (params (list (rustic-cargo-bin) toolchain "build" "--quiet"))
+                           (rustic-babel-default-toolchain (format "+%s" rustic-babel-default-toolchain))
+                           (t nil)))
+          (params (remove nil (list (rustic-cargo-bin) toolchain "build" "--quiet")))
           (inhibit-read-only t))
      (rustic-compilation-setup-buffer err-buff dir 'rustic-compilation-mode)
      (when rustic-babel-display-compilation-buffer
@@ -122,7 +124,7 @@ execution with rustfmt."
 
            ;; run project
            (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
-                  (params (list (rustic-cargo-bin) toolchain "run" "--quiet"))
+                  (params (remove nil (list (rustic-cargo-bin) toolchain "run" "--quiet")))
                   (inhibit-read-only t))
              (rustic-make-process
               :name rustic-babel-process-name
