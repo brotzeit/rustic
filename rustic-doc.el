@@ -39,7 +39,7 @@
   "Save location for the rustic-doc conversion script.")
 
 (defvar rustic-doc-source-repo
-  "https://raw.githubusercontent.com/brotzeit/rustic/master/rustic-doc/")
+  "https://raw.githubusercontent.com/emacs-rustic/rustic/main/rustic-doc/")
 
 (defvar rustic-doc-current-project nil
   "Location to search for documentation.

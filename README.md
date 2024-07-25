@@ -1,6 +1,6 @@
 # Rustic
 
-[![CI](https://github.com/psibi/rustic/actions/workflows/test.yml/badge.svg)](https://github.com/psibi/rustic/actions/workflows/test.yml)
+[![CI](https://github.com/emacs-rustic/rustic/actions/workflows/test.yml/badge.svg)](https://github.com/emacs-rustic/rustic/actions/workflows/test.yml)
 
 <!--toc:start-->
 - [Rustic](#rustic)
@@ -148,7 +148,7 @@ that doesn't work remotely, please open an issue.
 
 ## Compilation
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/compilation_buffer.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/compilation_buffer.png)
 
 If you want to use a Makefile you can either use `(setq
 rustic-compile-command "make")` or run `C-u` + `rustic-compile`.
@@ -221,7 +221,7 @@ Additional faces:
 
 ### rustc errors
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/rustc_errno.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/rustc_errno.png)
 
 ## Rustfmt
 
@@ -367,7 +367,7 @@ LSP commands:
 - `xref-find-references` with helm and rust-analyzer
 - `rustic-cargo-add-missing-dependencies` convenient command that adds missing dependencies to a crate's Cargo.toml
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/xref_references.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/xref_references.png)
 
 #### eglot
 
@@ -394,11 +394,11 @@ top of the sideline.
 
 ###### Applying code actions
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/code_actions.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/code_actions.png)
 
 ###### Auto import
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/auto_import.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/auto_import.png)
 
 ##### Macro expansion
 
@@ -409,7 +409,7 @@ The results are formatted and highlighted by default, but you can use
 your own function by customizing
 `lsp-rust-analyzer-macro-expansion-method`.
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/macro_expansion.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/macro_expansion.png)
 
 ### LSP + TRAMP
 
@@ -515,7 +515,7 @@ arguments in `rustic-test-arguments`
 
 `rustic-cargo-current-test` run test at point, whether it's a function or a module
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/cargo_current_test.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/cargo_current_test.png)
 
 ### Run
 
@@ -564,7 +564,7 @@ before being used.
 - `r` refresh crate list
 - `q` quit window
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/outdated.png)
 
 ### Expand
 
@@ -932,11 +932,11 @@ customized with `rustic-popup-commands`.  The command
 If you want to close the popup after you ran a command you can set
 `rustic-kill-buffer-and-window` to `t`.
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/popup.png)
 
 View help buffer containing a command's flags with `h`:
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup_help.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/popup_help.png)
 
 ## rust-mode
 
