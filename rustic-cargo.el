@@ -143,8 +143,22 @@ stored in this variable.")
     map)
   "Local keymap for `rustic-cargo-test-mode' buffers.")
 
+(defvar rustic-test-failure
+  (let ((test "---- [^\n]+ ----\nthread [^\n]+ panicked at ")
+        (file "\\([^\n]+\\)")
+        (start-line "\\([0-9]+\\)")
+        (start-col  "\\([0-9]+\\)"))
+    (let ((re (concat test file ":" start-line ":" start-col)))
+      (cons re '(1 2 3))))
+  "Match test failures.")
+
 (define-derived-mode rustic-cargo-test-mode rustic-compilation-mode "cargo-test"
   :group 'rustic
+
+  (add-to-list 'compilation-error-regexp-alist-alist
+               (cons 'rustic-test-failure rustic-test-failure))
+
+  (add-to-list 'compilation-error-regexp-alist 'rustic-test-failure)
 
   (when rustic-cargo-test-disable-warnings
     (setq-local rustic-compile-rustflags (concat rustic-compile-rustflags " -Awarnings"))))
