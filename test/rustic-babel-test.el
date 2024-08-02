@@ -63,13 +63,13 @@
 
 (ert-deftest rustic-test-babel-error-no-popup ()
   (let* ((string "fn main() {
-                    panic(\"hello world\");
+                    panic!(\"hello world\");
                   }")
          (buf (rustic-test-get-babel-block string))
-         (rustic-babel-display-error-popup t)
-         )
+         (rustic-babel-display-error-popup nil))
     (rustic-test-babel-execute-block buf)
-    (should (s-contains? "hello world" (rustic-test-babel-check-results buf)))))
+    ;; The output will have some message of panic
+    (should (s-contains? "panic" (rustic-test-babel-check-results buf)))))
 
 (ert-deftest rustic-test-babel-error-results ()
   (let* ((string "fn main() {
