@@ -98,7 +98,7 @@ When calling this function from `rustic-popup-mode', always use the value of
 (defun rustic-cargo-clippy-rerun ()
   "Run 'cargo clippy' with `rustic-clippy-arguments'."
   (interactive)
-  (rustic-cargo-clippy-run rustic-clippy-arguments))
+  (rustic-cargo-clippy-run :params rustic-clippy-arguments))
 
 (defun rustic-cargo-clippy-fix (&rest args)
   "Run 'clippy fix'."

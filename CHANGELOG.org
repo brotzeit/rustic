@@ -21,3 +21,4 @@
 - ~rustic-recompile~ will remember any universal arguments that is
   passed to it.
 - Fix ~rustic-cargo-upgrade~ in the presence of universal arguments.
+- Fix ~rusti-cargo-clippy-rerun~ to use the last used arguments.
