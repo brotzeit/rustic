@@ -61,6 +61,16 @@
     (should (eq (rustic-test-babel-check-results buf) nil))
     (should-not (buffer-live-p rustic-babel-compilation-buffer-name))))
 
+(ert-deftest rustic-test-babel-error-no-popup ()
+  (let* ((string "fn main() {
+                    panic!(\"hello world\");
+                  }")
+         (buf (rustic-test-get-babel-block string))
+         (rustic-babel-display-error-popup nil))
+    (rustic-test-babel-execute-block buf)
+    ;; The output will have some message of panic
+    (should (s-contains? "panic" (rustic-test-babel-check-results buf)))))
+
 (ert-deftest rustic-test-babel-error-results ()
   (let* ((string "fn main() {
                      let v = vec![1, 2, 3];
