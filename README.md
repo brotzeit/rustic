@@ -672,6 +672,9 @@ Customization:
   of babel process
 - `rustic-babel-auto-wrap-main` wrap body into main function
 - `rustic-babel-default-toolchain` active toolchain for babel blocks
+- `rustic-babel-display-error-popup` displays error popup on
+  compilation failure or when the exit code is non zero. Set it to nil
+  if you want it to be displayed as part of result block.
 
 ### lsp-mode
 
