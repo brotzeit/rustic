@@ -22,6 +22,14 @@
   :type 'boolean
   :group 'rustic-babel)
 
+(defcustom rustic-babel-display-error-popup t
+  "Diplay compilation error or panic in error popup.
+On failures and panic during execution, should the error be
+displayed separately or as part of popup or should it be part of
+results block ? By default we display it as separate popup."
+  :type 'boolean
+  :group 'rustic-babel)
+
 (defcustom rustic-babel-auto-wrap-main t
   "Whether to auto wrap body in `fn main' to function call if none exists."
   :type 'boolean
@@ -158,12 +166,15 @@ execution with rustfmt."
           (save-excursion
             (save-match-data
               (goto-char (point-min))
-              (when (re-search-forward "^thread '[^']+' panicked at .*")
-                (goto-char (match-beginning 0))
-                (setq result (buffer-substring-no-properties (point) (line-end-position)))))))
+              (if rustic-babel-display-error-popup
+                  (when (re-search-forward "^thread '[^']+' panicked at .*")
+                    (goto-char (match-beginning 0))
+                    (setq result (buffer-substring-no-properties (point) (line-end-position))))
+                (setq result (buffer-string))))))
         (rustic-babel-run-update-result-block result)
         (rustic-with-spinner rustic-babel-spinner nil nil)
-        (pop-to-buffer proc-buffer)))))
+        (when rustic-babel-display-error-popup
+          (pop-to-buffer proc-buffer))))))
 
 (defun rustic-babel-build-update-result-block (result)
   "Update result block with RESULT."
