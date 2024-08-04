@@ -7,6 +7,7 @@
   - [Intro](#intro)
   - [Known issues](#known-issues)
   - [Installation](#installation)
+    - [Melpa](#melpa)
     - [quelpa](#quelpa)
     - [straight](#straight)
   - [remote](#remote)
@@ -109,6 +110,32 @@ If you can't run rust-analyzer or cargo can't be found, your
 environment variables probably don't work in emacs. Try
 [exec-path-from-shell](https://github.com/purcell/exec-path-from-shell/tree/81125c5adbc903943c016c2984906dc089372a41#usage)
 to fix this.
+
+### Melpa
+
+Add melpa as part of package archives:
+
+``` emacs-lisp
+(use-package package
+  :ensure nil
+  :config
+  (package-initialize)
+  :custom
+  (package-native-compile t)
+  (package-archives '(("gnu"   . "http://elpa.gnu.org/packages/")
+                      ("melpa" . "https://melpa.org/packages/"))))
+```
+
+And then install rustic appropriately:
+
+``` emacs-lisp
+(use-package rustic
+  :ensure t
+  :config
+  (setq rustic-format-on-save nil)
+  :custom
+  (rustic-cargo-use-last-stored-arguments t))
+```
 
 ### quelpa
 
