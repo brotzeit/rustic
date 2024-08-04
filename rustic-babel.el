@@ -150,13 +150,14 @@ execution with rustfmt."
              (kill-buffer proc-buffer)
            (pop-to-buffer proc-buffer))
          (if (> (length (with-current-buffer proc-buffer (buffer-string))) 0)
-             (with-current-buffer proc-buffer
-               (save-excursion
-                 (save-match-data
-                   (goto-char (point-min))
-                   (setq result (buffer-string))
-                   (rustic-babel-run-update-result-block result)
-                   )))
+             (progn
+               (with-current-buffer proc-buffer
+                  (save-excursion
+                    (save-match-data
+                      (goto-char (point-min))
+                      (setq result (buffer-string))
+                      (rustic-babel-run-update-result-block result))))
+               (kill-buffer proc-buffer))
            (kill-buffer proc-buffer)))))))
 
 (defun rustic-babel-run-sentinel (proc _output)
