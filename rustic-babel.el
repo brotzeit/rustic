@@ -145,9 +145,20 @@ execution with rustfmt."
               (result (format "error: Could not compile `%s`." project)))
          (rustic-babel-build-update-result-block result))
        (rustic-with-spinner rustic-babel-spinner nil nil)
-       (if (= (length (with-current-buffer proc-buffer (buffer-string))) 0)
-           (kill-buffer proc-buffer)
-         (pop-to-buffer proc-buffer))))))
+       (if rustic-babel-display-error-popup
+         (if (= (length (with-current-buffer proc-buffer (buffer-string))) 0)
+             (kill-buffer proc-buffer)
+           (pop-to-buffer proc-buffer))
+         (if (> (length (with-current-buffer proc-buffer (buffer-string))) 0)
+             (progn
+               (with-current-buffer proc-buffer
+                  (save-excursion
+                    (save-match-data
+                      (goto-char (point-min))
+                      (setq result (buffer-string))
+                      (rustic-babel-run-update-result-block result))))
+               (kill-buffer proc-buffer))
+           (kill-buffer proc-buffer)))))))
 
 (defun rustic-babel-run-sentinel (proc _output)
   "Sentinel for babel project execution."
