@@ -31,8 +31,15 @@ visiting a project."
 ;;       that we added an extra regexp for funcs.
 
 (defvar rustic-func-item-beg-re
-  (concat "\\s-*\\(?:priv\\|pub\\)?\\s-*\\(?:async\\)?\\s-*"
-          (regexp-opt '("fn")))
+  (concat "^"
+          "\\(?:\\s-*"
+          (regexp-opt '("priv" "pub")) "\\s-*"
+          "\\(?:(\\s-*\\(?:in\\s-+\\)?" (regexp-opt '("crate" "self" "super")) "\\s-*)\\)?"
+          "\\)?"
+          "\\(?:\\s-*" (regexp-opt '("async" "const")) "\\s-+\\)?"
+          "\\(?:\\s-*unsafe\\s-+\\)?"
+          "\\(?:\\s-*extern\\(?:\\s-+\"C\"\\)?\\s-+\\)?"
+          "\\s-*fn\\s-+")
   "Start of a rust function.")
 
 (defun rustic-beginning-of-function ()

@@ -227,7 +227,7 @@ If ARG is not nil, use value as argument and store it in
 (defconst rustic-cargo-mod-regexp
   "^\s*mod\s+\\([[:word:][:multibyte:]_][[:word:][:multibyte:]_[:digit:]]*\\)\s*{")
 (defconst rustic-cargo-fn-regexp
-  "^\s*\\(?:async\s+\\)?\s*fn\s+\\([^(]+\\)\s*(")
+  (concat rustic-func-item-beg-re "\\([^(<]+\\)\\s-*\\(?:<\\s-*.+\\s-*>\\s-*\\)?("))
 
 (defun rustic-cargo--get-test-target()
   "Return either a full fn name or a mod name, whatever is closer to the point."
