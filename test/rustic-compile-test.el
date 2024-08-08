@@ -146,4 +146,17 @@
       (with-current-buffer (get-buffer rustic-compilation-buffer-name)
         (should (= compilation-num-errors-found 0))))))
 
+(ert-deftest rustic-test-panic ()
+  (kill-buffer (get-buffer rustic-compilation-buffer-name))
+  (let* ((string "fn main() {
+                       panic!(\"oops!\");
+                    }")
+         (default-directory (rustic-test-count-error-helper string)))
+    (let ((rustic-compile-backtrace "0")
+          (proc (rustic-compilation-start (split-string "cargo run"))))
+      (while (eq (process-status proc) 'run)
+        (sit-for 0.1))
+      (with-current-buffer (get-buffer rustic-compilation-buffer-name)
+        (should (= compilation-num-errors-found 0))))))
+
 (provide 'rustic-compile-test)
