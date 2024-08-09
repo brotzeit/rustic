@@ -341,6 +341,14 @@ rust-mode:
   (setq rust-mode-treesitter-derive t))
 ```
 
+And make to have rustic load after rust-mode:
+
+``` emacs-lisp
+(use-package rustic
+  :ensure t
+  :after (rust-mode))
+```
+
 ## LSP
 
 Disable `rustic-lsp-setup-p` to turn off automatic LSP configuration.
