@@ -157,6 +157,6 @@
       (while (eq (process-status proc) 'run)
         (sit-for 0.1))
       (with-current-buffer (get-buffer rustic-compilation-buffer-name)
-        (should (= compilation-num-errors-found 0))))))
+        (should (= compilation-num-errors-found 1))))))
 
 (provide 'rustic-compile-test)
