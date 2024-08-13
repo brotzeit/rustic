@@ -1,0 +1,26 @@
+* Unreleased
+
+- Revamp testing in CI: Use only cask.
+- Replace Makefile with justfile.
+- Pin Rust version in CI to avoid spurious failure.
+- Create a new babel variable to create temporary directory and not
+  rely on babel's internal stuff. This was needed to fix the tests.
+- Fix flaky tests.
+- Enable tests for Emacs 29.1
+- Update rustc to 1.76.0
+- Fix bugs in rustic-cargo-outdated mode in the presence of git
+  repositories as dependency.
+- Remove racer integrace since it's development has been discontinued.
+- Enable tests for Emacs 29.2
+- Add fixes for enabling tree sitter support from rust-mode.
+- Make ~rustic-cargo-clippy~ remember it's universal arguments.
+- Populate minibuffer entries for ~rustic-cargo-clippy~ and
+  ~rustic-cargo-build~ with it's previous entry.
+- Fix integration with lsp-mode during format of buffers.
+- Make ~rustic-cargo-test~ rembmer it's universal arguments.
+- ~rustic-recompile~ will remember any universal arguments that is
+  passed to it.
+- Fix ~rustic-cargo-upgrade~ in the presence of universal arguments.
+- Fix ~rustic-cargo-clippy-rerun~ to use the last used arguments.
+- Implement ~rustic-babel-display-error-popup~ customization
+  option. Refer the variable docs for more details.

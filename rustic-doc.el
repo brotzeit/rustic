@@ -39,7 +39,7 @@
   "Save location for the rustic-doc conversion script.")
 
 (defvar rustic-doc-source-repo
-  "https://raw.githubusercontent.com/brotzeit/rustic/master/rustic-doc/")
+  "https://raw.githubusercontent.com/emacs-rustic/rustic/main/rustic-doc/")
 
 (defvar rustic-doc-current-project nil
   "Location to search for documentation.
@@ -299,11 +299,11 @@ If NOCONFIRM is non-nil, install all dependencies without prompting user."
       (when (and (or missing-fd missing-makedocs missing-rg)
                  (or noconfirm (y-or-n-p "Missing some dependencies for rustic doc, install them? ")))
         (when missing-fd
-          (rustic-doc--start-process "install-fd" "cargo" nil "install" "fd-find"))
+          (rustic-doc--start-process "install-fd" (rustic-cargo-bin) nil "install" "fd-find"))
         (when missing-rg
-          (rustic-doc--start-process "install-rg" "cargo" nil "install" "ripgrep"))
+          (rustic-doc--start-process "install-rg" (rustic-cargo-bin)  nil "install" "ripgrep"))
         (when missing-makedocs
-          (rustic-doc--start-process "install-makedocs" "cargo" nil
+          (rustic-doc--start-process "install-makedocs" (rustic-cargo-bin) nil
                                      "install" "cargo-makedocs"))))))
 
 ;;;###autoload

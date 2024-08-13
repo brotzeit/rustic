@@ -1,5 +1,9 @@
 ;; -*- lexical-binding: t -*-
 
+(require 'rustic)
+(load (expand-file-name "test-helper.el"
+                        (file-name-directory
+                         (or load-file-name buffer-file-name))))
 
 (ert-deftest rustic-test-trigger-and-fix-format-on-compile ()
   (ignore-errors (kill-buffer (get-buffer rustic-compilation-buffer-name)))
@@ -46,8 +50,7 @@
         (write-file file1))
 
       (if-let ((proc (call-interactively 'rustic-compile)))
-          (while (eq (process-status proc) 'run)
-            (sit-for 0.01)))
+          (rustic-test--wait-till-finished rustic-compilation-buffer-name))
 
       (with-current-buffer buffer1
         (revert-buffer t t)
@@ -72,8 +75,7 @@
         (write-file file1))
 
       (if-let ((proc (call-interactively 'rustic-cargo-build)))
-          (while (eq (process-status proc) 'run)
-            (sit-for 0.5)))
+          (rustic-test--wait-till-finished rustic-compilation-buffer-name))
 
       (with-current-buffer buffer1
         (revert-buffer t t)
@@ -91,8 +93,7 @@
     (call-interactively 'rustic-cargo-clippy)
     (let* ((proc (get-process rustic-clippy-process-name))
            (buffer (process-buffer proc)))
-      (while (eq (process-status proc) 'run)
-        (sit-for 0.01))
+      (rustic-test--wait-till-finished rustic-clippy-buffer-name)
       (with-current-buffer buffer
         (should (string-match "^warning:\s" (buffer-substring-no-properties (point-min) (point-max)))))
     (should (string= (s-join " " (process-get proc 'command))
@@ -121,3 +122,5 @@
         (rustic-test--wait-till-finished rustic-clippy-buffer-name)
         (revert-buffer t t)
         (should (string= (buffer-string) "#![allow(non_snake_case)]\nfn main() { let _s = 1;}"))))))
+
+(provide 'rustic-clippy-test)

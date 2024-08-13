@@ -1,5 +1,9 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
+(require 'rustic)
+(load (expand-file-name "test-helper.el"
+                        (file-name-directory
+                         (or load-file-name buffer-file-name))))
 
 (ert-deftest rustic-test-format-next-error-last-buffer ()
   (let* ((string "fn main()      {}")
@@ -128,16 +132,31 @@
       (while (eq (process-status proc) 'run)
         (sit-for 0.1))
       (with-current-buffer (get-buffer rustic-compilation-buffer-name)
-        (should (= compilation-num-errors-found 1))))
+        (should (= compilation-num-errors-found 0))))
     (let ((rustic-compile-backtrace "1")
           (proc (rustic-compilation-start (split-string "cargo run"))))
       (while (eq (process-status proc) 'run)
         (sit-for 0.1))
       (with-current-buffer (get-buffer rustic-compilation-buffer-name)
-        (should (= compilation-num-errors-found 1))))
+        (should (= compilation-num-errors-found 0))))
     (let ((rustic-compile-backtrace "full")
           (proc (rustic-compilation-start (split-string "cargo run"))))
       (while (eq (process-status proc) 'run)
         (sit-for 0.1))
       (with-current-buffer (get-buffer rustic-compilation-buffer-name)
+        (should (= compilation-num-errors-found 0))))))
+
+(ert-deftest rustic-test-panic ()
+  (kill-buffer (get-buffer rustic-compilation-buffer-name))
+  (let* ((string "fn main() {
+                       panic!(\"oops!\");
+                    }")
+         (default-directory (rustic-test-count-error-helper string)))
+    (let ((rustic-compile-backtrace "0")
+          (proc (rustic-compilation-start (split-string "cargo run"))))
+      (while (eq (process-status proc) 'run)
+        (sit-for 0.1))
+      (with-current-buffer (get-buffer rustic-compilation-buffer-name)
         (should (= compilation-num-errors-found 1))))))
+
+(provide 'rustic-compile-test)

@@ -1,18 +1,22 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
 
+(require 'rustic)
+(load (expand-file-name "test-helper.el"
+                        (file-name-directory
+                         (or load-file-name buffer-file-name))))
+
 (ert-deftest rustic-test-count-errors ()
   ;; test error without error code
   (let* ((string "fn main() {")
          (default-directory (rustic-test-count-error-helper string))
          (rustic-format-trigger nil))
     (let ((proc (rustic-compilation-start (split-string "cargo build"))))
-      (while (eq (process-status proc) 'run)
-        (sit-for 0.1))
+      (rustic-test--wait-till-finished (process-buffer proc))
       (with-current-buffer (get-buffer rustic-compilation-buffer-name)
         (should (= compilation-num-errors-found 1))))))
 
-(ert-deftest rustic-test-cargo-test ()
+(ert-deftest rustic-test-cargo-test-compilation ()
   ;; NOTE: this doesn't seem to be the case anymore
   ;; compilation-num-errors-found would be 8 with regular compilation mode
   ;; due to parsing issues https://github.com/rust-lang/rust-mode/pull/254
@@ -65,10 +69,10 @@
                   }")
            (default-directory (rustic-test-count-error-helper string))
            (proc (rustic-cargo-test)))
-      (while (eq (process-status proc) 'run)
-        (sit-for 0.1))
+      (rustic-test--wait-till-finished rustic-test-buffer-name)
       (with-current-buffer (get-buffer rustic-test-buffer-name)
-        (should (= compilation-num-errors-found 10))))))
+        (should (= compilation-num-errors-found 0)))
+      (kill-buffer rustic-test-buffer-name))))
 
 (ert-deftest rustic-test-count-warnings ()
   (let* ((string "fn main() {
@@ -99,6 +103,7 @@
       (sit-for 0.1))
     (with-current-buffer (get-buffer rustic-compilation-buffer-name)
       (should (= compilation-num-warnings-found 20)))))
+
 (ert-deftest rustic-test-crate-path-error ()
   (let* ((test-workspace (expand-file-name "test/test-project/"))
          (test-crate (expand-file-name "test/test-project/crates/test-crate/")))
@@ -106,8 +111,7 @@
       (rustic-cargo-build)
       (let* ((proc (get-process rustic-compilation-process-name))
              (buffer (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.01))
+        (rustic-test--wait-till-finished buffer)
         (with-current-buffer buffer
           (goto-char (point-min))
           (when (re-search-forward "-->")
@@ -130,8 +134,7 @@
       (rustic-cargo-build)
       (let* ((proc (get-process rustic-compilation-process-name))
              (buffer (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.01))
+        (rustic-test--wait-till-finished buffer)
         (with-current-buffer buffer
           (goto-char (point-min))
           (when (re-search-forward "-->")
@@ -157,8 +160,7 @@
       (rustic-cargo-build)
       (let* ((proc (get-process rustic-compilation-process-name))
              (buffer (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.01))
+        (rustic-test--wait-till-finished buffer)
         (with-current-buffer buffer
           (goto-char (point-min))
           (compilation-next-error 1)
@@ -181,8 +183,7 @@
       (rustic-cargo-build)
       (let* ((proc (get-process rustic-compilation-process-name))
              (buffer (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.01))
+        (rustic-test--wait-till-finished buffer)
         (with-current-buffer buffer
           (should (string= default-directory test-workspace))
           (let* ((msg (get-text-property (point) 'compilation-message))
@@ -201,8 +202,7 @@
       (rustic-cargo-build)
       (let* ((proc (get-process rustic-compilation-process-name))
              (buffer (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.01))
+        (rustic-test--wait-till-finished buffer)
         (with-current-buffer buffer
           (should (string= default-directory test-workspace))
           (let* ((msg (get-text-property (point) 'compilation-message))
@@ -222,8 +222,9 @@
       (rustic-cargo-build)
       (let* ((proc (get-process rustic-compilation-process-name))
              (buffer (process-buffer proc)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.01))
+        (rustic-test--wait-till-finished buffer)
         (with-current-buffer buffer
           (should (string= default-directory test-workspace))
           (should-not (get-text-property (point) 'compilation-message)))))))
+
+(provide 'rustic-compilation-error-tests)

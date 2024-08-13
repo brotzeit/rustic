@@ -1,79 +1,80 @@
 # Rustic
 
-[![MELPA](https://melpa.org/packages/rustic-badge.svg)](https://melpa.org/#/rustic)
-[![](https://github.com/brotzeit/rustic/workflows/CI/badge.svg)](https://github.com/brotzeit/rustic/actions?query=workflow%3ACI)
+[![CI](https://github.com/emacs-rustic/rustic/actions/workflows/test.yml/badge.svg)](https://github.com/emacs-rustic/rustic/actions/workflows/test.yml)
 
-<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
-**Table of Contents**
-
+<!--toc:start-->
 - [Rustic](#rustic)
-    - [Intro](#intro)
-    - [Known issues](#known-issues)
-    - [Installation](#installation)
-        - [package](#package)
-        - [straight](#straight)
+  - [Intro](#intro)
+  - [Known issues](#known-issues)
+  - [Installation](#installation)
+    - [Melpa](#melpa)
+    - [quelpa](#quelpa)
+    - [straight](#straight)
+  - [remote](#remote)
+  - [Compilation](#compilation)
+    - [Navigating errors](#navigating-errors)
+    - [default directory](#default-directory)
+    - [Faces](#faces)
+    - [rustc errors](#rustc-errors)
+  - [Rustfmt](#rustfmt)
+    - [Change default arguments](#change-default-arguments)
+    - [edition 2018](#edition-2018)
     - [remote](#remote)
-    - [Compilation](#compilation)
-        - [Navigating errors](#navigating-errors)
-        - [default directory](#default-directory)
-        - [Faces](#faces)
-        - [rustc errors](#rustc-errors)
-    - [Rustfmt](#rustfmt)
-        - [Change default arguments](#change-default-arguments)
-        - [edition 2018](#edition-2018)
-        - [remote](#remote-1)
-    - [LSP](#lsp)
-        - [Server](#server)
-            - [Automatic server installation](#automatic-server-installation)
-        - [Client](#client)
-            - [eglot](#eglot)
-            - [lsp-mode](#lsp-mode)
-                - [`lsp-execute-code-action`](#lsp-execute-code-action)
-                    - [Applying code actions](#applying-code-actions)
-                    - [Auto import](#auto-import)
-                - [Macro expansion](#macro-expansion)
-        - [LSP + TRAMP](#lsp--tramp)
-        - [Detached file](#detached-file)
-    - [Cargo](#cargo)
-        - [Edit](#edit)
-        - [Test](#test)
-        - [Run](#run)
-        - [Outdated](#outdated)
-        - [Expand](#expand)
-        - [Spellcheck](#spellcheck)
-        - [More cargo commands](#more-cargo-commands)
-    - [Clippy](#clippy)
-        - [auto-fixing before compilation](#auto-fixing-before-compilation)
-        - [Commands](#commands)
-        - [Flycheck](#flycheck)
-        - [lsp-mode](#lsp-mode-1)
-    - [Org-babel](#org-babel)
-        - [Intro](#intro-1)
-        - [lsp-mode](#lsp-mode-2)
-        - [Commands](#commands-1)
-        - [Parameters](#parameters)
-            - [:crates](#crates)
-            - [:features](#features)
-            - [:paths](#paths)
-            - [:toolchain](#toolchain)
-            - [:main](#main)
-            - [:include](#include)
-            - [:use](#use)
-    - [Envrc](#envrc)
-    - [Spinner](#spinner)
-    - [rust docs in org-mode](#rust-docs-in-org-mode)
-        - [Prerequisites](#prerequisites)
-        - [Usage](#usage)
-        - [Notes](#notes)
-    - [Popup](#popup)
-    - [rust-mode](#rust-mode)
-    - [elisp tests](#elisp-tests)
-    - [Contributing](#contributing)
-
-<!-- markdown-toc end -->
-
+  - [Tree sitter](#tree-sitter)
+  - [LSP](#lsp)
+    - [Server](#server)
+      - [Automatic server installation](#automatic-server-installation)
+    - [Client](#client)
+      - [eglot](#eglot)
+      - [lsp-mode](#lsp-mode)
+        - [`lsp-execute-code-action`](#lsp-execute-code-action)
+          - [Applying code actions](#applying-code-actions)
+          - [Auto import](#auto-import)
+        - [Macro expansion](#macro-expansion)
+    - [LSP + TRAMP](#lsp-tramp)
+    - [Detached file](#detached-file)
+  - [Cargo](#cargo)
+    - [Edit](#edit)
+    - [Test](#test)
+    - [Run](#run)
+    - [Outdated](#outdated)
+    - [Expand](#expand)
+    - [Spellcheck](#spellcheck)
+    - [More cargo commands](#more-cargo-commands)
+  - [Clippy](#clippy)
+    - [auto-fixing before compilation](#auto-fixing-before-compilation)
+    - [Commands](#commands)
+    - [Flycheck](#flycheck)
+    - [lsp-mode](#lsp-mode)
+  - [Org-babel](#org-babel)
+    - [Intro](#intro)
+    - [lsp-mode](#lsp-mode)
+    - [Commands](#commands)
+    - [Parameters](#parameters)
+      - [:crates](#crates)
+      - [:features](#features)
+      - [:paths](#paths)
+      - [:toolchain](#toolchain)
+      - [:main](#main)
+      - [:include](#include)
+      - [:use](#use)
+  - [envrc](#envrc)
+  - [Spinner](#spinner)
+  - [rust docs in org-mode](#rust-docs-in-org-mode)
+    - [Prerequisites](#prerequisites)
+    - [Usage](#usage)
+    - [Notes](#notes)
+  - [Popup](#popup)
+  - [rust-mode](#rust-mode)
+  - [elisp tests](#elisp-tests)
+  - [Contributing](#contributing)
+<!--toc:end-->
 
 ## Intro
+
+This is a fork of [rustic](https://github.com/brotzeit/rustic) mode which is maintained. For more
+details, [see
+here](https://github.com/brotzeit/rustic/pull/551#issuecomment-1959124829).
 
 This package is based on [rust-mode](https://github.com/rust-lang/rust-mode) and provides additional features:
 
@@ -110,24 +111,53 @@ environment variables probably don't work in emacs. Try
 [exec-path-from-shell](https://github.com/purcell/exec-path-from-shell/tree/81125c5adbc903943c016c2984906dc089372a41#usage)
 to fix this.
 
-### package
+### Melpa
 
-This section explains how to install rustic with the default package manager.
-It's necessary to include elpa for a package dependency:
+Add melpa as part of package archives:
 
-```elisp
+``` emacs-lisp
+(use-package package
+  :ensure nil
+  :config
+  (package-initialize)
+  :custom
+  (package-native-compile t)
+  (package-archives '(("gnu"   . "http://elpa.gnu.org/packages/")
+                      ("melpa" . "https://melpa.org/packages/"))))
+```
+
+And then install rustic appropriately:
+
+``` emacs-lisp
+(use-package rustic
+  :ensure t
+  :config
+  (setq rustic-format-on-save nil)
+  :custom
+  (rustic-cargo-use-last-stored-arguments t))
+```
+
+### quelpa
+
+``` emacs-lisp
 (require 'package)
-(setq package-archives '(("melpa" . "http://melpa.org/packages/")
-                         ("gnu" . "http://elpa.gnu.org/packages/")))
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
 (package-refresh-contents)
-(use-package rustic)
+
+(use-package quelpa-use-package
+  :ensure t)
+
+(use-package rustic
+  :quelpa (rustic :fetcher github
+                  :repo "emacs-rustic/rustic"))
 ```
 
 If ‘spinner-1.7.3’ is unavailable” when trying to install rustic, you
 need to update GPG keys used by the ELPA package manager. Try
 installing
 [gnu-elpa-keyring-update](https://elpa.gnu.org/packages/gnu-elpa-keyring-update.html).
+
 
 ### straight
 
@@ -145,7 +175,7 @@ that doesn't work remotely, please open an issue.
 
 ## Compilation
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/compilation_buffer.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/compilation_buffer.png)
 
 If you want to use a Makefile you can either use `(setq
 rustic-compile-command "make")` or run `C-u` + `rustic-compile`.
@@ -197,7 +227,7 @@ FTR #174 #179 #236
 
 The colors that are displayed in compilation buffers come from cargo
 and are translated by xterm-color. You can change these colors by
-modifying `rustic-ansi-faces`.
+modifying `xterm-color-names` and `xterm-color-names-bright`.
 
 `rustic-compilation-mode` doesn't use the default faces of
 compile.el. If you want to change these colors you can use something
@@ -218,7 +248,7 @@ Additional faces:
 
 ### rustc errors
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/rustc_errno.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/rustc_errno.png)
 
 ## Rustfmt
 
@@ -299,6 +329,26 @@ Currently only `rustic-format-buffer` works remotely.
 
 `rustic-rustfmt-bin` needs to be an absolute path to work remotely.
 
+## Tree sitter
+
+For using tree sitter integration, make sure to enable tree sitter in
+rust-mode:
+
+``` emacs-lisp
+(use-package rust-mode
+  :ensure t
+  :init
+  (setq rust-mode-treesitter-derive t))
+```
+
+And make to have rustic load after rust-mode:
+
+``` emacs-lisp
+(use-package rustic
+  :ensure t
+  :after (rust-mode))
+```
+
 ## LSP
 
 Disable `rustic-lsp-setup-p` to turn off automatic LSP configuration.
@@ -352,7 +402,7 @@ LSP commands:
 - `xref-find-references` with helm and rust-analyzer
 - `rustic-cargo-add-missing-dependencies` convenient command that adds missing dependencies to a crate's Cargo.toml
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/xref_references.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/xref_references.png)
 
 #### eglot
 
@@ -379,11 +429,11 @@ top of the sideline.
 
 ###### Applying code actions
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/code_actions.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/code_actions.png)
 
 ###### Auto import
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/auto_import.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/auto_import.png)
 
 ##### Macro expansion
 
@@ -394,7 +444,7 @@ The results are formatted and highlighted by default, but you can use
 your own function by customizing
 `lsp-rust-analyzer-macro-expansion-method`.
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/macro_expansion.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/macro_expansion.png)
 
 ### LSP + TRAMP
 
@@ -500,7 +550,7 @@ arguments in `rustic-test-arguments`
 
 `rustic-cargo-current-test` run test at point, whether it's a function or a module
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/cargo_current_test.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/cargo_current_test.png)
 
 ### Run
 
@@ -549,7 +599,7 @@ before being used.
 - `r` refresh crate list
 - `q` quit window
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/outdated.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/outdated.png)
 
 ### Expand
 
@@ -657,6 +707,9 @@ Customization:
   of babel process
 - `rustic-babel-auto-wrap-main` wrap body into main function
 - `rustic-babel-default-toolchain` active toolchain for babel blocks
+- `rustic-babel-display-error-popup` displays error popup on
+  compilation failure or when the exit code is non zero. Set it to nil
+  if you want it to be displayed as part of result block.
 
 ### lsp-mode
 
@@ -917,11 +970,11 @@ customized with `rustic-popup-commands`.  The command
 If you want to close the popup after you ran a command you can set
 `rustic-kill-buffer-and-window` to `t`.
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/popup.png)
 
 View help buffer containing a command's flags with `h`:
 
-![](https://raw.githubusercontent.com/brotzeit/rustic/master/img/popup_help.png)
+![](https://raw.githubusercontent.com/emacs-rustic/rustic/main/img/popup_help.png)
 
 ## rust-mode
 
@@ -939,10 +992,10 @@ There are also some additional commands:
 To run the tests, you will need [Cask](https://github.com/cask/cask).
 
 ``` bash
-cask exec ert-runner
+cask emacs --batch -L . -L test -l test/all-tests.el -f ert-run-tests-batch-and-exit
 ```
 
-alternatively you can use `make test`
+alternatively you can use `just test`
 
 ## Contributing
 

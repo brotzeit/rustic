@@ -1,6 +1,11 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
 
+(require 'ert)
+(load (expand-file-name "test-helper.el"
+                        (file-name-directory
+                         (or load-file-name buffer-file-name))))
+
 (setq org-confirm-babel-evaluate nil)
 
 (defun rustic-test-get-babel-block (contents &optional params)
@@ -56,6 +61,27 @@
     (should (eq (rustic-test-babel-check-results buf) nil))
     (should-not (buffer-live-p rustic-babel-compilation-buffer-name))))
 
+(ert-deftest rustic-test-babel-error-no-popup ()
+  (let* ((string "fn main() {
+                    panic!(\"hello world\");
+                  }")
+         (buf (rustic-test-get-babel-block string))
+         (rustic-babel-display-error-popup nil))
+    (rustic-test-babel-execute-block buf)
+    ;; The output will have the entire message now
+    (should (s-contains? "hello world" (rustic-test-babel-check-results buf)))))
+
+(ert-deftest rustic-test-babel-error-yes-popup ()
+  (let* ((string "fn main() {
+                    panic!(\"hello world\");
+                  }")
+         (buf (rustic-test-get-babel-block string))
+         (rustic-babel-display-error-popup t))
+    (rustic-test-babel-execute-block buf)
+    ;; The output will contain partial message with rest of the useful
+    ;; output as part of the compilation buffer.
+    (should (not (s-contains? "hello world" (rustic-test-babel-check-results buf))))))
+
 (ert-deftest rustic-test-babel-error-results ()
   (let* ((string "fn main() {
                      let v = vec![1, 2, 3];
@@ -72,7 +98,7 @@
                    }")
          (buf (rustic-test-get-babel-block string)))
     (rustic-test-babel-execute-block buf)
-    (let ((re "^thread '[^']+' panicked at '[^']+', "))
+    (let ((re "^thread '[^']+' panicked at .*"))
       (should (string-match re (rustic-test-babel-check-results buf))))))
 
 (ert-deftest rustic-test-babel-spinner ()
@@ -112,6 +138,7 @@
       (rustic-test-babel-execute-block buf)
       (should-not (spinner-p rustic-babel-spinner))
       (should (eq mode-line-process nil)))))
+
 
 (ert-deftest rustic-test-babel-format ()
   (let* ((string "fn main()      {}")
@@ -243,3 +270,5 @@
     (with-current-buffer buf
       (rustic-test-babel-execute-block buf)
       (should (eq (rustic-test-babel-check-results buf) nil)))))
+
+(provide 'rustic-babel-test)

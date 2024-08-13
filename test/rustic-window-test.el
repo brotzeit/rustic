@@ -1,4 +1,8 @@
 ;; -*- lexical-binding: t -*-
+(require 'rustic)
+(load (expand-file-name "test-helper.el"
+                        (file-name-directory
+                         (or load-file-name buffer-file-name))))
 
 (ert-deftest rustic-test-window-count ()
   (should (= (length (window-list)) 1))
@@ -27,3 +31,5 @@
       (should (= (length (window-list)) 2))
       (should (get-buffer-window rustic-format-buffer-name)))
     (kill-buffer buf)))
+
+(provide 'rustic-window-test)

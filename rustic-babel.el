@@ -11,10 +11,6 @@
 
 (require 'rustic-rustfmt)
 
-;; FIXME This variable doesn't exist in noninteractive emacs sessions,
-;; which probably means that it is internal and we shouldn't use it.
-(defvar org-babel-temporary-directory)
-
 (defvar rustic-info nil)
 
 (add-to-list 'org-src-lang-modes '("rust" . rustic))
@@ -23,6 +19,14 @@
 
 (defcustom rustic-babel-display-compilation-buffer nil
   "Whether to display compilation buffer."
+  :type 'boolean
+  :group 'rustic-babel)
+
+(defcustom rustic-babel-display-error-popup t
+  "Diplay compilation error or panic in error popup.
+On failures and panic during execution, should the error be
+displayed separately or as part of popup or should it be part of
+results block ? By default we display it as separate popup."
   :type 'boolean
   :group 'rustic-babel)
 
@@ -36,11 +40,12 @@
   :type 'boolean
   :group 'rustic-babel)
 
-(defcustom rustic-babel-default-toolchain "stable"
+(defcustom rustic-babel-default-toolchain nil
   "Active toolchain for babel blocks.
 When passing a toolchain to a block as argument, this variable won't be
 considered."
-  :type 'string
+  :type '(choice (string :tag "String")
+                 (const :tag "Nil" nil))
   :group 'rustic-babel)
 
 (defvar rustic-babel-buffer-name '((:default . "*rust-babel*")))
@@ -74,8 +79,9 @@ should be wrapped in which case we will disable rustfmt."
                            ((eq toolchain-kw-or-string 'beta) "+beta")
                            ((eq toolchain-kw-or-string 'stable) "+stable")
                            (toolchain-kw-or-string (format "+%s" toolchain-kw-or-string))
-                           (t (format "+%s" rustic-babel-default-toolchain))))
-          (params (list "cargo" toolchain "build" "--quiet"))
+                           (rustic-babel-default-toolchain (format "+%s" rustic-babel-default-toolchain))
+                           (t nil)))
+          (params (remove nil (list (rustic-cargo-bin) toolchain "build" "--quiet")))
           (inhibit-read-only t))
      (rustic-compilation-setup-buffer err-buff dir 'rustic-compilation-mode)
      (when rustic-babel-display-compilation-buffer
@@ -126,7 +132,7 @@ execution with rustfmt."
 
            ;; run project
            (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
-                  (params (list "cargo" toolchain "run" "--quiet"))
+                  (params (remove nil (list (rustic-cargo-bin) toolchain "run" "--quiet")))
                   (inhibit-read-only t))
              (rustic-make-process
               :name rustic-babel-process-name
@@ -139,9 +145,20 @@ execution with rustfmt."
               (result (format "error: Could not compile `%s`." project)))
          (rustic-babel-build-update-result-block result))
        (rustic-with-spinner rustic-babel-spinner nil nil)
-       (if (= (length (with-current-buffer proc-buffer (buffer-string))) 0)
-           (kill-buffer proc-buffer)
-         (pop-to-buffer proc-buffer))))))
+       (if rustic-babel-display-error-popup
+         (if (= (length (with-current-buffer proc-buffer (buffer-string))) 0)
+             (kill-buffer proc-buffer)
+           (pop-to-buffer proc-buffer))
+         (if (> (length (with-current-buffer proc-buffer (buffer-string))) 0)
+             (progn
+               (with-current-buffer proc-buffer
+                  (save-excursion
+                    (save-match-data
+                      (goto-char (point-min))
+                      (setq result (buffer-string))
+                      (rustic-babel-run-update-result-block result))))
+               (kill-buffer proc-buffer))
+           (kill-buffer proc-buffer)))))))
 
 (defun rustic-babel-run-sentinel (proc _output)
   "Sentinel for babel project execution."
@@ -160,12 +177,15 @@ execution with rustfmt."
           (save-excursion
             (save-match-data
               (goto-char (point-min))
-              (when (re-search-forward "^thread '[^']+' panicked at '[^']+', ")
-                (goto-char (match-beginning 0))
-                (setq result (buffer-substring-no-properties (point) (line-end-position)))))))
+              (if rustic-babel-display-error-popup
+                  (when (re-search-forward "^thread '[^']+' panicked at .*")
+                    (goto-char (match-beginning 0))
+                    (setq result (buffer-substring-no-properties (point) (line-end-position))))
+                (setq result (buffer-string))))))
         (rustic-babel-run-update-result-block result)
         (rustic-with-spinner rustic-babel-spinner nil nil)
-        (pop-to-buffer proc-buffer)))))
+        (when rustic-babel-display-error-popup
+          (pop-to-buffer proc-buffer))))))
 
 (defun rustic-babel-build-update-result-block (result)
   "Update result block with RESULT."
@@ -210,12 +230,15 @@ after successful compilation."
                  (buffer-string)))))))
       (kill-buffer "rustic-babel-format-buffer"))))
 
+(defvar rustic-org-babel-temporary-directory
+  (make-temp-file "babel-" t))
+
 (defun rustic-babel-generate-project (&optional expand)
-  "Create rust project in `org-babel-temporary-directory'.
+  "Create rust project in `rustic-org-babel-temporary-directory'.
 Return full path if EXPAND is t."
-  (let* ((default-directory org-babel-temporary-directory)
+  (let* ((default-directory rustic-org-babel-temporary-directory)
          (dir (make-temp-file-internal "cargo" 0 "" nil)))
-    (shell-command-to-string (format "cargo new %s --bin --quiet" dir))
+    (shell-command-to-string (format "%s new %s --bin --quiet" (rustic-cargo-bin) dir))
     (if expand
         (concat (expand-file-name dir) "/")
       dir)))
@@ -224,14 +247,14 @@ Return full path if EXPAND is t."
   "In order to reduce the execution time when the project has
 dependencies, the project name is stored as a text property in the
 header of the org-babel block to check if the project already exists
-in `org-babel-temporary-directory'.  If the project exists, reuse it.
+in `rustic-org-babel-temporary-directory'.  If the project exists, reuse it.
 Otherwise create it with `rustic-babel-generate-project'."
   (let* ((beg (org-babel-where-is-src-block-head))
          (end (save-excursion (goto-char beg)
                               (line-end-position)))
          (line (buffer-substring beg end)))
     (let* ((project (symbol-name (get-text-property 0 'project line)))
-           (path (concat org-babel-temporary-directory "/" project "/")))
+           (path (concat rustic-org-babel-temporary-directory "/" project "/")))
       (if (file-directory-p path)
           (progn
             (put-text-property beg end 'project (make-symbol project))
@@ -348,7 +371,7 @@ kill the running process."
         (progn
           (rustic-process-kill-p p t)
           nil)
-      (let* ((default-directory org-babel-temporary-directory)
+      (let* ((default-directory rustic-org-babel-temporary-directory)
              (project (rustic-babel-project))
              (dir (setq rustic-babel-dir (expand-file-name project)))
              (main-p (cdr (assq :main params)))
@@ -392,7 +415,7 @@ at least one time in this emacs session before this command can be used."
                               (line-end-position)))
          (line (buffer-substring beg end))
          (project (symbol-name (get-text-property 0 'project line)))
-         (path (concat org-babel-temporary-directory "/" project "/src/main.rs")))
+         (path (concat rustic-org-babel-temporary-directory "/" project "/src/main.rs")))
     (if (file-exists-p path)
         (find-file path)
       (message "Run block first to visit generated project."))))
@@ -403,10 +426,10 @@ at least one time in this emacs session before this command can be used."
   (interactive)
   (rustic--inheritenv
    (let* ((err-buff (get-buffer-create rustic-babel-compilation-buffer-name))
-          (default-directory org-babel-temporary-directory)
+          (default-directory rustic-org-babel-temporary-directory)
           (body (org-element-property :value (org-element-at-point)))
           (project (rustic-babel-project))
-          (params (list "cargo" "clippy")))
+          (params (list (rustic-cargo-bin) "clippy")))
      (let* ((dir (setq rustic-babel-dir (expand-file-name project)))
             (main (expand-file-name "main.rs" (concat dir "/src")))
             (default-directory dir))

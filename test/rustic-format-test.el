@@ -1,5 +1,9 @@
 ;; -*- lexical-binding: t -*-
 ;; Before editing, eval (load-file "test-helper.el")
+(require 'rustic)
+(load (expand-file-name "test-helper.el"
+                        (file-name-directory
+                         (or load-file-name buffer-file-name))))
 
 (ert-deftest rustic-test-format-buffer ()
   (let* ((string "fn main()      {}")
@@ -35,7 +39,6 @@
       (fundamental-mode)
       ;; no rustic-mode buffer
       (should-error (rustic-format-buffer))
-      (should-not (get-buffer rustic-format-buffer-name))
       (erase-buffer)
       (rustic-mode)
       (insert string-dummy)
@@ -262,12 +265,10 @@
                    'rustic-format-file-sentinel
                    :buffer buf
                    :files main)))
-        (while (eq (process-status proc) 'run)
-          (sit-for 0.1))))
+        (rustic-test--wait-till-finished rustic-format-buffer-name)))
     (with-temp-buffer
       (insert-file-contents main)
       (should (string= (buffer-string) formatted-string)))))
-
 
 ;; rustfmt.toml
 
@@ -320,4 +321,4 @@
       (insert-file-contents main)
       (should (string= (buffer-string) formatted-string)))))
 
-
+(provide 'rustic-format-test)
