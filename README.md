@@ -3,6 +3,12 @@
 [![MELPA](https://melpa.org/packages/rustic-badge.svg)](https://melpa.org/#/rustic)
 [![](https://github.com/brotzeit/rustic/workflows/CI/badge.svg)](https://github.com/brotzeit/rustic/actions?query=workflow%3ACI)
 
+---
+### **UPDATE 2024-05-31**: This repository is not active anymore.
+
+A maintained fork of this repo has been created at https://github.com/emacs-rustic/rustic
+---
+
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
