@@ -30,6 +30,12 @@
     (require 'xdg)
     (fset 'rustic-doc--xdg-data-home 'xdg-data-home)))
 
+(defconst rustic-doc-pandoc-min-version
+  (rustic-mode--make-semver :major 2 :minor 1))
+
+(defconst rustic-doc-fd-find-min-version
+  (rustic-mode--make-semver :major 2))
+
 (defvar rustic-doc-lua-filter (concat (file-name-as-directory (getenv "HOME"))
                                       ".local/bin/rustic-doc-filter.lua")
   "Save location for the rustic-doc lua filter.")
@@ -71,6 +77,39 @@ Needs to be a function because of its reliance on
 (defvar helm-ag-base-command)
 (defvar helm-ag-success-exit-status)
 (declare-function helm-ag "ext:helm-ag")
+
+(defun rustic-doc--make-semver (&rest version-kv)
+  "Return a new semver-like version from VERSION-KV.
+VERSION-KV is a plist which must have :major key, and optionaly
+:minor and :patch. Default values for :minor and :patch are 0.
+Returned value is a list of the form (major minor patch)."
+  (let ((major (plist-get version-kv :major))
+        (minor (or (plist-get version-kv :minor) 0))
+        (patch (or (plist-get version-kv :patch) 0)))
+    (list major minor patch)))
+
+(defun rustic-doc--semver-from-string (version-str)
+  "Return a semver-like version from VERSION-STR."
+  (let* ((splitted-str (split-string version-str "\\."))
+         (str-length (length splitted-str)))
+    (mapcar #'string-to-number
+            ;; take only first 3 elements or less
+            (subseq splitted-str 0 (min 3 str-length)))))
+
+(defun rustic-doc--semver-greater (v1 v2)
+  "Return greater for two semver-like versions V1 and V2."
+  (defun -semver-major (v) (nth 0 v))
+  (defun -semver-minor (v) (nth 1 v))
+  (defun -semver-patch (v) (nth 2 v))
+
+  (cond
+   ((> (-semver-major v1) (-semver-major v2)) t)
+   ((< (-semver-major v1) (-semver-major v2)) nil)
+   ((> (-semver-minor v1) (-semver-minor v2)) t)
+   ((< (-semver-minor v1) (-semver-minor v2)) nil)
+   ((> (-semver-patch v1) (-semver-patch v2)) t)
+   ((< (-semver-patch v1) (-semver-patch v2)) nil)
+   (t nil)))
 
 (defun rustic-doc-default-search-function (search-dir search-term)
   "Default search functionality.
@@ -274,16 +313,28 @@ See buffer *cargo-makedocs* for more info")
                                        (rustic-doc--project-doc-dest)))))
     (message "Activate rustic-doc-mode to run `rustic-doc-convert-current-package")))
 
+(defun rustic-doc--extract-version (str)
+  "Extract semver-like version from `STR' and conver it to list.
+
+Both `fd-find' and `pandoc' output their versions in the form:
+`<program> <semver>\n', that's why this function parses the
+version from first whitespace to the end of the line."
+  (let ((start (string-match-p " " str))
+        (end (string-match-p "\n" str)))
+    (rustic-doc--semver-from-string (substring str start end))))
+
 (defun rustic-doc--confirm-dep-versions (missing-fd)
   "Verify that dependencies are not too old.
-Do not check `fd' when MISSING-FD is non-nil."
+      Do not check `fd' when MISSING-FD is non-nil."
   (when (not missing-fd)
-    (when  (> 8 (string-to-number
-                  (substring (shell-command-to-string "fd --version") 3 4)))
+    (when (rustic-doc--semver-greater
+           rustic-doc-fd-find-min-version
+           (rustic-doc--extract-version (shell-command-to-string "fd --version")))
       (message "Your version of fd is too old, please install a recent version, maybe through cargo.")))
 
-  (when (>= 11 (string-to-number
-                (substring (shell-command-to-string "pandoc --version") 9 11)))
+  (when (rustic-doc--semver-greater
+         rustic-doc-pandoc-min-version
+         (rustic-doc--extract-version (shell-command-to-string "pandoc --version")))
     (message "Your version of pandoc is too old, please install a more recent version. See their github for more info.")))
 
 
