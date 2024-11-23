@@ -116,14 +116,15 @@ and it's `cdr' is a list of arguments."
           (command (or (plist-get args :command)
                        (rustic-compute-rustfmt-args)))
           (command (if (listp command) command (list command)))
-          (cur-buf (current-buffer)))
+          (cur-buf (current-buffer))
+          (rustfmt (rustic-rustfmt-bin)))
      (setq rustic-save-pos (set-marker (make-marker) (point) (current-buffer)))
      (rustic-compilation-setup-buffer err-buf dir 'rustic-format-mode t)
      (--each files
        (unless (file-exists-p it)
          (error (format "File %s does not exist." it))))
      (with-current-buffer err-buf
-       (let* ((c `(,(rustic-rustfmt-bin)
+       (let* ((c `(,rustfmt
                    ,@(split-string rustic-rustfmt-args)
                    ,@command "--" ,@files))
               (proc (rustic-make-process :name rustic-format-process-name
