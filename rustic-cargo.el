@@ -357,7 +357,7 @@ Execute process in PATH."
 
 (defun rustic-cargo-install-crate-p (crate)
   "Ask whether to install crate CRATE."
-  (let ((cmd (format "cargo install cargo-%s" crate)))
+  (let ((cmd (format "%s install cargo-%s" (rustic-cargo-bin) crate)))
     (when (yes-or-no-p (format "Cargo-%s missing. Install ? " crate))
       (async-shell-command cmd (rustic-cargo-bin) "cargo-error"))))
 
@@ -519,7 +519,7 @@ The CRATE-LINE is a single line from the `rustic-cargo-oudated-buffer-name'"
   (let (upgrade)
     (dolist (crate crates)
       (setq upgrade (concat upgrade (format "-p %s@%s " (rustic-crate-name crate) (rustic-crate-version crate)))))
-    (let ((output (shell-command-to-string (format "cargo upgrade %s" upgrade))))
+    (let ((output (shell-command-to-string (format "%s upgrade %s" (rustic-cargo-bin) upgrade))))
       (if (string-match "error: no such subcommand:" output)
           (rustic-cargo-install-crate-p "edit")
         (rustic-cargo-reload-outdated)))))

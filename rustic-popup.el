@@ -149,7 +149,7 @@ If directory is not in a rust project call `read-directory-name'."
            (c (intern (concat "rustic-cargo-" command))))
       (if (commandp c)
           (call-interactively c)
-        (call-interactively 'rustic-compile (concat "cargo " command)))))
+        (call-interactively 'rustic-compile (concat (rustic-cargo-bin) " " command)))))
   (when rustic-kill-buffer-and-window
     (kill-buffer-and-window)))
 
@@ -220,7 +220,7 @@ corresponding line."
 
 (defun rustic-popup-help-flags (command)
   "Get flags of COMMAND."
-  (let ((string (shell-command-to-string (format "cargo %s -h" command)))
+  (let ((string (shell-command-to-string (format "%s %s -h" (rustic-cargo-bin) command)))
         flags)
     (dolist (s (split-string string "\n"))
       (when (and (not (string-match "^\s+\-h" s))
