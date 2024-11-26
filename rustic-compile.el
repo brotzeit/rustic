@@ -4,7 +4,7 @@
 
 ;; Unlike compile.el, rustic makes use of a non dumb terminal in order to receive
 ;; all ANSI control sequences, which get translated by xterm-color.
-;; This file also adds a derived compilation mode. Error matching regexes from
+;; This file also adds a derived compilation mode.  Error matching regexes from
 ;; compile.el are removed.
 
 ;;; Code:
@@ -297,6 +297,7 @@ ARGS is a plist that affects how the process is run.
      (unless (plist-get args :no-display)
        (funcall rustic-compile-display-method buf))
      (with-current-buffer buf
+       (setq compilation--start-time (float-time))
        (let ((inhibit-read-only t))
          (insert (format "%s \n" (s-join " "  command))))
        (rustic-make-process :name process
@@ -550,9 +551,10 @@ buffer."
 (defun rustic-compile (&optional arg)
   "Compile rust project.
 
-If `compilation-read-command' is non-nil or if called with prefix
-argument ARG then read the command in the minibuffer.  Otherwise
-use `rustic-compile-command'.
+If the variable `compilation-read-command' is non-nil or if
+`rustic-compile` is called with prefix argument ARG then read the
+command in the minibuffer.  Otherwise use
+`rustic-compile-command'.
 
 In either store the used command in `compilation-arguments'."
   (interactive "P")
