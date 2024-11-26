@@ -744,11 +744,10 @@ The documentation is built if necessary."
   "Add crate to Cargo.toml using 'cargo add'.
 If running with prefix command `C-u', read whole command from minibuffer."
   (interactive "P")
-  (let* ((command (if arg
-                      (read-from-minibuffer "Cargo add command: "
-                                            (rustic-cargo-bin) " add ")
-                    (concat (rustic-cargo-bin) " add "
-                            (read-from-minibuffer "Crate: ")))))
+  (let* ((base (concat (rustic-cargo-bin) " add "))
+	 (command (if arg
+                      (read-from-minibuffer "Cargo add command: " base)
+                    (concat base (read-from-minibuffer "Crate: ")))))
     (rustic-run-cargo-command command)))
 
 (defun rustic-cargo-add-missing-dependencies (&optional arg)
