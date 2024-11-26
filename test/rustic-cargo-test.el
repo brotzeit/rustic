@@ -257,7 +257,7 @@ fn test() {
 (ert-deftest rustic-cargo-login-test ()
   (let* ((process-environment (cl-copy-list process-environment))
          (tempdir (concat (temporary-file-directory) (file-name-as-directory "rustic-cargo-login-test")))
-         (credfile (concat tempdir "credentials")))
+         (credfile (concat tempdir "credentials.toml")))
 
     (when (file-exists-p credfile) (delete-file credfile))
 
@@ -268,5 +268,4 @@ fn test() {
     (with-temp-buffer
       (find-file credfile)
       (let ((buf-string (buffer-string)))
-        (message buf-string)
         (should (string-match "\\\[registry\\\]\ntoken = \"test-credentials\"\n" buf-string))))))
