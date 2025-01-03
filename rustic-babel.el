@@ -264,7 +264,7 @@ Use VERSION, FEATURES and PATH."
                           (cdr crate-and-version)
                         "*"))
              (features (cdr (assoc name crate-features)))
-             (path (cdr (assoc name crate-paths))))
+             (path (cadr (assoc name crate-paths))))
 
         ;; make sure it works with symbols and strings
         (when (symbolp name)
