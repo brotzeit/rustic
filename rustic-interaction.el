@@ -3,6 +3,7 @@
 ;;; Code:
 
 (require 'newcomment)
+(require 'url)
 
 (require 'rustic)
 
@@ -59,6 +60,49 @@ visiting a project."
                  ;; Did not find it.
                  (throw 'done nil)))))
     t))
+
+;;; Web Search
+
+;;;###autoload
+(defun rustic-doc-web-search (search-term)
+  "Search Rust documentation online at docs.rust-lang.org for SEARCH-TERM."
+  (interactive (let ((short-name (thing-at-point 'symbol t)))
+                 (list (read-string (format "Search Rust docs for (default %s): " short-name)
+                                    nil
+                                    nil
+                                    short-name))))
+  (let ((url (format "https://doc.rust-lang.org/std/?search=%s"
+                     (url-hexify-string search-term))))
+    (browse-url url)))
+
+;;;###autoload
+(defun rustic-doc-web-search-at-point ()
+  "Search Rust documentation online at docs.rust-lang.org for symbol at point."
+  (interactive)
+  (if-let ((symbol (thing-at-point 'symbol t)))
+      (let ((url (format "https://doc.rust-lang.org/std/?search=%s"
+                         (url-hexify-string symbol))))
+        (browse-url url))
+    (message "No symbol at point")))
+
+;;;###autoload
+(defun rustic-cratesio-web-search (search-term)
+  "Search for crates on crates.io for SEARCH-TERM."
+  (interactive "sSearch crates.io for: ")
+  (let ((url (format "https://crates.io/search?q=%s"
+                     (url-hexify-string search-term))))
+    (browse-url url)))
+
+;;;###autoload
+(defun rustic-cratesio-web-search-at-point ()
+  "Search for crates on crates.io for symbol at point."
+  (interactive)
+  (if-let ((symbol (thing-at-point 'symbol t)))
+      (let ((url (format "https://crates.io/search?q=%s"
+                         (url-hexify-string symbol))))
+        (browse-url url))
+    (message "No symbol at point")))
+
 ;;; _
 (provide 'rustic-interaction)
 ;;; rustic-interaction.el ends here
