@@ -66,8 +66,8 @@ propagated by `with-temp-buffer', so we explicitly ensure that
 happens, so that processes will be invoked consistently.  BODY is
 as for that macro."
   (declare (indent 0) (debug (body)))
-  (let ((p (cl-gensym))
-        (e (cl-gensym)))
+  (let ((p (gensym))
+        (e (gensym)))
     `(let ((,p process-environment)
            (,e exec-path))
        (with-temp-buffer
