@@ -383,7 +383,7 @@ is called `std::option::Option' in the docs."
   "Thing-at-point if using eglot.
 If anything goes wrong, return DEFAULT."
   (interactive)
-  (if-let ((content (jsonrpc-request
+  (if-let* ((content (jsonrpc-request
                      (eglot--current-server-or-lose)
                      :textDocument/hover (eglot--TextDocumentPositionParams)))
            ;; text-name is the qualified name, but it sometimes doesn't correspond to the folder structure.
@@ -397,7 +397,7 @@ If anything goes wrong, return DEFAULT."
 (defun rustic-doc--thing-at-point-lsp-mode (default)
   "Thing at point if using lsp-mode.
 If anything goes wrong, return DEFAULT."
-  (if-let ((active (boundp 'lsp-mode))
+  (if-let* ((active (boundp 'lsp-mode))
            (lsp-content (when (alist-get 'lsp-mode minor-mode-alist)
                           (-some->> (lsp--text-document-position-params)
                             (lsp--make-request "textDocument/hover")

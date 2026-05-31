@@ -314,7 +314,7 @@ executed with the parameter `:include'."
     (with-current-buffer (current-buffer)
       (save-excursion
         (dolist (b (mapcar (lambda (b) (if (symbolp b) (symbol-name b) b)) blocks))
-          (when-let ((c (rustic-babel-block-contents b)))
+          (when-let* ((c (rustic-babel-block-contents b)))
             (setq contents (concat contents c))))))
     contents))
 

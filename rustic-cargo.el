@@ -219,8 +219,8 @@ If ARG is not nil, use value as argument and store it in
 (defun rustic-cargo-test-dwim ()
   "Run test or mod at point. Otherwise run `rustic-cargo-test'."
   (interactive)
-  (if-let (test (or (rustic-cargo--get-current-fn-name)
-                    (rustic-cargo--get-current-mod)))
+  (if-let* ((test (or (rustic-cargo--get-current-fn-name)
+                      (rustic-cargo--get-current-mod))))
       (rustic-cargo-test)))
 
 (defconst rustic-cargo-mod-regexp
@@ -245,14 +245,14 @@ If ARG is not nil, use value as argument and store it in
   (save-excursion
     (progn
       (goto-char (line-end-position))
-      (when-let ((location (search-backward-regexp rustic-cargo-mod-regexp nil t)))
+      (when-let* ((location (search-backward-regexp rustic-cargo-mod-regexp nil t)))
         (cons location (match-string 1))))))
 
 (defun rustic-cargo--get-current-line-fn-name ()
   "Return cons with location and fn name from the current line or nil."
   (save-excursion
     (goto-char (line-beginning-position))
-    (when-let ((location (search-forward-regexp rustic-cargo-fn-regexp (line-end-position) t)))
+    (when-let* ((location (search-forward-regexp rustic-cargo-fn-regexp (line-end-position) t)))
       (cons location (match-string 1)))))
 
 (defun rustic-cargo--get-current-fn-name ()

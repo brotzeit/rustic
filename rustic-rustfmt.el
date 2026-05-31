@@ -175,7 +175,7 @@ and it's `cdr' is a list of arguments."
               (kill-buffer proc-buffer)
               (message "Formatted buffer with rustfmt."))
           (goto-char (point-min))
-          (when-let ((file (buffer-file-name next-error-last-buffer)))
+          (when-let* ((file (buffer-file-name next-error-last-buffer)))
             (save-excursion
               (save-match-data
                 (when (search-forward "<stdin>" nil t)
@@ -186,7 +186,7 @@ and it's `cdr' is a list of arguments."
           (message "Rustfmt error."))))
 
     ;; rustfmt warnings
-    (when-let ((b (process-get proc 'command-buf)))
+    (when-let* ((b (process-get proc 'command-buf)))
       (when (process-get proc 'command-buf)
         (let ((warnings ""))
           (with-current-buffer b
@@ -354,7 +354,7 @@ different emacs versions."
 (defun rustic-project-buffer-list ()
   "Return a list of the buffers belonging to the current project.
 This is basically a wrapper around `project--buffer-list'."
-  (when-let ((pr (project-current)))
+  (when-let* ((pr (project-current)))
     (if (fboundp 'project--buffer-list)
         (project--buffer-list pr)
       ;; Like the above function but for releases before Emacs 28.
