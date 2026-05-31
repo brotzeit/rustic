@@ -48,7 +48,7 @@ hit RET to send it to the program."
 
 ;;;###autoload
 (defun rustic-cargo-comint-run (&optional arg)
-  "Run 'cargo run' but for interactive programs.
+  "Run \='cargo run\=' but for interactive programs.
 
 If ARG is not nil, use value as argument and store it in `rustic-run-arguments'.
 When calling this function from `rustic-popup-mode', always use the value of

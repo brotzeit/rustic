@@ -44,17 +44,17 @@ VALUE is a string, an integer or a boolean."
 (defcustom rustic-format-trigger nil
   "This option allows you to automatically run rustfmt when saving
 or before using a compilation/cargo command.
-`on-compile' calls 'cargo fmt' in the directory that is returned by
+`on-compile' calls \='cargo fmt\=' in the directory that is returned by
 the function used in `rustic-compile-directory-method'."
   :type '(choice (const :tag "Format buffer before saving." on-save)
-                 (const :tag "Run 'cargo fmt' before compilation." on-compile)
+                 (const :tag "Run \='cargo fmt\=' before compilation." on-compile)
                  (const :tag "Don't format automatically." nil))
   :group 'rustic)
 
 (defcustom rustic-format-on-save-method 'rustic-format-file
   "Default function used for formatting before saving.
 This function will only be used when `rustic-format-trigger' is set
-to 'on-save."
+to `on-save'."
   :type 'function
   :group 'rustic)
 
@@ -64,7 +64,7 @@ to 'on-save."
   :group 'rustic)
 
 (defcustom rustic-cargo-clippy-trigger-fix nil
-  "Whether to run 'clippy --fix' before build or run."
+  "Whether to run \='clippy --fix\=' before build or run."
   :type '(choice (const :tag "Run 'clippy --fix' before saving." on-save)
                  (const :tag "Run 'clippy --fix' before compilation." on-compile)
                  (const :tag "Don't fix automatically." nil))
@@ -335,7 +335,7 @@ This operation requires a nightly version of rustfmt.
 
 (defun rustic-format-dwim (beg end)
   "Format region if active, if not check if major mode is rustic
-and format file, or else run 'cargo fmt'."
+and format file, or else run \='cargo fmt\='."
   (interactive "r")
   (cond ((region-active-p)
          (rustic-format-region beg end))
@@ -395,7 +395,7 @@ This is basically a wrapper around `project--buffer-list'."
           #'rustic-maybe-format-before-compilation)
 
 (defun rustic-before-save-hook ()
-  "Automatically run 'clippy --fix' OR rustfmt before saving.
+  "Automatically run \='clippy --fix\=' OR rustfmt before saving.
 
 Change `rustic-cargo-clippy-trigger-fix' and `rustic-format-trigger'
 to make use of these features.

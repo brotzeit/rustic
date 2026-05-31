@@ -8,7 +8,7 @@
 (require 'rustic-compile)
 
 (defcustom rustic-cargo-clippy-fix-args "--allow-dirty"
-  "Default arguments when running 'clippy --fix'."
+  "Default arguments when running \='clippy --fix\='."
   :type 'string
   :group 'rustic-cargo)
 
@@ -29,7 +29,7 @@
   "Buffer name for clippy buffers.")
 
 (defvar rustic-clippy-arguments ""
-  "Holds arguments for 'cargo clippy', similar to `compilation-arguments`.")
+  "Holds arguments for \='cargo clippy\=', similar to `compilation-arguments`.")
 
 (defvar rustic-cargo-clippy-mode-map
   (let ((map (make-sparse-keymap)))
@@ -72,7 +72,7 @@
 
 ;;;###autoload
 (defun rustic-cargo-clippy (&optional arg)
-  "Run 'cargo clippy'.
+  "Run \='cargo clippy\='.
 
 If ARG is not nil, use value as argument and store it in `rustic-clippy-arguments'.
 When calling this function from `rustic-popup-mode', always use the value of
@@ -90,12 +90,12 @@ When calling this function from `rustic-popup-mode', always use the value of
 
 ;;;###autoload
 (defun rustic-cargo-clippy-rerun ()
-  "Run 'cargo clippy' with `rustic-clippy-arguments'."
+  "Run \='cargo clippy\=' with `rustic-clippy-arguments'."
   (interactive)
   (rustic-cargo-clippy-run rustic-clippy-arguments))
 
 (defun rustic-cargo-clippy-fix (&rest args)
-  "Run 'clippy fix'."
+  "Run \='clippy fix\='."
   (interactive)
   (rustic-cargo-clippy-run
    :params (concat "--fix "

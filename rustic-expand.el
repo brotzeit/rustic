@@ -16,7 +16,7 @@
   "Buffer name for expand buffers.")
 
 (defvar rustic-expand-arguments ""
-  "Holds arguments for 'cargo expand', similar to `compilation-arguments`.")
+  "Holds arguments for \='cargo expand\=', similar to `compilation-arguments`.")
 
 (defvar rustic-cargo-expand-mode-map
   (let ((map (make-sparse-keymap)))
@@ -29,7 +29,7 @@
 
 ;;;###autoload
 (defun rustic-cargo-expand (&optional arg)
-  "Run 'cargo expand'.
+  "Run \='cargo expand\='.
 
 If ARG is not nil, use value as argument and store it in
 `rustic-expand-arguments'.  When calling this function from
@@ -42,7 +42,7 @@ If ARG is not nil, use value as argument and store it in
          (t ""))))
 
 (defun rustic-cargo-expand-command (&optional expand-args)
-  "Start compilation process for 'cargo expand' with optional EXPAND-ARGS."
+  "Start compilation process for \='cargo expand\=' with optional EXPAND-ARGS."
   (rustic-compilation-process-live)
   (let* ((command (list (rustic-cargo-bin) "expand"))
          (c (append command (split-string (if expand-args expand-args ""))))
@@ -53,7 +53,7 @@ If ARG is not nil, use value as argument and store it in
 
 ;;;###autoload
 (defun rustic-cargo-expand-rerun ()
-  "Run 'cargo expand' with `rustic-expand-arguments'."
+  "Run \='cargo expand\=' with `rustic-expand-arguments'."
   (interactive)
   (rustic-cargo-expand-command rustic-expand-arguments))
 

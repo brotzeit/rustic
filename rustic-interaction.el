@@ -16,7 +16,7 @@
 
 ;;;###autoload
 (defun rustic-open-dependency-file ()
-  "Open the 'Cargo.toml' file at the project root if the current buffer is
+  "Open the \='Cargo.toml\=' file at the project root if the current buffer is
 visiting a project."
   (interactive)
   (let ((workspace (rustic-buffer-crate t)))

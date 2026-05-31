@@ -431,7 +431,7 @@ fenced code delimiters and code annotations."
 
 (defun rustic-racer-kind-description (raw-kind)
   "Human friendly description of a rust kind.
-For example, 'EnumKind' -> 'an enum kind'."
+For example, \='EnumKind\=' -> \='an enum kind\='."
   (let* ((parts (s-split-words raw-kind))
          (description (s-join " " (--map (downcase it) parts)))
          (a (if (string-match-p (rx bos (or "a" "e" "i" "o" "u")) description)
