@@ -108,7 +108,6 @@ If ARG is not nil, use value as argument and store it in
 SPELLCHECK-ARGS, when given, are passed to the command."
   (let* ((command (list (rustic-cargo-bin) "spellcheck"))
          (c (append command (split-string (if spellcheck-args spellcheck-args ""))))
-         (spellcheck-command (string-join c " "))
          (buf rustic-spellcheck-buffer-name)
          (proc rustic-spellcheck-process-name)
          (mode 'rustic-cargo-spellcheck-mode))

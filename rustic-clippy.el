@@ -104,7 +104,7 @@ If ARG is not nil, use value as argument and store it in
                    rustic-default-clippy-arguments)
    :no-save (plist-get args :no-save)
    :silent t
-   :sentinel (lambda (proc msg)
+   :sentinel (lambda (proc _msg)
                (while (eq (process-status proc) 'run)
                  (sit-for 0.1))
                (if (zerop (process-exit-status proc))

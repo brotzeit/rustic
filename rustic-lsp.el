@@ -132,7 +132,7 @@ the priorities with `lsp-rust-switch-server'."
   (defclass eglot-rust-analyzer (eglot-lsp-server) ()
     :documentation "Rust-analyzer LSP server.")
 
-  (cl-defmethod eglot-initialization-options ((server eglot-rust-analyzer))
+  (cl-defmethod eglot-initialization-options ((_server eglot-rust-analyzer))
     "Pass `detachedFiles' when `rustic-enable-detached-file-support' is non-`nil'."
     (if (or (null rustic-enable-detached-file-support)
             (null buffer-file-name)
