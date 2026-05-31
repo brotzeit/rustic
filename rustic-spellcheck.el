@@ -104,7 +104,8 @@ If ARG is not nil, use value as argument and store it in
          (t ""))))
 
 (defun rustic-cargo-spellcheck-command (&optional spellcheck-args)
-  "Start compilation process for \='cargo spellcheck\=' with optional SPELLCHECK-ARGS."
+  "Start compilation process for \='cargo spellcheck\='.
+SPELLCHECK-ARGS, when given, are passed to the command."
   (let* ((command (list (rustic-cargo-bin) "spellcheck"))
          (c (append command (split-string (if spellcheck-args spellcheck-args ""))))
          (spellcheck-command (string-join c " "))

@@ -74,8 +74,9 @@
 (defun rustic-cargo-clippy (&optional arg)
   "Run \='cargo clippy\='.
 
-If ARG is not nil, use value as argument and store it in `rustic-clippy-arguments'.
-When calling this function from `rustic-popup-mode', always use the value of
+If ARG is not nil, use value as argument and store it in
+`rustic-clippy-arguments'.  When calling this function from
+`rustic-popup-mode', always use the value of
 `rustic-clippy-arguments'."
   (interactive "P")
   (rustic-cargo-clippy-run

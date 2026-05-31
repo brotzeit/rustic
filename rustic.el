@@ -60,11 +60,11 @@
 ;;; workaround for with-temp-buffer not propagating the environment, as per
 ;;; https://github.com/magit/magit/pull/4169
 (defmacro rustic--with-temp-process-buffer (&rest body)
-  "Like `with-temp-buffer', but always propagate `process-environment' and `exec-path'.
-When those vars are buffer-local in the calling buffer, they are not
-propagated by `with-temp-buffer', so we explicitly ensure that
-happens, so that processes will be invoked consistently.  BODY is
-as for that macro."
+  "Like `with-temp-buffer', but propagate environment and `exec-path'.
+Always propagate `process-environment' and `exec-path'.  When those
+vars are buffer-local in the calling buffer, they are not propagated
+by `with-temp-buffer', so we explicitly ensure that happens, so that
+processes will be invoked consistently.  BODY is as for that macro."
   (declare (indent 0) (debug (body)))
   (let ((p (gensym))
         (e (gensym)))

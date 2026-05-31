@@ -177,9 +177,9 @@ stored in this variable.")
 (defun rustic-cargo-test (&optional arg)
   "Run \='cargo test\='.
 
-If ARG is not nil, use value as argument and store it in `rustic-test-arguments'.
-When calling this function from `rustic-popup-mode', always use the value of
-`rustic-test-arguments'."
+If ARG is not nil, use value as argument and store it in
+`rustic-test-arguments'.  When calling this function from
+`rustic-popup-mode', always use the value of `rustic-test-arguments'."
   (interactive "P")
   (rustic-cargo-test-run
    (cond (arg
@@ -560,8 +560,9 @@ If BIN is not nil, create a binary application, otherwise a library."
 
 ;;;###autoload
 (defun rustic-cargo-init (project-path &optional bin)
-  "Run \='cargo init\=' to initialize a directory in the path specified by PROJECT-PATH.
-If BIN is not nil, create a binary application, otherwise a library."
+  "Run \='cargo init\=' to initialize a directory.
+Initialize the directory in the path specified by PROJECT-PATH.  If
+BIN is not nil, create a binary application, otherwise a library."
   (interactive "DProject path: ")
   (rustic-create-project project-path nil bin))
 
@@ -682,9 +683,9 @@ in your project like `pwd'"
 (defun rustic-cargo-clean (&optional arg)
   "Run \='cargo clean\=' for the current project.
 
-If ARG is not nil, use value as argument and store it in `rustic-clean-arguments'.
-When calling this function from `rustic-popup-mode', always use the value of
-`rustic-clean-arguments'."
+If ARG is not nil, use value as argument and store it in
+`rustic-clean-arguments'.  When calling this function from
+`rustic-popup-mode', always use the value of `rustic-clean-arguments'."
   (interactive "P")
   (rustic-run-cargo-command
    (-filter (lambda (s) (s-present? s))
@@ -855,8 +856,9 @@ If running with prefix command `C-u', read whole command from minibuffer."
 
 ;;;###autoload
 (defun rustic-cargo-upgrade (&optional arg)
-  "Upgrade dependencies as specified in the local manifest file using \='cargo upgrade\='.
-If running with prefix command `C-u', read whole command from minibuffer."
+  "Upgrade dependencies as specified in the local manifest file.
+Use \='cargo upgrade\=' to do so.  If running with prefix command
+`C-u', read whole command from minibuffer."
   (interactive "P")
   (let* ((command (if arg
                       (read-from-minibuffer "Cargo upgrade command: "

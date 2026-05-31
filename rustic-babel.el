@@ -254,7 +254,9 @@ Use VERSION, FEATURES and PATH."
     (concat name " = {" toml-entry "}")))
 
 (defun cargo-toml-dependencies (crate-versions crate-features crate-paths)
-  "Generate the [dependencies] section of a Cargo.toml file given crates and their versions & features."
+  "Generate the [dependencies] section of a Cargo.toml file.
+Build it from the given crates and their versions & features,
+namely CRATE-VERSIONS, CRATE-FEATURES and CRATE-PATHS."
   (let ((dependencies ""))
     (dolist (crate-and-version crate-versions)
       (let* ((name (if (listp crate-and-version)

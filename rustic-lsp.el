@@ -81,8 +81,9 @@ in, e.g. your home directory."
 (declare-function lsp-workspace-root "lsp-mode" (&optional path))
 
 (defun rustic-lsp-mode-setup ()
-  "When changing the `lsp-rust-server', it's also necessary to update the priorities
-with `lsp-rust-switch-server'."
+  "Set up lsp-mode for rustic.
+When changing the `lsp-rust-server', it's also necessary to update
+the priorities with `lsp-rust-switch-server'."
   (require 'lsp-rust)
   (require 'lsp-modeline)
   ;; TODO: Do we still need this ? Seems to break stuff (hlissner/doom-emacs/issues/4070)
