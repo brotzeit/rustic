@@ -761,7 +761,7 @@ want regex search slow things down).
 
 You can also set a default value by:
 ``` elisp
-;; By setq this default to `nil`, you'll have to explict set params to ":main yes" in each block
+;; By setq this default to `nil`, you'll have to explicitly set params to ":main yes" in each block
 (setq rustic-babel-auto-wrap-main nil)
 ```
 

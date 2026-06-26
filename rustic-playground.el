@@ -18,7 +18,7 @@
   :group 'rustic)
 
 (defcustom rustic-playground-enable-shortener t
-  "Enable shortend URL for playground links."
+  "Enable shortened URL for playground links."
   :type 'boolean
   :safe #'booleanp
   :group 'rustic)
